@@ -1,0 +1,99 @@
+---
+// This page needs SSR for email verification
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import { Button } from '../components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
+---
+
+<Layout title="Verify Email - TMBIZ">
+  <div class="container max-w-md py-16">
+    <Card>
+      <CardHeader>
+        <CardTitle>Email Verification</CardTitle>
+        <CardDescription>Verify your email address to activate your account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div id="verification-status" class="text-center py-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p class="text-muted-foreground">Verifying your email...</p>
+        </div>
+      </CardContent>
+      <CardFooter class="justify-center">
+        <a href="/login" class="text-sm text-muted-foreground hover:text-primary">
+          Back to Login
+        </a>
+      </CardFooter>
+    </Card>
+  </div>
+</Layout>
+
+<script>
+  import { toast } from 'sonner';
+
+  const statusContainer = document.getElementById('verification-status');
+
+  async function verifyEmail() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const type = urlParams.get('type');
+
+    if (!token) {
+      showError('Invalid verification link. Please request a new verification email.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, type }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess('Email verified successfully! Redirecting to login...');
+        setTimeout(() => {
+          window.location.href = '/login?verified=true';
+        }, 2000);
+      } else {
+        showError(data.error?.message || 'Verification failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      showError('An error occurred during verification. Please try again.');
+    }
+  }
+
+  function showSuccess(message: string) {
+    if (!statusContainer) return;
+    statusContainer.innerHTML = `
+      <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-lg font-medium text-green-600">${message}</p>
+    `;
+    toast.success(message);
+  }
+
+  function showError(message: string) {
+    if (!statusContainer) return;
+    statusContainer.innerHTML = `
+      <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-lg font-medium text-red-600">${message}</p>
+      <a href="/login" class="inline-block mt-4">
+        <Button>Go to Login</Button>
+      </a>
+    `;
+    toast.error(message);
+  }
+
+  // Run verification on page load
+  verifyEmail();
+</script>

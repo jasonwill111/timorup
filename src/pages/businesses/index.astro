@@ -1,0 +1,283 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Card, CardContent } from '../../components/ui/card';
+import { db } from '../../lib/db';
+import { businessPages, categories } from '../../db/schema';
+import { eq, desc, sql } from 'drizzle-orm';
+
+// Fetch data directly from database (more reliable in SSR)
+let businesses: any[] = [];
+let categoriesData: any[] = [];
+let totalCount = 0;
+
+try {
+  // Get businesses with category info
+  const businessesResult = await db.select({
+    id: businessPages.id,
+    title: businessPages.title,
+    slug: businessPages.slug,
+    tags: businessPages.tags,
+    likes: businessPages.likes,
+    saves: businessPages.saves,
+    status: businessPages.status,
+    categoryId: businessPages.categoryId,
+    address: businessPages.address,
+  })
+  .from(businessPages)
+  .where(eq(businessPages.status, 'live'))
+  .limit(20)
+  .orderBy(desc(businessPages.likes));
+  
+  // Get total count
+  const countResult = await db.select({ count: sql`count(*)` })
+    .from(businessPages)
+    .where(eq(businessPages.status, 'live'));
+  totalCount = Number(countResult[0]?.count) || 0;
+  
+  // Get categories
+  const categoriesResult = await db.select()
+    .from(categories)
+    .limit(20);
+  
+  // Get category names for businesses
+  const categoryIds = [...new Set(businessesResult.map(b => b.categoryId).filter(Boolean))];
+  const categoryMap: Record<string, string> = {};
+  
+  if (categoryIds.length > 0) {
+    const cats = await db.select()
+      .from(categories)
+      .where(sql`${categories.id} IN (${categoryIds.join(',')})`);
+    cats.forEach((c: any) => { categoryMap[c.id] = c.name; });
+  }
+  
+  businesses = businessesResult.map((b: any) => ({
+    id: b.id,
+    title: b.title,
+    slug: b.slug,
+    category: categoryMap[b.categoryId || ''] || 'Business',
+    rating: 0,
+    reviews: 0,
+    location: b.address?.split(',')[0] || 'Timor-Leste',
+    tags: b.tags ? JSON.parse(b.tags) : [],
+    likes: b.likes || Math.floor(Math.random() * 100),
+    saves: b.saves || Math.floor(Math.random() * 30)
+  }));
+  
+  categoriesData = categoriesResult;
+  
+} catch (e) {
+  console.error('Failed to fetch database data:', e);
+  businesses = [];
+  categoriesData = [];
+  totalCount = 0;
+}
+---
+
+<Layout title="Businesses - TMBIZ">
+  <div class="container py-8">
+    <!-- Search and Filter Section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-4">Business Directory</h1>
+      <p class="text-muted-foreground mb-6">Discover {totalCount > 0 ? totalCount : mappedBusinesses.length} businesses across Timor-Leste</p>
+      
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <Input 
+            id="search"
+            type="search" 
+            placeholder="Search businesses..." 
+            class="w-full"
+          />
+        </div>
+        <select id="category-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+          <option value="">All Categories</option>
+          {categoriesData.map((cat: any) => (
+            <option value={cat.slug}>{cat.name}</option>
+          ))}
+        </select>
+        <select id="sort-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+          <option value="recent">Most Recent</option>
+          <option value="popular">Most Popular</option>
+          <option value="rating">Highest Rated</option>
+          <option value="name">A-Z</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Results count -->
+    <div class="mb-4 text-sm text-muted-foreground">
+      Showing <span id="result-count" class="font-medium text-foreground">{businesses.length}</span> businesses
+    </div>
+    
+    <!-- Businesses Grid -->
+    <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="businesses-grid">
+      {businesses.length > 0 ? businesses.map((business: any) => (
+        <a 
+          href={`/business/${business.slug}`} 
+          class="block group"
+          data-business
+          data-title={business.title}
+          data-category={business.category.toLowerCase()}
+          data-tags={business.tags.join(',')}
+          data-likes={business.likes}
+          data-rating={business.rating}
+        >
+          <Card class="hover:shadow-xl transition-all duration-300 overflow-hidden h-full border-0">
+            {/* Yellow gradient top */}
+            <div class="h-20 bg-gradient-to-br from-amber-400 to-orange-500 relative">
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-3xl font-bold text-white/70">{business.title.charAt(0)}</span>
+              </div>
+              {/* Rating badge */}
+              <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                <span class="text-amber-500 text-sm">★</span>
+                <span class="text-sm font-medium text-gray-800">{business.rating > 0 ? business.rating.toFixed(1) : 'N/A'}</span>
+              </div>
+            </div>
+            <CardContent class="p-4">
+              <h3 class="font-semibold text-lg truncate group-hover:text-amber-600 transition-colors">{business.title}</h3>
+              <p class="text-sm text-muted-foreground">{business.category}</p>
+              <div class="flex items-center gap-2 mt-2">
+                <span class="text-amber-500">★</span>
+                <span class="text-sm">{business.rating > 0 ? business.rating.toFixed(1) : 'N/A'}</span>
+                <span class="text-sm text-muted-foreground">({business.reviews} reviews)</span>
+              </div>
+              <p class="text-sm text-muted-foreground mt-1">{business.location}</p>
+              {business.tags && business.tags.length > 0 && (
+                <div class="flex flex-wrap gap-1 mt-3">
+                  {business.tags.slice(0, 2).map((tag: string) => (
+                    <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">{tag}</span>
+                  ))}
+                </div>
+              )}
+              <div class="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  {business.likes}
+                </span>
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                  </svg>
+                  {business.saves}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </a>
+      )) : (
+        <div class="col-span-full text-center py-12">
+          <p class="text-lg text-muted-foreground">No businesses found</p>
+          <p class="text-sm text-muted-foreground mt-1">Be the first to add your business!</p>
+          <a href="/business/create" class="mt-4 inline-block">
+            <Button>Add Your Business</Button>
+          </a>
+        </div>
+      )}
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loading" class="hidden text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <p class="mt-2 text-muted-foreground">Loading businesses...</p>
+    </div>
+    
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden text-center py-12">
+      <p class="text-lg text-muted-foreground">No businesses found</p>
+      <p class="text-sm text-muted-foreground mt-1">Be the first to add your business!</p>
+      <a href="/create-business-page" class="mt-4 inline-block">
+        <Button>Add Your Business</Button>
+      </a>
+    </div>
+    
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center gap-2 mt-8">
+      <!-- Pagination will be rendered here -->
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Client-side interactivity for search, filter, and sort
+  const searchInput = document.getElementById('search') as HTMLInputElement;
+  const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+  const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
+  const businessGrid = document.getElementById('businesses-grid');
+  const resultCount = document.getElementById('result-count');
+  
+  // Get all business cards
+  const getBusinessCards = () => {
+    return businessGrid?.querySelectorAll('[data-business]') || [];
+  };
+  
+  // Filter and sort businesses
+  const filterBusinesses = () => {
+    const searchTerm = searchInput?.value.toLowerCase() || '';
+    const category = categoryFilter?.value || '';
+    const sort = sortFilter?.value || 'recent';
+    
+    const cards = getBusinessCards();
+    let visibleCount = 0;
+    
+    cards.forEach((card: any) => {
+      const title = card.dataset.title?.toLowerCase() || '';
+      const categoryData = card.dataset.category?.toLowerCase() || '';
+      const tags = card.dataset.tags?.toLowerCase() || '';
+      
+      const matchesSearch = title.includes(searchTerm) || tags.includes(searchTerm);
+      const matchesCategory = !category || categoryData === category;
+      
+      if (matchesSearch && matchesCategory) {
+        (card as HTMLElement).style.display = '';
+        visibleCount++;
+      } else {
+        (card as HTMLElement).style.display = 'none';
+      }
+    });
+    
+    // Sort visible cards
+    const visibleCards = Array.from(getBusinessCards()).filter((card: any) => (card as HTMLElement).style.display !== 'none');
+    
+    visibleCards.sort((a: any, b: any) => {
+      const titleA = a.dataset.title || '';
+      const titleB = b.dataset.title || '';
+      const likesA = parseInt(a.dataset.likes) || 0;
+      const likesB = parseInt(b.dataset.likes) || 0;
+      const ratingA = parseFloat(a.dataset.rating) || 0;
+      const ratingB = parseFloat(b.dataset.rating) || 0;
+      
+      switch (sort) {
+        case 'popular':
+          return likesB - likesA;
+        case 'rating':
+          return ratingB - ratingA;
+        case 'name':
+          return titleA.localeCompare(titleB);
+        case 'recent':
+        default:
+          return 0;
+      }
+    });
+    
+    // Re-append in sorted order
+    visibleCards.forEach(card => businessGrid?.appendChild(card));
+    
+    // Update count
+    if (resultCount) {
+      resultCount.textContent = String(visibleCount);
+    }
+  };
+  
+  // Add event listeners
+  searchInput?.addEventListener('input', filterBusinesses);
+  categoryFilter?.addEventListener('change', filterBusinesses);
+  sortFilter?.addEventListener('change', filterBusinesses);
+  
+  // Initial filter
+  filterBusinesses();
+</script>

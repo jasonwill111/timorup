@@ -1,0 +1,188 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { Button } from '@components/ui/button';
+---
+
+<AdminLayout title="Categories">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">Categories</h1>
+    </div>
+    
+    <!-- Categories List -->
+    <div class="bg-card border rounded-lg p-3 md:p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <h3 class="font-semibold text-sm md:text-base">All Categories</h3>
+        <Button id="add-category-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add Category</Button>
+      </div>
+      <div id="categories-list" class="space-y-2">
+        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Category Modal -->
+  <div id="category-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-card border rounded-lg w-full max-w-md">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h2 class="text-lg font-bold">Create Category</h2>
+        <button id="close-modal" class="p-1 hover:bg-muted rounded">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="category-form" class="p-4 space-y-4">
+        <div>
+          <label for="cat-name" class="block text-sm font-medium mb-1">Category Name *</label>
+          <input type="text" id="cat-name" name="name" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Restaurants" />
+        </div>
+        <div>
+          <label for="cat-slug" class="block text-sm font-medium mb-1">Slug *</label>
+          <input type="text" id="cat-slug" name="slug" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. restaurants" />
+        </div>
+        <div>
+          <label for="cat-desc" class="block text-sm font-medium mb-1">Description</label>
+          <textarea id="cat-desc" name="description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Category description..."></textarea>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
+          <Button type="submit" class="text-xs py-1 h-8">Create</Button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { toast } from 'sonner';
+  
+  // Load categories
+  async function loadCategories() {
+    try {
+      const res = await fetch('/api/admin/categories');
+      const data = await res.json();
+      
+      const container = document.getElementById('categories-list');
+      if (!container) return;
+      
+      if (!data.success || data.data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-8">No categories yet</p>';
+        return;
+      }
+      
+      container.innerHTML = data.data.map((cat: any) => `
+        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">${cat.name}</p>
+            <p class="text-xs text-muted-foreground">${cat.slug}</p>
+          </div>
+          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteCategory('${cat.id}')">Del</button>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      toast.error('Failed to load categories');
+    }
+  }
+  
+  // Auto-generate slug from name
+  document.getElementById('cat-name')?.addEventListener('input', (e) => {
+    const name = (e.target as HTMLInputElement).value;
+    const slugInput = document.getElementById('cat-slug') as HTMLInputElement;
+    if (slugInput && !slugInput.dataset.userModified) {
+      slugInput.value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+  });
+  
+  document.getElementById('cat-slug')?.addEventListener('input', (e) => {
+    (e.target as HTMLInputElement).dataset.userModified = 'true';
+  });
+  
+  // Modal controls
+  const modal = document.getElementById('category-modal');
+  const addBtn = document.getElementById('add-category-btn');
+  const closeBtn = document.getElementById('close-modal');
+  const cancelBtn = document.getElementById('cancel-btn');
+  
+  addBtn?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+  });
+  
+  closeBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  cancelBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  });
+  
+  // Form submission
+  document.getElementById('category-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const categoryData = {
+      name: String(formData.get('name') || ''),
+      slug: String(formData.get('slug') || ''),
+      description: String(formData.get('description') || ''),
+    };
+    
+    try {
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData),
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success('Category created successfully!');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+        (e.target as HTMLFormElement).reset();
+        loadCategories();
+      } else {
+        toast.error(data.error?.message || 'Failed to create category');
+      }
+    } catch (err) {
+      console.error('Error creating category:', err);
+      toast.error('Error creating category');
+    }
+  });
+  
+  // Delete category
+  (window as any).deleteCategory = async function(id: string) {
+    if (!confirm('Delete this category?')) return;
+    
+    try {
+      const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success('Category deleted');
+        loadCategories();
+      } else {
+        toast.error(data.error?.message || 'Failed to delete category');
+      }
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      toast.error('Error deleting category');
+    }
+  };
+  
+  // Initialize
+  loadCategories();
+</script>

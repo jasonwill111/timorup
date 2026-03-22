@@ -1,0 +1,851 @@
+---
+// This page needs SSR for dynamic business data
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '../../components/ui/card';
+---
+
+<Layout title="Business - TMBIZ">
+  <div id="business-page">
+    <!-- Loading State -->
+    <div id="loading" class="min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p class="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+    
+    <!-- Error State -->
+    <div id="error" class="hidden min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold">Business Not Found</h1>
+        <p class="mt-2 text-muted-foreground">The business you're looking for doesn't exist.</p>
+        <a href="/businesses" class="mt-4 inline-block">
+          <Button>Browse Businesses</Button>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Business Content -->
+    <div id="content" class="hidden">
+      <!-- Banner Section -->
+      <div id="banner-section" class="relative h-64 md:h-80 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
+        <img id="banner-image" class="w-full h-full object-cover hidden" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+      </div>
+      
+      <!-- Profile Section -->
+      <div class="container -mt-12 relative z-10">
+        <div class="flex flex-col md:flex-row gap-6">
+          <!-- Main Content -->
+          <div class="flex-1">
+            <!-- Profile Card -->
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                  <!-- Profile Image -->
+                  <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-muted flex-shrink-0 -mt-16 md:-mt-20 border-4 border-background shadow-lg">
+                    <img id="profile-image" class="w-full h-full object-cover" />
+                  </div>
+                  
+                  <!-- Business Info -->
+                  <div class="flex-1">
+                    <div class="flex flex-wrap gap-2 mb-2">
+                      <span id="status-badge" class="px-2 py-1 text-xs font-medium rounded-full"></span>
+                    </div>
+                    <p id="category-name" class="text-muted-foreground"></p>
+                    
+                    <!-- Contact Info -->
+                    <div class="mt-4 space-y-2">
+                      <p id="contact-name" class="font-medium"></p>
+                      <p id="contact-phone" class="text-sm text-muted-foreground"></p>
+                      <p id="contact-email" class="text-sm text-muted-foreground"></p>
+                      <p id="contact-address" class="text-sm text-muted-foreground"></p>
+                    </div>
+                  </div>
+                  
+                  <!-- Actions -->
+                  <div class="flex gap-2">
+                    <Button id="like-btn" variant="outline" size="icon">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                    </Button>
+                    <Button id="save-btn" variant="outline" size="icon">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                      </svg>
+                    </Button>
+                    <Button id="share-btn" variant="outline" size="icon">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <!-- About Section -->
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 class="text-xl font-semibold mb-4">About Us</h2>
+                <div id="about-us" class="prose dark:prose-invert max-w-none"></div>
+              </CardContent>
+            </Card>
+            
+            <!-- Products Section -->
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 class="text-xl font-semibold mb-4">Products & Services</h2>
+                <div id="products-grid" class="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Products will be loaded here -->
+                </div>
+                <div id="products-loading" class="text-center py-8">
+                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+                <div id="products-empty" class="hidden text-center py-8 text-muted-foreground">
+                  No products yet
+                </div>
+              </CardContent>
+            </Card>
+            
+            <!-- Reviews Section -->
+            <Card>
+              <CardContent className="p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold">Reviews</h2>
+                  <div class="flex items-center gap-2">
+                    <span id="avg-rating" class="text-2xl font-bold"></span>
+                    <span id="rating-stars" class="text-yellow-500"></span>
+                    <span id="rating-count" class="text-muted-foreground text-sm"></span>
+                  </div>
+                </div>
+                
+                <!-- Review Form (for logged in users) -->
+                <div id="review-form-container" class="hidden mb-6 p-4 bg-muted/50 rounded-lg">
+                  <h3 class="font-medium mb-3" id="review-form-title">Write a Review</h3>
+                  <form id="review-form">
+                    <!-- Star Rating -->
+                    <div class="mb-3">
+                      <label class="block text-sm font-medium mb-1">Your Rating</label>
+                      <div class="flex gap-1" id="star-rating">
+                        <button type="button" class="text-2xl text-gray-300 hover:text-yellow-500 transition-colors" data-rating="1">★</button>
+                        <button type="button" class="text-2xl text-gray-300 hover:text-yellow-500 transition-colors" data-rating="2">★</button>
+                        <button type="button" class="text-2xl text-gray-300 hover:text-yellow-500 transition-colors" data-rating="3">★</button>
+                        <button type="button" class="text-2xl text-gray-300 hover:text-yellow-500 transition-colors" data-rating="4">★</button>
+                        <button type="button" class="text-2xl text-gray-300 hover:text-yellow-500 transition-colors" data-rating="5">★</button>
+                      </div>
+                      <input type="hidden" id="rating-value" name="rating" value="0" />
+                    </div>
+                    <!-- Comment -->
+                    <div class="mb-3">
+                      <label for="review-comment" class="block text-sm font-medium mb-1">Your Review (optional)</label>
+                      <textarea 
+                        id="review-comment" 
+                        name="comment" 
+                        rows="3"
+                        class="w-full px-3 py-2 border rounded-lg bg-background"
+                        placeholder="Share your experience..."
+                      ></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                      <Button type="submit" id="submit-review-btn">Submit Review</Button>
+                      <Button type="button" id="cancel-review-btn" variant="outline" class="hidden">Cancel</Button>
+                    </div>
+                  </form>
+                </div>
+                
+                <!-- Login prompt for non-logged in users -->
+                <div id="login-prompt" class="hidden mb-6 p-4 bg-muted/50 rounded-lg text-center">
+                  <p class="text-muted-foreground">Please <a href="/login" class="text-primary hover:underline">log in</a> to write a review</p>
+                </div>
+                
+                <div id="reviews-list">
+                  <!-- Reviews will be loaded here -->
+                </div>
+                <div id="reviews-loading" class="text-center py-8">
+                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+                <div id="reviews-empty" class="hidden text-center py-8 text-muted-foreground">
+                  No reviews yet. Be the first to review!
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <!-- Sidebar -->
+          <div class="w-full md:w-80 space-y-6">
+            <!-- Map Card -->
+            <Card>
+              <CardContent className="p-4">
+                <div id="map" class="h-48 rounded-lg bg-muted"></div>
+                <a id="map-link" href="#" target="_blank" class="block mt-2 text-sm text-primary hover:underline">
+                  Open in Maps →
+                </a>
+              </CardContent>
+            </Card>
+            
+            <!-- Opening Hours -->
+            <Card>
+              <CardContent className="p-4">
+                <h3 class="font-semibold mb-3">Opening Hours</h3>
+                <div id="opening-hours" class="space-y-2 text-sm">
+                  <!-- Hours will be rendered here -->
+                </div>
+              </CardContent>
+            </Card>
+            
+            <!-- WhatsApp Contact -->
+            <Card className="bg-brand-500 text-white border-0">
+              <CardContent className="p-4 text-center">
+                <h3 class="font-semibold mb-2">Contact via WhatsApp</h3>
+                <a id="whatsapp-btn" href="#" class="inline-flex items-center justify-center gap-2 bg-white text-brand-600 px-4 py-2 rounded-lg font-medium hover:bg-brand-50 transition-colors">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  Chat on WhatsApp
+                </a>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Get slug from URL
+  const slug = window.location.pathname.split('/').pop();
+  
+  const loading = document.getElementById('loading');
+  const error = document.getElementById('error');
+  const content = document.getElementById('content');
+  
+  let currentBusiness: any = null;
+  
+  async function loadBusiness() {
+    if (!slug) return;
+    
+    try {
+      const res = await fetch(`/api/businesses/${slug}`);
+      const data = await res.json();
+      
+      if (!data.success) {
+        loading?.classList.add('hidden');
+        error?.classList.remove('hidden');
+        return;
+      }
+      
+      const business = data.data;
+      currentBusiness = business;
+      
+      // Update page title
+      document.title = `${business.title} - TMBIZ`;
+      
+      // Banner
+      const bannerImage = document.getElementById('banner-image');
+      if (bannerImage && business.bannerImageId) {
+        bannerImage.src = `/api/media/${business.bannerImageId}`;
+        bannerImage.classList.remove('hidden');
+      }
+      
+      // Profile
+      const profileImage = document.getElementById('profile-image');
+      if (profileImage && business.profileImageId) {
+        profileImage.src = `/api/media/${business.profileImageId}`;
+      } else if (profileImage) {
+        profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(business.title)}&background=FFD150&color=1a1a1a`;
+      }
+      
+      // Status badge
+      const statusBadge = document.getElementById('status-badge');
+      if (statusBadge) {
+        const statusColors: Record<string, string> = {
+          draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+          live: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+          expired: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+          paid: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+        };
+        statusBadge.className = `px-2 py-1 text-xs font-medium rounded-full ${statusColors[business.status] || ''}`;
+        statusBadge.textContent = business.status.charAt(0).toUpperCase() + business.status.slice(1);
+      }
+      
+      // Contact info
+      if (document.getElementById('contact-name') && business.contactName) {
+        document.getElementById('contact-name')!.textContent = business.contactName;
+      }
+      if (document.getElementById('contact-phone') && business.contactNumber) {
+        const phoneEl = document.getElementById('contact-phone')!;
+        phoneEl.textContent = `${business.countryCode || '+670'} ${business.contactNumber}`;
+      }
+      if (document.getElementById('contact-email') && business.email) {
+        document.getElementById('contact-email')!.textContent = business.email;
+      }
+      if (document.getElementById('contact-address') && business.address) {
+        document.getElementById('contact-address')!.textContent = business.address;
+      }
+      
+      // About Us
+      const aboutUs = document.getElementById('about-us');
+      if (aboutUs) {
+        aboutUs.innerHTML = business.aboutUs || '<p class="text-muted-foreground">No description available.</p>';
+      }
+      
+      // WhatsApp
+      const whatsappBtn = document.getElementById('whatsapp-btn');
+      if (whatsappBtn && business.contactNumber) {
+        const phone = `${business.countryCode || '+670'}`.replace('+', '') + business.contactNumber.replace(/\s/g, '');
+        const message = encodeURIComponent(`Hi, I'm interested in ${business.title}`);
+        whatsappBtn.setAttribute('href', `https://wa.me/${phone}?text=${message}`);
+      }
+      
+      // Opening Hours
+      const openingHoursEl = document.getElementById('opening-hours');
+      if (openingHoursEl && business.openingHours) {
+        try {
+          const hours = JSON.parse(business.openingHours);
+          const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+          const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+          
+          dayNames.forEach((day, index) => {
+            const dayKey = days[index];
+            const dayHours = hours[dayKey];
+            const p = document.createElement('p');
+            p.className = 'flex justify-between';
+            
+            if (dayHours && dayHours.open && dayHours.close) {
+              p.innerHTML = `<span>${day}</span><span>${dayHours.open} - ${dayHours.close}</span>`;
+            } else if (dayHours && dayHours.open === 'closed') {
+              p.innerHTML = `<span>${day}</span><span class="text-red-500">Closed</span>`;
+            } else {
+              p.innerHTML = `<span>${day}</span><span>-</span>`;
+            }
+            openingHoursEl.appendChild(p);
+          });
+        } catch (e) {
+          openingHoursEl.innerHTML = '<p class="text-muted-foreground">No hours available</p>';
+        }
+      } else if (openingHoursEl) {
+        openingHoursEl.innerHTML = '<p class="text-muted-foreground">No hours available</p>';
+      }
+      
+      // Initialize Map
+      if (business.locationLat && business.locationLng) {
+        initMap(business.locationLat, business.locationLng, business.title);
+      } else {
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+          mapContainer.innerHTML = '<div class="flex items-center justify-center h-full text-muted-foreground">No location available</div>';
+        }
+      }
+      
+      // Show content
+      loading?.classList.add('hidden');
+      content?.classList.remove('hidden');
+      
+      // Load products and reviews
+      loadProducts(business.id);
+      loadReviews(business.id);
+      initLikeSaveButtons(business.id, business.likes, business.saves);
+      initReviewForm(business.id);
+      
+    } catch (err) {
+      console.error('Error loading business:', err);
+      loading?.classList.add('hidden');
+      error?.classList.remove('hidden');
+    }
+  }
+  
+  // Initialize Review Form
+  function initReviewForm(businessId: string) {
+    initStarRating();
+    
+    // Form submission
+    document.getElementById('review-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitReview(businessId);
+    });
+    
+    // Cancel edit
+    document.getElementById('cancel-review-btn')?.addEventListener('click', () => {
+      currentUserReview = null;
+      (window as any).editingReviewId = null;
+      
+      const cancelBtn = document.getElementById('cancel-review-btn');
+      const formTitle = document.getElementById('review-form-title');
+      const ratingValue = document.getElementById('rating-value') as HTMLInputElement;
+      const commentInput = document.getElementById('review-comment') as HTMLTextAreaElement;
+      
+      if (cancelBtn) cancelBtn.classList.add('hidden');
+      if (formTitle) formTitle.textContent = 'Write a Review';
+      if (ratingValue) ratingValue.value = '0';
+      if (commentInput) commentInput.value = '';
+      updateStarDisplay(0);
+    });
+  }
+  
+  // Initialize Map with Leaflet (CDN)
+  function initMap(lat: number, lng: number, title: string) {
+    const mapContainer = document.getElementById('map');
+    const mapLink = document.getElementById('map-link');
+    
+    if (!mapContainer) return;
+    
+    // Load Leaflet CSS and JS from CDN
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+    
+    if (!window.L) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => createMap(lat, lng, title);
+      document.head.appendChild(script);
+    } else {
+      createMap(lat, lng, title);
+    }
+    
+    if (mapLink) {
+      mapLink.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
+    }
+  }
+  
+  function createMap(lat: number, lng: number, title: string) {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer || !window.L) return;
+    
+    const map = window.L.map(mapContainer).setView([lat, lng], 15);
+    
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    
+    window.L.marker([lat, lng]).addTo(map)
+      .bindPopup(title)
+      .openPopup();
+  }
+  
+  // Load Products
+  async function loadProducts(businessId: string) {
+    const grid = document.getElementById('products-grid');
+    const loading = document.getElementById('products-loading');
+    const empty = document.getElementById('products-empty');
+    
+    if (!grid || !loading || !empty) return;
+    
+    try {
+      const res = await fetch(`/api/products?businessPageId=${businessId}`);
+      const data = await res.json();
+      
+      loading.classList.add('hidden');
+      
+      if (!data.success || data.data.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      
+      data.data.forEach((product: any) => {
+        const card = document.createElement('a');
+        card.href = `/business/${slug}/product/${product.id}`;
+        card.className = 'block';
+        
+        const firstImage = product.images && product.images.length > 0 
+          ? `/api/media/${product.images[0].mediaId}`
+          : null;
+        
+        card.innerHTML = `
+          <div class="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+            <div class="aspect-square bg-muted relative">
+              ${firstImage 
+                ? `<img src="${firstImage}" alt="${product.title}" class="w-full h-full object-cover" />`
+                : `<div class="flex items-center justify-center h-full text-4xl font-bold text-muted-foreground">${product.title.charAt(0)}</div>`
+              }
+            </div>
+            <div class="p-3">
+              <h3 class="font-medium truncate">${product.title}</h3>
+              <p class="text-sm text-muted-foreground">${product.price}</p>
+            </div>
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+      
+    } catch (err) {
+      console.error('Error loading products:', err);
+      loading.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+  
+  // Load Reviews
+  let currentUserReview: any = null;
+  
+  async function loadReviews(businessId: string) {
+    const list = document.getElementById('reviews-list');
+    const loading = document.getElementById('reviews-loading');
+    const empty = document.getElementById('reviews-empty');
+    const avgRating = document.getElementById('avg-rating');
+    const ratingStars = document.getElementById('rating-stars');
+    const ratingCount = document.getElementById('rating-count');
+    const reviewFormContainer = document.getElementById('review-form-container');
+    const loginPrompt = document.getElementById('login-prompt');
+    
+    if (!list || !loading || !empty) return;
+    
+    try {
+      // Check if user is logged in and has already reviewed
+      if (currentUser) {
+        const userReviewRes = await fetch(`/api/reviews/user/${businessId}?userId=${currentUser.id}`);
+        const userReviewData = await userReviewRes.json();
+        
+        if (userReviewData.success && userReviewData.data) {
+          currentUserReview = userReviewData.data;
+          // Show edit form
+          if (reviewFormContainer) {
+            reviewFormContainer.classList.remove('hidden');
+            const formTitle = document.getElementById('review-form-title');
+            if (formTitle) formTitle.textContent = 'Edit Your Review';
+            // Pre-fill form
+            const ratingValue = document.getElementById('rating-value') as HTMLInputElement;
+            const commentInput = document.getElementById('review-comment') as HTMLTextAreaElement;
+            if (ratingValue) ratingValue.value = currentUserReview.rating.toString();
+            if (commentInput) commentInput.value = currentUserReview.comment || '';
+            updateStarDisplay(currentUserReview.rating);
+          }
+        } else {
+          // Show create form
+          if (reviewFormContainer) reviewFormContainer.classList.remove('hidden');
+        }
+      } else {
+        // Show login prompt
+        if (loginPrompt) loginPrompt.classList.remove('hidden');
+      }
+      
+      const res = await fetch(`/api/reviews?businessPageId=${businessId}`);
+      const data = await res.json();
+      
+      loading.classList.add('hidden');
+      
+      // Update rating summary
+      if (currentBusiness && avgRating && ratingStars && ratingCount) {
+        avgRating.textContent = currentBusiness.ratingAverage ? currentBusiness.ratingAverage.toFixed(1) : '0';
+        ratingStars.innerHTML = '★'.repeat(Math.round(currentBusiness.ratingAverage || 0)) + '☆'.repeat(5 - Math.round(currentBusiness.ratingAverage || 0));
+        ratingCount.textContent = `(${currentBusiness.ratingCount || 0} reviews)`;
+      }
+      
+      if (!data.success || data.data.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      
+      data.data.forEach((review: any) => {
+        const div = document.createElement('div');
+        div.className = 'border-b last:border-b-0 py-4';
+        
+        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+        const date = new Date(review.createdAt).toLocaleDateString();
+        
+        // Check if this is user's own review
+        const isOwnReview = currentUser && review.userId === currentUser.id;
+        
+        div.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-yellow-500">${stars}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-muted-foreground">${date}${review.isEdited ? ' (edited)' : ''}</span>
+              ${isOwnReview ? `
+                <button class="text-xs text-primary hover:underline edit-own-review" data-review-id="${review.id}">Edit</button>
+                <button class="text-xs text-red-500 hover:underline delete-own-review" data-review-id="${review.id}">Delete</button>
+              ` : ''}
+            </div>
+          </div>
+          ${review.comment ? `<p class="text-sm">${review.comment}</p>` : ''}
+        `;
+        
+        list.appendChild(div);
+      });
+      
+      // Add event listeners for edit/delete buttons
+      list.querySelectorAll('.edit-own-review').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const reviewId = (e.target as HTMLElement).dataset.reviewId;
+          showEditForm(reviewId);
+        });
+      });
+      
+      list.querySelectorAll('.delete-own-review').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const reviewId = (e.target as HTMLElement).dataset.reviewId;
+          if (confirm('Are you sure you want to delete your review?')) {
+            await deleteReview(reviewId!, businessId);
+          }
+        });
+      });
+      
+    } catch (err) {
+      console.error('Error loading reviews:', err);
+      loading.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+  
+  // Star rating interaction
+  function initStarRating() {
+    const stars = document.querySelectorAll('#star-rating button');
+    const ratingValue = document.getElementById('rating-value') as HTMLInputElement;
+    
+    stars.forEach(star => {
+      star.addEventListener('mouseenter', () => {
+        const rating = parseInt((star as HTMLElement).dataset.rating || '0');
+        updateStarDisplay(rating);
+      });
+      
+      star.addEventListener('click', () => {
+        const rating = parseInt((star as HTMLElement).dataset.rating || '0');
+        if (ratingValue) ratingValue.value = rating.toString();
+        updateStarDisplay(rating);
+      });
+    });
+  }
+  
+  function updateStarDisplay(rating: number) {
+    const stars = document.querySelectorAll('#star-rating button');
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.remove('text-gray-300');
+        star.classList.add('text-yellow-500');
+      } else {
+        star.classList.remove('text-yellow-500');
+        star.classList.add('text-gray-300');
+      }
+    });
+  }
+  
+  // Show edit form
+  function showEditForm(reviewId: string) {
+    const cancelBtn = document.getElementById('cancel-review-btn');
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+    
+    const formTitle = document.getElementById('review-form-title');
+    if (formTitle) formTitle.textContent = 'Edit Your Review';
+    
+    (window as any).editingReviewId = reviewId;
+  }
+  
+  // Submit review
+  async function submitReview(businessId: string) {
+    const ratingValue = document.getElementById('rating-value') as HTMLInputElement;
+    const commentInput = document.getElementById('review-comment') as HTMLTextAreaElement;
+    const submitBtn = document.getElementById('submit-review-btn') as HTMLButtonElement;
+    
+    const rating = parseInt(ratingValue?.value || '0');
+    const comment = commentInput?.value;
+    
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+    
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Submitting...';
+    }
+    
+    try {
+      const editingId = (window as any).editingReviewId;
+      let res;
+      
+      if (editingId) {
+        // Update existing review
+        res = await fetch(`/api/reviews/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.id, rating, comment })
+        });
+      } else {
+        // Create new review
+        res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.id, businessPageId: businessId, rating, comment })
+        });
+      }
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        // Reload reviews
+        loadReviews(businessId);
+        
+        // Reset form
+        const cancelBtn = document.getElementById('cancel-review-btn');
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+        if (ratingValue) ratingValue.value = '0';
+        if (commentInput) commentInput.value = '';
+        updateStarDisplay(0);
+        (window as any).editingReviewId = null;
+        
+        const formTitle = document.getElementById('review-form-title');
+        if (formTitle) formTitle.textContent = 'Write a Review';
+      } else {
+        alert(data.error?.message || 'Failed to submit review');
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      alert('Failed to submit review');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = editingId ? 'Update Review' : 'Submit Review';
+      }
+    }
+  }
+  
+  // Delete review
+  async function deleteReview(reviewId: string, businessId: string) {
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}?userId=${currentUser.id}`, {
+        method: 'DELETE'
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        // Reload reviews
+        loadReviews(businessId);
+        
+        // Reset form state
+        currentUserReview = null;
+        const reviewFormContainer = document.getElementById('review-form-container');
+        const formTitle = document.getElementById('review-form-title');
+        if (formTitle) formTitle.textContent = 'Write a Review';
+        (window as any).editingReviewId = null;
+        
+        const ratingValue = document.getElementById('rating-value') as HTMLInputElement;
+        const commentInput = document.getElementById('review-comment') as HTMLTextAreaElement;
+        if (ratingValue) ratingValue.value = '0';
+        if (commentInput) commentInput.value = '';
+        updateStarDisplay(0);
+      } else {
+        alert(data.error?.message || 'Failed to delete review');
+      }
+    } catch (err) {
+      console.error('Error deleting review:', err);
+      alert('Failed to delete review');
+    }
+  }
+  
+  // Initialize Like/Save buttons
+  function initLikeSaveButtons(businessId: string, initialLikes: number, initialSaves: number) {
+    const likeBtn = document.getElementById('like-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const shareBtn = document.getElementById('share-btn');
+    
+    let liked = false;
+    let saved = false;
+    let likes = initialLikes || 0;
+    let saves = initialSaves || 0;
+    
+    // Update button counts
+    const updateLikeCount = () => {
+      const likeCount = likeBtn?.querySelector('.count');
+      if (likeCount) {
+        likeCount.textContent = likes.toString();
+      }
+    };
+    
+    const updateSaveCount = () => {
+      const saveCount = saveBtn?.querySelector('.count');
+      if (saveCount) {
+        saveCount.textContent = saves.toString();
+      }
+    };
+    
+    // Add count elements
+    if (likeBtn) {
+      likeBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+        <span class="count ml-1">${likes}</span>
+      `;
+    }
+    
+    if (saveBtn) {
+      saveBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+        </svg>
+        <span class="count ml-1">${saves}</span>
+      `;
+    }
+    
+    likeBtn?.addEventListener('click', async () => {
+      if (liked) return;
+      liked = true;
+      
+      try {
+        const res = await fetch(`/api/businesses/${businessId}/like`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          likes = data.likes;
+          updateLikeCount();
+          likeBtn.classList.add('text-red-500');
+        }
+      } catch (err) {
+        console.error('Error liking business:', err);
+        liked = false;
+      }
+    });
+    
+    saveBtn?.addEventListener('click', async () => {
+      if (saved) return;
+      saved = true;
+      
+      try {
+        const res = await fetch(`/api/businesses/${businessId}/save`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          saves = data.saves;
+          updateSaveCount();
+          saveBtn.classList.add('text-blue-500');
+        }
+      } catch (err) {
+        console.error('Error saving business:', err);
+        saved = false;
+      }
+    });
+    
+    shareBtn?.addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: currentBusiness?.title,
+          text: `Check out ${currentBusiness?.title}`,
+          url: window.location.href,
+        });
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    });
+  }
+  
+  // Declare Leaflet
+  declare global {
+    interface Window {
+      L: any;
+    }
+  }
+  
+  loadBusiness();
+</script>

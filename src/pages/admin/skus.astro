@@ -1,0 +1,215 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { Button } from '@components/ui/button';
+---
+
+<AdminLayout title="SKUs">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">SKUs / Products</h1>
+    </div>
+    
+    <!-- SKUs List -->
+    <div class="bg-card border rounded-lg p-3 md:p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <h3 class="font-semibold text-sm md:text-base">All Products</h3>
+        <Button id="add-sku-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add SKU</Button>
+      </div>
+      <div id="skus-list" class="space-y-2">
+        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create SKU Modal -->
+  <div id="sku-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-card border rounded-lg w-full max-w-md">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h2 class="text-lg font-bold">Create SKU</h2>
+        <button id="close-modal" class="p-1 hover:bg-muted rounded">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="sku-form" class="p-4 space-y-4">
+        <div>
+          <label for="sku-business" class="block text-sm font-medium mb-1">Business *</label>
+          <select id="sku-business" name="businessPageId" required class="w-full px-3 py-2 border rounded-md text-sm">
+            <option value="">Select a business...</option>
+          </select>
+        </div>
+        <div>
+          <label for="sku-title" class="block text-sm font-medium mb-1">Product Name *</label>
+          <input type="text" id="sku-title" name="title" required class="w-full px-3 py-2 border rounded-md text-sm" />
+        </div>
+        <div>
+          <label for="sku-price" class="block text-sm font-medium mb-1">Price *</label>
+          <input type="text" id="sku-price" name="price" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. $50.00" />
+        </div>
+        <div>
+          <label for="sku-description" class="block text-sm font-medium mb-1">Description</label>
+          <textarea id="sku-description" name="description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Product description..."></textarea>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
+          <Button type="submit" class="text-xs py-1 h-8">Create</Button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { toast } from 'sonner';
+  
+  let businesses: any[] = [];
+  
+  // Load businesses for dropdown
+  async function loadBusinesses() {
+    try {
+      const res = await fetch('/api/admin/businesses?limit=100');
+      const data = await res.json();
+      
+      if (data.success && data.data) {
+        businesses = data.data;
+        const select = document.getElementById('sku-business') as HTMLSelectElement;
+        if (select) {
+          select.innerHTML = '<option value="">Select a business...</option>' +
+            businesses.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+        }
+      }
+    } catch (err) {
+      console.error('Error loading businesses:', err);
+    }
+  }
+  
+  // Load SKUs
+  async function loadSKUs() {
+    const container = document.getElementById('skus-list');
+    if (!container) return;
+    
+    try {
+      // Load all products across all businesses (admin mode)
+      const res = await fetch('/api/products?isAdmin=true');
+      const data = await res.json();
+      
+      if (!data.success || data.data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">No SKUs yet</p>';
+        return;
+      }
+      
+      // Get business names
+      const bizMap = new Map(businesses.map(b => [b.id, b.title]));
+      
+      container.innerHTML = data.data.map((sku: any) => `
+        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">${sku.title}</p>
+            <p class="text-xs text-muted-foreground">${sku.price} - ${bizMap.get(sku.businessPageId) || 'Unknown'}</p>
+          </div>
+          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteSKU('${sku.id}')">Del</button>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading SKUs:', err);
+      container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">Error loading SKUs</p>';
+    }
+  }
+  
+  // Modal controls
+  const modal = document.getElementById('sku-modal');
+  const addBtn = document.getElementById('add-sku-btn');
+  const closeBtn = document.getElementById('close-modal');
+  const cancelBtn = document.getElementById('cancel-btn');
+  
+  addBtn?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+  });
+  
+  closeBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  cancelBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  });
+  
+  // Form submission
+  document.getElementById('sku-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const skuData = {
+      title: String(formData.get('title') || ''),
+      price: String(formData.get('price') || ''),
+      description: String(formData.get('description') || ''),
+      businessPageId: String(formData.get('businessPageId') || ''),
+      isAdmin: true, // Admin bypass
+    };
+    
+    if (!skuData.businessPageId) {
+      toast.error('Please select a business');
+      return;
+    }
+    
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(skuData),
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success('SKU created successfully!');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+        (e.target as HTMLFormElement).reset();
+        loadSKUs();
+      } else {
+        toast.error(data.error?.message || 'Failed to create SKU');
+      }
+    } catch (err) {
+      console.error('Error creating SKU:', err);
+      toast.error('Error creating SKU');
+    }
+  });
+  
+  // Delete SKU
+  (window as any).deleteSKU = async function(id: string) {
+    if (!confirm('Delete this SKU?')) return;
+    
+    try {
+      const res = await fetch(`/api/products/${id}?isAdmin=true`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success('SKU deleted');
+        loadSKUs();
+      } else {
+        toast.error('Failed to delete SKU');
+      }
+    } catch (err) {
+      console.error('Error deleting SKU:', err);
+      toast.error('Error deleting SKU');
+    }
+  };
+  
+  // Initialize
+  loadBusinesses().then(loadSKUs);
+</script>

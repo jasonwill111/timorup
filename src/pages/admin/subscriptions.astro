@@ -1,0 +1,219 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Subscriptions">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">Subscriptions</h1>
+      <p class="text-sm text-muted-foreground mt-1">Manage subscription orders and payments</p>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="flex gap-2 mb-4 overflow-x-auto">
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border bg-primary text-primary-foreground" data-status="all">All</button>
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border" data-status="unpaid">Unpaid</button>
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border" data-status="paid">Paid</button>
+    </div>
+    
+    <!-- Orders List -->
+    <div class="bg-card border rounded-lg p-3 md:p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-sm md:text-base">Orders</h3>
+        <span id="orders-count" class="text-xs text-muted-foreground">Loading...</span>
+      </div>
+      <div id="orders-list" class="space-y-2">
+        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div id="order-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-card border rounded-lg w-full max-w-md">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h2 class="text-lg font-bold">Order Details</h2>
+        <button id="close-modal" class="p-1 hover:bg-muted rounded">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="order-details" class="p-4 space-y-3">
+        <!-- Order details will be loaded here -->
+      </div>
+      <div class="p-4 border-t flex gap-2 justify-end">
+        <button id="confirm-payment-btn" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">Confirm Payment</button>
+        <button id="cancel-modal-btn" class="px-4 py-2 border text-sm rounded-md hover:bg-muted">Close</button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { toast } from 'sonner';
+  
+  let currentFilter = 'all';
+  let selectedOrderId = '';
+  
+  // Load orders
+  async function loadOrders() {
+    try {
+      const url = currentFilter === 'all' 
+        ? '/api/orders' 
+        : `/api/orders?status=${currentFilter}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      const container = document.getElementById('orders-list');
+      const countEl = document.getElementById('orders-count');
+      if (!container || !countEl) return;
+      
+      if (!data.success || data.data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-8">No orders found</p>';
+        countEl.textContent = '0 orders';
+        return;
+      }
+      
+      countEl.textContent = `${data.data.length} order${data.data.length !== 1 ? 's' : ''}`;
+      
+      container.innerHTML = data.data.map((order: any) => `
+        <div class="flex items-center justify-between p-3 border rounded text-sm cursor-pointer hover:bg-muted/50" onclick="showOrderDetails('${order.id}')">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">#${order.id.slice(0, 8)}</p>
+            <p class="text-xs text-muted-foreground truncate">${order.planType} - $${order.amount}</p>
+            <p class="text-xs text-muted-foreground">${order.businessPageId ? order.businessPageId.slice(0, 8) : 'N/A'}</p>
+          </div>
+          <div class="flex items-center gap-2 ml-2">
+            <span class="px-2 py-0.5 text-xs rounded-full ${order.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${order.status}</span>
+            ${order.status === 'unpaid' ? `<button class="text-xs text-primary hover:underline" onclick="event.stopPropagation(); confirmOrder('${order.id}')">Confirm</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading orders:', err);
+      toast.error('Failed to load orders');
+    }
+  }
+  
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('bg-primary', 'text-primary-foreground');
+      });
+      btn.classList.add('bg-primary', 'text-primary-foreground');
+      currentFilter = (btn as HTMLElement).dataset.status || 'all';
+      loadOrders();
+    });
+  });
+  
+  // Show order details
+  (window as any).showOrderDetails = async function(id: string) {
+    selectedOrderId = id;
+    const modal = document.getElementById('order-modal');
+    const detailsEl = document.getElementById('order-details');
+    const confirmBtn = document.getElementById('confirm-payment-btn');
+    
+    if (!modal || !detailsEl || !confirmBtn) return;
+    
+    try {
+      const res = await fetch(`/api/orders/${id}`);
+      const data = await res.json();
+      
+      if (!data.success) {
+        toast.error('Failed to load order details');
+        return;
+      }
+      
+      const order = data.data;
+      detailsEl.innerHTML = `
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <span class="text-muted-foreground">Order ID:</span>
+          <span class="font-mono">${order.id.slice(0, 12)}...</span>
+          <span class="text-muted-foreground">Plan:</span>
+          <span class="capitalize">${order.planType}</span>
+          <span class="text-muted-foreground">Amount:</span>
+          <span class="font-semibold">$${order.amount}</span>
+          <span class="text-muted-foreground">Status:</span>
+          <span class="capitalize ${order.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}">${order.status}</span>
+          <span class="text-muted-foreground">Created:</span>
+          <span>${order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</span>
+          <span class="text-muted-foreground">Paid Date:</span>
+          <span>${order.paidDate ? new Date(order.paidDate).toLocaleDateString() : 'Not paid'}</span>
+          <span class="text-muted-foreground">Expires:</span>
+          <span>${order.expiryDate ? new Date(order.expiryDate).toLocaleDateString() : 'N/A'}</span>
+        </div>
+      `;
+      
+      if (order.status === 'paid') {
+        confirmBtn.classList.add('hidden');
+      } else {
+        confirmBtn.classList.remove('hidden');
+      }
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    } catch (err) {
+      console.error('Error loading order:', err);
+      toast.error('Error loading order details');
+    }
+  };
+  
+  // Modal controls
+  const modal = document.getElementById('order-modal');
+  const closeModalBtn = document.getElementById('close-modal');
+  const cancelModalBtn = document.getElementById('cancel-modal-btn');
+  
+  closeModalBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  cancelModalBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  });
+  
+  // Confirm payment button
+  document.getElementById('confirm-payment-btn')?.addEventListener('click', async () => {
+    if (!selectedOrderId) return;
+    await confirmOrder(selectedOrderId);
+  });
+  
+  // Confirm order
+  (window as any).confirmOrder = async function(id: string) {
+    try {
+      const res = await fetch(`/api/orders/${id}/status`, { 
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'paid' }),
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success('Payment confirmed successfully!');
+        loadOrders();
+        const modal = document.getElementById('order-modal');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      } else {
+        toast.error(data.error?.message || 'Failed to confirm payment');
+      }
+    } catch (err) {
+      console.error('Error confirming order:', err);
+      toast.error('Error confirming payment');
+    }
+  };
+  
+  // Initialize
+  loadOrders();
+</script>

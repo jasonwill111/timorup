@@ -1,0 +1,311 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Button } from '../components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
+---
+
+<Layout title="Pricing - TMBIZ">
+  <div class="container py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
+      <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Choose the plan that works best for your business. All plans include a 3-day free trial.
+      </p>
+    </div>
+    
+    <!-- Billing Toggle -->
+    <div class="flex justify-center mb-8">
+      <div class="bg-muted p-1 rounded-lg flex">
+        <button id="monthly-btn" class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-background shadow-sm">
+          Monthly
+        </button>
+        <button id="yearly-btn" class="px-4 py-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          Yearly <span class="text-xs text-green-500 ml-1">Save 17%</span>
+        </button>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <!-- Basic Plan -->
+      <Card>
+        <CardHeader class="text-center">
+          <CardTitle class="text-2xl">Basic</CardTitle>
+          <CardDescription>For small businesses</CardDescription>
+        </CardHeader>
+        <CardContent class="text-center">
+          <div id="basic-price" class="text-5xl font-bold mb-1">$39<span class="text-lg text-muted-foreground">/mo</span></div>
+          <p id="basic-yearly" class="text-lg font-semibold text-green-600 dark:text-green-400 mb-6">
+            $390/year
+          </p>
+          
+          <ul class="text-left space-y-3">
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Business page with full details
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Up to <strong>10 products/services</strong>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              5 images per product
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              1 video per product
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Photo gallery
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Contact information
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Map integration
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Customer reviews
+            </li>
+          </ul>
+        </CardContent>
+        <CardFooter>
+          <a href="/subscribe?plan=basic" data-plan="basic" class="w-full subscribe-link">
+            <Button class="w-full">Get Started</Button>
+          </a>
+        </CardFooter>
+      </Card>
+      
+      <!-- Pro Plan -->
+      <Card class="border-2 border-primary relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white px-3 py-1 text-sm font-medium rounded-full">
+          Most Popular
+        </div>
+        <CardHeader class="text-center">
+          <CardTitle class="text-2xl">Pro</CardTitle>
+          <CardDescription>For growing businesses</CardDescription>
+        </CardHeader>
+        <CardContent class="text-center">
+          <div id="pro-price" class="text-5xl font-bold mb-1">$69<span class="text-lg text-muted-foreground">/mo</span></div>
+          <p id="pro-yearly" class="text-lg font-semibold text-green-600 dark:text-green-400 mb-6">
+            $690/year
+          </p>
+          
+          <ul class="text-left space-y-3">
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Everything in Basic
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Up to <strong>30 products/services</strong>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              5 images per product
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              1 video per product
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Priority support
+            </li>
+          </ul>
+        </CardContent>
+        <CardFooter>
+          <a href="/subscribe?plan=pro" data-plan="pro" class="w-full subscribe-link">
+            <Button class="w-full">Get Started</Button>
+          </a>
+        </CardFooter>
+      </Card>
+      
+      <!-- Max Plan -->
+      <Card class="border-2 border-amber-500 relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-3 py-1 text-sm font-medium rounded-full">
+          Best Value
+        </div>
+        <CardHeader class="text-center">
+          <CardTitle class="text-2xl">Max</CardTitle>
+          <CardDescription>For large businesses</CardDescription>
+        </CardHeader>
+        <CardContent class="text-center">
+          <div id="max-price" class="text-5xl font-bold mb-1">$99<span class="text-lg text-muted-foreground">/mo</span></div>
+          <p id="max-yearly" class="text-lg font-semibold text-green-600 dark:text-green-400 mb-6">
+            $990/year
+          </p>
+          
+          <ul class="text-left space-y-3">
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Everything in Pro
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Up to <strong>60 products/services</strong>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              5 images per product
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              1 video per product
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Dedicated support
+            </li>
+          </ul>
+        </CardContent>
+        <CardFooter>
+          <a href="/subscribe?plan=max" data-plan="max" class="w-full subscribe-link">
+            <Button class="w-full bg-amber-500 hover:bg-amber-600">Get Started</Button>
+          </a>
+        </CardFooter>
+      </Card>
+    </div>
+    
+    <div class="text-center mt-12">
+      <p class="text-muted-foreground mb-4">Prefer annual billing? Save with yearly plans!</p>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <a href="/subscribe?plan=basic-yearly" data-plan="basic-yearly" class="text-primary hover:underline yearly-link">Basic Yearly ($390)</a>
+        <a href="/subscribe?plan=pro-yearly" data-plan="pro-yearly" class="text-primary hover:underline yearly-link">Pro Yearly ($690)</a>
+        <a href="/subscribe?plan=max-yearly" data-plan="max-yearly" class="text-primary hover:underline yearly-link">Max Yearly ($990)</a>
+      </div>
+    </div>
+    
+    <div class="text-center mt-8">
+      <p class="text-muted-foreground">
+        Questions? <a href="mailto:contact@timorbiz.com" class="text-primary hover:underline">Contact us</a>
+      </p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const monthlyBtn = document.getElementById('monthly-btn');
+  const yearlyBtn = document.getElementById('yearly-btn');
+  
+  const basicPrice = document.getElementById('basic-price');
+  const basicPeriod = document.getElementById('basic-period');
+  const basicYearly = document.getElementById('basic-yearly');
+  
+  const proPrice = document.getElementById('pro-price');
+  const proPeriod = document.getElementById('pro-period');
+  const proYearly = document.getElementById('pro-yearly');
+  
+  const maxPrice = document.getElementById('max-price');
+  const maxPeriod = document.getElementById('max-period');
+  const maxYearly = document.getElementById('max-yearly');
+  
+  // Get all subscribe links
+  const subscribeLinks = document.querySelectorAll('.subscribe-link');
+  const yearlyLinks = document.querySelectorAll('.yearly-link');
+  
+  function updateLinks(isYearly) {
+    const suffix = isYearly ? '-yearly' : '';
+    subscribeLinks.forEach(link => {
+      const plan = link.dataset.plan;
+      if (plan) {
+        link.href = `/subscribe?plan=${plan}${suffix}`;
+      }
+    });
+  }
+  
+  function showMonthly() {
+    // Update buttons
+    monthlyBtn?.classList.add('bg-background', 'shadow-sm');
+    monthlyBtn?.classList.remove('text-muted-foreground');
+    yearlyBtn?.classList.remove('bg-background', 'shadow-sm');
+    yearlyBtn?.classList.add('text-muted-foreground');
+    
+    // Update Basic
+    if (basicPrice) basicPrice.textContent = '$39';
+    if (basicPeriod) basicPeriod.textContent = 'per month';
+    basicYearly?.classList.add('hidden');
+    
+    // Update Pro
+    if (proPrice) proPrice.textContent = '$69';
+    if (proPeriod) proPeriod.textContent = 'per month';
+    proYearly?.classList.add('hidden');
+    
+    // Update Max
+    if (maxPrice) maxPrice.textContent = '$99';
+    if (maxPeriod) maxPeriod.textContent = 'per month';
+    maxYearly?.classList.add('hidden');
+    
+    // Update links
+    updateLinks(false);
+  }
+  
+  function showYearly() {
+    // Update buttons
+    yearlyBtn?.classList.add('bg-background', 'shadow-sm');
+    yearlyBtn?.classList.remove('text-muted-foreground');
+    monthlyBtn?.classList.remove('bg-background', 'shadow-sm');
+    monthlyBtn?.classList.add('text-muted-foreground');
+    
+    // Update Basic - show yearly pricing
+    if (basicPrice) basicPrice.textContent = '$390';
+    if (basicPeriod) basicPeriod.textContent = 'per year';
+    basicYearly?.classList.remove('hidden');
+    
+    // Update Pro - show yearly pricing
+    if (proPrice) proPrice.textContent = '$690';
+    if (proPeriod) proPeriod.textContent = 'per year';
+    proYearly?.classList.remove('hidden');
+    
+    // Update Max - show yearly pricing
+    if (maxPrice) maxPrice.textContent = '$990';
+    if (maxPeriod) maxPeriod.textContent = 'per year';
+    maxYearly?.classList.remove('hidden');
+    
+    // Update links
+    updateLinks(true);
+  }
+  
+  monthlyBtn?.addEventListener('click', showMonthly);
+  yearlyBtn?.addEventListener('click', showYearly);
+</script>

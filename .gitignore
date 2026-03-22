@@ -1,0 +1,91 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Drizzle
+.drizzle/
+
+# Wrangler
+.wrangler/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test
+coverage/
+playwright-report/
+
+# Auto-detected by SpecWeave
+# JavaScript/TypeScript
+.pnpm-store/
+.yarn/
+.npm/
+package-lock.json
+*.tsbuildinfo
+.eslintcache
+
+# TypeScript
+*.tsbuildinfo
+build/
+*.d.ts.map
+
+# Astro
+
+# Vite
+.vite/
+
+# Drizzle
+drizzle/
+
+# Vitest
+
+# Playwright
+test-results/
+playwright/.cache/
+
+# Dependencies
+
+# Environment
+*.env
+
+# IDEs
+*.swp
+*.swo
+*~
+
+# OS
+desktop.ini
+
+# Logs
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary
+*.tmp
+.temp/
+tmp/
+
+# SpecWeave
+.specweave/cache/
+.specweave/increments/*/logs/
+.specweave/increments/*/test-results/
+.specweave/docs-site-internal/
+.claude-plugin/
+plugins/

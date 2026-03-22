@@ -1,0 +1,110 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Reviews">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">Reviews</h1>
+      <p class="text-sm text-muted-foreground mt-1">Manage customer reviews for all businesses</p>
+    </div>
+    
+    <!-- Reviews List -->
+    <div class="bg-card border rounded-lg p-3 md:p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-sm md:text-base">All Reviews</h3>
+        <span id="reviews-count" class="text-xs text-muted-foreground">Loading...</span>
+      </div>
+      <div id="reviews-list" class="space-y-2">
+        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { toast } from 'sonner';
+  
+  // Load reviews
+  async function loadReviews() {
+    try {
+      const res = await fetch('/api/admin/reviews');
+      const data = await res.json();
+      
+      const container = document.getElementById('reviews-list');
+      const countEl = document.getElementById('reviews-count');
+      if (!container || !countEl) return;
+      
+      if (!data.success || data.data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-8">No reviews yet</p>';
+        countEl.textContent = '0 reviews';
+        return;
+      }
+      
+      countEl.textContent = `${data.data.length} review${data.data.length !== 1 ? 's' : ''}`;
+      
+      // Render reviews
+      container.innerHTML = data.data.map((review: any) => `
+        <div class="p-3 border rounded text-sm">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-medium">Business: ${review.businessPageId.slice(0, 8)}...</span>
+                <span class="text-xs text-muted-foreground">User: ${review.userId.slice(0, 8)}...</span>
+              </div>
+              <div class="flex items-center gap-1 mb-2">
+                ${renderStars(review.rating)}
+              </div>
+              <p class="text-muted-foreground text-xs">${review.comment || 'No comment'}</p>
+              <div class="flex items-center gap-2 mt-2">
+                <span class="text-xs text-muted-foreground">${review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</span>
+                ${review.isEdited ? '<span class="text-xs text-yellow-600">(edited)</span>' : ''}
+              </div>
+            </div>
+            <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1 border border-red-200 dark:border-red-800 rounded" onclick="deleteReview('${review.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading reviews:', err);
+      toast.error('Failed to load reviews');
+    }
+  }
+  
+  // Render star rating
+  function renderStars(rating: number) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars += '<span class="text-yellow-500">★</span>';
+      } else {
+        stars += '<span class="text-gray-300 dark:text-gray-600">★</span>';
+      }
+    }
+    return stars;
+  }
+  
+  // Delete review
+  (window as any).deleteReview = async function(id: string) {
+    if (!confirm('Delete this review? This action cannot be undone.')) return;
+    
+    try {
+      const res = await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success('Review deleted');
+        loadReviews();
+      } else {
+        toast.error(data.error?.message || 'Failed to delete review');
+      }
+    } catch (err) {
+      console.error('Error deleting review:', err);
+      toast.error('Error deleting review');
+    }
+  };
+  
+  // Initialize
+  loadReviews();
+</script>

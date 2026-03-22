@@ -1,0 +1,894 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Button } from '../../components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
+---
+
+<Layout title="Create Business - TMBIZ">
+  <div class="container max-w-3xl py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">Create Your Business</h1>
+      <p class="text-muted-foreground mt-2">Fill in your business details to get started</p>
+    </div>
+    
+    <form id="business-form" class="space-y-8">
+      <!-- Media / Images -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Images</CardTitle>
+          <CardDescription>Add images to make your business stand out</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-6">
+          <!-- Profile Image -->
+          <div>
+            <label class="block text-sm font-medium mb-2">Profile Image *</label>
+            <p class="text-xs text-muted-foreground mb-2">Recommended: 200x200px (circular)</p>
+            <div id="profile-image-upload" class="border-2 border-dashed rounded-lg aspect-square w-full max-w-xs flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors bg-muted/50 relative">
+              <img id="profile-preview" class="hidden w-full h-full object-cover rounded-full" alt="Profile" />
+              <div id="profile-placeholder" class="text-center p-4">
+                <svg class="mx-auto h-10 w-10 text-muted-foreground mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-sm text-muted-foreground">Click to upload</p>
+              </div>
+              <input type="file" id="profileImage" name="profileImage" accept="image/jpeg,image/png,image/webp" class="hidden" />
+            </div>
+          </div>
+          
+          <!-- Banner Image -->
+          <div>
+            <label class="block text-sm font-medium mb-2">Banner Image</label>
+            <p class="text-xs text-muted-foreground mb-2">Recommended: 1200x400px</p>
+            <div id="banner-image-upload" class="border-2 border-dashed rounded-lg aspect-[3/1] w-full flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors bg-muted/50 relative">
+              <img id="banner-preview" class="hidden w-full h-full object-cover rounded-lg" alt="Banner" />
+              <div id="banner-placeholder" class="text-center p-4">
+                <svg class="mx-auto h-10 w-10 text-muted-foreground mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-sm text-muted-foreground">Click to upload</p>
+              </div>
+              <input type="file" id="bannerImage" name="bannerImage" accept="image/jpeg,image/png,image/webp" class="hidden" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- Basic Info -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Basic Information</CardTitle>
+          <CardDescription>The main details about your business</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <div>
+            <label for="title" class="block text-sm font-medium mb-1">Business Name *</label>
+            <input 
+              type="text" 
+              id="title" 
+              name="title" 
+              required
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="Your business name"
+            />
+          </div>
+          
+          <div>
+            <label for="slug" class="block text-sm font-medium mb-1">URL Slug *</label>
+            <input 
+              type="text" 
+              id="slug" 
+              name="slug" 
+              required
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="your-business-name"
+            />
+            <p class="text-xs text-muted-foreground mt-1">This will be your URL: timorbiz.com/business/your-business-name</p>
+          </div>
+          
+          <div>
+            <label for="category" class="block text-sm font-medium mb-1">Category *</label>
+            <select 
+              id="category" 
+              name="categoryId" 
+              required
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+            >
+              <option value="">Select a category</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- Contact Info -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact Information</CardTitle>
+          <CardDescription>How customers can reach you</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="contactName" class="block text-sm font-medium mb-1">Contact Person</label>
+              <input 
+                type="text" 
+                id="contactName" 
+                name="contactName" 
+                class="w-full px-3 py-2 border rounded-lg bg-background"
+                placeholder="Your name"
+              />
+            </div>
+            <div>
+              <label for="contactNumber" class="block text-sm font-medium mb-1">Phone Number</label>
+              <input 
+                type="tel" 
+                id="contactNumber" 
+                name="contactNumber" 
+                class="w-full px-3 py-2 border rounded-lg bg-background"
+                placeholder="+670 7x xxx xxx"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label for="email" class="block text-sm font-medium mb-1">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="business@email.com"
+            />
+          </div>
+          
+          <div>
+            <label for="address" class="block text-sm font-medium mb-1">Address</label>
+            <textarea 
+              id="address" 
+              name="address" 
+              rows="2"
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="Your business address"
+            ></textarea>
+          </div>
+          
+          <!-- Map Location -->
+          <div class="mt-4">
+            <label class="block text-sm font-medium mb-2">Business Location</label>
+            <p class="text-xs text-muted-foreground mb-2">Click on the map to set your location, or enter coordinates manually</p>
+            
+            <div id="map-container" class="h-64 rounded-lg border mb-3" style="min-height: 250px;">
+              <div id="map-placeholder" class="h-full flex items-center justify-center bg-muted rounded-lg">
+                <p class="text-muted-foreground">Loading map...</p>
+              </div>
+              <div id="map" class="hidden h-full rounded-lg" style="min-height: 250px;"></div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="latitude" class="block text-xs font-medium mb-1">Latitude</label>
+                <input 
+                  type="number" 
+                  id="latitude" 
+                  name="latitude"
+                  step="any"
+                  class="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                  placeholder="-8.5569"
+                />
+              </div>
+              <div>
+                <label for="longitude" class="block text-xs font-medium mb-1">Longitude</label>
+                <input 
+                  type="number" 
+                  id="longitude" 
+                  name="longitude"
+                  step="any"
+                  class="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                  placeholder="125.5603"
+                />
+              </div>
+            </div>
+            
+            <button type="button" id="get-coords-btn" class="mt-2 text-sm text-primary hover:underline">
+              Get coordinates from address
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- About -->
+      <Card>
+        <CardHeader>
+          <CardTitle>About Your Business</CardTitle>
+          <CardDescription>Tell customers more about what you do</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <label for="aboutUs" class="block text-sm font-medium mb-1">About Us</label>
+            <textarea 
+              id="aboutUs" 
+              name="aboutUs" 
+              rows="6"
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="Describe your business, products, and services..."
+            ></textarea>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- Opening Hours -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Opening Hours</CardTitle>
+          <CardDescription>Set your business hours</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-3">
+          <p class="text-xs text-muted-foreground">Leave time empty or check "Closed" for days you're not open</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm" id="hours-container">
+            <!-- Hours will be generated by JavaScript -->
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- Additional Info -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Additional Details</CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <div>
+            <label for="yearOfEstablishment" class="block text-sm font-medium mb-1">Year Established</label>
+            <input 
+              type="number" 
+              id="yearOfEstablishment" 
+              name="yearOfEstablishment" 
+              min="1900"
+              max="2100"
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="2020"
+            />
+          </div>
+          
+          <div>
+            <label for="tags" class="block text-sm font-medium mb-1">Tags</label>
+            <input 
+              type="text" 
+              id="tags" 
+              name="tags" 
+              class="w-full px-3 py-2 border rounded-lg bg-background"
+              placeholder="restaurant, cafe, coffee (comma separated)"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <!-- Media Gallery -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Media Gallery</CardTitle>
+          <CardDescription>Add up to 4 images to showcase your business</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p class="text-xs text-muted-foreground mb-3">Maximum 4 images, 5MB each (JPEG, PNG, WebP)</p>
+          
+          <div id="gallery-container" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <!-- Gallery slots will be generated by JavaScript -->
+          </div>
+          
+          <p id="gallery-error" class="text-sm text-red-500 mt-2 hidden"></p>
+        </CardContent>
+      </Card>
+      
+      <!-- Publish Options -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Publish</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input 
+              type="checkbox" 
+              id="publishNow" 
+              name="publishNow"
+              class="rounded border-gray-300 w-5 h-5 text-primary"
+            />
+            <div>
+              <span class="font-medium">Publish immediately</span>
+              <p class="text-sm text-muted-foreground">Start your 3-day free trial immediately</p>
+            </div>
+          </label>
+        </CardContent>
+      </Card>
+      
+      <!-- Submit -->
+      <div class="flex gap-4">
+        <Button type="submit">Create Business</Button>
+        <a href="/account">
+          <Button type="button" variant="outline">Cancel</Button>
+        </a>
+      </div>
+    </form>
+  </div>
+</Layout>
+
+<script>
+  let userId = null;
+  
+  // Get session from cookie-based auth
+  async function getSession() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+      
+      if (data.session?.user) {
+        return data.session.user;
+      }
+      // Not logged in, redirect to login
+      window.location.href = '/login';
+      return null;
+    } catch (err) {
+      console.error('Error getting session:', err);
+      window.location.href = '/login';
+      return null;
+    }
+  }
+  
+  // Initialize - get session
+  async function init() {
+    const user = await getSession();
+    if (!user) return;
+    
+    userId = user.id;
+    
+    // Load categories
+    loadCategories();
+  }
+  
+  // Load categories
+  async function loadCategories() {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      
+      const select = document.getElementById('category') as HTMLSelectElement;
+      
+      if (data.success && data.data.length > 0) {
+        data.data.forEach((cat: any) => {
+          const option = document.createElement('option');
+          option.value = cat.id;
+          option.textContent = cat.name;
+          select.appendChild(option);
+        });
+      }
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    }
+  }
+  
+  // Auto-generate slug from title
+  const titleInput = document.getElementById('title') as HTMLInputElement;
+  const slugInput = document.getElementById('slug') as HTMLInputElement;
+  
+  titleInput?.addEventListener('input', () => {
+    const slug = titleInput.value
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+    slugInput.value = slug;
+  });
+  
+  // Image upload handling
+  let profileImageUrl = '';
+  let bannerImageUrl = '';
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  
+  async function handleImageUpload(input: HTMLInputElement, previewEl: HTMLImageElement, placeholderEl: HTMLElement, isProfile: boolean) {
+    const file = input.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload a JPEG, PNG, or WebP image.');
+      input.value = '';
+      return;
+    }
+    
+    // Validate file size
+    if (file.size > MAX_SIZE) {
+      alert('Image must be less than 5MB');
+      input.value = '';
+      return;
+    }
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      previewEl.src = result;
+      previewEl.classList.remove('hidden');
+      placeholderEl.classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+    
+    // Upload to server
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const res = await fetch('/api/media/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (data.success && data.data?.url) {
+        if (isProfile) {
+          profileImageUrl = data.data.url;
+        } else {
+          bannerImageUrl = data.data.url;
+        }
+      } else {
+        // Use local preview as fallback
+        if (isProfile) {
+          profileImageUrl = reader.result as string;
+        } else {
+          bannerImageUrl = reader.result as string;
+        }
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      // Use local preview as fallback
+      if (isProfile) {
+        profileImageUrl = reader.result as string;
+      } else {
+        bannerImageUrl = reader.result as string;
+      }
+    }
+  }
+  
+  // Profile image upload
+  const profileInput = document.getElementById('profileImage') as HTMLInputElement;
+  const profilePreview = document.getElementById('profile-preview') as HTMLImageElement;
+  const profilePlaceholder = document.getElementById('profile-placeholder');
+  const profileUploadArea = document.getElementById('profile-image-upload');
+  
+  profileUploadArea?.addEventListener('click', () => profileInput.click());
+  profileInput?.addEventListener('change', () => handleImageUpload(profileInput, profilePreview, profilePlaceholder!, true));
+  
+  // Banner image upload
+  const bannerInput = document.getElementById('bannerImage') as HTMLInputElement;
+  const bannerPreview = document.getElementById('banner-preview') as HTMLImageElement;
+  const bannerPlaceholder = document.getElementById('banner-placeholder');
+  const bannerUploadArea = document.getElementById('banner-image-upload');
+  
+  bannerUploadArea?.addEventListener('click', () => bannerInput.click());
+  bannerInput?.addEventListener('change', () => handleImageUpload(bannerInput, bannerPreview, bannerPlaceholder!, false));
+  
+  // Map and location handling
+  let map: any = null;
+  let marker: any = null;
+  let leafletLoaded = false;
+  
+  async function loadLeaflet() {
+    if (leafletLoaded) return;
+    
+    // Load Leaflet CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    
+    // Load Leaflet JS
+    await new Promise<void>((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+    
+    leafletLoaded = true;
+  }
+  
+  async function initMap() {
+    await loadLeaflet();
+    
+    const mapEl = document.getElementById('map') as HTMLElement;
+    const placeholder = document.getElementById('map-placeholder');
+    
+    if (!mapEl || !(window as any).L) return;
+    
+    // Timor-Leste default coordinates
+    const defaultLat = -8.5569;
+    const defaultLng = 125.5603;
+    
+    map = (window as any).L.map('map').setView([defaultLat, defaultLng], 10);
+    
+    (window as any).L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Add click handler to set marker
+    map.on('click', (e: any) => {
+      const { lat, lng } = e.latlng;
+      setMarker(lat, lng);
+    });
+    
+    // Show map, hide placeholder
+    mapEl.classList.remove('hidden');
+    if (placeholder) placeholder.classList.add('hidden');
+    
+    // Check for existing coordinates
+    const latInput = document.getElementById('latitude') as HTMLInputElement;
+    const lngInput = document.getElementById('longitude') as HTMLInputElement;
+    
+    if (latInput.value && lngInput.value) {
+      setMarker(parseFloat(latInput.value), parseFloat(lngInput.value));
+    }
+  }
+  
+  function setMarker(lat: number, lng: number) {
+    if (!map) return;
+    
+    // Remove existing marker
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    
+    // Add new marker
+    marker = (window as any).L.marker([lat, lng]).addTo(map);
+    map.setView([lat, lng], 15);
+    
+    // Update inputs
+    const latInput = document.getElementById('latitude') as HTMLInputElement;
+    const lngInput = document.getElementById('longitude') as HTMLInputElement;
+    latInput.value = lat.toFixed(6);
+    lngInput.value = lng.toFixed(6);
+  }
+  
+  // Get coordinates from address using Nominatim
+  const getCoordsBtn = document.getElementById('get-coords-btn');
+  getCoordsBtn?.addEventListener('click', async () => {
+    const addressInput = document.getElementById('address') as HTMLTextAreaElement;
+    const address = addressInput?.value;
+    
+    if (!address) {
+      alert('Please enter an address first');
+      return;
+    }
+    
+    getCoordsBtn.textContent = 'Searching...';
+    getCoordsBtn.setAttribute('disabled', 'true');
+    
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Timor-Leste')}`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lon = parseFloat(result.lon);
+        
+        // Initialize map if not already done
+        if (!map) {
+          await initMap();
+        }
+        
+        setMarker(lat, lon);
+      } else {
+        alert('Address not found. Please try a different address or enter coordinates manually.');
+      }
+    } catch (err) {
+      console.error('Geocoding error:', err);
+      alert('Error finding address. Please enter coordinates manually.');
+    } finally {
+      getCoordsBtn.textContent = 'Get coordinates from address';
+      getCoordsBtn.removeAttribute('disabled');
+    }
+  });
+  
+  // Manual coordinate input handlers
+  const latInput = document.getElementById('latitude') as HTMLInputElement;
+  const lngInput = document.getElementById('longitude') as HTMLInputElement;
+  
+  async function updateMarkerFromInput() {
+    const lat = parseFloat(latInput.value);
+    const lng = parseFloat(lngInput.value);
+    
+    if (!isNaN(lat) && !isNaN(lng)) {
+      if (!map) {
+        await initMap();
+      }
+      setMarker(lat, lng);
+    }
+  }
+  
+  latInput?.addEventListener('change', updateMarkerFromInput);
+  lngInput?.addEventListener('change', updateMarkerFromInput);
+  
+  // Initialize map on page load
+  setTimeout(initMap, 1000);
+  
+  // Opening hours
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  
+  function generateOpeningHours() {
+    const container = document.getElementById('hours-container');
+    if (!container) return;
+    
+    container.innerHTML = days.map((day, index) => `
+      <div class="flex items-center gap-2 p-2 border rounded-lg">
+        <input type="checkbox" id="${day}-closed" name="${day}-closed" class="rounded" />
+        <label for="${day}-closed" class="w-20 font-medium">${dayLabels[index]}</label>
+        <input 
+          type="time" 
+          id="${day}-open" 
+          name="${day}-open"
+          class="border rounded px-2 py-1 text-sm"
+          value="09:00"
+        />
+        <span>to</span>
+        <input 
+          type="time" 
+          id="${day}-close" 
+          name="${day}-close"
+          class="border rounded px-2 py-1 text-sm"
+          value="18:00"
+        />
+      </div>
+    `).join('');
+  }
+  
+  function collectOpeningHours(): Record<string, string> | null {
+    const hours: Record<string, string> = {};
+    let hasAnyHours = false;
+    
+    days.forEach(day => {
+      const closed = (document.getElementById(`${day}-closed`) as HTMLInputElement)?.checked;
+      const open = (document.getElementById(`${day}-open`) as HTMLInputElement)?.value;
+      const close = (document.getElementById(`${day}-close`) as HTMLInputElement)?.value;
+      
+      if (closed) {
+        hours[day] = 'closed';
+        hasAnyHours = true;
+      } else if (open && close) {
+        hours[day] = `${open}-${close}`;
+        hasAnyHours = true;
+      }
+    });
+    
+    return hasAnyHours ? hours : null;
+  }
+  
+  // Initialize opening hours
+  generateOpeningHours();
+  
+  // Media Gallery
+  const MAX_GALLERY_IMAGES = 4;
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const galleryImages: string[] = [];
+  
+  function generateGallerySlots() {
+    const container = document.getElementById('gallery-container');
+    if (!container) return;
+    
+    container.innerHTML = Array.from({ length: MAX_GALLERY_IMAGES }, (_, i) => `
+      <div class="gallery-slot aspect-square border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors bg-muted/50 relative" data-index="${i}">
+        <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" data-input="${i}" />
+        <div class="text-center p-2 gallery-placeholder">
+          <svg class="mx-auto h-8 w-8 text-muted-foreground mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <p class="text-xs text-muted-foreground">Image ${i + 1}</p>
+        </div>
+        <img class="hidden w-full h-full object-cover rounded-lg gallery-preview" data-preview="${i}" alt="Gallery image ${i + 1}" />
+        <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hidden gallery-remove" data-remove="${i}">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    `).join('');
+    
+    // Add click handlers
+    container.querySelectorAll('.gallery-slot').forEach((slot) => {
+      slot.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('.gallery-remove')) return;
+        const input = slot.querySelector('input[type="file"]') as HTMLInputElement;
+        input?.click();
+      });
+    });
+    
+    // Add change handlers for file inputs
+    container.querySelectorAll('input[type="file"]').forEach((input) => {
+      input.addEventListener('change', handleGalleryUpload);
+    });
+    
+    // Add remove handlers
+    container.querySelectorAll('.gallery-remove').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt((btn as HTMLElement).dataset.remove || '0');
+        removeGalleryImage(index);
+      });
+    });
+  }
+  
+  async function handleGalleryUpload(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    
+    const index = parseInt(input.dataset.input || '0');
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showGalleryError('Invalid file type. Please upload JPEG, PNG, or WebP.');
+      return;
+    }
+    
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      showGalleryError('Image must be less than 5MB.');
+      return;
+    }
+    
+    // Validate count
+    if (galleryImages.length >= MAX_GALLERY_IMAGES && !galleryImages[index]) {
+      showGalleryError('Maximum 4 images allowed.');
+      return;
+    }
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const result = event.target?.result as string;
+      
+      // Upload to server
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const res = await fetch('/api/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        
+        const imageUrl = data.success && data.data?.url ? data.data.url : result;
+        
+        // Update gallery
+        galleryImages[index] = imageUrl;
+        updateGallerySlot(index, imageUrl);
+      } catch (err) {
+        // Use local preview as fallback
+        galleryImages[index] = result;
+        updateGallerySlot(index, result);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  
+  function updateGallerySlot(index: number, url: string) {
+    const container = document.getElementById('gallery-container');
+    if (!container) return;
+    
+    const slot = container.querySelector(`[data-index="${index}"]`);
+    if (!slot) return;
+    
+    const preview = slot.querySelector('.gallery-preview') as HTMLImageElement;
+    const placeholder = slot.querySelector('.gallery-placeholder');
+    const removeBtn = slot.querySelector('.gallery-remove');
+    
+    if (preview && placeholder && removeBtn) {
+      preview.src = url;
+      preview.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+      removeBtn.classList.remove('hidden');
+    }
+  }
+  
+  function removeGalleryImage(index: number) {
+    galleryImages[index] = '';
+    const container = document.getElementById('gallery-container');
+    if (!container) return;
+    
+    const slot = container.querySelector(`[data-index="${index}"]`);
+    if (!slot) return;
+    
+    const preview = slot.querySelector('.gallery-preview') as HTMLImageElement;
+    const placeholder = slot.querySelector('.gallery-placeholder');
+    const removeBtn = slot.querySelector('.gallery-remove');
+    const input = slot.querySelector('input[type="file"]') as HTMLInputElement;
+    
+    if (preview && placeholder && removeBtn && input) {
+      preview.src = '';
+      preview.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+      removeBtn.classList.add('hidden');
+      input.value = '';
+    }
+  }
+  
+  function showGalleryError(message: string) {
+    const errorEl = document.getElementById('gallery-error');
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+      setTimeout(() => errorEl.classList.add('hidden'), 5000);
+    }
+  }
+  
+  function getGalleryImages(): string[] {
+    return galleryImages.filter(url => url !== '');
+  }
+  
+  // Initialize gallery
+  generateGallerySlots();
+  
+  // Submit form
+  document.getElementById('business-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!userId) {
+      alert('Please log in to create a business');
+      window.location.href = '/login';
+      return;
+    }
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const publishNow = (document.getElementById('publishNow') as HTMLInputElement)?.checked;
+    
+    const data = {
+      title: formData.get('title'),
+      slug: formData.get('slug'),
+      categoryId: formData.get('categoryId'),
+      contactName: formData.get('contactName'),
+      contactNumber: formData.get('contactNumber'),
+      email: formData.get('email'),
+      address: formData.get('address'),
+      latitude: formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : undefined,
+      longitude: formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : undefined,
+      aboutUs: formData.get('aboutUs'),
+      openingHours: collectOpeningHours(),
+      yearOfEstablishment: formData.get('yearOfEstablishment') ? parseInt(formData.get('yearOfEstablishment') as string) : undefined,
+      tags: formData.get('tags') ? (formData.get('tags') as string).split(',').map(t => t.trim()) : [],
+      galleryImages: getGalleryImages(),
+      publishNow,
+      ownerId: userId,
+      profileImageUrl,
+      bannerImageUrl,
+    };
+    
+    try {
+      const res = await fetch('/api/businesses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      const result = await res.json();
+      
+      if (result.success) {
+        alert('Business created successfully!');
+        window.location.href = `/business/${data.slug}`;
+      } else {
+        alert('Error: ' + result.error.message);
+      }
+    } catch (err) {
+      console.error('Error creating business:', err);
+      alert('Error creating business');
+    }
+  });
+  
+  // Initialize
+  init();
+</script>

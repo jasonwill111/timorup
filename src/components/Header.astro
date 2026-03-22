@@ -1,0 +1,198 @@
+---
+import { ThemeToggle } from './ui/theme-toggle';
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+
+// Check if user is logged in (simplified - in production use proper auth)
+const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'));
+---
+
+<header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <div class="container max-w-6xl">
+    <div class="flex h-16 items-center justify-between">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-lg">T</span>
+        </div>
+        <span class="font-bold text-xl hidden sm:inline-block">TMBIZ</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-6">
+        <a
+          href="/businesses"
+          class:list={[
+            "text-sm font-medium transition-colors hover:text-primary",
+            currentPath.startsWith('/businesses') ? "text-primary" : "text-muted-foreground"
+          ]}
+        >
+          Businesses
+        </a>
+        <a
+          href="/categories"
+          class:list={[
+            "text-sm font-medium transition-colors hover:text-primary",
+            currentPath.startsWith('/categories') ? "text-primary" : "text-muted-foreground"
+          ]}
+        >
+          Categories
+        </a>
+        <a
+          href="/pricing"
+          class:list={[
+            "text-sm font-medium transition-colors hover:text-primary",
+            currentPath === '/pricing' ? "text-primary" : "text-muted-foreground"
+          ]}
+        >
+          Pricing
+        </a>
+      </nav>
+
+      <!-- Right Side -->
+      <div class="flex items-center gap-2">
+        <!-- Theme Toggle (using shadcn theme component) -->
+        <ThemeToggle client:load />
+
+        <!-- Desktop Auth Buttons -->
+        <div class="hidden md:flex items-center gap-2">
+          {isLoggedIn ? (
+            <>
+              <a href="/account" class="text-sm font-medium text-muted-foreground hover:text-primary">
+                My Account
+              </a>
+              <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">
+                Admin
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="/login" class="text-sm font-medium text-muted-foreground hover:text-primary">
+                Log in
+              </a>
+              <a href="/register" class="text-sm font-medium bg-brand-500 text-white px-4 py-2 rounded-lg hover:bg-brand-600 transition-colors">
+                Sign Up
+              </a>
+            </>
+          )}
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button
+          id="mobile-menu-btn"
+          class="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+          aria-label="Open menu"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t">
+    <nav class="container max-w-6xl py-4 space-y-2">
+      <a
+        href="/businesses"
+        class:list={[
+          "block px-3 py-2 rounded-lg text-sm font-medium",
+          currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"
+        ]}
+      >
+        Businesses
+      </a>
+      <a
+        href="/categories"
+        class:list={[
+          "block px-3 py-2 rounded-lg text-sm font-medium",
+          currentPath.startsWith('/categories') ? "bg-muted text-primary" : "text-muted-foreground"
+        ]}
+      >
+        Categories
+      </a>
+      <a
+        href="/pricing"
+        class:list={[
+          "block px-3 py-2 rounded-lg text-sm font-medium",
+          currentPath === '/pricing' ? "bg-muted text-primary" : "text-muted-foreground"
+        ]}
+      >
+        Pricing
+      </a>
+      <div class="border-t pt-2 mt-2">
+        {isLoggedIn ? (
+          <>
+            <a
+              href="/account"
+              class:list={[
+                "block px-3 py-2 rounded-lg text-sm font-medium",
+                currentPath === '/account' ? "bg-muted text-primary" : "text-muted-foreground"
+              ]}
+            >
+              My Account
+            </a>
+            <a
+              href="/admin"
+              class:list={[
+                "block px-3 py-2 rounded-lg text-sm font-medium",
+                currentPath.startsWith('/admin') ? "bg-muted text-primary" : "text-muted-foreground"
+              ]}
+            >
+              Admin
+            </a>
+            <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">
+              Log Out
+            </button>
+          </>
+        ) : (
+          <>
+            <a
+              href="/login"
+              class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground"
+            >
+              Log in
+            </a>
+            <a
+              href="/register"
+              class="block px-3 py-2 rounded-lg text-sm font-medium bg-brand-500 text-white text-center"
+            >
+              Sign Up
+            </a>
+          </>
+        )}
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Mobile logout - call server-side API to invalidate session
+  document.getElementById('mobile-logout')?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/auth/sign-out', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      sessionStorage.removeItem('userId');
+      localStorage.removeItem('userId');
+      window.location.href = '/';
+    }
+  });
+</script>

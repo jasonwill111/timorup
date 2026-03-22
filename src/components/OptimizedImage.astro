@@ -1,0 +1,88 @@
+---
+// Optimized Image Component for Astro
+// Uses R2 CDN with responsive srcset for optimal loading
+
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  loading?: 'lazy' | 'eager';
+  decoding?: 'async' | 'sync';
+  sizes?: string;
+}
+
+// R2 public URL from environment
+const R2_PUBLIC_URL = import.meta.env.PUBLIC_R2_PUBLIC_URL || 
+  `https://${import.meta.env.PUBLIC_R2_BUCKET || 'timorbiz-media'}.r2.cloudflarestorage.com`;
+
+// Generate responsive srcset for R2 images
+function generateSrcset(src: string): string {
+  if (!src) return '';
+  
+  // If it's a data URL or external URL, no srcset
+  if (src.startsWith('data:') || src.startsWith('http') && !src.includes('r2.cloudflarestorage')) {
+    return '';
+  }
+  
+  // Extract the key from R2 URL
+  let key = src;
+  if (src.includes(R2_PUBLIC_URL)) {
+    key = src.replace(`${R2_PUBLIC_URL}/`, '');
+  }
+  
+  // Generate srcset with different widths using Cloudflare Images
+  // Note: This requires Cloudflare Images to be set up
+  // For now, we'll use a simple approach with the original
+  const widths = [320, 640, 960, 1280];
+  const srcsetParts = widths.map(w => {
+    // If using Cloudflare Images CDN transformation
+    const cdnUrl = `https://timorbiz.com/cdn-cgi/image/width=${w},quality=75,format=webp/${R2_PUBLIC_URL}/${key} ${w}w`;
+    return cdnUrl;
+  });
+  
+  return srcsetParts.join(', ');
+}
+
+// Get the full URL for the image
+function getImageUrl(src: string): string {
+  if (!src) return '/placeholder.svg';
+  if (src.startsWith('data:') || src.startsWith('http')) return src;
+  return `${R2_PUBLIC_URL}/${src}`;
+}
+
+const { 
+  src, 
+  alt, 
+  width, 
+  height, 
+  className = '', 
+  loading = 'lazy',
+  decoding = 'async',
+  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+} = Astro.props;
+
+const imageUrl = getImageUrl(src);
+const srcset = generateSrcset(src);
+---
+
+<img
+  src={imageUrl}
+  srcset={srcset || undefined}
+  {sizes}
+  {alt}
+  {width}
+  {height}
+  class:list={['optimized-image', className]}
+  {loading}
+  {decoding}
+/>
+
+<style>
+  .optimized-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+</style>

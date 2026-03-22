@@ -1,0 +1,436 @@
+---
+// Edit Product page
+export const prerender = false;
+
+import Layout from '@layouts/Layout.astro';
+import { Button } from '@components/ui/button';
+import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@components/ui/card';
+---
+
+<Layout title="Edit Product - TMBIZ">
+  <div class="container py-8">
+    <!-- Back Link -->
+    <a id="back-link" href="#" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to Products
+    </a>
+
+    <!-- Loading -->
+    <div id="loading" class="flex items-center justify-center min-h-[400px]">
+      <div class="text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p class="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Access Denied -->
+    <div id="access-denied" class="hidden text-center py-12">
+      <h1 class="text-2xl font-bold mb-2">Access Denied</h1>
+      <p class="text-muted-foreground mb-6">You don't have permission to edit this product.</p>
+      <a href="/account">
+        <Button>Go to My Account</Button>
+      </a>
+    </div>
+
+    <!-- Not Found -->
+    <div id="not-found" class="hidden text-center py-12">
+      <h1 class="text-2xl font-bold mb-2">Product Not Found</h1>
+      <p class="text-muted-foreground mb-6">The product you're looking for doesn't exist.</p>
+      <a href="/account">
+        <Button>Go to My Account</Button>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="hidden">
+      <Card class="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Edit Product</CardTitle>
+          <CardDescription>Update your product or service details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form id="product-form" class="space-y-6">
+            <!-- Product Name -->
+            <div>
+              <Label for="title">Product Name *</Label>
+              <Input 
+                id="title" 
+                name="title" 
+                placeholder="e.g., Professional Photography Service" 
+                required 
+              />
+            </div>
+
+            <!-- Price -->
+            <div>
+              <Label for="price">Price *</Label>
+              <Input 
+                id="price" 
+                name="price" 
+                type="text"
+                placeholder="e.g., $150" 
+                required 
+              />
+              <p class="text-xs text-muted-foreground mt-1">Enter price in USD or local currency</p>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <Label for="description">Description</Label>
+              <textarea 
+                id="description" 
+                name="description" 
+                rows="4"
+                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="Describe your product or service..."
+              ></textarea>
+            </div>
+
+            <!-- Product Images -->
+            <div>
+              <Label>Product Images (up to 4)</Label>
+              <div id="image-upload-area" class="mt-2">
+                <div class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer" id="upload-trigger">
+                  <svg class="w-10 h-10 mx-auto text-muted-foreground mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <p class="text-sm text-muted-foreground">Click to upload images</p>
+                  <p class="text-xs text-muted-foreground mt-1">JPG, PNG, WebP - Max 5MB each</p>
+                </div>
+                <input type="file" id="file-input" accept="image/*" multiple class="hidden" />
+              </div>
+              
+              <!-- Image Preview -->
+              <div id="image-preview" class="grid grid-cols-4 gap-2 mt-4"></div>
+              <input type="hidden" id="media-ids" name="mediaIds" value="" />
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p class="text-sm text-red-600 dark:text-red-400" id="error-text"></p>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="hidden bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <p class="text-sm text-green-600 dark:text-green-400">Product updated successfully!</p>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex gap-3">
+              <Button type="submit" class="flex-1">Save Changes</Button>
+              <Button type="button" variant="outline" id="cancel-btn">Cancel</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Get slug and id from URL
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  const slugIndex = pathParts.indexOf('business');
+  const slug = slugIndex >= 0 ? pathParts[slugIndex + 1] : '';
+  const productId = pathParts[pathParts.length - 1];
+
+  let currentUser: any = null;
+  let currentProduct: any = null;
+  let currentBusiness: any = null;
+  let uploadedImages: string[] = [];
+
+  const loading = document.getElementById('loading');
+  const accessDenied = document.getElementById('access-denied');
+  const notFound = document.getElementById('not-found');
+  const content = document.getElementById('content');
+
+  // Get session
+  async function getSession() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+      return data.user || null;
+    } catch (err) {
+      console.error('Error getting session:', err);
+      return null;
+    }
+  }
+
+  // Load product
+  async function loadProduct() {
+    try {
+      const res = await fetch(`/api/products/${productId}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        return data.data;
+      }
+    } catch (err) {
+      console.error('Error loading product:', err);
+    }
+    return null;
+  }
+
+  // Load business by slug
+  async function loadBusiness() {
+    try {
+      const res = await fetch(`/api/businesses/${slug}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        return data.data;
+      }
+    } catch (err) {
+      console.error('Error loading business:', err);
+    }
+    return null;
+  }
+
+  // Initialize
+  async function init() {
+    currentUser = await getSession();
+    
+    if (!currentUser) {
+      loading?.classList.add('hidden');
+      accessDenied?.classList.remove('hidden');
+      return;
+    }
+
+    currentBusiness = await loadBusiness();
+    
+    if (!currentBusiness) {
+      loading?.classList.add('hidden');
+      notFound?.classList.remove('hidden');
+      return;
+    }
+
+    currentProduct = await loadProduct();
+    
+    if (!currentProduct) {
+      loading?.classList.add('hidden');
+      notFound?.classList.remove('hidden');
+      return;
+    }
+
+    // Check ownership
+    if (currentBusiness.ownerId !== currentUser.id) {
+      loading?.classList.add('hidden');
+      accessDenied?.classList.remove('hidden');
+      return;
+    }
+
+    // Set back link
+    const backLink = document.getElementById('back-link');
+    if (backLink) {
+      backLink.setAttribute('href', `/business/${slug}/products`);
+    }
+
+    // Populate form
+    (document.getElementById('title') as HTMLInputElement).value = currentProduct.title || '';
+    (document.getElementById('price') as HTMLInputElement).value = currentProduct.price || '';
+    (document.getElementById('description') as HTMLTextAreaElement).value = currentProduct.description || '';
+
+    // Load existing images
+    if (currentProduct.images && currentProduct.images.length > 0) {
+      uploadedImages = currentProduct.images.map((img: any) => img.mediaId);
+      const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
+      if (mediaIdsInput) {
+        mediaIdsInput.value = uploadedImages.join(',');
+      }
+      
+      // Render existing images
+      currentProduct.images.forEach((img: any) => {
+        renderExistingImage(img.mediaId);
+      });
+    }
+
+    // Show content
+    loading?.classList.add('hidden');
+    content?.classList.remove('hidden');
+  }
+
+  // Render existing image
+  function renderExistingImage(mediaId: string) {
+    const preview = document.getElementById('image-preview');
+    if (!preview) return;
+
+    const div = document.createElement('div');
+    div.className = 'relative aspect-square rounded-lg overflow-hidden bg-muted';
+    div.dataset.existing = 'true';
+    div.innerHTML = `
+      <img src="/api/media/${mediaId}" class="w-full h-full object-cover" />
+      <button type="button" data-remove="${mediaId}" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    `;
+    
+    div.querySelector('button')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = (e.currentTarget as HTMLElement).dataset.remove;
+      uploadedImages = uploadedImages.filter(imgId => imgId !== id);
+      div.remove();
+      
+      const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
+      if (mediaIdsInput) {
+        mediaIdsInput.value = uploadedImages.join(',');
+      }
+    });
+    
+    preview.appendChild(div);
+  }
+
+  // Handle form submission
+  document.getElementById('product-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const title = (document.getElementById('title') as HTMLInputElement).value;
+    const price = (document.getElementById('price') as HTMLInputElement).value;
+    const description = (document.getElementById('description') as HTMLTextAreaElement).value;
+    
+    if (!title || !price) {
+      showError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          title,
+          price,
+          description,
+          images: uploadedImages
+        }),
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        // Show success and redirect
+        const successDiv = document.getElementById('success-message');
+        successDiv?.classList.remove('hidden');
+        setTimeout(() => {
+          window.location.href = `/business/${slug}/products`;
+        }, 1500);
+      } else {
+        showError(data.error?.message || 'Failed to update product');
+      }
+    } catch (err) {
+      console.error('Error updating product:', err);
+      showError('An error occurred. Please try again.');
+    }
+  });
+
+  // Cancel button
+  document.getElementById('cancel-btn')?.addEventListener('click', () => {
+    window.location.href = `/business/${slug}/products`;
+  });
+
+  // Show error
+  function showError(message: string) {
+    const errorDiv = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    if (errorDiv && errorText) {
+      errorText.textContent = message;
+      errorDiv.classList.remove('hidden');
+    }
+  }
+
+  // File upload handling
+  const uploadTrigger = document.getElementById('upload-trigger');
+  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+  
+  uploadTrigger?.addEventListener('click', () => {
+    fileInput?.click();
+  });
+
+  fileInput?.addEventListener('change', async (e) => {
+    const files = (e.target as HTMLInputElement).files;
+    if (!files || files.length === 0) return;
+
+    // Check max images
+    if (uploadedImages.length + files.length > 4) {
+      showError('Maximum 4 images allowed');
+      return;
+    }
+
+    // Upload each file
+    for (const file of files) {
+      if (uploadedImages.length >= 4) break;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Image must be less than 5MB');
+        continue;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          uploadedImages.push(data.data.id);
+          renderImagePreview(data.data.id, file);
+        }
+      } catch (err) {
+        console.error('Error uploading image:', err);
+      }
+    }
+
+    const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
+    if (mediaIdsInput) {
+      mediaIdsInput.value = uploadedImages.join(',');
+    }
+  });
+
+  // Render image preview
+  function renderImagePreview(mediaId: string, file: File) {
+    const preview = document.getElementById('image-preview');
+    if (!preview) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const div = document.createElement('div');
+      div.className = 'relative aspect-square rounded-lg overflow-hidden bg-muted';
+      div.innerHTML = `
+        <img src="${e.target?.result}" class="w-full h-full object-cover" />
+        <button type="button" data-remove="${mediaId}" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      `;
+      
+      div.querySelector('button')?.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        const id = (ev.currentTarget as HTMLElement).dataset.remove;
+        uploadedImages = uploadedImages.filter(imgId => imgId !== id);
+        div.remove();
+        
+        const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
+        if (mediaIdsInput) {
+          mediaIdsInput.value = uploadedImages.join(',');
+        }
+      });
+      
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  init();
+</script>

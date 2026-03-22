@@ -1,0 +1,361 @@
+---
+// This page needs SSR for dynamic product data
+export const prerender = false;
+
+import Layout from '../../../layouts/Layout.astro';
+import { Button } from '../../../components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+---
+
+<Layout title="Manage Products - TMBIZ">
+  <div class="container py-8">
+    <!-- Back Link -->
+    <a href="/account" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to Account
+    </a>
+
+    <!-- Loading -->
+    <div id="loading" class="flex items-center justify-center min-h-[400px]">
+      <div class="text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p class="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Access Denied -->
+    <div id="access-denied" class="hidden text-center py-12">
+      <h1 class="text-2xl font-bold mb-2">Access Denied</h1>
+      <p class="text-muted-foreground mb-6">You don't have permission to manage this business.</p>
+      <a href="/account">
+        <Button>Go to My Account</Button>
+      </a>
+    </div>
+
+    <!-- Business Not Found -->
+    <div id="not-found" class="hidden text-center py-12">
+      <h1 class="text-2xl font-bold mb-2">Business Not Found</h1>
+      <p class="text-muted-foreground mb-6">The business you're looking for doesn't exist.</p>
+      <a href="/account">
+        <Button>Go to My Account</Button>
+      </a>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="hidden">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl font-bold" id="business-title">Products</h1>
+          <p class="text-muted-foreground" id="business-subtitle">Manage your business products</p>
+        </div>
+        <div id="add-product-container">
+          <a id="add-product-btn" href="#" class="hidden">
+            <Button>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Product
+            </Button>
+          </a>
+        </div>
+      </div>
+
+      <!-- Upgrade Banner (for trial users) -->
+      <div id="upgrade-banner" class="hidden mb-6">
+        <Card class="border-amber-500 bg-amber-50 dark:bg-amber-900/20">
+          <CardContent class="p-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 class="font-semibold text-amber-800 dark:text-amber-200">Upgrade to Create Products</h3>
+                <p class="text-sm text-amber-700 dark:text-amber-300">You're on a free trial. Upgrade to add products to your business.</p>
+              </div>
+              <a href="/account">
+                <Button variant="outline" class="border-amber-500 text-amber-700 hover:bg-amber-100 dark:border-amber-600 dark:text-amber-300">
+                  View Plans
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="products-section">
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Products</CardTitle>
+            <CardDescription>Manage your products and services</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div id="products-loading" class="text-center py-8">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+            <div id="products-empty" class="hidden text-center py-8">
+              <p class="text-muted-foreground mb-4">No products yet</p>
+              <p class="text-sm text-muted-foreground">Add your first product to showcase what you offer</p>
+            </div>
+            <div id="products-list" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Products will be loaded here -->
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- SKU Limit Warning -->
+      <div id="sku-limit-warning" class="hidden mt-6">
+        <Card class="border-orange-500 bg-orange-50 dark:bg-orange-900/20">
+          <CardContent class="p-4">
+            <p class="text-sm text-orange-700 dark:text-orange-300">
+              You've reached your product limit. Upgrade your plan to add more products.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Get slug from URL
+  const slug = window.location.pathname.split('/').filter(s => s)[2];
+  
+  const loading = document.getElementById('loading');
+  const accessDenied = document.getElementById('access-denied');
+  const notFound = document.getElementById('not-found');
+  const content = document.getElementById('content');
+  
+  let currentUser: any = null;
+  let currentBusiness: any = null;
+  let subscriptionStatus: any = null;
+  
+  // Get session
+  async function getSession() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+      if (data.session?.user) {
+        return data.session.user;
+      }
+    } catch (err) {
+      console.error('Error getting session:', err);
+    }
+    return null;
+  }
+  
+  // Load business
+  async function loadBusiness() {
+    try {
+      const res = await fetch(`/api/businesses/${slug}`);
+      const data = await res.json();
+      
+      if (!data.success) {
+        loading?.classList.add('hidden');
+        notFound?.classList.remove('hidden');
+        return null;
+      }
+      
+      return data.data;
+    } catch (err) {
+      console.error('Error loading business:', err);
+      loading?.classList.add('hidden');
+      notFound?.classList.remove('hidden');
+      return null;
+    }
+  }
+  
+  // Load subscription status
+  async function loadSubscription(businessPageId: string) {
+    try {
+      const res = await fetch(`/api/account/subscription/${businessPageId}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        return data.data;
+      }
+    } catch (err) {
+      console.error('Error loading subscription:', err);
+    }
+    return null;
+  }
+  
+  // Load products
+  async function loadProducts(businessPageId: string) {
+    try {
+      const res = await fetch(`/api/products?businessPageId=${businessPageId}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        return data.data;
+      }
+    } catch (err) {
+      console.error('Error loading products:', err);
+    }
+    return [];
+  }
+  
+  // Initialize
+  async function init() {
+    // Get current user
+    currentUser = await getSession();
+    
+    if (!currentUser) {
+      loading?.classList.add('hidden');
+      accessDenied?.classList.remove('hidden');
+      return;
+    }
+    
+    // Load business
+    currentBusiness = await loadBusiness();
+    
+    if (!currentBusiness) {
+      return; // Already handled in loadBusiness
+    }
+    
+    // Check ownership
+    if (currentBusiness.ownerId !== currentUser.id) {
+      loading?.classList.add('hidden');
+      accessDenied?.classList.remove('hidden');
+      return;
+    }
+    
+    // Load subscription status
+    subscriptionStatus = await loadSubscription(currentBusiness.id);
+    
+    // Update UI
+    document.title = `Manage Products - ${currentBusiness.title} - TMBIZ`;
+    
+    const titleEl = document.getElementById('business-title');
+    const subtitleEl = document.getElementById('business-subtitle');
+    if (titleEl) titleEl.textContent = currentBusiness.title;
+    if (subtitleEl) subtitleEl.textContent = 'Manage your products';
+    
+    // Show add product button for paid users
+    const addProductBtn = document.getElementById('add-product-btn');
+    const upgradeBanner = document.getElementById('upgrade-banner');
+    
+    if (subscriptionStatus?.status === 'active') {
+      if (addProductBtn) {
+        addProductBtn.href = `/business/${slug}/product/new`;
+        addProductBtn.classList.remove('hidden');
+      }
+    } else {
+      // Show upgrade banner for trial/unsubscribed users
+      if (upgradeBanner) upgradeBanner.classList.remove('hidden');
+    }
+    
+    // Load products
+    const products = await loadProducts(currentBusiness.id);
+    displayProducts(products);
+    
+    // Show content
+    loading?.classList.add('hidden');
+    content?.classList.remove('hidden');
+  }
+  
+  // Display products
+  function displayProducts(products: any[]) {
+    const loadingEl = document.getElementById('products-loading');
+    const emptyEl = document.getElementById('products-empty');
+    const listEl = document.getElementById('products-list');
+    
+    if (!loadingEl || !emptyEl || !listEl) return;
+    
+    loadingEl.classList.add('hidden');
+    
+    if (products.length === 0) {
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    
+    products.forEach((product: any) => {
+      const firstImage = product.images && product.images.length > 0
+        ? `/api/media/${product.images[0].mediaId}`
+        : null;
+      
+      const card = document.createElement('div');
+      card.className = 'border rounded-lg overflow-hidden hover:shadow-md transition-shadow';
+      
+      card.innerHTML = `
+        <div class="aspect-square bg-muted relative">
+          ${firstImage 
+            ? `<img src="${firstImage}" alt="${product.title}" class="w-full h-full object-cover" />`
+            : `<div class="flex items-center justify-center h-full text-4xl font-bold text-muted-foreground">${product.title.charAt(0)}</div>`
+          }
+          <div class="absolute top-2 right-2 flex gap-1">
+            <a href="/business/${slug}/product/${product.id}/edit" class="p-1.5 bg-white dark:bg-gray-800 rounded-full shadow hover:bg-gray-100" title="Edit">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </a>
+            <a href="/business/${slug}/product/${product.id}" class="p-1.5 bg-white dark:bg-gray-800 rounded-full shadow hover:bg-gray-100" title="View">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </a>
+            <button data-delete="${product.id}" class="p-1.5 bg-white dark:bg-gray-800 rounded-full shadow hover:bg-red-50 text-red-500" title="Delete">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-3">
+          <h3 class="font-medium truncate">${product.title}</h3>
+          <p class="text-sm text-muted-foreground">${product.price}</p>
+        </div>
+      `;
+      
+      listEl.appendChild(card);
+    });
+    
+    // Add delete handlers
+    listEl.querySelectorAll('[data-delete]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const productId = (e.target as HTMLElement).closest('button')?.dataset.delete;
+        if (!productId) return;
+        
+        if (confirm('Are you sure you want to delete this product?')) {
+          await deleteProduct(productId);
+        }
+      });
+    });
+  }
+  
+  // Delete product
+  async function deleteProduct(productId: string) {
+    try {
+      const res = await fetch(`/api/products/${productId}?userId=${currentUser.id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        // Reload products
+        const products = await loadProducts(currentBusiness.id);
+        
+        // Clear and reload
+        const listEl = document.getElementById('products-list');
+        const emptyEl = document.getElementById('products-empty');
+        
+        if (listEl) listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.add('hidden');
+        
+        displayProducts(products);
+      } else {
+        alert(data.error?.message || 'Failed to delete product');
+      }
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      alert('Failed to delete product');
+    }
+  }
+  
+  init();
+</script>

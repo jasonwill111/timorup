@@ -1,0 +1,110 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Dashboard">
+<script>
+  // Check authentication on page load
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+      if (!data.user || data.user.role !== 'admin') {
+        window.location.href = '/login?redirect=/admin';
+      }
+    } catch (e) {
+      window.location.href = '/login?redirect=/admin';
+    }
+  }
+  checkAuth();
+</script>
+
+<AdminLayout title="Dashboard">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">Dashboard</h1>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
+      <div class="bg-card border rounded-lg p-3 md:p-4 text-center">
+        <p class="text-xl md:text-3xl font-bold" id="stat-users">-</p>
+        <p class="text-xs md:text-sm text-muted-foreground">Users</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 md:p-4 text-center">
+        <p class="text-xl md:text-3xl font-bold" id="stat-businesses">-</p>
+        <p class="text-xs md:text-sm text-muted-foreground">Businesses</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 md:p-4 text-center">
+        <p class="text-xl md:text-3xl font-bold" id="stat-orders">-</p>
+        <p class="text-xs md:text-sm text-muted-foreground">Orders</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 md:p-4 text-center">
+        <p class="text-xl md:text-3xl font-bold" id="stat-revenue">$0</p>
+        <p class="text-xs md:text-sm text-muted-foreground">Revenue</p>
+      </div>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="bg-card border rounded-lg p-3 md:p-4">
+      <h3 class="font-semibold mb-2 text-sm md:text-base">Recent Orders</h3>
+      <div id="orders-list" class="space-y-2">
+        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Load dashboard stats
+  async function loadStats() {
+    try {
+      const res = await fetch('/api/admin/stats');
+      const data = await res.json();
+      
+      if (data.success) {
+        document.getElementById('stat-users')!.textContent = String(data.data.totalUsers);
+        document.getElementById('stat-businesses')!.textContent = String(data.data.totalBusinesses);
+        document.getElementById('stat-orders')!.textContent = String(data.data.totalOrders);
+        document.getElementById('stat-revenue')!.textContent = '$' + String(data.data.totalRevenue || 0);
+      }
+    } catch (err) {
+      console.error('Error loading stats:', err);
+    }
+  }
+  
+  // Load recent orders
+  async function loadOrders() {
+    try {
+      const res = await fetch('/api/admin/orders');
+      const data = await res.json();
+      
+      const container = document.getElementById('orders-list');
+      if (!container) return;
+      
+      if (!data.success || data.data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-8 text-sm">No orders yet</p>';
+        return;
+      }
+      
+      container.innerHTML = data.data.slice(0, 5).map((order: any) => `
+        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">#${order.id.slice(0, 8)}</p>
+            <p class="text-xs text-muted-foreground truncate">${order.planType || 'Subscription'} - $${order.amount}</p>
+          </div>
+          <div class="flex items-center gap-2 ml-2">
+            <span class="px-2 py-0.5 text-xs rounded-full ${order.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${order.status}</span>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading orders:', err);
+    }
+  }
+  
+  // Initialize
+  loadStats();
+  loadOrders();
+</script>

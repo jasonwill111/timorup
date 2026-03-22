@@ -1,0 +1,16 @@
+name = "timorbiz"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+pages_build_output_dir = "dist"
+
+[pages]
+
+# Local D1 database
+[[d1_databases]]
+binding = "DB"
+database_name = "timorbiz-local"
+database_id = "local"
