@@ -120,7 +120,7 @@ classification:
 | ORM | Drizzle ORM | D1 原生支持 |
 | 数据库 | Cloudflare D1 (SQLite) | 开发/生产 |
 | 媒体存储 | Cloudflare R2 | S3 兼容 |
-| 编辑器 | Lexical | Notion-like 体验 |
+| 编辑器 | TipTap 3.x | 替换原 Lexical，Notion-like 体验 |
 | 样式 | Tailwind CSS 4.x | |
 | 验证 | Zod | |
 | Toast | Sonner | |
@@ -469,13 +469,15 @@ classification:
 
 ---
 
-## 10. Lexical 编辑器用途
+## 10. 富文本编辑器
+
+> ⚠️ **更新 (2026-03-22)**: Lexical 已替换为 TipTap v3
 
 | 场景 | 用途 |
 |------|------|
-| 前端用户 | 商业页面 - 关于我们 (About Us) |
-| 前端用户 | 商业页面 - 最新动态 (Latest Updates) |
-| Admin/Editor | 博客/新闻 (Posts) |
+| 前端用户 | 商业页面 - 关于我们 (About Us) — TipTap |
+| 前端用户 | 商业页面 - 最新动态 (Latest Updates) — TipTap |
+| Admin/Editor | 博客/新闻 (Posts) — TipTap |
 | Admin/Editor | 自定义模块内容 |
 
 ---
@@ -580,5 +582,5 @@ classification:
 
 ---
 
-**文档版本**: 3.0  
-**最后更新**: 2026-02-27
+**文档版本**: 3.1
+**最后更新**: 2026-03-22

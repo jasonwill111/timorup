@@ -95,7 +95,7 @@ timorbiz/
 │   │   │   ├── RegisterForm.tsx    # 注册表单
 │   │   │   └── OAuthButton.tsx     # OAuth 按钮
 │   │   └── editor/
-│   │       ├── LexicalEditor.tsx   # Lexical 编辑器
+│   │       ├── RichTextEditor.tsx   # TipTap 富文本编辑器（替换 Lexical）
 │   │       └── plugins/            # 编辑器插件
 │   │
 │   ├── layouts/
@@ -116,7 +116,7 @@ timorbiz/
 │   │   │   ├── businesses.astro   # 商家管理
 │   │   │   ├── products.astro     # 产品管理
 │   │   │   ├── orders.astro      # 订单管理
-│   │   │   ├── posts.astro       # 文章管理
+│   │   │   ├── blogs.astro       # 博客管理（Admin CRUD）
 │   │   │   └── settings.astro    # 站点设置
 │   │   └── ...
 │   │
@@ -182,7 +182,7 @@ timorbiz/
 │   ├── images/                      # 静态图片
 │   └── favicon.svg
 │
-├── wrangler.toml                    # Cloudflare 配置
+├── wrangler.jsonc                    # Cloudflare 配置
 ├── astro.config.mjs
 ├── drizzle.config.ts
 └── package.json
@@ -382,8 +382,8 @@ r2://timorbiz-media/
 ### 8.1 清理过期页面
 
 ```yaml
-# wrangler.toml
-[[triggers]]
+# wrangler.jsonc
+[[triggers]] # wrangler.jsonc
 crons = ["0 0 * * *"]  # 每天 UTC 0 点
 
 # 任务内容
@@ -396,7 +396,7 @@ crons = ["0 0 * * *"]  # 每天 UTC 0 点
 ### 8.2 发送过期提醒
 
 ```yaml
-[[triggers]]
+[[triggers]] # wrangler.jsonc
 crons = ["0 9 * * *"]  # 每天 UTC 9 点
 
 # 任务内容
@@ -489,6 +489,6 @@ NODE_ENV=development
 
 ---
 
-**文档版本**: 2.0  
-**最后更新**: 2026-02-28
+**文档版本**: 3.0
+**最后更新**: 2026-03-22
 **开发状态**: ✅ 架构已完成

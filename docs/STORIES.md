@@ -64,12 +64,15 @@
 - [x] 可以运行 pnpm deploy
 - [x] 部署成功
 
-### INF-009: 项目配置 Lexical 编辑器
+### INF-009: 项目配置 TipTap 编辑器
+
+> ⚠️ **更新 (2026-03-22)**: Lexical 已替换为 TipTap v3
 
 **验收标准:**
-- [x] 安装 lexical 和 @lexical/react
-- [x] 创建 LexicalEditor 组件
-- [x] 支持基本富文本格式
+- [x] 安装 @tiptap/* 相关依赖
+- [x] 创建 RichTextEditor 组件
+- [x] 支持基本富文本格式 (bold, italic, lists, headings)
+- [x] 支持富文本 HTML 输出存储到数据库
 
 ### INF-010: 项目配置 Better Auth
 
@@ -208,10 +211,13 @@
 
 ### BS-008: 用户可以编辑"关于我们"内容
 
+> ⚠️ **更新 (2026-03-22)**: Lexical → TipTap 富文本编辑器
+
 **验收标准:**
-- [x] 使用 Lexical 编辑器
-- [x] 支持富文本格式
-- [x] 保存内容到数据库
+- [x] 使用 TipTap 编辑器 (RichTextEditor)
+- [x] 支持富文本格式 (bold, italic, lists, headings)
+- [x] 保存 HTML 内容到 aboutUs 字段
+- [x] Admin 商家页面和公开创建页面均支持
 
 ### BS-009: 用户可以添加标签
 
@@ -229,10 +235,12 @@
 
 ### BS-011: 用户可以添加最新动态
 
+> ⚠️ **更新 (2026-03-22)**: 改为 TipTap 富文本字段 latestUpdates
+
 **验收标准:**
-- [x] 最多 4 条动态
-- [x] 每条可配图
-- [x] 104 字符限制
+- [x] TipTap 富文本编辑器 (latestUpdates 字段)
+- [x] Admin 商家页面支持编辑最新动态
+- [x] 保存 HTML 内容到 latestUpdates 字段
 
 ### BS-012: 用户可以发布商业页面
 
@@ -244,10 +252,12 @@
 
 ### BS-013: 系统限制每个用户只能创建1个商业页面
 
+> ❌ **未实现 (2026-03-22)**: API 中无此检查，需在 `src/pages/api/businesses/create.ts` 和 `src/pages/api/admin/businesses/index.ts` 中添加用户已有页面检查
+
 **验收标准:**
-- [x] 创建前检查用户已有页面
-- [x] 有页面则提示错误
-- [x] 管理员不受限制
+- [ ] 创建前检查用户已有页面
+- [ ] 有页面则提示错误
+- [ ] 管理员不受限制
 
 ---
 
@@ -452,10 +462,13 @@
 
 ### SB-003: 系统显示支付信息
 
+> ❌ **部分实现 (2026-03-22)**: 二维码硬编码为 `/images/payment-qr.png`，需改为从 Site Settings API 动态读取
+
 **验收标准:**
 - [x] 显示支付二维码图片
 - [x] 显示联系方式
 - [x] 显示支付说明
+- [ ] ❌ 二维码从 Site Settings 动态获取（需修复）
 
 ### SB-004: 用户可以创建订单
 
@@ -563,6 +576,72 @@
 
 ---
 
-**文档版本**: 2.0  
-**最后更新**: 2026-02-28
-**开发状态**: ✅ 全部完成 (50 Stories)
+## Phase 11: 博客系统 (BL) ✅ 新增 2026-03-22
+
+### BL-001: Admin 可以创建博客文章
+
+**验收标准:**
+- [x] Admin 博客管理页面 (`/admin/blogs`)
+- [x] 创建/编辑/删除文章
+- [x] 支持富文本内容 (TipTap)
+- [x] 支持草稿/发布/归档状态
+
+### BL-002: 博客文章列表展示
+
+**验收标准:**
+- [x] Admin 页面显示文章列表
+- [x] 支持搜索和状态筛选
+- [x] 状态徽章显示 (draft/published/archived)
+
+### BL-003: 博客 API 路由
+
+**验收标准:**
+- [x] GET /api/admin/blogs — 列表
+- [x] GET /api/admin/blogs/:id — 详情
+- [x] POST /api/admin/blogs — 创建
+- [x] PUT /api/admin/blogs/:id — 更新
+- [x] DELETE /api/admin/blogs/:id — 删除
+
+---
+
+## Phase 12: 基础设施增强 (INFX) ✅ 新增 2026-03-22
+
+### INFX-001: Admin 认证中间件安全加固
+
+**验收标准:**
+- [x] better-auth session 验证
+- [x] 管理员角色检查
+- [x] 登录速率限制 (10 次/15分钟/IP)
+- [x] 动态 CORS origin 验证
+
+### INFX-002: 过期提醒邮件
+
+**验收标准:**
+- [x] Cron /cleanup/reminders 发送邮件
+- [x] emailTemplates.subscriptionExpiring 模板
+- [x] 从 users 表获取所有者邮箱
+- [x] Wrangler cron triggers 配置
+
+### INFX-003: Cloudflare Workers CI/CD
+
+**验收标准:**
+- [x] GitHub Actions CI (version-check + build)
+- [x] GitHub Actions Deploy (wrangler deploy)
+- [x] GitHub Actions Test
+- [x] GitHub Actions Version-check (main 分支每周检查)
+- [x] pre-commit hooks (版本检查)
+
+### INFX-004: TipTap 富文本编辑器 (About Us / Latest Updates)
+
+**验收标准:**
+- [x] latestUpdates 字段添加到 businessPages schema
+- [x] Admin 商家表单使用 TipTap (About Us + Latest Updates)
+- [x] Admin business creation API 接受 latestUpdates
+- [x] 纯文本 textarea fallback
+
+---
+
+**文档版本**: 3.0
+**最后更新**: 2026-03-22
+**开发状态**: ⚠️ 49/51 Stories 完成 | 2 个未完成 (BS-013, SB-003 部分)
+**新增**: Blog 系统 (BL-001~BL-003) + 基础设施增强 (INFX-001~INFX-004)

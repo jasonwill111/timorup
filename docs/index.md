@@ -17,15 +17,15 @@ scan_level: exhaustive
 
 | 组件 | 技术 | 版本 |
 |------|------|------|
-| 前端框架 | Astro | 5.x |
+| 前端框架 | Astro | 6.x |
 | UI 框架 | React | 19.x |
 | API 框架 | Hono | 4.x |
 | 数据库 | D1 (SQLite) | - |
-| ORM | Drizzle ORM | 0.41.x |
-| 认证 | Better Auth | 1.4.x |
+| ORM | Drizzle ORM | 0.45.x |
+| 认证 | Better Auth | 1.5.x |
 | UI 组件 | shadcn/ui | latest |
-| 样式 | Tailwind CSS | 3.4.x |
-| 富文本编辑器 | Lexical | 0.27.x |
+| 样式 | Tailwind CSS | 4.x |
+| 富文本编辑器 | TipTap | 3.x |
 | 验证 | Zod | 3.24.x |
 | 媒体存储 | Cloudflare R2 | - |
 | 地图 | Leaflet + OpenStreetMap | - |
@@ -73,6 +73,8 @@ timorbiz/
 | `/api/categories/*` | `src/server/routes/categories.ts` | 分类 |
 | `/api/orders/*` | `src/server/routes/orders.ts` | 订单 |
 | `/api/admin/*` | `src/server/routes/admin.ts` | 管理后台 |
+| `/api/blogs/*` | `src/server/routes/blogs.ts` | 博客 CRUD |
+| `/api/cron/*` | `src/server/routes/cron.ts` | 定时任务 |
 
 ## 生成的文档
 
@@ -83,6 +85,7 @@ timorbiz/
 - [项目上下文](./project-context.md)
 - [史诗列表](./EPICS.md)
 - [用户故事](./STORIES.md)
+- [PRD 合规审计报告](./GAP_ANALYSIS.md)
 
 ### BMAD 工作流产出
 
@@ -126,6 +129,8 @@ pnpm build
 | 编辑产品 | `/business/[slug]/product/[id]/edit` |
 | 用户账户 | `/account` |
 | 管理后台 | `/admin` |
+| Admin 商家管理 | `/admin/businesses` |
+| Admin 博客管理 | `/admin/blogs` |
 | 创建商家 | `/business/create` |
 | 登录 | `/login` |
 | 注册 | `/register` |
@@ -147,6 +152,7 @@ pnpm build
 | media | 媒体文件 |
 | ad_banners | 广告横幅 |
 | site_settings | 站点设置 |
+| blog_posts | 博客文章 |
 
 ## 品牌颜色
 
@@ -156,7 +162,7 @@ pnpm build
 
 ---
 
-**文档版本**: 2.0  
-**最后更新**: 2026-02-28  
+**文档版本**: 3.0
+**最后更新**: 2026-03-22
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ 全部完成 (50 Stories, 10 Epics)
+**开发状态**: ⚠️ 55/57 Stories 完成 (2 个缺口) | 12 个 Epic 全部完成 | 剩余 12 个功能缺口待修复（详见 GAP_ANALYSIS.md）
