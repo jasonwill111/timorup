@@ -1,0 +1,38 @@
+name: 版本检查（main）
+
+# 每周一 09:00 自动运行，记录版本差距
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  version-check-weekly:
+    name: 周版本检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 版本检查
+        run: |
+          pnpm outdated 2>&1 | tee outdated-report.txt
+          echo "::notice::版本检查报告已生成"
+
+      - name: 上传报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-report-$(date '+%Y-%m-%d')
+          path: outdated-report.txt
+          retention-days: 30

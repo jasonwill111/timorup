@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 部署到 Cloudflare Workers
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://timorbiz.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for Cloudflare Workers
+        run: pnpm build
+        env:
+          USE_CLOUDFLARE: '1'
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # wrangler.toml 已迁移到 wrangler.jsonc，但 wrangler-action 也支持 jsonc
+          # 显式指定配置文件
+          configuration: |
+            { "main": "@astrojs/cloudflare/entrypoints/server", "name": "timorbiz" }
+          environment: production
+
+      - name: 验证部署
+        run: |
+          echo "✅ 部署完成"
+          echo "🌐 站点: https://timorbiz.com"
+          curl -s -o /dev/null -w "%{http_code}" https://timorbiz.com || echo "无法验证（域名未配置）"
