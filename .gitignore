@@ -107,6 +107,8 @@ nul
 .specweave/increments/*/logs/
 .specweave/increments/*/test-results/
 .specweave/docs-site-internal/
+.specweave/state/prompt-cache/
+.specweave/logs/decisions.jsonl
 .claude-plugin/
 plugins/
 # But track the core specweave structure
