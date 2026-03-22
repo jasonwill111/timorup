@@ -14,9 +14,23 @@ import bannerRoutes from './routes/banners';
 
 const app = new Hono();
 
+const getAllowedOrigins = () => {
+  const appUrl = process.env.APP_URL || 'http://localhost:4321';
+  return process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || [appUrl];
+};
+
+function isOriginAllowed(origin: string | undefined): boolean {
+  if (!origin) return true;
+  const allowed = getAllowedOrigins();
+  return allowed.includes(origin) || origin.startsWith('http://localhost:');
+}
+
 app.use('*', logger());
 app.use('*', cors({
-  origin: '*',
+  origin: (origin) => {
+    if (!isOriginAllowed(origin)) return getAllowedOrigins()[0] || 'http://localhost:4321';
+    return origin || '*';
+  },
   credentials: true,
 }));
 
