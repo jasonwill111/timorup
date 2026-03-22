@@ -6,6 +6,10 @@ import { sql } from 'drizzle-orm';
 import { sessions, accounts, verifications } from './auth';
 export { sessions, accounts, verifications };
 
+// Re-export blog tables
+import { blogPosts } from './blogs';
+export { blogPosts };
+
 // Users table
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),

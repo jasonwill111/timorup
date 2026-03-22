@@ -5,7 +5,7 @@ import { getCookie } from 'hono/cookie';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
-  users, businessPages, orders, categories, siteSettings, reviews
+  users, businessPages, orders, categories, siteSettings, reviews, blogPosts
 } from '@/db/schema';
 import { eq, desc, and, like, or, sql } from 'drizzle-orm';
 
@@ -495,6 +495,119 @@ adminApp.delete('/reviews/:id', async (c) => {
   const id = c.req.param('id');
   try {
     await db.delete(reviews).where(eq(reviews.id, id));
+    return c.json({ success: true });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Delete error';
+    return c.json({ success: false, error: { code: 'DELETE_ERROR', message } }, 500);
+  }
+});
+
+// ── BLOG POSTS ────────────────────────────────────────────────────────────────
+
+adminApp.get('/blogs', async (c) => {
+  const { page = '1', limit = '20', status = '', search = '' } = c.req.query();
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+
+  try {
+    const conditions = [];
+    if (status) conditions.push(eq(blogPosts.status, status));
+    if (search) {
+      conditions.push(
+        or(like(blogPosts.title, `%${search}%`), like(blogPosts.excerpt, `%${search}%`))
+      );
+    }
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const posts = await db.select({
+      id: blogPosts.id, title: blogPosts.title, slug: blogPosts.slug,
+      excerpt: blogPosts.excerpt, status: blogPosts.status,
+      coverImageId: blogPosts.coverImageId, authorId: blogPosts.authorId,
+      tags: blogPosts.tags, publishedAt: blogPosts.publishedAt,
+      createdAt: blogPosts.createdAt, updatedAt: blogPosts.updatedAt,
+    }).from(blogPosts).where(where)
+      .orderBy(desc(blogPosts.createdAt))
+      .limit(parseInt(limit)).offset(offset);
+
+    return c.json({ success: true, data: posts });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Fetch error';
+    return c.json({ success: false, error: { code: 'FETCH_ERROR', message } }, 500);
+  }
+});
+
+adminApp.get('/blogs/:id', async (c) => {
+  const id = c.req.param('id');
+  try {
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).limit(1);
+    if (!post) return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Not found' } }, 404);
+    return c.json({ success: true, data: post });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Fetch error';
+    return c.json({ success: false, error: { code: 'FETCH_ERROR', message } }, 500);
+  }
+});
+
+adminApp.post('/blogs', async (c) => {
+  const { title, slug, excerpt, content, coverImageId, authorId, status = 'draft', tags } = await c.req.json();
+  if (!title || !slug || !authorId) {
+    return c.json({ success: false, error: { code: 'MISSING_PARAMS', message: 'title, slug, authorId required' } }, 400);
+  }
+
+  try {
+    const id = crypto.randomUUID();
+    const publishedAt = status === 'published' ? new Date() : null;
+    const [created] = await db.insert(blogPosts).values({
+      id, title, slug, excerpt, content,
+      coverImageId, authorId, status,
+      tags: tags ? JSON.stringify(tags) : null,
+      publishedAt,
+    }).returning();
+    return c.json({ success: true, data: created }, 201);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Create error';
+    if (message.toLowerCase().includes('unique')) {
+      return c.json({ success: false, error: { code: 'DUPLICATE_SLUG', message: 'Slug already exists' } }, 409);
+    }
+    return c.json({ success: false, error: { code: 'CREATE_ERROR', message } }, 500);
+  }
+});
+
+adminApp.put('/blogs/:id', async (c) => {
+  const id = c.req.param('id');
+  const { title, slug, excerpt, content, coverImageId, status, tags } = await c.req.json();
+
+  try {
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    if (title !== undefined) updates.title = title;
+    if (slug !== undefined) updates.slug = slug;
+    if (excerpt !== undefined) updates.excerpt = excerpt;
+    if (content !== undefined) updates.content = content;
+    if (coverImageId !== undefined) updates.coverImageId = coverImageId;
+    if (status !== undefined) {
+      updates.status = status;
+      if (status === 'published') {
+        const [existing] = await db.select({ publishedAt: blogPosts.publishedAt })
+          .from(blogPosts).where(eq(blogPosts.id, id)).limit(1);
+        if (!existing?.publishedAt) updates.publishedAt = new Date();
+      }
+    }
+    if (tags !== undefined) updates.tags = JSON.stringify(tags);
+
+    const [updated] = await db.update(blogPosts)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .set(updates as any).where(eq(blogPosts.id, id)).returning();
+    if (!updated) return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Not found' } }, 404);
+    return c.json({ success: true, data: updated });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Update error';
+    return c.json({ success: false, error: { code: 'UPDATE_ERROR', message } }, 500);
+  }
+});
+
+adminApp.delete('/blogs/:id', async (c) => {
+  const id = c.req.param('id');
+  try {
+    await db.delete(blogPosts).where(eq(blogPosts.id, id));
     return c.json({ success: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Delete error';

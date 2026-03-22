@@ -1,31 +1,423 @@
 ---
 import AdminLayout from '@layouts/AdminLayout.astro';
 import { Button } from '@components/ui/button';
+import RichTextEditor from '@components/RichTextEditor';
 ---
 
 <AdminLayout title="Blog Posts">
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
-    <div class="mb-4 md:mb-6">
-      <h1 class="text-xl md:text-2xl font-bold">Blog Posts</h1>
-      <p class="text-sm text-muted-foreground mt-1">Manage blog posts and articles</p>
+    <div class="mb-4 md:mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold">Blog Posts</h1>
+        <p class="text-sm text-muted-foreground mt-1">Create and manage blog posts</p>
+      </div>
+      <Button id="new-post-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ New Post</Button>
     </div>
-    
-    <!-- Info Card -->
-    <div class="bg-card border rounded-lg p-4">
-      <div class="flex items-start gap-3">
-        <div class="text-2xl">📝</div>
-        <div>
-          <h3 class="font-semibold mb-1">Blog Posts Not Available</h3>
-          <p class="text-sm text-muted-foreground mb-3">The blog/posts feature is not yet implemented in the database schema. This feature requires adding a new database table for blog posts.</p>
-          <p class="text-xs text-muted-foreground">To add this feature, you would need to:</p>
-          <ol class="text-xs text-muted-foreground list-decimal list-inside mt-1 space-y-0.5">
-            <li>Add a blog_posts table to the database schema</li>
-            <li>Create API routes for CRUD operations</li>
-            <li>Build the admin UI for managing posts</li>
-          </ol>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input
+        type="text" id="search-input"
+        placeholder="Search posts..."
+        class="px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-primary w-48"
+      />
+      <select id="status-filter"
+        class="px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-primary">
+        <option value="">All statuses</option>
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+
+    <!-- Posts List -->
+    <div class="bg-card border rounded-lg divide-y">
+      <div id="posts-list" class="divide-y divide-border">
+        <p class="text-center text-muted-foreground py-8 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Modal -->
+  <div id="post-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" aria-modal="true">
+    <div class="bg-card border rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h2 class="text-lg font-bold" id="modal-title">New Blog Post</h2>
+        <button id="close-modal" class="p-1 hover:bg-muted rounded">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="post-form" class="p-4 space-y-4">
+        <input type="hidden" id="post-id" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Title *</label>
+            <input type="text" id="post-title" required
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Post title" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Slug *</label>
+            <div class="flex gap-2">
+              <input type="text" id="post-slug" required
+                class="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="post-url-slug" />
+              <button type="button" id="generate-slug-btn"
+                class="px-3 py-2 text-sm border rounded-md hover:bg-muted whitespace-nowrap">
+                Auto
+              </button>
+            </div>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Excerpt</label>
+            <textarea id="post-excerpt" rows="2"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              placeholder="Short summary (optional)"></textarea>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Content</label>
+            <div id="editor-container"></div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Status</label>
+            <select id="post-status"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+            <input type="text" id="post-tags"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="news, update, tips" />
+          </div>
         </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="submit"
+            class="flex-1 bg-primary text-primary-foreground py-2 rounded-md hover:opacity-90 transition-opacity">
+            Save Post
+          </button>
+          <button type="button" id="cancel-btn"
+            class="px-4 py-2 border rounded-md hover:bg-muted transition-colors">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-card border rounded-lg w-full max-w-sm p-6 text-center">
+      <h3 class="text-lg font-bold mb-2">Delete Post?</h3>
+      <p class="text-sm text-muted-foreground mb-4">This action cannot be undone.</p>
+      <div class="flex gap-2">
+        <button id="confirm-delete-btn"
+          class="flex-1 bg-red-500 text-white py-2 rounded-md hover:opacity-90 transition-opacity">
+          Delete
+        </button>
+        <button id="cancel-delete-btn"
+          class="flex-1 border py-2 rounded-md hover:bg-muted transition-colors">
+          Cancel
+        </button>
       </div>
     </div>
   </div>
 </AdminLayout>
+
+<script>
+  import { createRoot } from 'react-dom/client';
+  import { createElement, useState, useEffect, useRef } from 'react';
+  // @ts-ignore
+  import RichTextEditor from '@components/RichTextEditor';
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let posts: any[] = [];
+  let deleteTargetId: string | null = null;
+  let editorContent = '';
+  let editorRoot: HTMLDivElement | null = null;
+  let editorReactRoot: any = null;
+
+  // ── DOM refs ────────────────────────────────────────────────────────────────
+  const $ = (id: string) => document.getElementById(id)!;
+  const modal = $<HTMLDivElement>('post-modal');
+  const deleteModal = $<HTMLDivElement>('delete-modal');
+  const form = $<HTMLFormElement>('post-form');
+  const listEl = $<HTMLDivElement>('posts-list');
+  const searchInput = $<HTMLInputElement>('search-input');
+  const statusFilter = $<HTMLSelectElement>('status-filter');
+  const postIdInput = $<HTMLInputElement>('post-id') as HTMLInputElement;
+  const titleInput = $<HTMLInputElement>('post-title') as HTMLInputElement;
+  const slugInput = $<HTMLInputElement>('post-slug') as HTMLInputElement;
+  const excerptInput = $<HTMLTextAreaElement>('post-excerpt') as HTMLTextAreaElement;
+  const statusSelect = $<HTMLSelectElement>('post-status') as HTMLSelectElement;
+  const tagsInput = $<HTMLInputElement>('post-tags') as HTMLInputElement;
+  const modalTitle = $<HTMLHeadingElement>('modal-title');
+
+  // ── Fetch posts ─────────────────────────────────────────────────────────────
+  async function fetchPosts() {
+    const params = new URLSearchParams({ limit: '100' });
+    if (statusFilter.value) params.set('status', statusFilter.value);
+    if (searchInput.value) params.set('search', searchInput.value);
+
+    try {
+      const res = await fetch(`/api/admin/blogs?${params}`);
+      const data = await res.json();
+      posts = data.success ? data.data : [];
+      renderList();
+    } catch {
+      listEl.innerHTML = '<p class="text-center text-red-500 py-8">Failed to load posts</p>';
+    }
+  }
+
+  // ── Render list ─────────────────────────────────────────────────────────────
+  function renderList() {
+    if (posts.length === 0) {
+      listEl.innerHTML = '<p class="text-center text-muted-foreground py-8 text-sm">No posts found</p>';
+      return;
+    }
+    listEl.innerHTML = posts.map(post => `
+      <div class="p-3 md:p-4 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="font-medium text-sm truncate">${escapeHtml(post.title)}</h3>
+            ${statusBadge(post.status)}
+          </div>
+          <p class="text-xs text-muted-foreground mt-0.5 truncate">${escapeHtml(post.excerpt || '')}</p>
+          <p class="text-xs text-muted-foreground mt-0.5">
+            ${post.publishedAt ? formatDate(post.publishedAt) : 'Not published'}
+            ${post.tags ? ` · ${JSON.parse(post.tags || '[]').join(', ')}` : ''}
+          </p>
+        </div>
+        <div class="flex gap-1 shrink-0">
+          <button onclick="window.editPost('${post.id}')" class="px-2 py-1 text-xs border rounded hover:bg-muted">Edit</button>
+          <button onclick="window.deletePost('${post.id}')" class="px-2 py-1 text-xs border rounded hover:bg-red-50 hover:text-red-500">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.editPost = async function(id: string) {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+
+    postIdInput.value = id;
+    titleInput.value = post.title;
+    slugInput.value = post.slug;
+    excerptInput.value = post.excerpt || '';
+    statusSelect.value = post.status || 'draft';
+    tagsInput.value = post.tags ? JSON.parse(post.tags).join(', ') : '';
+    editorContent = post.content || '';
+    modalTitle.textContent = 'Edit Blog Post';
+
+    openModal();
+    renderEditor();
+  };
+
+  window.deletePost = function(id: string) {
+    deleteTargetId = id;
+    deleteModal.classList.remove('hidden');
+    deleteModal.classList.add('flex');
+  };
+
+  // ── Modal helpers ───────────────────────────────────────────────────────────
+  function openModal() {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    editorRoot = null;
+    editorReactRoot = null;
+  }
+
+  function openDeleteModal() {
+    deleteModal.classList.remove('hidden');
+    deleteModal.classList.add('flex');
+  }
+
+  function closeDeleteModal() {
+    deleteModal.classList.add('hidden');
+    deleteModal.classList.remove('flex');
+    deleteTargetId = null;
+  }
+
+  // ── Editor ───────────────────────────────────────────────────────────────────
+  function renderEditor() {
+    const container = document.getElementById('editor-container')!;
+    container.innerHTML = '<div id="rich-editor" class="min-h-[200px]"></div>';
+    editorRoot = document.getElementById('rich-editor')!;
+
+    // Simple React mount
+    if (typeof window !== 'undefined' && editorRoot) {
+      import('react-dom/client').then(({ createRoot: cr }) => {
+        const root = cr(editorRoot!);
+        editorReactRoot = root;
+        const EditableEditor = () => {
+          const [content, setContent] = useState(editorContent);
+          return createElement(RichTextEditor, {
+            initialContent: content,
+            editable: true,
+            onChange: (html: string) => { editorContent = html; },
+            placeholder: 'Write your blog post here...',
+          });
+        };
+        root.render(createElement(EditableEditor));
+      }).catch(() => {
+        // Fallback: plain textarea
+        container.innerHTML = `<textarea id="post-content-fallback"
+          class="w-full min-h-[200px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y">${escapeHtml(editorContent)}</textarea>`;
+      });
+    }
+  }
+
+  // ── Save ─────────────────────────────────────────────────────────────────────
+  async function savePost() {
+    const id = postIdInput.value;
+    const content = editorContent;
+
+    // Get content from fallback textarea if React failed
+    const fallback = document.getElementById('post-content-fallback') as HTMLTextAreaElement;
+    const finalContent = fallback?.value ?? content;
+
+    const tags = tagsInput.value
+      .split(',').map(t => t.trim()).filter(Boolean);
+
+    const payload = {
+      title: titleInput.value,
+      slug: slugInput.value,
+      excerpt: excerptInput.value,
+      content: finalContent,
+      status: statusSelect.value,
+      tags,
+      authorId: getCurrentUserId(),
+    };
+
+    try {
+      const url = id ? `/api/admin/blogs/${id}` : '/api/admin/blogs';
+      const method = id ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal();
+        fetchPosts();
+      } else {
+        alert(data.error?.message || 'Save failed');
+      }
+    } catch {
+      alert('Save failed');
+    }
+  }
+
+  // ── Delete ───────────────────────────────────────────────────────────────────
+  async function deletePost() {
+    if (!deleteTargetId) return;
+    try {
+      const res = await fetch(`/api/admin/blogs/${deleteTargetId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        closeDeleteModal();
+        fetchPosts();
+      } else {
+        alert(data.error?.message || 'Delete failed');
+      }
+    } catch {
+      alert('Delete failed');
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  function getCurrentUserId() {
+    try {
+      const user = JSON.parse(localStorage.getItem('adminUser') || '{}');
+      return user.id || 'system';
+    } catch {
+      return 'system';
+    }
+  }
+
+  function escapeHtml(str: string) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatDate(date: string | Date) {
+    return new Date(date).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  function statusBadge(status: string) {
+    const map: Record<string, string> = {
+      published: 'bg-green-100 text-green-700',
+      draft: 'bg-yellow-100 text-yellow-700',
+      archived: 'bg-gray-100 text-gray-600',
+    };
+    const cls = map[status] || 'bg-gray-100 text-gray-600';
+    return `<span class="px-1.5 py-0.5 text-xs rounded ${cls} capitalize">${status}</span>`;
+  }
+
+  function slugify(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  // ── Event listeners ───────────────────────────────────────────────────────────
+  $('new-post-btn').addEventListener('click', () => {
+    postIdInput.value = '';
+    titleInput.value = '';
+    slugInput.value = '';
+    excerptInput.value = '';
+    statusSelect.value = 'draft';
+    tagsInput.value = '';
+    editorContent = '';
+    modalTitle.textContent = 'New Blog Post';
+    openModal();
+    renderEditor();
+  });
+
+  $('close-modal').addEventListener('click', closeModal);
+  $('cancel-btn').addEventListener('click', closeModal);
+
+  $('generate-slug-btn').addEventListener('click', () => {
+    slugInput.value = slugify(titleInput.value);
+  });
+
+  // Auto-generate slug on title change if slug is empty
+  titleInput.addEventListener('input', () => {
+    if (!slugInput.value) slugInput.value = slugify(titleInput.value);
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    savePost();
+  });
+
+  $('confirm-delete-btn').addEventListener('click', deletePost);
+  $('cancel-delete-btn').addEventListener('click', closeDeleteModal);
+
+  searchInput.addEventListener('input', () => fetchPosts());
+  statusFilter.addEventListener('change', () => fetchPosts());
+
+  // Close modal on backdrop click
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) closeDeleteModal(); });
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  fetchPosts();
+</script>
