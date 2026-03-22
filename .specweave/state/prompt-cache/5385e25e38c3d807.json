@@ -1,0 +1,10 @@
+[isClaudeCliAvailable] Running fresh detection (no cache)...
+[isClaudeCliAvailable] Claude CLI available: version=2.1.81 (Claude Code), path=C:\Users\Nick\.local\bin\claude.exe, method=binary
+[executeClaudeCli] Using direct binary: C:\Users\Nick\.local\bin\claude.exe
+{
+  "detected": false,
+  "plugins": [],
+  "confidence": 0,
+  "latencyMs": 14758.0292,
+  "installMessage": "Claude CLI exited with code 143: "
+}

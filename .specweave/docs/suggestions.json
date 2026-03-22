@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2026-03-22T09:59:59.508Z",
+  "summary": {
+    "totalModules": 8,
+    "modulesDocumented": 0,
+    "modulesPartial": 5,
+    "modulesUndocumented": 3,
+    "totalWorkItems": 0,
+    "matchedWorkItems": 0,
+    "coveragePercent": 28
+  },
+  "priorityZones": [],
+  "immediateActions": [
+    {
+      "priority": 1,
+      "module": "pages",
+      "action": "Add README based on existing test cases",
+      "files": [
+        "src\\pages/README.md"
+      ],
+      "reason": "Has test coverage but lacks documentation"
+    },
+    {
+      "priority": 2,
+      "module": "components",
+      "action": "Add README based on existing test cases",
+      "files": [
+        "src\\components/README.md"
+      ],
+      "reason": "Has test coverage but lacks documentation"
+    }
+  ],
+  "moduleStatuses": [
+    {
+      "moduleName": "pages",
+      "modulePath": "src\\pages",
+      "hasReadme": false,
+      "hasAnalysis": true,
+      "coverage": 40,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "partial"
+    },
+    {
+      "moduleName": "components",
+      "modulePath": "src\\components",
+      "hasReadme": false,
+      "hasAnalysis": true,
+      "coverage": 40,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "partial"
+    },
+    {
+      "moduleName": "server",
+      "modulePath": "src\\server",
+      "hasReadme": false,
+      "hasAnalysis": true,
+      "coverage": 40,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "partial"
+    },
+    {
+      "moduleName": "db",
+      "modulePath": "src\\db",
+      "hasReadme": false,
+      "hasAnalysis": true,
+      "coverage": 40,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "partial"
+    },
+    {
+      "moduleName": "lib",
+      "modulePath": "src\\lib",
+      "hasReadme": false,
+      "hasAnalysis": true,
+      "coverage": 60,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "partial"
+    },
+    {
+      "moduleName": "layouts",
+      "modulePath": "src\\layouts",
+      "hasReadme": false,
+      "hasAnalysis": false,
+      "coverage": 0,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "none"
+    },
+    {
+      "moduleName": "styles",
+      "modulePath": "src\\styles",
+      "hasReadme": false,
+      "hasAnalysis": false,
+      "coverage": 0,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "none"
+    },
+    {
+      "moduleName": "test",
+      "modulePath": "src\\test",
+      "hasReadme": false,
+      "hasAnalysis": false,
+      "coverage": 0,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "none"
+    }
+  ],
+  "additionalSources": [],
+  "notAnalyzed": [
+    {
+      "path": "src\\pages",
+      "reason": "Sampled (tier: medium)",
+      "filesSkipped": 19
+    },
+    {
+      "path": "src\\components",
+      "reason": "Sampled (tier: medium)",
+      "filesSkipped": 13
+    },
+    {
+      "path": "src\\server",
+      "reason": "Sampled (tier: medium)",
+      "filesSkipped": 8
+    },
+    {
+      "path": "src\\lib",
+      "reason": "Sampled (tier: medium)",
+      "filesSkipped": 4
+    },
+    {
+      "path": "src\\layouts",
+      "reason": "Analysis skipped",
+      "filesSkipped": 2
+    },
+    {
+      "path": "src\\styles",
+      "reason": "Analysis skipped",
+      "filesSkipped": 1
+    },
+    {
+      "path": "src\\test",
+      "reason": "Analysis skipped",
+      "filesSkipped": 1
+    }
+  ],
+  "painPointsAddressed": [],
+  "isUmbrella": false
+}

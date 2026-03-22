@@ -1,0 +1,19 @@
+[isClaudeCliAvailable] Running fresh detection (no cache)...
+[isClaudeCliAvailable] Claude CLI available: version=2.1.81 (Claude Code), path=C:\Users\Nick\.local\bin\claude.exe, method=binary
+[executeClaudeCli] Using direct binary: C:\Users\Nick\.local\bin\claude.exe
+Extracted result from JSON wrapper, duration_ms: 10394
+Increment recommendation: new (confidence: 0.85, mandatory: true)
+{
+  "detected": false,
+  "plugins": [],
+  "confidence": 0.9,
+  "reasoning": "No explicit sw-github/sw-jira/sw-ado/sw-media mentions",
+  "latencyMs": 11800.8267,
+  "increment": {
+    "action": "new",
+    "confidence": 0.85,
+    "mandatory": true,
+    "suggestedName": "local-docs-priority-mechanism",
+    "reasoning": "Design and implement mechanism to prioritize local Claude.md/docs in development workflow — new feature requiring investigation and implementation"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  // Cloudflare Workers entrypoint (Astro 6 + @astrojs/cloudflare v13)
+  "main": "@astrojs/cloudflare/entrypoints/server",
+
+  "name": "timorbiz",
+
+  // Update to deployment date
+  "compatibility_date": "2025-03-22",
+
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+
+  // Static assets served from dist
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
+
+  // Observability (logs, traces)
+  "observability": {
+    "enabled": true
+  },
+
+  // D1 database binding
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "timorbiz",
+      "database_id": "YOUR_D1_DATABASE_ID"
+    }
+  ],
+
+  // R2 bucket for media storage
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "timorbiz-media"
+    }
+  ],
+
+  // KV namespace for sessions/cache
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "YOUR_KV_ID"
+    }
+  ]
+}

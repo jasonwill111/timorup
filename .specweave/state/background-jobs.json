@@ -1,0 +1,29 @@
+{
+  "jobs": [
+    {
+      "id": "b2613960",
+      "type": "living-docs-builder",
+      "status": "completed",
+      "progress": {
+        "current": 0,
+        "total": 100,
+        "percentage": 0,
+        "itemsCompleted": [],
+        "itemsFailed": []
+      },
+      "startedAt": "2026-03-22T09:59:58.997Z",
+      "updatedAt": "2026-03-22T09:59:59.554Z",
+      "config": {
+        "type": "living-docs-builder",
+        "projectPath": "D:\\Dev Projects\\timorbiz",
+        "userInputs": {
+          "analysisDepth": "quick",
+          "priorityAreas": [],
+          "additionalSources": [],
+          "knownPainPoints": []
+        }
+      },
+      "completedAt": "2026-03-22T09:59:59.554Z"
+    }
+  ]
+}

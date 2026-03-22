@@ -1,0 +1,76 @@
+{
+  "generatedAt": "2026-03-22T09:59:59.483Z",
+  "stats": {
+    "totalWorkItems": 0,
+    "matchedWorkItems": 0,
+    "unmatchedWorkItems": 0,
+    "modulesWithWorkItems": 0
+  },
+  "modules": {
+    "pages": {
+      "moduleName": "pages",
+      "modulePath": "src\\pages",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "components": {
+      "moduleName": "components",
+      "modulePath": "src\\components",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "server": {
+      "moduleName": "server",
+      "modulePath": "src\\server",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "db": {
+      "moduleName": "db",
+      "modulePath": "src\\db",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "lib": {
+      "moduleName": "lib",
+      "modulePath": "src\\lib",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "layouts": {
+      "moduleName": "layouts",
+      "modulePath": "src\\layouts",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "styles": {
+      "moduleName": "styles",
+      "modulePath": "src\\styles",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    },
+    "test": {
+      "moduleName": "test",
+      "modulePath": "src\\test",
+      "matches": [],
+      "workItemCount": 0,
+      "priority": "low",
+      "docStatus": "none"
+    }
+  },
+  "unmatchedItems": []
+}

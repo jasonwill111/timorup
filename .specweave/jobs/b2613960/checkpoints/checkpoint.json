@@ -1,0 +1,240 @@
+{
+  "phase": "suggestions",
+  "progressPercent": 100,
+  "errors": [],
+  "lastUpdated": "2026-03-22T09:59:59.553Z",
+  "discovery": {
+    "codebaseStats": {
+      "totalFiles": 901,
+      "totalDirs": 203,
+      "byExtension": {
+        ".example": 1,
+        "": 5,
+        ".backup": 1,
+        ".png": 7,
+        ".md": 623,
+        ".mjs": 1,
+        ".json": 10,
+        ".ts": 83,
+        ".db": 1,
+        ".html": 1,
+        ".yaml": 67,
+        ".log": 1,
+        ".tsx": 18,
+        ".astro": 36,
+        ".sql": 4,
+        ".css": 1,
+        ".lock": 1,
+        ".toml": 1,
+        ".csv": 28,
+        ".xml": 10,
+        ".groovy": 1
+      },
+      "byType": {
+        "code": 70,
+        "tests": 32,
+        "docs": 623,
+        "config": 88,
+        "assets": 88
+      },
+      "estimatedLOC": 6770
+    },
+    "techStack": {
+      "languages": [
+        "TypeScript"
+      ],
+      "frameworks": [
+        "React"
+      ],
+      "buildTools": [],
+      "testFrameworks": [
+        "Vitest",
+        "Playwright"
+      ],
+      "detectedFrom": [
+        "package.json"
+      ]
+    },
+    "existingDocs": {
+      "readme": "README.md",
+      "contributing": null,
+      "docsFolder": "docs",
+      "wikiFolder": null,
+      "mdFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md"
+      ]
+    },
+    "entryPoints": {
+      "main": [],
+      "index": [],
+      "exports": []
+    },
+    "modules": [
+      {
+        "name": "pages",
+        "path": "src\\pages",
+        "fileCount": 55,
+        "estimatedLOC": 1373,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [
+          "api\\admin\\businesses\\index.ts",
+          "api\\admin\\categories\\index.ts",
+          "api\\admin\\orders\\index.ts",
+          "api\\admin\\settings\\index.ts",
+          "api\\admin\\users\\index.ts",
+          "api\\businesses\\index.ts",
+          "api\\categories\\index.ts",
+          "api\\products\\index.ts",
+          "api\\reviews\\index.ts"
+        ],
+        "extensions": {
+          ".astro": 31,
+          ".ts": 24
+        }
+      },
+      {
+        "name": "components",
+        "path": "src\\components",
+        "fileCount": 21,
+        "estimatedLOC": 1457,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [],
+        "extensions": {
+          ".tsx": 18,
+          ".astro": 3
+        }
+      },
+      {
+        "name": "server",
+        "path": "src\\server",
+        "fileCount": 13,
+        "estimatedLOC": 2815,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [
+          "index.ts"
+        ],
+        "extensions": {
+          ".ts": 13
+        }
+      },
+      {
+        "name": "db",
+        "path": "src\\db",
+        "fileCount": 9,
+        "estimatedLOC": 426,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [
+          "schema\\index.ts"
+        ],
+        "extensions": {
+          ".sql": 4,
+          ".json": 2,
+          ".ts": 3
+        }
+      },
+      {
+        "name": "lib",
+        "path": "src\\lib",
+        "fileCount": 9,
+        "estimatedLOC": 1201,
+        "hasTests": true,
+        "hasReadme": false,
+        "entryPoints": [],
+        "extensions": {
+          ".ts": 9
+        }
+      },
+      {
+        "name": "layouts",
+        "path": "src\\layouts",
+        "fileCount": 2,
+        "estimatedLOC": 0,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [],
+        "extensions": {
+          ".astro": 2
+        }
+      },
+      {
+        "name": "styles",
+        "path": "src\\styles",
+        "fileCount": 1,
+        "estimatedLOC": 0,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [],
+        "extensions": {
+          ".css": 1
+        }
+      },
+      {
+        "name": "test",
+        "path": "src\\test",
+        "fileCount": 1,
+        "estimatedLOC": 21,
+        "hasTests": false,
+        "hasReadme": false,
+        "entryPoints": [],
+        "extensions": {
+          ".ts": 1
+        }
+      }
+    ],
+    "tier": "medium",
+    "samplingConfig": {
+      "tier": "medium",
+      "filesPerDir": 5,
+      "priorityPatterns": [
+        "**/index.*",
+        "**/main.*",
+        "**/*.config.*",
+        "**/types.*",
+        "**/README.md"
+      ],
+      "skipPatterns": [
+        "node_modules/**",
+        "dist/**",
+        "build/**",
+        "**/*.test.*",
+        "**/*.spec.*"
+      ]
+    },
+    "discoveredAt": "2026-03-22T09:59:59.271Z",
+    "languagesDetected": [
+      "typescript"
+    ],
+    "umbrella": {
+      "isUmbrella": false,
+      "source": "none",
+      "childRepoCount": 0
+    }
+  },
+  "foundationPaths": [
+    "D:\\Dev Projects\\timorbiz\\.specweave\\docs\\internal\\architecture\\overview.md",
+    "D:\\Dev Projects\\timorbiz\\.specweave\\docs\\internal\\architecture\\tech-stack.md",
+    "D:\\Dev Projects\\timorbiz\\.specweave\\docs\\internal\\architecture\\modules-skeleton.md"
+  ],
+  "matchingStats": {
+    "totalWorkItems": 0,
+    "matchedWorkItems": 0,
+    "unmatchedWorkItems": 0,
+    "modulesWithWorkItems": 0
+  },
+  "moduleAnalysis": {
+    "completed": [
+      "pages",
+      "components",
+      "server",
+      "db",
+      "lib"
+    ],
+    "remaining": []
+  }
+}

@@ -1,0 +1,8 @@
+{"timestamp":"2026-03-22T10:03:29Z","hook":"stop-auto","decision":"approve","reason":"No auto session","reasonCode":"session_inactive","durationMs":479,"context":{"sessionActive":false}}
+{"timestamp":"2026-03-22T10:03:29Z","hook":"stop-reflect","decision":"approve","reason":"No transcript available","reasonCode":"no_transcript","durationMs":485,"context":{}}
+{"timestamp":"2026-03-22T10:13:50Z","hook":"stop-auto","decision":"approve","reason":"No auto session","reasonCode":"session_inactive","durationMs":890,"context":{"sessionActive":false}}
+{"timestamp":"2026-03-22T10:13:50Z","hook":"stop-reflect","decision":"approve","reason":"No transcript available","reasonCode":"no_transcript","durationMs":1084,"context":{}}
+{"timestamp":"2026-03-22T10:44:41Z","hook":"stop-auto","decision":"approve","reason":"No auto session","reasonCode":"session_inactive","durationMs":346,"context":{"sessionActive":false}}
+{"timestamp":"2026-03-22T10:44:41Z","hook":"stop-reflect","decision":"approve","reason":"No transcript available","reasonCode":"no_transcript","durationMs":362,"context":{}}
+{"timestamp":"2026-03-22T10:49:53Z","hook":"stop-reflect","decision":"approve","reason":"No transcript available","reasonCode":"no_transcript","durationMs":378,"context":{}}
+{"timestamp":"2026-03-22T10:49:53Z","hook":"stop-auto","decision":"approve","reason":"No auto session","reasonCode":"session_inactive","durationMs":380,"context":{"sessionActive":false}}
