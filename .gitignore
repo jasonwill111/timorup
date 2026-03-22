@@ -82,6 +82,26 @@ yarn-error.log*
 .temp/
 tmp/
 
+# Dev tools (OMC, BMAD, OpenCode, Playwright MCP)
+.omc/
+.opencode/
+.claude/
+.playwright-mcp/
+_bmad/
+_bmad-output/
+
+# Project screenshots (local only)
+admin-*.png
+timorbiz-*.png
+timorbiz-dark-mode.png
+timorbiz-screenshot.png
+
+# Local database
+local.db
+
+# Windows junk
+nul
+
 # SpecWeave
 .specweave/cache/
 .specweave/increments/*/logs/
@@ -89,3 +109,7 @@ tmp/
 .specweave/docs-site-internal/
 .claude-plugin/
 plugins/
+# But track the core specweave structure
+!.specweave/
+!.specweave/config.json
+!.specweave/docs/

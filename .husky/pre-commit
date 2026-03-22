@@ -1,0 +1,37 @@
+#!/bin/sh
+# ============================================================
+# Combined Pre-Commit Hook
+# - SpecWeave validation checks
+# - Tech stack version check (dev-standards)
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# --- Run SpecWeave checks (if hook exists) ---
+SPECWEAVE_HOOK="$PROJECT_ROOT/.git/hooks/pre-commit"
+if [ -f "$SPECWEAVE_HOOK" ]; then
+  "$SPECWEAVE_HOOK"
+  SW_RESULT=$?
+  if [ $SW_RESULT -ne 0 ]; then
+    echo ""
+    echo "❌ SpecWeave pre-commit checks failed (exit $SW_RESULT)"
+    exit 1
+  fi
+fi
+
+# --- Run version check ---
+cd "$PROJECT_ROOT"
+if [ -f "./scripts/check-versions.sh" ]; then
+  chmod +x ./scripts/check-versions.sh 2>/dev/null
+  ./scripts/check-versions.sh --check-only
+  VC_RESULT=$?
+  if [ $VC_RESULT -ne 0 ]; then
+    echo ""
+    echo "❌ Version check failed. Run ./scripts/check-versions.sh to see details."
+    exit 1
+  fi
+fi
+
+echo ""
+echo "✅ Pre-commit checks passed"
