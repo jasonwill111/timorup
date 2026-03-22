@@ -49,7 +49,11 @@ import { Button } from '@components/ui/button';
         </div>
         <div>
           <label for="biz-about" class="block text-sm font-medium mb-1">About Us</label>
-          <textarea id="biz-about" name="aboutUs" rows="4" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Enter business description..."></textarea>
+          <div id="about-editor-container" class="min-h-[150px] border rounded-md overflow-hidden"></div>
+        </div>
+        <div>
+          <label for="biz-updates" class="block text-sm font-medium mb-1">Latest Updates</label>
+          <div id="updates-editor-container" class="min-h-[150px] border rounded-md overflow-hidden"></div>
         </div>
         <div class="flex gap-2 justify-end">
           <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
@@ -62,8 +66,12 @@ import { Button } from '@components/ui/button';
 
 <script>
   import { toast } from 'sonner';
-  
+
   let businessList: any[] = [];
+  let aboutContent = '';
+  let updatesContent = '';
+  let aboutReactRoot: any = null;
+  let updatesReactRoot: any = null;
   
   // Load businesses
   async function loadBusinesses() {
@@ -122,9 +130,68 @@ import { Button } from '@components/ui/button';
   const closeBtn = document.getElementById('close-modal');
   const cancelBtn = document.getElementById('cancel-btn');
   
+  // Render TipTap editors
+  function renderEditors(initialAbout = '', initialUpdates = '') {
+    aboutContent = initialAbout;
+    updatesContent = initialUpdates;
+
+    const aboutContainer = document.getElementById('about-editor-container')!;
+    const updatesContainer = document.getElementById('updates-editor-container')!;
+
+    aboutContainer.innerHTML = '<div id="about-editor-mount" class="tiptap-editor"></div>';
+    updatesContainer.innerHTML = '<div id="updates-editor-mount" class="tiptap-editor"></div>';
+
+    if (typeof window !== 'undefined') {
+      import('react-dom/client').then(({ createRoot: cr }) => {
+        const aboutEl = document.getElementById('about-editor-mount')!;
+        const updatesEl = document.getElementById('updates-editor-mount')!;
+
+        aboutReactRoot = cr(aboutEl);
+        updatesReactRoot = cr(updatesEl);
+
+        import('react').then(React => {
+          import('@components/RichTextEditor').then(({ default: RichTextEditor }) => {
+            const { createElement, useState } = React;
+
+            const AboutEditor = () => {
+              const [content, setContent] = useState(initialAbout);
+              aboutContent = content;
+              return createElement(RichTextEditor, {
+                initialContent: content,
+                editable: true,
+                onChange: (html: string) => { aboutContent = html; },
+                placeholder: 'Write about your business...',
+              });
+            };
+
+            const UpdatesEditor = () => {
+              const [content, setContent] = useState(initialUpdates);
+              updatesContent = content;
+              return createElement(RichTextEditor, {
+                initialContent: content,
+                editable: true,
+                onChange: (html: string) => { updatesContent = html; },
+                placeholder: 'Latest news and updates...',
+              });
+            };
+
+            aboutReactRoot.render(createElement(AboutEditor));
+            updatesReactRoot.render(createElement(UpdatesEditor));
+          });
+        });
+      }).catch(() => {
+        aboutContainer.innerHTML = `<textarea name="aboutUs" rows="4" class="w-full px-3 py-2 border rounded-md text-sm">${initialAbout}</textarea>`;
+        updatesContainer.innerHTML = `<textarea name="latestUpdates" rows="4" class="w-full px-3 py-2 border rounded-md text-sm">${initialUpdates}</textarea>`;
+      });
+    }
+  }
+
   addBtn?.addEventListener('click', () => {
+    aboutContent = '';
+    updatesContent = '';
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
+    renderEditors('', '');
   });
   
   closeBtn?.addEventListener('click', () => {
@@ -154,7 +221,8 @@ import { Button } from '@components/ui/button';
       slug: String(formData.get('slug') || ''),
       email: String(formData.get('email') || ''),
       contactNumber: String(formData.get('phone') || ''),
-      aboutUs: String(formData.get('aboutUs') || ''),
+      aboutUs: aboutContent,
+      latestUpdates: updatesContent,
       status: 'draft',
     };
     

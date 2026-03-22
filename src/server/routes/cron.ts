@@ -2,8 +2,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { db } from '@/lib/db';
-import { businessPages, orders } from '@/db/schema';
+import { businessPages, orders, users } from '@/db/schema';
 import { eq, lt, gt, and } from 'drizzle-orm';
+import { emailTemplates, sendEmail } from '@/lib/email';
 
 const cronApp = new Hono();
 
@@ -98,14 +99,14 @@ cronApp.get('/cleanup/reminders', async (c) => {
   try {
     const now = new Date();
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-    
-    // Find businesses expiring in 3 days
+
+    // Find businesses expiring in 3 days with owner info
     const expiringSoon = await db.select({
       id: businessPages.id,
       title: businessPages.title,
-      email: businessPages.email,
       contactName: businessPages.contactName,
       expiryDate: businessPages.expiryDate,
+      ownerId: businessPages.ownerId,
     })
     .from(businessPages)
     .where(
@@ -115,15 +116,36 @@ cronApp.get('/cleanup/reminders', async (c) => {
         gt(businessPages.expiryDate, now)
       )
     );
-    
-    // TODO: Send email reminders
-    // For now, just return the list
-    
+
+    const results = [];
+    for (const business of expiringSoon) {
+      // Get owner's email from users table
+      const [owner] = await db.select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, business.ownerId))
+        .limit(1);
+
+      if (!owner?.email) {
+        results.push({ businessId: business.id, status: 'skipped', reason: 'no owner email' });
+        continue;
+      }
+
+      const name = business.contactName || owner.name || 'Business Owner';
+      const expiryDateStr = business.expiryDate
+        ? new Date(business.expiryDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        : 'soon';
+
+      const template = emailTemplates.subscriptionExpiring(name, business.title, expiryDateStr);
+      await sendEmail({ to: owner.email, ...template });
+
+      results.push({ businessId: business.id, email: owner.email, status: 'sent' });
+    }
+
     return c.json({
       success: true,
       data: {
         count: expiringSoon.length,
-        businesses: expiringSoon,
+        results,
         timestamp: now.toISOString(),
       }
     });

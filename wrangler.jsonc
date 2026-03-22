@@ -46,5 +46,13 @@
       "binding": "CACHE",
       "id": "YOUR_KV_ID"
     }
-  ]
+  ],
+
+  // Cron triggers for cleanup jobs
+  "triggers": {
+    "crons": [
+      "0 0 * * *",           // cleanup/expired - daily at midnight
+      "0 9 * * *"           // cleanup/reminders - daily at 9am
+    ]
+  },
 }

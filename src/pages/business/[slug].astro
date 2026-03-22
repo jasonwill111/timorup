@@ -181,7 +181,7 @@ import { Card, CardContent } from '../../components/ui/card';
             <!-- Map Card -->
             <Card>
               <CardContent className="p-4">
-                <div id="map" class="h-48 rounded-lg bg-muted"></div>
+                <div id="map" class="h-64 rounded-lg bg-muted"></div>
                 <a id="map-link" href="#" target="_blank" class="block mt-2 text-sm text-primary hover:underline">
                   Open in Maps →
                 </a>
@@ -420,17 +420,44 @@ import { Card, CardContent } from '../../components/ui/card';
   
   function createMap(lat: number, lng: number, title: string) {
     const mapContainer = document.getElementById('map');
+    const mapLink = document.getElementById('map-link');
     if (!mapContainer || !window.L) return;
-    
+
     const map = window.L.map(mapContainer).setView([lat, lng], 15);
-    
+
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
     }).addTo(map);
-    
-    window.L.marker([lat, lng]).addTo(map)
-      .bindPopup(title)
+
+    // Custom marker with brand yellow color
+    const markerIcon = window.L.divIcon({
+      html: `<div style="
+        width: 36px; height: 36px;
+        background: #FFD150;
+        border: 3px solid white;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        display: flex; align-items: center; justify-content: center;
+      "><span style="
+        transform: rotate(45deg);
+        font-size: 16px;
+      ">&#128205;</span></div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36],
+      className: '',
+    });
+
+    window.L.marker([lat, lng], { icon: markerIcon }).addTo(map)
+      .bindPopup(`<strong>${title}</strong>`)
       .openPopup();
+
+    // Open device maps app on click
+    map.on('click', () => {
+      window.open(`https://www.openstreetmap.org/directions?from=&to=${lat},${lng}`, '_blank');
+    });
   }
   
   // Load Products

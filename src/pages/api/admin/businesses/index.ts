@@ -70,7 +70,7 @@ export async function GET({ url }: { url: URL }) {
 export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
-    const { title, slug, email, contactNumber, aboutUs, status, ownerId } = body;
+    const { title, slug, email, contactNumber, aboutUs, latestUpdates, status, ownerId } = body;
 
     if (!title || !slug) {
       return new Response(JSON.stringify({
@@ -108,6 +108,7 @@ export async function POST({ request }: { request: Request }) {
       email: email || null,
       contactNumber: contactNumber || null,
       aboutUs: aboutUs || null,
+      latestUpdates: latestUpdates || null,
       status: status || 'draft',
       ownerId: finalOwnerId,
       createdAt: new Date(),

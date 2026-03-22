@@ -73,6 +73,7 @@ export const businessPages = sqliteTable('business_pages', {
   locationLng: real('location_lng'),
   openingHours: text('opening_hours'),
   aboutUs: text('about_us'),
+  latestUpdates: text('latest_updates'),
   tags: text('tags'),
   likes: integer('likes').default(0),
   saves: integer('saves').default(0),
