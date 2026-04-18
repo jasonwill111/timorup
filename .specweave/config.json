@@ -71,10 +71,6 @@
   "planning": {
     "deepInterview": {
       "enabled": false
-    },
-    "incrementInterview": {
-      "enabled": true,
-      "minQuestions": 3
     }
   },
   "translation": {

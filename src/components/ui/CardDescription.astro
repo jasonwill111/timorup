@@ -1,0 +1,23 @@
+---
+interface Props {
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  class: className = '',
+  'data-slot': slot = 'card-description',
+  ...props
+} = Astro.props;
+---
+
+<p
+  class:list={[
+    'text-sm text-muted-foreground',
+    className
+  ]}
+  data-slot={slot}
+  {...props}
+>
+  <slot />
+</p>

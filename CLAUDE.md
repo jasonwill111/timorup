@@ -1,6 +1,6 @@
-<!-- SW:META template="claude" version="0.0.0" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
+<!-- SW:META template="claude" version="1.0.578" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
 
-<!-- SW:SECTION:hook-priority version="0.0.0" -->
+<!-- SW:SECTION:hook-priority version="1.0.578" -->
 ## Hook Instructions Override Everything
 
 `<system-reminder>` hook output = **BLOCKING PRECONDITIONS**.
@@ -15,11 +15,11 @@
 **Setup actions are NOT implementation** — "connect github", "setup sync", "import issues" → route to the matching setup skill (`sw:sync-setup`, `sw:import`, `sw:progress-sync`), NOT `/sw:increment`.
 <!-- SW:END:hook-priority -->
 
-<!-- SW:SECTION:header version="0.0.0" -->
+<!-- SW:SECTION:header version="1.0.578" -->
 **Framework**: SpecWeave | **Truth**: `spec.md` + `tasks.md`
 <!-- SW:END:header -->
 
-<!-- SW:SECTION:claude-code-concepts version="0.0.0" -->
+<!-- SW:SECTION:claude-code-concepts version="1.0.578" -->
 ## Skills & Plugins
 
 **Invoke**: `/skill-name` | auto-trigger by keywords | `Skill({ skill: "name" })`
@@ -30,7 +30,7 @@
 **Skill chaining** — skills are NOT "one and done":
 1. **Planning**: `sw:pm` (specs) → `sw:architect` (design)
 2. **Implementation**: Use `sw:architect` for all domains. Optional domain plugins available via `vskill install` (mobile, marketing, etc.)
-3. **Closure**: `sw:grill` runs automatically via `/sw:done`
+3. **Closure**: `sw:code-reviewer` + `/simplify` + `sw:grill` run automatically via `/sw:done`
 
 **Complexity gate** — before chaining domain skills:
 1. **Tech stack specified?** → Chain ONLY the matching skill. If unspecified, ASK or default to minimal (vanilla JS/HTML, simple Express)
@@ -41,13 +41,13 @@
 If auto-activation fails, invoke explicitly: `Skill({ skill: "name" })`
 <!-- SW:END:claude-code-concepts -->
 
-<!-- SW:SECTION:lsp version="0.0.0" -->
+<!-- SW:SECTION:lsp version="1.0.578" -->
 ## LSP (Code Intelligence)
 
 **Native LSP broken in v2.1.0+.** Use: `specweave lsp refs|def|hover src/file.ts SymbolName`
 <!-- SW:END:lsp -->
 
-<!-- SW:SECTION:start version="0.0.0" -->
+<!-- SW:SECTION:start version="1.0.578" -->
 ## Getting Started
 
 Your first increment starts at `0001`. Just describe what you want to build:
@@ -55,7 +55,7 @@ Your first increment starts at `0001`. Just describe what you want to build:
 `/sw:increment "your-feature"`
 <!-- SW:END:start -->
 
-<!-- SW:SECTION:autodetect version="0.0.0" -->
+<!-- SW:SECTION:autodetect version="1.0.578" -->
 ## Auto-Detection
 
 SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
@@ -71,7 +71,7 @@ SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
 **Setup/config requests bypass auto-detection** → route directly to the matching skill (e.g., `sw:sync-setup`, `sw:import`)
 <!-- SW:END:autodetect -->
 
-<!-- SW:SECTION:metarule version="0.0.0" -->
+<!-- SW:SECTION:metarule version="1.0.578" -->
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default (MANDATORY)
@@ -95,15 +95,16 @@ SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
 ### 3. Verification Before Done
 - Never mark a task complete without proving it works
 - Run tests after every task: `npx vitest run` + `npx playwright test`
-- Run `/simplify` before committing — catches duplication, readability issues, and inefficiencies via 3 parallel review agents
+- `sw:code-reviewer` writes `code-review-report.json` — CLI blocks closure if critical/high/medium findings remain
+- `/simplify` runs after code-review — catches duplication, readability issues, and inefficiencies via 3 parallel review agents
 - `/sw:grill` writes `grill-report.json` — CLI blocks closure without it
 - `/sw:judge-llm` writes `judge-llm-report.json` — WAIVED if consent denied
 - Ask yourself: **"Would a staff engineer approve this?"**
 
 ### 5. Auto-Closure After Implementation (MANDATORY)
 - When `/sw:do` completes all tasks, IMMEDIATELY invoke `/sw:done` — do NOT stop to ask for review
-- The quality gates inside `/sw:done` (grill, judge-llm, PM validation) ARE the review — no user confirmation needed
-- `/sw:done` handles: grill report, judge-llm, PM gates, closure, sync to GitHub/Jira/ADO
+- The quality gates inside `/sw:done` (code-review, simplify, grill, judge-llm, PM validation) ARE the review — no user confirmation needed
+- `/sw:done` handles: code-review loop, simplify, grill report, judge-llm, PM gates, closure, sync to GitHub/Jira/ADO
 - If a gate fails, the increment stays open automatically — no risk of premature closure
 - If the user disagrees, they can re-open the increment
 - **Anti-pattern**: "All tasks complete. Should I close?" — NEVER ask this. Just close it.
@@ -116,7 +117,7 @@ Good: npm run build → node script.js → Success
 ```
 <!-- SW:END:metarule -->
 
-<!-- SW:SECTION:rules version="0.0.0" -->
+<!-- SW:SECTION:rules version="1.0.578" -->
 ## Rules
 
 1. **Files** → `.specweave/increments/####-name/` (see Structure section for details)
@@ -132,7 +133,7 @@ Good: npm run build → node script.js → Success
 8. **Multi-repo**: ALL repos MUST be at `repositories/{org}/{repo-name}/` — NEVER directly under `repositories/`
 <!-- SW:END:rules -->
 
-<!-- SW:SECTION:workflow version="0.0.0" -->
+<!-- SW:SECTION:workflow version="1.0.578" -->
 ## Workflow
 
 `/sw:increment "X"` → `/sw:do` → `/sw:progress` → `/sw:done 0001`
@@ -156,13 +157,13 @@ Good: npm run build → node script.js → Success
 **Large-scale changes**: For codebase-wide migrations or bulk refactors, use `/batch` — decomposes work into parallel agents with worktree isolation, each producing its own PR. Example: `/batch migrate from Solid to React`
 <!-- SW:END:workflow -->
 
-<!-- SW:SECTION:save-nested-repos version="0.0.0" -->
+<!-- SW:SECTION:save-nested-repos version="1.0.578" -->
 ## Nested Repos
 
 Before git operations, scan: `for d in repositories packages services apps libs workspace; do [ -d "$d" ] && find "$d" -maxdepth 2 -name ".git" -type d; done`
 <!-- SW:END:save-nested-repos -->
 
-<!-- SW:SECTION:reflect version="0.0.0" -->
+<!-- SW:SECTION:reflect version="1.0.578" -->
 ## Skill Memories
 
 SpecWeave learns from corrections. Learnings saved here automatically. Edit or delete as needed.
@@ -170,7 +171,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Disable**: Set `"reflect": { "enabled": false }` in `.specweave/config.json`
 <!-- SW:END:reflect -->
 
-<!-- SW:SECTION:context version="0.0.0" -->
+<!-- SW:SECTION:context version="1.0.578" -->
 ## Context
 
 **Before implementing**: Check ADRs at `.specweave/docs/internal/architecture/adr/`
@@ -178,7 +179,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Load context**: `/sw:docs <topic>` loads relevant living docs into conversation
 <!-- SW:END:context -->
 
-<!-- SW:SECTION:structure version="0.0.0" -->
+<!-- SW:SECTION:structure version="1.0.578" -->
 ## Structure
 
 ```
@@ -193,7 +194,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Everything else → subfolders**: `reports/` | `logs/` | `scripts/` | `backups/`
 <!-- SW:END:structure -->
 
-<!-- SW:SECTION:taskformat version="0.0.0" -->
+<!-- SW:SECTION:taskformat version="1.0.578" -->
 ## Task Format
 
 ```markdown
@@ -203,19 +204,19 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 ```
 <!-- SW:END:taskformat -->
 
-<!-- SW:SECTION:secrets version="0.0.0" -->
+<!-- SW:SECTION:secrets version="1.0.578" -->
 ## Secrets
 
 Before CLI tools, check existing config (`grep -q` only — never display values).
 <!-- SW:END:secrets -->
 
-<!-- SW:SECTION:syncing version="0.0.0" -->
+<!-- SW:SECTION:syncing version="1.0.578" -->
 ## External Sync
 
 Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`. Mapping: Feature→Milestone | Story→Issue | Task→Checkbox.
 <!-- SW:END:syncing -->
 
-<!-- SW:SECTION:testing version="0.0.0" -->
+<!-- SW:SECTION:testing version="1.0.578" -->
 ## Testing Pipeline (MANDATORY)
 
 **Testing is a pipeline step, not an afterthought.**
@@ -231,6 +232,8 @@ Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`.
 - Never mark a task `[x]` until its tests pass
 
 ### Before Closing (`/sw:done`)
+- `sw:code-reviewer` writes `code-review-report.json` — blocks closure if critical/high/medium findings remain (fix loop, max 3 iterations)
+- `/simplify` runs after code-review passes — cleans up code before grill
 - `/sw:grill` writes `grill-report.json` — CLI blocks closure without it
 - `/sw:judge-llm` writes `judge-llm-report.json` — WAIVED if consent denied
 - `/sw:validate` — 130+ rule checks
@@ -242,23 +245,23 @@ Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`.
 - Coverage targets: unit 95%, integration 90%, e2e 100% of AC scenarios
 <!-- SW:END:testing -->
 
-<!-- SW:SECTION:tdd version="0.0.0" -->
+<!-- SW:SECTION:tdd version="1.0.578" -->
 ## TDD
 
 When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Use `/sw:tdd-cycle`. Enforcement via `testing.tddEnforcement` (strict|warn|off).
 <!-- SW:END:tdd -->
 
-<!-- SW:SECTION:api version="0.0.0" -->
+<!-- SW:SECTION:api version="1.0.578" -->
 <!-- API: Enable `apiDocs` in config.json. Commands: /sw:api-docs -->
 <!-- SW:END:api -->
 
-<!-- SW:SECTION:limits version="0.0.0" -->
+<!-- SW:SECTION:limits version="1.0.578" -->
 ## Limits
 
 **Max 1500 lines/file** — extract before adding
 <!-- SW:END:limits -->
 
-<!-- SW:SECTION:troubleshooting version="0.0.0" -->
+<!-- SW:SECTION:troubleshooting version="1.0.578" -->
 ## Troubleshooting
 
 | Issue | Fix |
@@ -270,13 +273,13 @@ When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Us
 | npm E401 on update | `npm i -g specweave --registry https://registry.npmjs.org --userconfig /dev/null` |
 <!-- SW:END:troubleshooting -->
 
-<!-- SW:SECTION:lazyloading version="0.0.0" -->
+<!-- SW:SECTION:lazyloading version="1.0.578" -->
 ## Plugin Auto-Loading
 
 Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugin install <name>@specweave`. Disable: `export SPECWEAVE_DISABLE_AUTO_LOAD=1`
 <!-- SW:END:lazyloading -->
 
-<!-- SW:SECTION:principles version="0.0.0" -->
+<!-- SW:SECTION:principles version="1.0.578" -->
 ## Principles
 
 1. **Spec-first**: `/sw:increment` before coding — mandatory for ALL implementation requests, no exceptions unless user explicitly opts out
@@ -288,7 +291,7 @@ Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugi
 7. **Test before ship**: Tests pass at every step — unit after each task, E2E before close, no exceptions
 <!-- SW:END:principles -->
 
-<!-- SW:SECTION:linking version="0.0.0" -->
+<!-- SW:SECTION:linking version="1.0.578" -->
 ## Bidirectional Linking
 
 Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
@@ -296,13 +299,13 @@ Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
 Task format: `**AC**: AC-US1-01, AC-US1-02` (CRITICAL for linking)
 <!-- SW:END:linking -->
 
-<!-- SW:SECTION:mcp version="0.0.0" -->
+<!-- SW:SECTION:mcp version="1.0.578" -->
 ## External Services
 
 CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
 <!-- SW:END:mcp -->
 
-<!-- SW:SECTION:auto version="0.0.0" -->
+<!-- SW:SECTION:auto version="1.0.578" -->
 ## Auto Mode
 
 `/sw:auto` (start) | `/sw:auto-status` (check) | `/sw:cancel-auto` (emergency)
@@ -310,13 +313,13 @@ CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
 Pattern: IMPLEMENT → TEST → FAIL? → FIX → PASS → NEXT. STOP & ASK if spec conflicts or ambiguity.
 <!-- SW:END:auto -->
 
-<!-- SW:SECTION:docs version="0.0.0" -->
+<!-- SW:SECTION:docs version="1.0.578" -->
 ## Docs
 
 [verified-skill.com](https://verified-skill.com)
 <!-- SW:END:docs -->
 
-<!-- SW:SECTION:non-claude version="0.0.0" -->
+<!-- SW:SECTION:non-claude version="1.0.578" -->
 ## Using SpecWeave with Other AI Tools
 
 See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
@@ -340,16 +343,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Category | Technology | Version |
 |----------|------------|---------|
 | Framework | Astro | 6.0.8 |
-| UI Library | React | 19.2.4 |
 | API Server | Hono | 4.12.5 |
 | Database | SQLite via libsql + Drizzle ORM | 0.45.1 |
 | Auth | Better Auth | 1.5.3 |
 | Styling | TailwindCSS | 4.2.1 |
-| UI Components | shadcn/ui (base UI @base-ui/react) | Latest |
+| UI Components | Pure Astro + TailwindCSS | - |
+| Icons | @lucide/astro | 1.8.0 |
+| Rich Text | TipTap (framework-agnostic) | 3.20.4 |
+| State | Nanostores | 1.1.1 |
 | Validation | Zod | 4.3.6 |
-| Theme | shadcn/astro inline script + React state (no next-themes) |
+| Theme | Inline script (no next-themes) |
 | Fonts | @fontsource (Inter, Oswald) | 5.2.8 |
-| Base UI | @base-ui/react | 1.2.0 |
 | Deployment | Cloudflare Workers (Astro SSR + workerd) |
 | Testing | Vitest + Playwright |
 
@@ -394,8 +398,8 @@ src/
 │   ├── admin/                # Admin dashboard pages
 │   └── business/             # Business listing pages
 ├── components/
-│   ├── ui/                  # shadcn/ui components (base UI) - .tsx files
-│   └── business/            # Business-specific components - .tsx files
+│   ├── ui/                  # Astro UI components - .astro files
+│   └── business/            # Business-specific components - .astro files
 ├── layouts/                  # Astro layouts - .astro files
 ├── server/
 │   ├── index.ts             # Hono app entry point
@@ -422,31 +426,32 @@ TailwindCSS v4 uses CSS-based configuration in `src/styles/globals.css`:
 
 **Note**: No `tailwind.config.mjs` needed for v4.
 
-## shadcn/ui with Base UI
+## UI Components (Pure Astro)
 
-All components use `@base-ui/react` as the primitive layer for interactive components. Non-interactive components (Card, Badge, Label, etc.) use styled HTML elements per shadcn Base UI pattern.
+All UI components are pure Astro `.astro` files using TailwindCSS. No React dependencies.
 
-### Interactive Components (Base UI Primitives)
+### Interactive Components
 
-| Component | Import | File |
-|-----------|--------|-------|
-| Button | `@base-ui/react/button` | `button.tsx` |
-| Input | `@base-ui/react/input` | `input.tsx` |
-| Select | `@base-ui/react/select` | `select.tsx` |
-| Tabs | `@base-ui/react/tabs` | `tabs.tsx` |
-| Accordion | `@base-ui/react/accordion` | `accordion.tsx` |
-| Avatar | `@base-ui/react/avatar` | `avatar.tsx` |
+| Component | File |
+|-----------|------|
+| Button | `button.astro` |
+| Input | `input.astro` |
+| Select | `select.astro` |
+| Tabs | `tabs.astro` |
+| Accordion | `accordion.astro` |
+| Avatar | `avatar.astro` |
+| ThemeToggle | `theme-toggle.astro` |
 
-### Non-Interactive Components (Styled HTML)
+### Non-Interactive Components
 
-| Component | Implementation | File |
-|-----------|---------------|------|
-| Card | styled `<div>` | `card.tsx` |
-| Badge | styled `<span>` | `badge.tsx` |
-| Label | styled `<label>` | `label.tsx` |
-| Textarea | styled `<textarea>` | `textarea.tsx` |
-| Skeleton | styled `<div>` | `skeleton.tsx` |
-| Pagination | uses Button component | `pagination.tsx` |
+| Component | Implementation |
+|-----------|---------------|
+| Card | styled `<div>` |
+| Badge | styled `<span>` |
+| Label | styled `<label>` |
+| Textarea | styled `<textarea>` |
+| Skeleton | styled `<div>` |
+| Pagination | uses Button component |
 
 ## Database Schema
 
@@ -458,7 +463,7 @@ Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orde
 - **Grid Layout**: Use `sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4` for lists
 - **Mobile First**: All responsive designs start with mobile
 - **Fonts**: Inter (body), Oswald (headings) - loaded via @fontsource
-- **Theme**: Light/Dark mode with inline script in Layout.astro + React state (shadcn/astro pattern), default is light
+- **Theme**: Light/Dark mode with inline script in Layout.astro + nanostores (no React)
 - **Colors**: Yellow brand theme (#FFD150), light background (#FDFBF7), dark background (#0A0F1A)
 
 ## API Architecture
@@ -477,10 +482,10 @@ Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orde
 - `pnpm build` (or `pnpm build:cf`) builds for Cloudflare Workers
 - Local database is `local.db` (SQLite)
 - Image optimization uses Sharp
-- Theme toggle uses shadcn/astro pattern with inline script in Layout.astro + React state in ThemeToggle component
+- Theme toggle uses inline script in Layout.astro + nanostores (no React)
 - TailwindCSS v4 uses `@tailwindcss/vite` plugin (not @astrojs/tailwind)
 
-## Dark Mode Implementation (shadcn/astro pattern)
+## Dark Mode Implementation (Pure Astro)
 
 ### Layout.astro - Inline Theme Script
 Add this script in `<head>` to prevent flash of wrong theme:
@@ -494,7 +499,7 @@ Add this script in `<head>` to prevent flash of wrong theme:
   };
   const isDark = getThemePreference() === 'dark';
   document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
-  
+
   if (typeof localStorage !== 'undefined') {
     const observer = new MutationObserver(() => {
       const isDark = document.documentElement.classList.contains('dark');
@@ -506,16 +511,19 @@ Add this script in `<head>` to prevent flash of wrong theme:
 ```
 
 ### ThemeToggle Component
-Uses React state + direct DOM manipulation:
-```tsx
-const [theme, setThemeState] = React.useState<"light" | "dark">("light")
+Uses vanilla JS with nanostores for state:
+```astro
+---
+import { Moon, Sun } from '@lucide/astro';
+---
+<button onclick="toggleTheme()">
+  <span class="sun-icon"><Sun /></span>
+  <span class="moon-icon"><Moon /></span>
+</button>
 
-const toggleTheme = () => {
-  const newTheme = theme === "dark" ? "light" : "dark"
-  setThemeState(newTheme)
-  document.documentElement.classList[newTheme === "dark" ? "add" : "remove"]("dark")
-  localStorage.setItem("theme", newTheme)
-}
+<script>
+  // Vanilla JS theme toggle
+</script>
 ```
 
 ### CSS Variables (globals.css)
@@ -547,7 +555,7 @@ This project has a **local tech-stack context system** that is automatically loa
 > 项目技术栈上下文: `.omc/tech-context.md`
 
 This file is generated by `~/.claude/.omc/scripts/load-tech-context.js` from `~/.claude/memory/MANIFEST.json` and maps all dependencies in `package.json` to their corresponding memory files. It includes:
-- Version coverage status for all 9 detected tech stacks (Astro 6, Hono, Drizzle, TailwindCSS, TipTap, better-auth, React, Zod, Cloudflare Workers)
+- Version coverage status for all tech stacks (Astro 6, Hono, Drizzle, TailwindCSS, TipTap, better-auth, Nanostores, Zod, Cloudflare Workers)
 - Stale version warnings (e.g. if memory files are based on older versions)
 - Links to primary and domain-specific memory files for each stack
 - MCP supplement suggestions for uncovered packages
@@ -558,4 +566,3 @@ node ~/.claude/.omc/scripts/load-tech-context.js "D:\Dev Projects\timorbiz"
 ```
 
 **Pre-commit hook** automatically runs version checks via `scripts/check-versions.sh`. See `VERSION_LOG.md` for upgrade history.
-

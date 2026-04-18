@@ -1,0 +1,26 @@
+---
+interface Props {
+  value: string;
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  value,
+  class: className = '',
+  'data-slot': slot = 'tabs-content',
+  ...props
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    className
+  ]}
+  data-tab-content={value}
+  data-slot={slot}
+  {...props}
+>
+  <slot />
+</div>

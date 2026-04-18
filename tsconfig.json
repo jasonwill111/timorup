@@ -11,8 +11,6 @@
       "@pages/*": ["src/pages/*"],
       "@server/*": ["src/server/*"],
       "@db/*": ["src/db/*"]
-    },
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    }
   }
 }

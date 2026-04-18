@@ -3,8 +3,9 @@
 export const prerender = false;
 
 import Layout from '@layouts/Layout.astro';
-import { Button } from '@components/ui/button';
-import { Card, CardContent } from '@components/ui/card';
+import Button from '@components/ui/Button.astro';
+import Card from '@components/ui/Card.astro'
+import CardContent from '@components/ui/CardContent.astro';
 ---
 
 <Layout title="Product - TMBIZ">
@@ -61,16 +62,16 @@ import { Card, CardContent } from '@components/ui/card';
           </div>
           
           <!-- Description -->
-          <Card className="mb-6">
-            <CardContent className="p-6">
+          <Card class="mb-6">
+            <CardContent class="p-6">
               <h2 class="text-lg font-semibold mb-3">Description</h2>
               <div id="product-description" class="prose dark:prose-invert max-w-none"></div>
             </CardContent>
           </Card>
           
           <!-- Business Info -->
-          <Card className="mb-20">
-            <CardContent className="p-6">
+          <Card class="mb-20">
+            <CardContent class="p-6">
               <h2 class="text-lg font-semibold mb-3">Sold by</h2>
               <a id="business-link" href="#" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                 <div id="business-logo" class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">

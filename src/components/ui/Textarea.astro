@@ -1,0 +1,44 @@
+---
+interface Props {
+  class?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  readonly?: boolean;
+  required?: boolean;
+  name?: string;
+  id?: string;
+  rows?: number;
+  'data-slot'?: string;
+}
+
+const {
+  class: className = '',
+  placeholder,
+  disabled = false,
+  readonly: readonlyAttr,
+  required = false,
+  name,
+  id,
+  rows = 4,
+  'data-slot': slot = 'textarea',
+  ...props
+} = Astro.props;
+---
+
+<textarea
+  class:list={[
+    'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+    className
+  ]}
+  placeholder={placeholder}
+  disabled={disabled}
+  readonly={readonlyAttr}
+  required={required}
+  name={name}
+  id={id}
+  rows={rows}
+  data-slot={slot}
+  {...props}
+>
+  <slot />
+</textarea>

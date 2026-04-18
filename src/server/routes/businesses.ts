@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 import { getCookie } from 'hono/cookie';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { hasUserBusiness } from '@/lib/business-logic';
 import { businessPages, categories, media, users } from '@/db/schema';
 import { eq, desc, like, and, or, sql } from 'drizzle-orm';
 
@@ -45,6 +46,27 @@ async function isAdmin(c: any) {
   
   return dbUser?.id === user.id; // In a real app, you'd have a role field
 }
+
+// Get current user's business (one-business-per-user check)
+businessesApp.get('/my-business', async (c) => {
+  const user = await getCurrentUser(c);
+  if (!user) {
+    return c.json({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'You must be logged in' }
+    }, 401);
+  }
+
+  const business = await hasUserBusiness(db, user.id);
+  if (!business) {
+    return c.json({
+      success: false,
+      error: { code: 'NOT_FOUND', message: 'No business found for this user' }
+    }, 404);
+  }
+
+  return c.json({ success: true, data: business });
+});
 
 // Get all businesses (with pagination, search, filter)
 businessesApp.get('/', async (c) => {

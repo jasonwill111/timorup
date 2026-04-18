@@ -1,8 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Card, CardContent } from '../../components/ui/card';
+import Button from '../../components/ui/Button.astro';
+import Input from '../../components/ui/Input.astro';
+import CardContent from '../../components/ui/CardContent.astro';
 import { db } from '../../lib/db';
 import { businessPages, categories } from '../../db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
@@ -73,6 +73,8 @@ try {
   categoriesData = [];
   totalCount = 0;
 }
+
+import Card from '../../components/ui/Card.astro'
 ---
 
 <Layout title="Businesses - TMBIZ">

@@ -1,0 +1,23 @@
+---
+interface Props {
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  class: className = '',
+  'data-slot': slot = 'card-header',
+  ...props
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'flex flex-col space-y-1.5 p-6',
+    className
+  ]}
+  data-slot={slot}
+  {...props}
+>
+  <slot />
+</div>

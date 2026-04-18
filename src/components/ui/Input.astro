@@ -1,0 +1,45 @@
+---
+interface Props {
+  type?: string;
+  class?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  readonly?: boolean;
+  required?: boolean;
+  name?: string;
+  id?: string;
+  value?: string;
+  'data-slot'?: string;
+}
+
+const {
+  type = 'text',
+  class: className = '',
+  placeholder,
+  disabled = false,
+  readonly: readonlyAttr,
+  required = false,
+  name,
+  id,
+  value,
+  'data-slot': slot = 'input',
+  ...props
+} = Astro.props;
+---
+
+<input
+  type={type}
+  class:list={[
+    'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+    className
+  ]}
+  placeholder={placeholder}
+  disabled={disabled}
+  readonly={readonlyAttr}
+  required={required}
+  name={name}
+  id={id}
+  value={value}
+  data-slot={slot}
+  {...props}
+/>

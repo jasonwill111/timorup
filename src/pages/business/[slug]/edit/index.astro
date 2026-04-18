@@ -1,0 +1,765 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import CardHeader from '@/components/ui/CardHeader.astro';
+import CardTitle from '@/components/ui/CardTitle.astro';
+import CardDescription from '@/components/ui/CardDescription.astro';
+import CardContent from '@/components/ui/CardContent.astro';
+---
+
+<Layout title="Edit Business - TMBIZ">
+  <!-- TipTap CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/@tiptap/core@3.22.3/dist/tiptap.min.css" />
+  <div class="container py-12">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold mb-2">Edit Business</h1>
+      <p class="text-muted-foreground mb-8">Update your business information</p>
+
+      <!-- Loading state -->
+      <div id="loading-state" class="text-center py-20">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p class="text-muted-foreground mt-2">Loading your business...</p>
+      </div>
+
+      <!-- Not found / unauthorized -->
+      <div id="not-found-state" class="hidden text-center py-20">
+        <p class="text-muted-foreground mb-4">Business not found or you don't have permission to edit it.</p>
+        <a href="/account">
+          <Button variant="outline">Back to Account</Button>
+        </a>
+      </div>
+
+      <!-- Edit form -->
+      <div id="edit-form-container" class="hidden">
+        <form id="business-form" class="space-y-8">
+          <!-- Basic Info -->
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+              <CardDescription>The main details about your business</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <div>
+                <label for="title" class="block text-sm font-medium mb-1">Business Name *</label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  required
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                  placeholder="Your business name"
+                />
+              </div>
+
+              <div>
+                <label for="slug" class="block text-sm font-medium mb-1">URL Slug *</label>
+                <input
+                  type="text"
+                  id="slug"
+                  name="slug"
+                  required
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                  placeholder="your-business-name"
+                />
+                <p class="text-xs text-muted-foreground mt-1">This will be your URL: timorbiz.com/business/your-business-name</p>
+              </div>
+
+              <div>
+                <label for="category" class="block text-sm font-medium mb-1">Category *</label>
+                <select
+                  id="category"
+                  name="categoryId"
+                  required
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                >
+                  <option value="">Select a category</option>
+                </select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Contact Info -->
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>How customers can reach you</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="contactName" class="block text-sm font-medium mb-1">Contact Person</label>
+                  <input
+                    type="text"
+                    id="contactName"
+                    name="contactName"
+                    class="w-full px-3 py-2 border rounded-lg bg-background"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label for="contactNumber" class="block text-sm font-medium mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="contactNumber"
+                    name="contactNumber"
+                    class="w-full px-3 py-2 border rounded-lg bg-background"
+                    placeholder="+670 7x xxx xxx"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="email" class="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                  placeholder="business@email.com"
+                />
+              </div>
+
+              <div>
+                <label for="address" class="block text-sm font-medium mb-1">Address</label>
+                <textarea
+                  id="address"
+                  name="address"
+                  rows="2"
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                  placeholder="Your business address"
+                ></textarea>
+              </div>
+
+              <!-- Map Location -->
+              <div class="mt-4">
+                <label class="block text-sm font-medium mb-2">Business Location</label>
+                <p class="text-xs text-muted-foreground mb-2">Click on the map to set your location, or enter coordinates manually</p>
+
+                <div id="map-container" class="h-64 rounded-lg border mb-3" style="min-height: 250px;">
+                  <div id="map-placeholder" class="h-full flex items-center justify-center bg-muted rounded-lg">
+                    <p class="text-muted-foreground">Loading map...</p>
+                  </div>
+                  <div id="map" class="hidden h-full rounded-lg" style="min-height: 250px;"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="latitude" class="block text-xs font-medium mb-1">Latitude</label>
+                    <input
+                      type="number"
+                      id="latitude"
+                      name="latitude"
+                      step="any"
+                      class="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                      placeholder="-8.5569"
+                    />
+                  </div>
+                  <div>
+                    <label for="longitude" class="block text-xs font-medium mb-1">Longitude</label>
+                    <input
+                      type="number"
+                      id="longitude"
+                      name="longitude"
+                      step="any"
+                      class="w-full px-3 py-2 border rounded-lg bg-background text-sm"
+                      placeholder="125.5603"
+                    />
+                  </div>
+                </div>
+
+                <button type="button" id="get-coords-btn" class="mt-2 text-sm text-primary hover:underline">
+                  Get coordinates from address
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- About -->
+          <Card>
+            <CardHeader>
+              <CardTitle>About Your Business</CardTitle>
+              <CardDescription>Tell customers more about what you do</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <label for="aboutUs" class="block text-sm font-medium mb-1">About Us</label>
+                <div id="aboutUs-editor"></div>
+                <input type="hidden" id="aboutUs" name="aboutUs" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Opening Hours -->
+          <Card>
+            <CardHeader>
+              <CardTitle>Opening Hours</CardTitle>
+              <CardDescription>Set your business hours</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-3">
+              <p class="text-xs text-muted-foreground">Leave time empty or check "Closed" for days you're not open</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm" id="hours-container">
+                <!-- Hours will be generated by JavaScript -->
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Additional Info -->
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Details</CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <div>
+                <label for="yearOfEstablishment" class="block text-sm font-medium mb-1">Year Established</label>
+                <input
+                  type="number"
+                  id="yearOfEstablishment"
+                  name="yearOfEstablishment"
+                  min="1900"
+                  max="2100"
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                  placeholder="2020"
+                />
+              </div>
+
+              <div>
+                <label for="tags" class="block text-sm font-medium mb-1">Tags</label>
+                <input
+                  type="text"
+                  id="tags"
+                  name="tags"
+                  class="w-full px-3 py-2 border rounded-lg bg-background"
+                  placeholder="restaurant, cafe, coffee (comma separated)"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Submit -->
+          <div class="flex gap-4">
+            <Button type="submit" id="submit-btn">Save Changes</Button>
+            <a id="cancel-link" href="#">
+              <Button type="button" variant="outline">Cancel</Button>
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { geocodeAddress } from '@/lib/geo';
+
+  // ── TipTap Editor Helper ─────────────────────────────────────────────────────
+  async function initTipTapEditor(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
+    const textareaId = `${element.id}-content`;
+
+    // Create hidden textarea for form submission
+    const textarea = document.createElement('textarea');
+    textarea.id = textareaId;
+    textarea.name = 'aboutUs';
+    textarea.className = 'hidden';
+    element.insertAdjacentElement('afterend', textarea);
+
+    // Dynamic imports for TipTap
+    const [tiptapCore, tiptapStarterKit, tiptapLink, tiptapPlaceholder] = await Promise.all([
+      import('https://esm.sh/@tiptap/core@3.22.3'),
+      import('https://esm.sh/@tiptap/starter-kit@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-link@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-placeholder@3.22.3'),
+    ]);
+
+    const { Editor } = tiptapCore;
+    const { default: StarterKit } = tiptapStarterKit;
+    const { default: Link } = tiptapLink;
+    const { default: Placeholder } = tiptapPlaceholder;
+
+    const editor = new Editor({
+      element,
+      extensions: [
+        StarterKit.configure({
+          heading: { levels: [2, 3] },
+        }),
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: { class: 'text-primary underline' },
+        }),
+        Placeholder.configure({
+          placeholder: options.placeholder || 'Tell customers about your business...',
+          emptyEditorClass: 'is-editor-empty',
+        }),
+      ],
+      content: options.content || '',
+      onUpdate: ({ editor }) => {
+        textarea.value = editor.getHTML();
+      },
+      editorProps: {
+        attributes: {
+          class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] px-3 py-2 border rounded-lg bg-background',
+        },
+      },
+    });
+
+    // Initial sync
+    textarea.value = editor.getHTML();
+
+    return editor;
+  }
+
+  let userId: string | null = null;
+  let businessSlug = '';
+  let map: any = null;
+  let marker: any = null;
+  let leafletLoaded = false;
+  let aboutUsEditor: any = null;
+
+  // Get slug from URL
+  const pathParts = window.location.pathname.split('/');
+  businessSlug = pathParts[2] || '';
+
+  // Get session
+  async function getSession() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+
+      if (data.session?.user) {
+        return data.session.user;
+      }
+      window.location.href = '/login';
+      return null;
+    } catch (err) {
+      console.error('Error getting session:', err);
+      window.location.href = '/login';
+      return null;
+    }
+  }
+
+  // Initialize page
+  async function init() {
+    const user = await getSession();
+    if (!user) return;
+
+    userId = user.id;
+    const cancelLink = document.getElementById('cancel-link') as HTMLAnchorElement;
+    if (cancelLink) cancelLink.href = `/business/${businessSlug}`;
+
+    // Load business data
+    try {
+      const res = await fetch(`/api/businesses/${businessSlug}`);
+      const data = await res.json();
+
+      if (!data.success || !data.data) {
+        showNotFound();
+        return;
+      }
+
+      // Check ownership
+      if (data.data.ownerId !== userId) {
+        showNotFound();
+        return;
+      }
+
+      populateForm(data.data);
+      showForm();
+      loadCategories();
+    } catch (err) {
+      console.error('Error loading business:', err);
+      showNotFound();
+    }
+  }
+
+  function showForm() {
+    document.getElementById('loading-state')?.classList.add('hidden');
+    document.getElementById('edit-form-container')?.classList.remove('hidden');
+  }
+
+  function showNotFound() {
+    document.getElementById('loading-state')?.classList.add('hidden');
+    document.getElementById('not-found-state')?.classList.remove('hidden');
+  }
+
+  async function populateForm(business: any) {
+    // Basic info
+    const titleInput = document.getElementById('title') as HTMLInputElement;
+    const slugInput = document.getElementById('slug') as HTMLInputElement;
+    const contactNameInput = document.getElementById('contactName') as HTMLInputElement;
+    const contactNumberInput = document.getElementById('contactNumber') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const addressInput = document.getElementById('address') as HTMLTextAreaElement;
+    const latInput = document.getElementById('latitude') as HTMLInputElement;
+    const lngInput = document.getElementById('longitude') as HTMLInputElement;
+    const aboutUsInput = document.getElementById('aboutUs') as HTMLTextAreaElement;
+    const yearInput = document.getElementById('yearOfEstablishment') as HTMLInputElement;
+    const tagsInput = document.getElementById('tags') as HTMLInputElement;
+
+    if (titleInput) titleInput.value = business.title || '';
+    if (slugInput) slugInput.value = business.slug || '';
+    if (contactNameInput) contactNameInput.value = business.contactName || '';
+    if (contactNumberInput) contactNumberInput.value = business.contactNumber || '';
+    if (emailInput) emailInput.value = business.email || '';
+    if (addressInput) addressInput.value = business.address || '';
+
+    // Initialize TipTap editor with existing content
+    const aboutUsContainer = document.getElementById('aboutUs-editor');
+    if (aboutUsContainer) {
+      aboutUsEditor = await initTipTapEditor(aboutUsContainer, {
+        placeholder: 'Tell customers about your business, products, and services...',
+        content: business.aboutUs || '',
+      });
+    }
+
+    if (yearInput && business.yearOfEstablishment) yearInput.value = String(business.yearOfEstablishment);
+    if (tagsInput && business.tags) {
+      try {
+        const tags = typeof business.tags === 'string' ? JSON.parse(business.tags) : business.tags;
+        if (Array.isArray(tags)) tagsInput.value = tags.join(', ');
+      } catch { tagsInput.value = business.tags || ''; }
+    }
+
+    // Coordinates
+    if (latInput && business.locationLat != null) latInput.value = String(business.locationLat);
+    if (lngInput && business.locationLng != null) lngInput.value = String(business.locationLng);
+
+    // Pre-select category after loadCategories runs
+    (window as any).__pendingCategoryId = business.categoryId;
+
+    // Opening hours
+    populateOpeningHours(business.openingHours);
+
+    // Init map with existing coords
+    const lat = business.locationLat;
+    const lng = business.locationLng;
+    if (lat && lng) {
+      setTimeout(() => initMap(lat, lng), 1000);
+    } else {
+      setTimeout(() => initMap(-8.5569, 125.5603), 1000);
+    }
+  }
+
+  // Load categories and pre-select
+  async function loadCategories() {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+
+      const select = document.getElementById('category') as HTMLSelectElement;
+      if (!data.success || !data.data?.length || !select) return;
+
+      data.data.forEach((cat: any) => {
+        const option = document.createElement('option');
+        option.value = cat.id;
+        option.textContent = cat.name;
+        select.appendChild(option);
+      });
+
+      // Pre-select category
+      const pendingCategoryId = (window as any).__pendingCategoryId;
+      if (pendingCategoryId) {
+        select.value = pendingCategoryId;
+      }
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    }
+  }
+
+  // Opening hours
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  function populateOpeningHours(hoursJson: string | null) {
+    let hours: Record<string, string> = {};
+    if (hoursJson) {
+      try { hours = typeof hoursJson === 'string' ? JSON.parse(hoursJson) : hoursJson; } catch { hours = {}; }
+    }
+
+    const container = document.getElementById('hours-container');
+    if (!container) return;
+
+    container.innerHTML = days.map((day, index) => {
+      const value = hours[day] || '';
+      const isClosed = value === 'closed';
+      const [open = '09:00', close = '18:00'] = isClosed ? ['09:00', '18:00'] : value.split('-');
+
+      return `
+        <div class="flex items-center gap-2 p-2 border rounded-lg">
+          <input type="checkbox" id="${day}-closed" name="${day}-closed" class="rounded" ${isClosed ? 'checked' : ''} />
+          <label for="${day}-closed" class="w-20 font-medium">${dayLabels[index]}</label>
+          <input
+            type="time"
+            id="${day}-open"
+            name="${day}-open"
+            class="border rounded px-2 py-1 text-sm"
+            value="${open}"
+          />
+          <span>to</span>
+          <input
+            type="time"
+            id="${day}-close"
+            name="${day}-close"
+            class="border rounded px-2 py-1 text-sm"
+            value="${close}"
+          />
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Map
+  async function loadLeaflet() {
+    if (leafletLoaded) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+
+    await new Promise<void>((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+
+    leafletLoaded = true;
+  }
+
+  async function initMap(lat: number, lng: number) {
+    await loadLeaflet();
+
+    const mapEl = document.getElementById('map') as HTMLElement;
+    const placeholder = document.getElementById('map-placeholder');
+    if (!mapEl || !(window as any).L) return;
+
+    map = (window as any).L.map('map').setView([lat, lng], 13);
+
+    (window as any).L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    map.on('click', (e: any) => {
+      setMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    mapEl.classList.remove('hidden');
+    if (placeholder) placeholder.classList.add('hidden');
+
+    // Show existing marker
+    const latInput = document.getElementById('latitude') as HTMLInputElement;
+    const lngInput = document.getElementById('longitude') as HTMLInputElement;
+    if (latInput.value && lngInput.value) {
+      setMarker(parseFloat(latInput.value), parseFloat(lngInput.value));
+    }
+  }
+
+  function setMarker(lat: number, lng: number) {
+    if (!map) return;
+
+    if (marker) map.removeLayer(marker);
+
+    marker = (window as any).L.marker([lat, lng]).addTo(map);
+    map.setView([lat, lng], 15);
+
+    const latInput = document.getElementById('latitude') as HTMLInputElement;
+    const lngInput = document.getElementById('longitude') as HTMLInputElement;
+    if (latInput) latInput.value = lat.toFixed(6);
+    if (lngInput) lngInput.value = lng.toFixed(6);
+  }
+
+  // Geocoding button
+  const getCoordsBtn = document.getElementById('get-coords-btn');
+  getCoordsBtn?.addEventListener('click', async () => {
+    const addressInput = document.getElementById('address') as HTMLTextAreaElement;
+    const address = addressInput?.value;
+
+    if (!address) {
+      alert('Please enter an address first');
+      return;
+    }
+
+    getCoordsBtn.textContent = 'Searching...';
+    getCoordsBtn.setAttribute('disabled', 'true');
+
+    try {
+      const result = await geocodeAddress(address);
+
+      if (result) {
+        const { lat, lng } = result;
+        if (!map) await initMap(lat, lng);
+        setMarker(lat, lng);
+      } else {
+        alert('Address not found. Please try a more specific address or enter coordinates manually.');
+      }
+    } catch (err) {
+      console.error('Geocoding error:', err);
+      alert('Address not found. Please try a more specific address or enter coordinates manually.');
+    } finally {
+      getCoordsBtn.textContent = 'Get coordinates from address';
+      getCoordsBtn.removeAttribute('disabled');
+    }
+  });
+
+  // Manual coordinate input handlers
+  const latInput = document.getElementById('latitude') as HTMLInputElement;
+  const lngInput = document.getElementById('longitude') as HTMLInputElement;
+
+  latInput?.addEventListener('change', async () => {
+    const lat = parseFloat(latInput.value);
+    const lng = parseFloat(lngInput.value);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      if (!map) await initMap(lat, lng);
+      setMarker(lat, lng);
+    }
+  });
+
+  lngInput?.addEventListener('change', async () => {
+    const lat = parseFloat(latInput.value);
+    const lng = parseFloat(lngInput.value);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      if (!map) await initMap(lat, lng);
+      setMarker(lat, lng);
+    }
+  });
+
+  // Collect opening hours
+  function collectOpeningHours(): Record<string, string> | null {
+    const hours: Record<string, string> = {};
+    let hasAnyHours = false;
+
+    days.forEach(day => {
+      const closed = (document.getElementById(`${day}-closed`) as HTMLInputElement)?.checked;
+      const open = (document.getElementById(`${day}-open`) as HTMLInputElement)?.value;
+      const close = (document.getElementById(`${day}-close`) as HTMLInputElement)?.value;
+
+      if (closed) {
+        hours[day] = 'closed';
+        hasAnyHours = true;
+      } else if (open && close) {
+        hours[day] = `${open}-${close}`;
+        hasAnyHours = true;
+      }
+    });
+
+    return hasAnyHours ? hours : null;
+  }
+
+  // Form submit
+  document.getElementById('business-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    const formData = new FormData(e.target as HTMLFormElement);
+
+    const data = {
+      title: formData.get('title'),
+      slug: formData.get('slug'),
+      categoryId: formData.get('categoryId'),
+      contactName: formData.get('contactName'),
+      contactNumber: formData.get('contactNumber'),
+      email: formData.get('email'),
+      address: formData.get('address'),
+      latitude: formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null,
+      longitude: formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null,
+      aboutUs: formData.get('aboutUs'),
+      openingHours: collectOpeningHours(),
+      yearOfEstablishment: formData.get('yearOfEstablishment')
+        ? parseInt(formData.get('yearOfEstablishment') as string)
+        : null,
+      tags: formData.get('tags')
+        ? (formData.get('tags') as string).split(',').map(t => t.trim()).filter(Boolean)
+        : [],
+    };
+
+    try {
+      const res = await fetch(`/api/businesses/${businessSlug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        window.location.href = `/business/${data.slug}`;
+      } else {
+        alert(result.error?.message || 'Failed to save changes');
+      }
+    } catch (err) {
+      console.error('Save error:', err);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Changes';
+    }
+  });
+
+  // Auto-generate slug from title
+  const titleInput = document.getElementById('title') as HTMLInputElement;
+  const slugInput = document.getElementById('slug') as HTMLInputElement;
+
+  titleInput?.addEventListener('input', () => {
+    const slug = titleInput.value
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+    slugInput.value = slug;
+  });
+
+  // Start
+  init();
+</script>
+
+<style is:global>
+  /* TipTap editor styling */
+  .ProseMirror {
+    outline: none;
+    min-height: 150px;
+  }
+
+  .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .ProseMirror h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ProseMirror h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ProseMirror ul, .ProseMirror ol {
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .ProseMirror a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+</style>

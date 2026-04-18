@@ -1,7 +1,6 @@
 ---
 import AdminLayout from '@layouts/AdminLayout.astro';
-import { Button } from '@components/ui/button';
-import RichTextEditor from '@components/RichTextEditor';
+import Button from '@components/ui/Button.astro';
 ---
 
 <AdminLayout title="Blog Posts">
@@ -138,18 +137,71 @@ import RichTextEditor from '@components/RichTextEditor';
   </div>
 </AdminLayout>
 
+<!-- TipTap CSS -->
+<link rel="stylesheet" href="https://unpkg.com/@tiptap/core@3.22.3/dist/tiptap.min.css" />
+
 <script>
-  import { createRoot } from 'react-dom/client';
-  import { createElement, useState, useEffect, useRef } from 'react';
-  // @ts-ignore
-  import RichTextEditor from '@components/RichTextEditor';
+  // ── TipTap Editor Helper ─────────────────────────────────────────────────────
+  // Using dynamic import to avoid SSR build issues
+  async function initTipTapEditor(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
+    const textareaId = `${element.id}-content`;
+
+    // Create hidden textarea for form submission
+    const textarea = document.createElement('textarea');
+    textarea.id = textareaId;
+    textarea.name = element.id.replace('-editor', '');
+    textarea.className = 'hidden';
+    element.insertAdjacentElement('afterend', textarea);
+
+    // Dynamic imports for TipTap
+    const [tiptapCore, tiptapStarterKit, tiptapLink, tiptapPlaceholder] = await Promise.all([
+      import('https://esm.sh/@tiptap/core@3.22.3'),
+      import('https://esm.sh/@tiptap/starter-kit@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-link@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-placeholder@3.22.3'),
+    ]);
+
+    const { Editor } = tiptapCore;
+    const { default: StarterKit } = tiptapStarterKit;
+    const { default: Link } = tiptapLink;
+    const { default: Placeholder } = tiptapPlaceholder;
+
+    const editor = new Editor({
+      element,
+      extensions: [
+        StarterKit.configure({
+          heading: { levels: [2, 3] },
+        }),
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: { class: 'text-primary underline' },
+        }),
+        Placeholder.configure({
+          placeholder: options.placeholder || 'Start typing...',
+          emptyEditorClass: 'is-editor-empty',
+        }),
+      ],
+      content: options.content || '',
+      onUpdate: ({ editor }) => {
+        textarea.value = editor.getHTML();
+      },
+      editorProps: {
+        attributes: {
+          class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] px-3 py-2',
+        },
+      },
+    });
+
+    // Initial sync
+    textarea.value = editor.getHTML();
+
+    return editor;
+  }
 
   // ── State ──────────────────────────────────────────────────────────────────
   let posts: any[] = [];
   let deleteTargetId: string | null = null;
-  let editorContent = '';
-  let editorRoot: HTMLDivElement | null = null;
-  let editorReactRoot: any = null;
+  let editorInstance: any = null;
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   const $ = (id: string) => document.getElementById(id)!;
@@ -210,7 +262,7 @@ import RichTextEditor from '@components/RichTextEditor';
     `).join('');
   }
 
-  window.editPost = async function(id: string) {
+  (window as any).editPost = async function(id: string) {
     const post = posts.find(p => p.id === id);
     if (!post) return;
 
@@ -220,14 +272,13 @@ import RichTextEditor from '@components/RichTextEditor';
     excerptInput.value = post.excerpt || '';
     statusSelect.value = post.status || 'draft';
     tagsInput.value = post.tags ? JSON.parse(post.tags).join(', ') : '';
-    editorContent = post.content || '';
     modalTitle.textContent = 'Edit Blog Post';
 
     openModal();
-    renderEditor();
+    renderEditor(post.content || '');
   };
 
-  window.deletePost = function(id: string) {
+  (window as any).deletePost = function(id: string) {
     deleteTargetId = id;
     deleteModal.classList.remove('hidden');
     deleteModal.classList.add('flex');
@@ -242,13 +293,6 @@ import RichTextEditor from '@components/RichTextEditor';
   function closeModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    editorRoot = null;
-    editorReactRoot = null;
-  }
-
-  function openDeleteModal() {
-    deleteModal.classList.remove('hidden');
-    deleteModal.classList.add('flex');
   }
 
   function closeDeleteModal() {
@@ -258,42 +302,26 @@ import RichTextEditor from '@components/RichTextEditor';
   }
 
   // ── Editor ───────────────────────────────────────────────────────────────────
-  function renderEditor() {
+  async function renderEditor(initialContent = '') {
     const container = document.getElementById('editor-container')!;
-    container.innerHTML = '<div id="rich-editor" class="min-h-[200px]"></div>';
-    editorRoot = document.getElementById('rich-editor')!;
+    container.innerHTML = '<div id="content-editor"></div>';
 
-    // Simple React mount
-    if (typeof window !== 'undefined' && editorRoot) {
-      import('react-dom/client').then(({ createRoot: cr }) => {
-        const root = cr(editorRoot!);
-        editorReactRoot = root;
-        const EditableEditor = () => {
-          const [content, setContent] = useState(editorContent);
-          return createElement(RichTextEditor, {
-            initialContent: content,
-            editable: true,
-            onChange: (html: string) => { editorContent = html; },
-            placeholder: 'Write your blog post here...',
-          });
-        };
-        root.render(createElement(EditableEditor));
-      }).catch(() => {
-        // Fallback: plain textarea
-        container.innerHTML = `<textarea id="post-content-fallback"
-          class="w-full min-h-[200px] px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-y">${escapeHtml(editorContent)}</textarea>`;
-      });
-    }
+    editorInstance = await initTipTapEditor(
+      document.getElementById('content-editor')!,
+      {
+        placeholder: 'Write your blog post...',
+        content: initialContent,
+      }
+    );
   }
 
   // ── Save ─────────────────────────────────────────────────────────────────────
   async function savePost() {
     const id = postIdInput.value;
-    const content = editorContent;
 
-    // Get content from fallback textarea if React failed
-    const fallback = document.getElementById('post-content-fallback') as HTMLTextAreaElement;
-    const finalContent = fallback?.value ?? content;
+    // Get content from hidden textarea synced by TipTap editor
+    const contentTextarea = document.getElementById('content-editor-content') as HTMLTextAreaElement;
+    const finalContent = contentTextarea?.value || '';
 
     const tags = tagsInput.value
       .split(',').map(t => t.trim()).filter(Boolean);
@@ -329,7 +357,7 @@ import RichTextEditor from '@components/RichTextEditor';
   }
 
   // ── Delete ───────────────────────────────────────────────────────────────────
-  async function deletePost() {
+  async function handleDelete() {
     if (!deleteTargetId) return;
     try {
       const res = await fetch(`/api/admin/blogs/${deleteTargetId}`, { method: 'DELETE' });
@@ -385,7 +413,6 @@ import RichTextEditor from '@components/RichTextEditor';
     excerptInput.value = '';
     statusSelect.value = 'draft';
     tagsInput.value = '';
-    editorContent = '';
     modalTitle.textContent = 'New Blog Post';
     openModal();
     renderEditor();
@@ -408,7 +435,7 @@ import RichTextEditor from '@components/RichTextEditor';
     savePost();
   });
 
-  $('confirm-delete-btn').addEventListener('click', deletePost);
+  $('confirm-delete-btn').addEventListener('click', handleDelete);
   $('cancel-delete-btn').addEventListener('click', closeDeleteModal);
 
   searchInput.addEventListener('input', () => fetchPosts());
@@ -421,3 +448,43 @@ import RichTextEditor from '@components/RichTextEditor';
   // ── Init ─────────────────────────────────────────────────────────────────────
   fetchPosts();
 </script>
+
+<style is:global>
+  /* TipTap editor styling */
+  .ProseMirror {
+    outline: none;
+    min-height: 150px;
+  }
+
+  .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .ProseMirror h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ProseMirror h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ProseMirror ul, .ProseMirror ol {
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .ProseMirror a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+</style>

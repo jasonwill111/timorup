@@ -1,0 +1,70 @@
+---
+interface Props {
+  defaultValue?: string;
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  defaultValue = '',
+  class: className = '',
+  'data-slot': slot = 'tabs',
+  ...props
+} = Astro.props;
+---
+
+<div
+  class:list={['w-full', className]}
+  data-tabs=""
+  data-default-value={defaultValue}
+  data-slot={slot}
+  {...props}
+>
+  <slot />
+</div>
+
+<script is:inline>
+  document.querySelectorAll('[data-tabs]').forEach((tabs) => {
+    const defaultValue = tabs.getAttribute('data-default-value') || '';
+    const triggers = tabs.querySelectorAll('[data-tab-trigger]');
+    const contents = tabs.querySelectorAll('[data-tab-content]');
+
+    // Set initial active state
+    triggers.forEach((trigger) => {
+      const value = trigger.getAttribute('data-tab-trigger');
+      if (value === defaultValue || (value && !defaultValue && trigger === triggers[0])) {
+        trigger.setAttribute('data-active', '');
+      }
+    });
+
+    contents.forEach((content) => {
+      const value = content.getAttribute('data-tab-content');
+      if (value === defaultValue || (value && !defaultValue && content === contents[0])) {
+        content.removeAttribute('hidden');
+      } else {
+        content.setAttribute('hidden', '');
+      }
+    });
+
+    // Add click handlers
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const value = trigger.getAttribute('data-tab-trigger');
+
+        // Update triggers
+        triggers.forEach((t) => t.removeAttribute('data-active'));
+        trigger.setAttribute('data-active', '');
+
+        // Update content
+        contents.forEach((content) => {
+          const contentValue = content.getAttribute('data-tab-content');
+          if (contentValue === value) {
+            content.removeAttribute('hidden');
+          } else {
+            content.setAttribute('hidden', '');
+          }
+        });
+      });
+    });
+  });
+</script>

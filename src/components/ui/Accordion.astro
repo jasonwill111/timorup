@@ -1,0 +1,51 @@
+---
+interface AccordionItem {
+  id: string;
+  title: string;
+  content: string;
+}
+
+interface Props {
+  items: AccordionItem[];
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  items,
+  class: className = '',
+  'data-slot': slot = 'accordion',
+  ...props
+} = Astro.props;
+---
+
+<div
+  class:list={['divide-y divide-border rounded-md border', className]}
+  data-accordion=""
+  data-slot={slot}
+  {...props}
+>
+  {items.map((item) => (
+    <details class="group">
+      <summary class="flex cursor-pointer items-center justify-between py-4 font-medium list-none hover:underline">
+        {item.title}
+        <svg
+          class="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </summary>
+      <div class="pb-4 text-sm text-muted-foreground">
+        {item.content}
+      </div>
+    </details>
+  ))}
+</div>

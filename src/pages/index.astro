@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
+import Button from '../components/ui/Button.astro';
+import Card from '../components/ui/Card.astro'
+import CardContent from '../components/ui/CardContent.astro';
 import { db } from '../lib/db';
 import { businessPages, categories } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -143,7 +144,7 @@ const mappedCategories = categoriesData.map((c: any) => ({
                   <span class="text-sm font-medium text-gray-800">{business.rating > 0 ? business.rating.toFixed(1) : 'N/A'}</span>
                 </div>
               </div>
-              <CardContent className="p-4">
+              <CardContent class="p-4">
                 <h3 class="font-semibold text-lg truncate group-hover:text-amber-600 transition-colors">{business.title}</h3>
                 <p class="text-sm text-muted-foreground">{business.category}</p>
                 <div class="flex items-center gap-2 mt-2 text-sm text-muted-foreground">

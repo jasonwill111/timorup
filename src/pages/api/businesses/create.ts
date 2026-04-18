@@ -2,52 +2,63 @@
 export const prerender = false;
 
 import { db } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { hasUserBusiness } from '@/lib/business-logic';
 import { businessPages, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST({ request }: { request: Request }) {
   try {
-    const body = await request.json();
-    const { 
-      title, slug, ownerId, categoryId, contactName, contactNumber, 
-      countryCode, email, address, aboutUs, tags, openingHours,
-      latitude, longitude 
-    } = body;
+    // 1. Authenticate via better-auth session (security fix for BS-013)
+    const cookieHeader = request.headers.get('cookie') || '';
+    const session = await auth.api.getSession({
+      headers: { cookie: cookieHeader },
+    });
 
-    // Validate required fields
-    if (!title || !ownerId) {
+    if (!session?.user) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'Title and owner are required' }
+        error: { code: 'UNAUTHORIZED', message: 'You must be logged in to create a business' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const userId = session.user.id;
+    const body = await request.json();
+    const {
+      title, slug, categoryId, contactName, contactNumber,
+      countryCode, email, address, aboutUs, tags, openingHours,
+      latitude, longitude
+    } = body;
+
+    // 2. Check one-business-per-user limit
+    const existingBusiness = await hasUserBusiness(db, userId);
+    if (existingBusiness) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'LIMIT_REACHED', message: 'You can only create one business page' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Check owner exists
-    const owner = await db.select()
-      .from(users)
-      .where(eq(users.id, ownerId))
-      .limit(1);
-
-    if (owner.length === 0) {
+    // 3. Validate required fields
+    if (!title) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'Owner not found' }
-      }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+        error: { message: 'Title is required' }
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Generate slug if not provided
+    // 4. Check slug uniqueness
     const businessSlug = slug || title.toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
       .replace(/-+/g, '-');
 
-    // Check slug uniqueness
-    const existing = await db.select()
+    const existingSlug = await db.select()
       .from(businessPages)
       .where(eq(businessPages.slug, businessSlug))
       .limit(1);
 
-    if (existing.length > 0) {
+    if (existingSlug.length > 0) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Business with this name already exists' }
@@ -59,7 +70,7 @@ export async function POST({ request }: { request: Request }) {
       id,
       title,
       slug: businessSlug,
-      ownerId,
+      ownerId: userId, // Derived from session, not from request body
       categoryId: categoryId || null,
       contactName: contactName || null,
       contactNumber: contactNumber || null,

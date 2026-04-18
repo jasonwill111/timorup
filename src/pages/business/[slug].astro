@@ -3,8 +3,10 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import { Button } from '../../components/ui/button';
-import { Card, CardContent } from '../../components/ui/card';
+import Button from '../../components/ui/Button.astro';
+import CardContent from '../../components/ui/CardContent.astro';
+
+import Card from '../../components/ui/Card.astro'
 ---
 
 <Layout title="Business - TMBIZ">
@@ -42,8 +44,8 @@ import { Card, CardContent } from '../../components/ui/card';
           <!-- Main Content -->
           <div class="flex-1">
             <!-- Profile Card -->
-            <Card className="mb-6">
-              <CardContent className="p-6">
+            <Card class="mb-6">
+              <CardContent class="p-6">
                 <div class="flex flex-col md:flex-row gap-6 items-start">
                   <!-- Profile Image -->
                   <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-muted flex-shrink-0 -mt-16 md:-mt-20 border-4 border-background shadow-lg">
@@ -89,16 +91,16 @@ import { Card, CardContent } from '../../components/ui/card';
             </Card>
             
             <!-- About Section -->
-            <Card className="mb-6">
-              <CardContent className="p-6">
+            <Card class="mb-6">
+              <CardContent class="p-6">
                 <h2 class="text-xl font-semibold mb-4">About Us</h2>
                 <div id="about-us" class="prose dark:prose-invert max-w-none"></div>
               </CardContent>
             </Card>
             
             <!-- Products Section -->
-            <Card className="mb-6">
-              <CardContent className="p-6">
+            <Card class="mb-6">
+              <CardContent class="p-6">
                 <h2 class="text-xl font-semibold mb-4">Products & Services</h2>
                 <div id="products-grid" class="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- Products will be loaded here -->
@@ -114,7 +116,7 @@ import { Card, CardContent } from '../../components/ui/card';
             
             <!-- Reviews Section -->
             <Card>
-              <CardContent className="p-6">
+              <CardContent class="p-6">
                 <div class="flex items-center justify-between mb-4">
                   <h2 class="text-xl font-semibold">Reviews</h2>
                   <div class="flex items-center gap-2">
@@ -180,7 +182,7 @@ import { Card, CardContent } from '../../components/ui/card';
           <div class="w-full md:w-80 space-y-6">
             <!-- Map Card -->
             <Card>
-              <CardContent className="p-4">
+              <CardContent class="p-4">
                 <div id="map" class="h-64 rounded-lg bg-muted"></div>
                 <a id="map-link" href="#" target="_blank" class="block mt-2 text-sm text-primary hover:underline">
                   Open in Maps →
@@ -190,7 +192,7 @@ import { Card, CardContent } from '../../components/ui/card';
             
             <!-- Opening Hours -->
             <Card>
-              <CardContent className="p-4">
+              <CardContent class="p-4">
                 <h3 class="font-semibold mb-3">Opening Hours</h3>
                 <div id="opening-hours" class="space-y-2 text-sm">
                   <!-- Hours will be rendered here -->
@@ -199,8 +201,8 @@ import { Card, CardContent } from '../../components/ui/card';
             </Card>
             
             <!-- WhatsApp Contact -->
-            <Card className="bg-brand-500 text-white border-0">
-              <CardContent className="p-4 text-center">
+            <Card class="bg-brand-500 text-white border-0">
+              <CardContent class="p-4 text-center">
                 <h3 class="font-semibold mb-2">Contact via WhatsApp</h3>
                 <a id="whatsapp-btn" href="#" class="inline-flex items-center justify-center gap-2 bg-white text-brand-600 px-4 py-2 rounded-lg font-medium hover:bg-brand-50 transition-colors">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

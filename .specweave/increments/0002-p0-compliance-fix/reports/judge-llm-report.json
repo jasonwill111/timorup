@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "increment": "0002-p0-compliance-fix",
+  "date": "2026-04-18",
+  "status": "WAIVED",
+  "reason": "externalModels not configured in .specweave/config.json",
+  "gateCheck": {
+    "passed": true,
+    "reason": "Consent not required — no externalModels block in config"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "projects": {
+    "timorbiz": {
+      "id": "timorbiz",
+      "name": "timorbiz",
+      "techStack": [],
+      "keywords": [],
+      "created": "2026-03-22T14:47:59.077Z"
+    }
+  },
+  "defaultProject": "timorbiz",
+  "metadata": {
+    "created": "2026-03-22T14:47:59.078Z",
+    "lastModified": "2026-03-22T14:47:59.078Z"
+  }
+}

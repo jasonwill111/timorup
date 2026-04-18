@@ -1,0 +1,118 @@
+---
+import Button from './Button.astro';
+
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseUrl?: string;
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  currentPage,
+  totalPages,
+  baseUrl = '?page=',
+  class: className = '',
+  'data-slot': slot = 'pagination',
+  ...props
+} = Astro.props;
+
+// Guard: Don't render pagination for single page or invalid total
+if (totalPages <= 1) {
+  // Render nothing for single page - caller should handle this case
+  return;
+}
+
+const prevPage = currentPage > 1 ? currentPage - 1 : null;
+const nextPage = currentPage < totalPages ? currentPage + 1 : null;
+
+const showPages = [];
+const maxVisible = 5;
+let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+let end = Math.min(totalPages, start + maxVisible - 1);
+if (end - start < maxVisible - 1) {
+  start = Math.max(1, end - maxVisible + 1);
+}
+for (let i = start; i <= end; i++) {
+  showPages.push(i);
+}
+---
+
+<nav
+  class:list={['flex items-center justify-center gap-1', className]}
+  data-pagination=""
+  data-current-page={currentPage}
+  data-total-pages={totalPages}
+  data-base-url={baseUrl}
+  data-slot={slot}
+  {...props}
+>
+  {/* First */}
+  {currentPage > 1 && (
+    <a href={`${baseUrl}1`} data-page="first">
+      <Button variant="outline" size="sm">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+        </svg>
+      </Button>
+    </a>
+  )}
+
+  {/* Previous */}
+  {prevPage ? (
+    <a href={`${baseUrl}${prevPage}`} data-page="prev">
+      <Button variant="outline" size="sm">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </Button>
+    </a>
+  ) : (
+    <Button variant="outline" size="sm" disabled>
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </Button>
+  )}
+
+  {/* Pages */}
+  {showPages.map((page) => (
+    <a href={`${baseUrl}${page}`} data-page={page}>
+      <Button
+        variant={page === currentPage ? 'default' : 'outline'}
+        size="sm"
+      >
+        {page}
+      </Button>
+    </a>
+  ))}
+
+  {/* Next */}
+  {nextPage ? (
+    <a href={`${baseUrl}${nextPage}`} data-page="next">
+      <Button variant="outline" size="sm">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </Button>
+    </a>
+  ) : (
+    <Button variant="outline" size="sm" disabled>
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </Button>
+  )}
+
+  {/* Last */}
+  {currentPage < totalPages && (
+    <a href={`${baseUrl}${totalPages}`} data-page="last">
+      <Button variant="outline" size="sm">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+        </svg>
+      </Button>
+    </a>
+  )}
+</nav>

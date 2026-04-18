@@ -425,4 +425,44 @@ describe('Business API Business Logic', () => {
       expect(canUpgradePlan('basic', 'basic')).toBe(false);
     });
   });
+
+  // ============================================================
+  // One-Business-Per-User Tests (BS-013)
+  // ============================================================
+  describe('hasUserBusiness', () => {
+    it('TC-001: hasUserBusiness returns business when user has one', async () => {
+      // Setup: mock db returns a business for user-1
+      const mockWhere = vi.fn(() => ({
+        limit: vi.fn(() => Promise.resolve([
+          { id: 'biz-1', ownerId: 'user-1', title: 'My Cafe', slug: 'my-cafe', status: 'live' }
+        ])),
+      }));
+      const mockFrom = vi.fn(() => ({ where: mockWhere }));
+      const mockSelect = vi.fn(() => ({ from: mockFrom }));
+      const mockDb = { select: mockSelect };
+
+      // Import the actual function - mock is applied from module-level vi.mock
+      const { hasUserBusiness } = await import('@/lib/business-logic');
+      const result = await hasUserBusiness(mockDb, 'user-1');
+
+      expect(result).toEqual({ id: 'biz-1', ownerId: 'user-1', title: 'My Cafe', slug: 'my-cafe', status: 'live' });
+      expect(mockSelect).toHaveBeenCalled();
+    });
+
+    it('TC-002: hasUserBusiness returns null when user has no business', async () => {
+      // Setup: mock db returns empty array
+      const mockWhere = vi.fn(() => ({
+        limit: vi.fn(() => Promise.resolve([])),
+      }));
+      const mockFrom = vi.fn(() => ({ where: mockWhere }));
+      const mockSelect = vi.fn(() => ({ from: mockFrom }));
+      const mockDb = { select: mockSelect };
+
+      const { hasUserBusiness } = await import('@/lib/business-logic');
+      const result = await hasUserBusiness(mockDb, 'user-2');
+
+      expect(result).toBeNull();
+      expect(mockSelect).toHaveBeenCalled();
+    });
+  });
 });

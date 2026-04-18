@@ -1,5 +1,5 @@
 ---
-import { ThemeToggle } from './ui/theme-toggle';
+import ThemeToggle from './ui/ThemeToggle.astro';
 
 interface Props {
   currentPath?: string;
@@ -56,7 +56,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       <!-- Right Side -->
       <div class="flex items-center gap-2">
         <!-- Theme Toggle (using shadcn theme component) -->
-        <ThemeToggle client:load />
+        <ThemeToggle />
 
         <!-- Desktop Auth Buttons -->
         <div class="hidden md:flex items-center gap-2">

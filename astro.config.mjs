@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import node from '@astrojs/node';
@@ -34,12 +33,19 @@ export default defineConfig({
   adapter,
 
   integrations: [
-    react(),
     sitemap(),
   ],
 
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      alias: {
+        '@': new URL('./src', import.meta.url).pathname,
+      },
+    },
+    ssr: {
+      noExternal: ['better-auth'],
+    },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
       optimizeDeps: {
@@ -55,9 +61,6 @@ export default defineConfig({
         cssMinify: true,
       },
     }),
-    ssr: {
-      noExternal: ['better-auth'],
-    },
   },
 
   streaming: true,

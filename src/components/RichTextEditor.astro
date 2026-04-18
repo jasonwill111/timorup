@@ -1,0 +1,37 @@
+---
+// TODO: Full TipTap migration in 0005
+// This is a temporary stub - will be replaced with proper TipTap vanilla integration
+
+interface Props {
+  initialContent?: string;
+  onChange?: string;  // placeholder for future onChange handler
+  placeholder?: string;
+  editable?: boolean;
+  name?: string;
+  id?: string;
+}
+
+const {
+  initialContent = '',
+  placeholder = 'Start writing...',
+  editable = true,
+  name,
+  id,
+} = Astro.props;
+---
+
+<div class="border rounded-lg overflow-hidden bg-background">
+  {editable && (
+    <div class="border-b px-3 py-2 bg-muted/30 text-xs text-muted-foreground">
+      Rich Text Editor - Basic textarea mode (Full editor coming in 0005)
+    </div>
+  )}
+  <textarea
+    name={name}
+    id={id}
+    placeholder={placeholder}
+    readonly={!editable}
+    class="min-h-[200px] w-full p-4 focus:outline-none resize-y"
+    set:html={initialContent}
+  />
+</div>

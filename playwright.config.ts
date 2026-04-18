@@ -16,9 +16,9 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'pnpm dev',
+    command: 'export USE_CLOUDFLARE=0 && pnpm dev',
     url: 'http://localhost:4321',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
   projects: [

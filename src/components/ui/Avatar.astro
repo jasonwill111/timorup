@@ -1,0 +1,69 @@
+---
+interface Props {
+  src?: string;
+  alt?: string;
+  fallback?: string;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+  'data-slot'?: string;
+}
+
+const {
+  src,
+  alt = 'Avatar',
+  fallback,
+  size = 'md',
+  class: className = '',
+  'data-slot': slot = 'avatar',
+  ...props
+} = Astro.props;
+
+const sizes = {
+  sm: 'h-8 w-8',
+  md: 'h-10 w-10',
+  lg: 'h-12 w-12',
+};
+---
+
+<div
+  class:list={[
+    'relative inline-flex shrink-0 overflow-hidden rounded-full',
+    sizes[size],
+    className
+  ]}
+  data-slot={slot}
+  {...props}
+>
+  {src ? (
+    <img
+      class="aspect-square h-full w-full"
+      src={src}
+      alt={alt}
+      width={sizes[size].match(/h-(\d+)/)?.[1] ? parseInt(sizes[size].match(/h-(\d+)/)?.[1] || '10') * 4 : 40}
+      height={sizes[size].match(/h-(\d+)/)?.[1] ? parseInt(sizes[size].match(/h-(\d+)/)?.[1] || '10') * 4 : 40}
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <div class="flex h-full w-full items-center justify-center rounded-full bg-muted">
+      {fallback ? (
+        <span class="text-sm font-medium">{fallback.slice(0, 2).toUpperCase()}</span>
+      ) : (
+        <svg
+          class="h-4 w-4 text-muted-foreground"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+          />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      )}
+    </div>
+  )}
+</div>

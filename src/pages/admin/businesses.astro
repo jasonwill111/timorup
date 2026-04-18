@@ -1,6 +1,6 @@
 ---
 import AdminLayout from '@layouts/AdminLayout.astro';
-import { Button } from '@components/ui/button';
+import Button from '@components/ui/Button.astro';
 ---
 
 <AdminLayout title="Businesses">
@@ -65,28 +65,24 @@ import { Button } from '@components/ui/button';
 </AdminLayout>
 
 <script>
-  import { toast } from 'sonner';
-
   let businessList: any[] = [];
   let aboutContent = '';
   let updatesContent = '';
-  let aboutReactRoot: any = null;
-  let updatesReactRoot: any = null;
-  
+
   // Load businesses
   async function loadBusinesses() {
     try {
       const res = await fetch('/api/admin/businesses');
       const data = await res.json();
-      
+
       const container = document.getElementById('businesses-list');
       if (!container) return;
-      
+
       if (!data.success || data.data.length === 0) {
         container.innerHTML = '<p class="text-center text-muted-foreground py-8">No businesses yet</p>';
         return;
       }
-      
+
       businessList = data.data;
       container.innerHTML = data.data.map((biz: any) => `
         <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
@@ -107,7 +103,6 @@ import { Button } from '@components/ui/button';
       `).join('');
     } catch (err) {
       console.error('Error loading businesses:', err);
-      toast.error('Failed to load businesses');
     }
   }
   
@@ -130,7 +125,7 @@ import { Button } from '@components/ui/button';
   const closeBtn = document.getElementById('close-modal');
   const cancelBtn = document.getElementById('cancel-btn');
   
-  // Render TipTap editors
+  // Render editors with simple textareas
   function renderEditors(initialAbout = '', initialUpdates = '') {
     aboutContent = initialAbout;
     updatesContent = initialUpdates;
@@ -138,52 +133,12 @@ import { Button } from '@components/ui/button';
     const aboutContainer = document.getElementById('about-editor-container')!;
     const updatesContainer = document.getElementById('updates-editor-container')!;
 
-    aboutContainer.innerHTML = '<div id="about-editor-mount" class="tiptap-editor"></div>';
-    updatesContainer.innerHTML = '<div id="updates-editor-mount" class="tiptap-editor"></div>';
+    aboutContainer.innerHTML = `<textarea name="aboutUs" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Write about your business...">${escapeHtml(initialAbout)}</textarea>`;
+    updatesContainer.innerHTML = `<textarea name="latestUpdates" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Latest news and updates...">${escapeHtml(initialUpdates)}</textarea>`;
+  }
 
-    if (typeof window !== 'undefined') {
-      import('react-dom/client').then(({ createRoot: cr }) => {
-        const aboutEl = document.getElementById('about-editor-mount')!;
-        const updatesEl = document.getElementById('updates-editor-mount')!;
-
-        aboutReactRoot = cr(aboutEl);
-        updatesReactRoot = cr(updatesEl);
-
-        import('react').then(React => {
-          import('@components/RichTextEditor').then(({ default: RichTextEditor }) => {
-            const { createElement, useState } = React;
-
-            const AboutEditor = () => {
-              const [content, setContent] = useState(initialAbout);
-              aboutContent = content;
-              return createElement(RichTextEditor, {
-                initialContent: content,
-                editable: true,
-                onChange: (html: string) => { aboutContent = html; },
-                placeholder: 'Write about your business...',
-              });
-            };
-
-            const UpdatesEditor = () => {
-              const [content, setContent] = useState(initialUpdates);
-              updatesContent = content;
-              return createElement(RichTextEditor, {
-                initialContent: content,
-                editable: true,
-                onChange: (html: string) => { updatesContent = html; },
-                placeholder: 'Latest news and updates...',
-              });
-            };
-
-            aboutReactRoot.render(createElement(AboutEditor));
-            updatesReactRoot.render(createElement(UpdatesEditor));
-          });
-        });
-      }).catch(() => {
-        aboutContainer.innerHTML = `<textarea name="aboutUs" rows="4" class="w-full px-3 py-2 border rounded-md text-sm">${initialAbout}</textarea>`;
-        updatesContainer.innerHTML = `<textarea name="latestUpdates" rows="4" class="w-full px-3 py-2 border rounded-md text-sm">${initialUpdates}</textarea>`;
-      });
-    }
+  function escapeHtml(str: string) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   addBtn?.addEventListener('click', () => {
@@ -236,17 +191,17 @@ import { Button } from '@components/ui/button';
       const data = await res.json();
       
       if (data.success) {
-        toast.success('Business created successfully!');
+        alert('Business created successfully!');
         modal?.classList.add('hidden');
         modal?.classList.remove('flex');
         (e.target as HTMLFormElement).reset();
         loadBusinesses();
       } else {
-        toast.error(data.error?.message || 'Failed to create business');
+        alert(data.error?.message || 'Failed to create business');
       }
     } catch (err) {
       console.error('Error creating business:', err);
-      toast.error('Error creating business');
+      alert('Error creating business');
     }
   });
   
@@ -261,14 +216,14 @@ import { Button } from '@components/ui/button';
       const data = await res.json();
       
       if (!data.success) {
-        toast.error('Failed to update status');
+        alert('Failed to update status');
         loadBusinesses();
       } else {
-        toast.success('Status updated');
+        alert('Status updated');
       }
     } catch (err) {
       console.error('Error updating status:', err);
-      toast.error('Error updating status');
+      alert('Error updating status');
     }
   };
   

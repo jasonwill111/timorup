@@ -1,0 +1,29 @@
+---
+interface Props {
+  class?: string;
+  for?: string;
+  id?: string;
+  'data-slot'?: string;
+}
+
+const {
+  class: className = '',
+  for: forAttr,
+  id,
+  'data-slot': slot = 'label',
+  ...props
+} = Astro.props;
+---
+
+<label
+  class:list={[
+    'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+    className
+  ]}
+  for={forAttr}
+  id={id}
+  data-slot={slot}
+  {...props}
+>
+  <slot />
+</label>
