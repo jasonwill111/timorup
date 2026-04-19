@@ -1,11 +1,11 @@
 {
   "id": "0005-tiptap-rich-editor",
-  "status": "in-progress",
+  "status": "completed",
   "started": "2026-04-18T11:30:00.000Z",
   "type": "feature",
   "priority": "P1",
   "created": "2026-04-18T11:20:42.337Z",
-  "lastActivity": "2026-04-18T11:20:42.337Z",
+  "lastActivity": "2026-04-18T11:42:28.358Z",
   "testMode": "TDD",
   "coverageTarget": 80,
   "feature_id": null,
@@ -14,5 +14,6 @@
   "planning": {
     "parallel": false
   },
-  "project": "timorbiz"
+  "project": "timorbiz",
+  "approvedAt": "2026-04-18T11:42:28.358Z"
 }

@@ -1,0 +1,18 @@
+{
+  "id": "0011-restore-missing-pages",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-04-19T10:30:34.712Z",
+  "lastActivity": "2026-04-19T10:36:21.614Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorbiz",
+  "approvedAt": "2026-04-19T10:36:21.614Z"
+}

@@ -1,0 +1,138 @@
+{
+  "version": "1.1",
+  "incrementId": "0007-db-schema-v2",
+  "timestamp": "2026-04-19T17:12:00.000Z",
+  "verdict": "FAIL",
+  "shipReadiness": "NOT READY",
+  "summary": {
+    "totalFindings": 5,
+    "critical": 2,
+    "high": 2,
+    "medium": 1
+  },
+  "acCompliance": {
+    "totalACs": 25,
+    "passed": 25,
+    "failed": 0,
+    "scopeCreep": [],
+    "results": [
+      { "acId": "AC-US1-01", "status": "pass", "evidence": "users.id uses text primaryKey (UUID format), line 15 in src/db/schema/index.ts" },
+      { "acId": "AC-US1-02", "status": "pass", "evidence": "role enum 'user' | 'editor' | 'admin' | 'super_admin', line 20 in schema" },
+      { "acId": "AC-US1-03", "status": "pass", "evidence": "phone: text().notNull(), line 17 in schema" },
+      { "acId": "AC-US1-04", "status": "pass", "evidence": "email: text().unique() - nullable by default, line 16 in schema" },
+      { "acId": "AC-US1-05", "status": "pass", "evidence": "emailVerified: boolean default false, line 21 in schema" },
+      { "acId": "AC-US1-06", "status": "pass", "evidence": "lastLoginAt: timestamp, line 22 in schema" },
+      { "acId": "AC-US1-07", "status": "pass", "evidence": "AdminLayout.astro lines 288-293 check role !== 'admin' && !== 'super_admin', redirects to login" },
+      { "acId": "AC-US2-01", "status": "pass", "evidence": "parentId field exists in categories table, line 36 in schema" },
+      { "acId": "AC-US2-02", "status": "pass", "evidence": "parentId nullable (NULL = top-level), line 36 schema + index at line 43" },
+      { "acId": "AC-US2-03", "status": "pass", "evidence": "Two-level hierarchy supported via parentId references" },
+      { "acId": "AC-US2-04", "status": "pass", "evidence": "Categories page has parent dropdown filter" },
+      { "acId": "AC-US3-01", "status": "pass", "evidence": "status enum 'draft' | 'pending' | 'live' | 'expired', line 74 in schema" },
+      { "acId": "AC-US3-02", "status": "pass", "evidence": "countryCode default '+670', line 80 in schema" },
+      { "acId": "AC-US3-03", "status": "pass", "evidence": "featured boolean default false, line 75 in schema" },
+      { "acId": "AC-US3-04", "status": "pass", "evidence": "aboutUs text type supports long content, line 87 in schema" },
+      { "acId": "AC-US4-01", "status": "pass", "evidence": "mediaType enum 'image' | 'video', line 55 in schema" },
+      { "acId": "AC-US4-02", "status": "pass", "evidence": "Format validation: ALLOWED_IMAGE_TYPES/VIDEO_TYPES defined in media.ts" },
+      { "acId": "AC-US4-03", "status": "pass", "evidence": "Size limits: MAX_IMAGE_SIZE = 10MB, MAX_VIDEO_SIZE = 100MB, lines 11-12 media.ts" },
+      { "acId": "AC-US4-04", "status": "pass", "evidence": "seoTitle, seoDescription fields exist in media table, lines 58-59 in schema" },
+      { "acId": "AC-US4-05", "status": "pass", "evidence": "type enum 'profile' | 'banner' | 'gallery' | 'product' | 'blog', line 56 in schema" },
+      { "acId": "AC-US5-01", "status": "pass", "evidence": "productType enum 'product' | 'service', line 109 in schema" },
+      { "acId": "AC-US5-02", "status": "pass", "evidence": "price nullable integer (NULL = Ask for Price), line 110 in schema" },
+      { "acId": "AC-US5-03", "status": "pass", "evidence": "currency default 'USD', line 111 in schema" },
+      { "acId": "AC-US5-04", "status": "pass", "evidence": "isActive boolean default true, line 115 in schema" },
+      { "acId": "AC-US5-05", "status": "pass", "evidence": "shortDescription and longDescription fields exist, lines 112-113 in schema" },
+      { "acId": "AC-US5-06", "status": "pass", "evidence": "mediaIds JSON array field, line 114 in schema" },
+      { "acId": "AC-US5-07", "status": "pass", "evidence": "TipTap editor integrated in product new/edit pages, lines 163-217 in new/index.astro" },
+      { "acId": "AC-US6-01", "status": "pass", "evidence": "billingCycle enum 'monthly' | 'yearly', line 171 in schema" },
+      { "acId": "AC-US6-02", "status": "pass", "evidence": "status enum 'unpaid' | 'paid' | 'expired', line 172 in schema" },
+      { "acId": "AC-US6-03", "status": "pass", "evidence": "Subscription visibility implemented in [slug].astro lines 248-274 - hides about/products/reviews when inactive" },
+      { "acId": "AC-US6-04", "status": "pass", "evidence": "endDate field exists for calculating expiry, line 175 in schema" },
+      { "acId": "AC-US7-01", "status": "pass", "evidence": "Reviews disabled via subscription gating - only shown when subscription is active" },
+      { "acId": "AC-US8-01", "status": "pass", "evidence": "Orders disabled - no frontend order entry points visible" }
+    ]
+  },
+  "findings": [
+    {
+      "id": "GRL-001",
+      "title": "media.ts queries non-existent field planType on businessPages",
+      "severity": "critical",
+      "confidence": 95,
+      "category": "correctness",
+      "file": "src/server/routes/media.ts:57",
+      "issue": "Code queries `businessPages.planType` but this field does not exist in the schema. The subscriptions table handles plan/limits, not businessPages.",
+      "evidence": "Line 57: `const [business] = await db.select({ planType: businessPages.planType })` - planType field doesn't exist in businessPages schema definition.",
+      "suggestion": "Remove planType reference and use subscriptions table to determine plan limits, or remove the getBusinessPlanLimits helper if not used.",
+      "impact": "SQL error will occur when trying to query businessPages.planType"
+    },
+    {
+      "id": "GRL-002",
+      "title": "media.ts sets wrong field for type during upload",
+      "severity": "critical",
+      "confidence": 90,
+      "category": "correctness",
+      "file": "src/server/routes/media.ts:268, 377",
+      "issue": "Code sets `type: isImage ? 'image' : 'video'` but schema defines `type` as enum 'profile'|'banner'|'gallery'|'product'|'blog'. Should set `mediaType` instead.",
+      "evidence": "Line 268 and 377: `type: isImage ? 'image' : 'video'` - media.type uses category enum, not image/video. Should use media.mediaType field.",
+      "suggestion": "Change to: `mediaType: isImage ? 'image' : 'video'` on lines 268 and 377",
+      "impact": "Database will reject uploads because 'image'/'video' is not a valid value for the type enum"
+    },
+    {
+      "id": "GRL-003",
+      "title": "Seed data price format incompatible with schema",
+      "severity": "high",
+      "confidence": 85,
+      "category": "correctness",
+      "file": "src/db/seed.ts:206-214",
+      "issue": "Seed products use string prices ('$15.00', '$4.00') but schema defines price as integer (cents). Seed will either fail or store wrong values.",
+      "evidence": "Line 206: `{ price: '$15.00', ... }` - Schema line 110: `price: integer(price)` (expects cents)",
+      "suggestion": "Update seed products to use integer cents: 1500 for $15.00, 400 for $4.00, etc.",
+      "impact": "Seed data will have incorrect price values or insertion may fail"
+    },
+    {
+      "id": "GRL-004",
+      "title": "Seed data still uses planType on orders table",
+      "severity": "high",
+      "confidence": 85,
+      "category": "maintainability",
+      "file": "src/db/seed.ts:228-233",
+      "issue": "Seed sampleOrders still insert planType field which is now deprecated. The subscriptions table should be used instead.",
+      "evidence": "Line 228: `{ planType: 'pro', amount: 5000, ... }` - orders schema uses planType legacy field",
+      "suggestion": "Update seed to use subscriptions table instead of orders, and remove planType from orders seed",
+      "impact": "Seed data follows deprecated schema structure"
+    },
+    {
+      "id": "GRL-005",
+      "title": "Admin API endpoints lack server-side role verification",
+      "severity": "medium",
+      "confidence": 75,
+      "category": "security",
+      "file": "src/pages/api/admin/users/index.ts",
+      "issue": "Admin API endpoints (GET, POST) have no server-side authentication or role verification. Client-side AdminLayout guard can be bypassed.",
+      "evidence": "users/index.ts lines 8-59 - no auth.session check, no role verification. Any request can list/create users.",
+      "suggestion": "Add server-side auth check: verify session token and ensure user.role is 'admin' or 'super_admin' before processing",
+      "impact": "Any authenticated user can access admin API endpoints by directly calling them"
+    }
+  ],
+  "testResults": {
+    "unitTests": "117 passed",
+    "buildStatus": "PASS",
+    "testFiles": 6,
+    "coverageNote": "Build passes, tests pass. Critical issues are schema/data mismatch and security gaps."
+  },
+  "rubricCompliance": {
+    "totalCriteria": 0,
+    "passed": 0,
+    "failed": 0,
+    "note": "rubric.md exists but contains no criteria with sw:grill evaluator"
+  },
+  "improvementsSinceLastGrill": [
+    "AC-US6-03: Subscription visibility - NOW IMPLEMENTED (lines 248-274 in [slug].astro)",
+    "GRL-003: media.ts mediaType filter - FIXED (now uses eq(media.mediaType, 'image'))",
+    "GRL-004: Upload size limits - FIXED (10MB/100MB per spec)",
+    "T-008: TipTap for products - NOW IMPLEMENTED (product new/edit pages)"
+  ],
+  "remainingCriticalIssues": [
+    "GRL-001: media.ts queries non-existent planType field",
+    "GRL-002: media.ts sets wrong 'type' field value"
+  ]
+}

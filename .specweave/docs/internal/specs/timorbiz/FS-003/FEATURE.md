@@ -5,7 +5,7 @@ type: feature
 status: planned
 priority: P0
 created: 2026-04-18
-lastUpdated: 2026-04-18
+lastUpdated: 2026-04-19
 tldr: "Remove React/shadcn dependencies from the project and add Astro-native alternatives."
 complexity: high
 stakeholder_relevant: true

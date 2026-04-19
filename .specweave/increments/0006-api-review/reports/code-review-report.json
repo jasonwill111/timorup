@@ -1,0 +1,155 @@
+{
+  "version": "1.1",
+  "scope": "increment 0006-api-review",
+  "date": "2026-04-18",
+  "reviewers": ["security", "logic", "performance"],
+  "gateCheck": {
+    "passed": true,
+    "reason": "No critical findings. High/Medium findings are recommendations, not blockers."
+  },
+  "summary": {
+    "total": 9,
+    "critical": 0,
+    "high": 2,
+    "medium": 4,
+    "low": 2,
+    "info": 1
+  },
+  "validation": {
+    "performed": false,
+    "preValidation": { "critical": 0, "high": 2 },
+    "postValidation": { "critical": 0, "high": 2 },
+    "rejected": 0
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "category": "Type Safety",
+      "file": "src/pages/api/businesses/[slug].ts:143",
+      "line": 143,
+      "description": "Uses Math.floor(Date.now() / 1000) for timestamp instead of Date object",
+      "impact": "Mixed timestamp formats - some fields use Date objects, others use Unix seconds. This can cause issues when comparing dates.",
+      "recommendation": "Use consistent Date objects: updatedAt: new Date()",
+      "codeSnippet": "updateValues.updatedAt = Math.floor(Date.now() / 1000);"
+    },
+    {
+      "severity": "high",
+      "category": "Logic Error",
+      "file": "src/pages/api/businesses/[slug].ts:117",
+      "line": 117,
+      "description": "PUT endpoint lacks Zod validation - accepts arbitrary body fields",
+      "impact": "Invalid data can be submitted, including fields that shouldn't be user-modifiable. No schema validation for updateBusinessSchema.",
+      "recommendation": "Apply updateBusinessSchema.safeParse(body) before processing"
+    },
+    {
+      "severity": "medium",
+      "category": "Error Handling",
+      "file": "src/pages/api/businesses/[slug].ts:66-74",
+      "line": 66,
+      "description": "Inconsistent error response format - uses { message: '...' } instead of unified format",
+      "impact": "Inconsistent API responses make client handling harder",
+      "recommendation": "Use errorResponse() helper from @/lib/api-response"
+    },
+    {
+      "severity": "medium",
+      "category": "Performance",
+      "file": "src/pages/api/businesses/[slug].ts:32-41",
+      "line": 32,
+      "description": "N+1 query pattern - separate query for category after business fetch",
+      "impact": "Each business request triggers 2 additional queries (category + products + reviews). 4 queries per request instead of 1.",
+      "recommendation": "Use leftJoin to fetch category with business query in single query"
+    },
+    {
+      "severity": "medium",
+      "category": "Missing Feature",
+      "file": "src/server/routes/blogs.ts:69-100",
+      "line": 69,
+      "description": "POST /blogs lacks authentication check",
+      "impact": "Anyone can create blog posts without admin authentication. The comment says 'Admin only' but no auth middleware is applied.",
+      "recommendation": "Add getCurrentUser() check at start of POST handler, or rely on admin middleware from route mounting"
+    },
+    {
+      "severity": "medium",
+      "category": "Security",
+      "file": "src/server/routes/blogs.ts:95",
+      "line": 95,
+      "description": "Error message string matching for duplicate detection is fragile",
+      "impact": "Database error messages vary by SQL dialect. 'UNIQUE' check may not catch all duplicate key violations.",
+      "recommendation": "Use proper database constraint handling or Zod schema validation for slug uniqueness"
+    },
+    {
+      "severity": "low",
+      "category": "Code Quality",
+      "file": "src/pages/api/businesses/[slug].ts:19-26",
+      "line": 19,
+      "description": "Inconsistent 404 response format",
+      "impact": "404 response doesn't use unified error format with code field",
+      "recommendation": "Use errorResponse(ErrorCodes.NOT_FOUND, 'Business not found', undefined, 404)"
+    },
+    {
+      "severity": "low",
+      "category": "Type Safety",
+      "file": "src/server/routes/businesses.ts:20",
+      "line": 20,
+      "description": "getCurrentUser function uses 'any' type for Hono context",
+      "impact": "Type safety is bypassed - should use proper Hono types",
+      "recommendation": "Import proper Hono context type or use generic type inference"
+    },
+    {
+      "severity": "info",
+      "category": "Documentation",
+      "file": "src/server/routes/blogs.ts:1",
+      "line": 1,
+      "description": "Comment states 'Admin only — protected by admin middleware' but route is standalone",
+      "impact": "If mounted standalone (not under /admin), this route is NOT protected. Docstring may mislead.",
+      "recommendation": "Clarify middleware protection assumption in comment"
+    }
+  ],
+  "perFileSummary": [
+    {
+      "file": "src/pages/api/businesses/[slug].ts",
+      "issues": 4,
+      "topSeverity": "high"
+    },
+    {
+      "file": "src/pages/api/businesses/create.ts",
+      "issues": 0,
+      "topSeverity": "none"
+    },
+    {
+      "file": "src/pages/api/businesses/index.ts",
+      "issues": 0,
+      "topSeverity": "none"
+    },
+    {
+      "file": "src/pages/api/auth/sign-in.ts",
+      "issues": 0,
+      "topSeverity": "none"
+    },
+    {
+      "file": "src/server/routes/businesses.ts",
+      "issues": 1,
+      "topSeverity": "low"
+    },
+    {
+      "file": "src/server/routes/blogs.ts",
+      "issues": 2,
+      "topSeverity": "medium"
+    }
+  ],
+  "recommendations": [
+    "1. Apply updateBusinessSchema validation to PUT /api/businesses/[slug] endpoint",
+    "2. Standardize timestamp format - use Date objects consistently throughout",
+    "3. Fix N+1 query in [slug].ts by using leftJoin for category",
+    "4. Verify blog routes are mounted under admin middleware or add explicit auth",
+    "5. Consider using proper typed Hono context instead of 'any'"
+  ],
+  "positiveFindings": [
+    "Astro sign-in properly uses better-auth's signIn with error handling",
+    "Astro create.ts correctly uses api-response helpers and Zod validation",
+    "Hono businesses.ts has proper auth patterns with getCurrentUser",
+    "Admin routes have rate limiting on login endpoint",
+    "Error codes are consistently defined in ErrorCodes enum",
+    "SQL injection is mitigated via parameterized queries (Drizzle ORM)"
+  ]
+}

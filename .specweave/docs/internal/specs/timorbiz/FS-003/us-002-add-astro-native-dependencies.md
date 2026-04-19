@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-003
 title: "Add Astro-Native Dependencies"
-status: not_started
+status: completed
 priority: P0
 created: 2026-04-18
 tldr: "**As a** developer."
@@ -21,9 +21,9 @@ project: timorbiz
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: `lucide-astro` added to dependencies
-- [ ] **AC-US2-02**: All existing TipTap packages retained (framework-agnostic)
-- [ ] **AC-US2-03**: `nanostores` and `@nanostores/react` retained
+- [x] **AC-US2-01**: `@lucide/astro` added to dependencies (replaced deprecated lucide-astro)
+- [x] **AC-US2-02**: All existing TipTap packages retained (framework-agnostic)
+- [x] **AC-US2-03**: `nanostores` added (retained from existing)
 
 ---
 
@@ -36,4 +36,4 @@ project: timorbiz
 
 ## Tasks
 
-- [ ] **T-002**: Add lucide-astro Dependency
+- [x] **T-002**: Add lucide-astro Dependency

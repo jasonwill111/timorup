@@ -6,27 +6,73 @@ import Button from '@components/ui/Button.astro';
 <AdminLayout title="Categories">
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
-    <div class="mb-4 md:mb-6">
-      <h1 class="text-xl md:text-2xl font-bold">Categories</h1>
-    </div>
-    
-    <!-- Categories List -->
-    <div class="bg-card border rounded-lg p-3 md:p-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-        <h3 class="font-semibold text-sm md:text-base">All Categories</h3>
-        <Button id="add-category-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add Category</Button>
+    <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold">Categories</h1>
+        <p class="text-sm text-muted-foreground">Two-level industry hierarchy</p>
       </div>
-      <div id="categories-list" class="space-y-2">
-        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      <Button id="add-category-btn" class="text-xs py-1 h-8 md:text-sm md:h-9">+ Add Category</Button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 mb-4">
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold" id="stat-total">-</p>
+        <p class="text-xs text-muted-foreground">Total</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold text-blue-600" id="stat-parent">-</p>
+        <p class="text-xs text-muted-foreground">Industries</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold text-green-600" id="stat-child">-</p>
+        <p class="text-xs text-muted-foreground">Sub-categories</p>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="bg-card border rounded-lg p-3 mb-4">
+      <div class="flex flex-col sm:flex-row gap-2">
+        <select id="level-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
+          <option value="">All Levels</option>
+          <option value="parent">Industries (Top-level)</option>
+          <option value="child">Sub-categories</option>
+        </select>
+        <select id="parent-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
+          <option value="">All Parents</option>
+        </select>
+        <input type="search" id="search" placeholder="Search categories..." class="h-9 px-3 rounded-md border bg-background text-sm flex-1" />
+      </div>
+    </div>
+
+    <!-- Categories List -->
+    <div class="bg-card border rounded-lg">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-muted/50">
+            <tr>
+              <th class="text-left p-3 font-medium">Category</th>
+              <th class="text-left p-3 font-medium hidden md:table-cell">Type</th>
+              <th class="text-left p-3 font-medium hidden lg:table-cell">Parent</th>
+              <th class="text-left p-3 font-medium">Sort</th>
+              <th class="text-right p-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="categories-list">
+            <tr>
+              <td colspan="5" class="text-center p-8 text-muted-foreground">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- Create Category Modal -->
-  <div id="category-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-card border rounded-lg w-full max-w-md">
+  <!-- Create/Edit Category Modal -->
+  <div id="category-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-card border rounded-lg w-full max-w-md my-8">
       <div class="p-4 border-b flex items-center justify-between">
-        <h2 class="text-lg font-bold">Create Category</h2>
+        <h2 id="form-title" class="text-lg font-bold">Create Category</h2>
         <button id="close-modal" class="p-1 hover:bg-muted rounded">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -34,21 +80,48 @@ import Button from '@components/ui/Button.astro';
         </button>
       </div>
       <form id="category-form" class="p-4 space-y-4">
+        <input type="hidden" id="cat-id" />
+
         <div>
           <label for="cat-name" class="block text-sm font-medium mb-1">Category Name *</label>
-          <input type="text" id="cat-name" name="name" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Restaurants" />
+          <input type="text" id="cat-name" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Restaurants" />
         </div>
         <div>
           <label for="cat-slug" class="block text-sm font-medium mb-1">Slug *</label>
-          <input type="text" id="cat-slug" name="slug" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. restaurants" />
+          <input type="text" id="cat-slug" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. restaurants" />
+        </div>
+        <div>
+          <label for="cat-parent" class="block text-sm font-medium mb-1">Parent Industry</label>
+          <select id="cat-parent" class="w-full px-3 py-2 border rounded-md text-sm">
+            <option value="">Top-level (Industry)</option>
+          </select>
+          <p class="text-xs text-muted-foreground mt-1">Leave empty for top-level industry categories</p>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label for="cat-icon" class="block text-sm font-medium mb-1">Icon (emoji)</label>
+            <input type="text" id="cat-icon" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. 🍽️" maxlength="4" />
+          </div>
+          <div class="col-span-2">
+            <label for="cat-image" class="block text-sm font-medium mb-1">Image URL</label>
+            <input type="url" id="cat-image" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="https://example.com/image.jpg" />
+          </div>
+        </div>
+        <div>
+          <label for="cat-sort" class="block text-sm font-medium mb-1">Sort Order</label>
+          <input type="number" id="cat-sort" class="w-full px-3 py-2 border rounded-md text-sm" value="0" min="0" />
         </div>
         <div>
           <label for="cat-desc" class="block text-sm font-medium mb-1">Description</label>
-          <textarea id="cat-desc" name="description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Category description..."></textarea>
+          <textarea id="cat-desc" rows="2" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Brief description..."></textarea>
         </div>
-        <div class="flex gap-2 justify-end">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="cat-active" checked class="rounded" />
+          <label for="cat-active" class="text-sm">Active</label>
+        </div>
+        <div class="flex gap-2 justify-end pt-2">
           <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
-          <Button type="submit" class="text-xs py-1 h-8">Create</Button>
+          <Button type="submit" id="submit-btn" class="text-xs py-1 h-8">Create</Button>
         </div>
       </form>
     </div>
@@ -56,37 +129,132 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
-  import { toast } from 'sonner';
-  
+  let categories: any[] = [];
+  let parentCategories: any[] = [];
+  let editingId: string | null = null;
+
   // Load categories
   async function loadCategories() {
     try {
       const res = await fetch('/api/admin/categories');
       const data = await res.json();
-      
-      const container = document.getElementById('categories-list');
-      if (!container) return;
-      
-      if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted-foreground py-8">No categories yet</p>';
-        return;
+
+      if (data.success) {
+        categories = data.data;
+        // Filter parent categories for dropdown
+        parentCategories = categories.filter((c: any) => !c.parentId);
+        renderCategories();
+        updateStats();
+        updateParentDropdown();
       }
-      
-      container.innerHTML = data.data.map((cat: any) => `
-        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
-          <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">${cat.name}</p>
-            <p class="text-xs text-muted-foreground">${cat.slug}</p>
-          </div>
-          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteCategory('${cat.id}')">Del</button>
-        </div>
-      `).join('');
     } catch (err) {
       console.error('Error loading categories:', err);
-      toast.error('Failed to load categories');
+      showToast('Failed to load categories', 'error');
     }
   }
-  
+
+  // Update stats
+  function updateStats() {
+    const total = categories.length;
+    const parents = categories.filter((c: any) => !c.parentId).length;
+    const children = categories.filter((c: any) => c.parentId).length;
+
+    const el = document.getElementById('stat-total');
+    if (el) el.textContent = String(total);
+    const parentEl = document.getElementById('stat-parent');
+    if (parentEl) parentEl.textContent = String(parents);
+    const childEl = document.getElementById('stat-child');
+    if (childEl) childEl.textContent = String(children);
+  }
+
+  // Update parent dropdown
+  function updateParentDropdown() {
+    const select = document.getElementById('cat-parent') as HTMLSelectElement;
+    const filterSelect = document.getElementById('parent-filter') as HTMLSelectElement;
+
+    const options = parentCategories.map((c: any) =>
+      `<option value="${c.id}">${c.icon ? c.icon + ' ' : ''}${c.name}</option>`
+    ).join('');
+
+    if (select) {
+      select.innerHTML = '<option value="">Top-level (Industry)</option>' + options;
+    }
+    if (filterSelect) {
+      filterSelect.innerHTML = '<option value="">All Parents</option>' + options;
+    }
+  }
+
+  // Get parent name
+  function getParentName(parentId: string | null): string {
+    if (!parentId) return '-';
+    const parent = categories.find((c: any) => c.id === parentId);
+    return parent ? parent.name : '-';
+  }
+
+  // Render categories list
+  function renderCategories() {
+    const container = document.getElementById('categories-list');
+    if (!container) return;
+
+    const levelFilter = (document.getElementById('level-filter') as HTMLSelectElement)?.value || '';
+    const parentFilter = (document.getElementById('parent-filter') as HTMLSelectElement)?.value || '';
+    const search = (document.getElementById('search') as HTMLInputElement)?.value.toLowerCase() || '';
+
+    const filtered = categories.filter((cat: any) => {
+      const matchesLevel = !levelFilter ||
+        (levelFilter === 'parent' && !cat.parentId) ||
+        (levelFilter === 'child' && cat.parentId);
+      const matchesParent = !parentFilter || cat.parentId === parentFilter;
+      const matchesSearch = !search ||
+        (cat.name && cat.name.toLowerCase().includes(search)) ||
+        (cat.slug && cat.slug.toLowerCase().includes(search));
+      return matchesLevel && matchesParent && matchesSearch;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-muted-foreground">No categories found</td></tr>';
+      return;
+    }
+
+    container.innerHTML = filtered.map((cat: any) => `
+      <tr class="border-t hover:bg-muted/50">
+        <td class="p-3">
+          <div class="flex items-center gap-2">
+            ${cat.icon ? `<span class="text-lg">${cat.icon}</span>` : ''}
+            <div>
+              <span class="font-medium">${cat.name}</span>
+              <p class="text-xs text-muted-foreground">/${cat.slug}</p>
+            </div>
+          </div>
+        </td>
+        <td class="p-3 hidden md:table-cell">
+          ${cat.parentId
+            ? '<span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">Sub</span>'
+            : '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">Industry</span>'
+          }
+        </td>
+        <td class="p-3 hidden lg:table-cell text-muted-foreground text-sm">
+          ${getParentName(cat.parentId)}
+        </td>
+        <td class="p-3 text-muted-foreground text-sm">
+          ${cat.sortOrder || 0}
+        </td>
+        <td class="p-3 text-right">
+          <button onclick="editCategory('${cat.id}')" class="p-1 hover:bg-primary/10 rounded text-primary" title="Edit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </button>
+          <button onclick="deleteCategory('${cat.id}')" class="p-1 hover:bg-red-100 rounded text-red-500" title="Delete">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
   // Auto-generate slug from name
   document.getElementById('cat-name')?.addEventListener('input', (e) => {
     const name = (e.target as HTMLInputElement).value;
@@ -95,94 +263,148 @@ import Button from '@components/ui/Button.astro';
       slugInput.value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     }
   });
-  
+
   document.getElementById('cat-slug')?.addEventListener('input', (e) => {
     (e.target as HTMLInputElement).dataset.userModified = 'true';
   });
-  
+
   // Modal controls
   const modal = document.getElementById('category-modal');
   const addBtn = document.getElementById('add-category-btn');
   const closeBtn = document.getElementById('close-modal');
   const cancelBtn = document.getElementById('cancel-btn');
-  
-  addBtn?.addEventListener('click', () => {
+  const formTitle = document.getElementById('form-title');
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+  function openModal() {
+    editingId = null;
+    document.getElementById('category-form')?.reset();
+    (document.getElementById('cat-slug') as HTMLInputElement).dataset.userModified = '';
+    (document.getElementById('cat-id') as HTMLInputElement).value = '';
+    (document.getElementById('cat-sort') as HTMLInputElement).value = '0';
+    (document.getElementById('cat-active') as HTMLInputElement).checked = true;
+    (document.getElementById('cat-image') as HTMLInputElement).value = '';
+    updateParentDropdown();
+    if (formTitle) formTitle.textContent = 'Create Category';
+    if (submitBtn) submitBtn.textContent = 'Create';
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
-  });
-  
-  closeBtn?.addEventListener('click', () => {
+  }
+
+  function closeModalFn() {
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
-  });
-  
-  cancelBtn?.addEventListener('click', () => {
-    modal?.classList.add('hidden');
-    modal?.classList.remove('flex');
-  });
-  
+    editingId = null;
+  }
+
+  addBtn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModalFn);
+  cancelBtn?.addEventListener('click', closeModalFn);
   modal?.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
+    if (e.target === modal) closeModalFn();
   });
-  
+
+  // Edit category
+  (window as any).editCategory = function(id: string) {
+    const cat = categories.find((c: any) => c.id === id);
+    if (!cat) return;
+
+    editingId = id;
+    (document.getElementById('cat-id') as HTMLInputElement).value = id;
+    (document.getElementById('cat-name') as HTMLInputElement).value = cat.name || '';
+    (document.getElementById('cat-slug') as HTMLInputElement).value = cat.slug || '';
+    (document.getElementById('cat-parent') as HTMLSelectElement).value = cat.parentId || '';
+    (document.getElementById('cat-icon') as HTMLInputElement).value = cat.icon || '';
+    (document.getElementById('cat-image') as HTMLInputElement).value = cat.image || '';
+    (document.getElementById('cat-sort') as HTMLInputElement).value = String(cat.sortOrder || 0);
+    (document.getElementById('cat-desc') as HTMLTextAreaElement).value = cat.description || '';
+    (document.getElementById('cat-active') as HTMLInputElement).checked = cat.isActive !== false;
+    (document.getElementById('cat-slug') as HTMLInputElement).dataset.userModified = 'true';
+
+    if (formTitle) formTitle.textContent = 'Edit Category';
+    if (submitBtn) submitBtn.textContent = 'Save Changes';
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+  };
+
   // Form submission
   document.getElementById('category-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    
-    const categoryData = {
-      name: String(formData.get('name') || ''),
-      slug: String(formData.get('slug') || ''),
-      description: String(formData.get('description') || ''),
+
+    const categoryData: any = {
+      name: (document.getElementById('cat-name') as HTMLInputElement)?.value,
+      slug: (document.getElementById('cat-slug') as HTMLInputElement)?.value,
+      parentId: (document.getElementById('cat-parent') as HTMLSelectElement)?.value || null,
+      icon: (document.getElementById('cat-icon') as HTMLInputElement)?.value || '',
+      image: (document.getElementById('cat-image') as HTMLInputElement)?.value || '',
+      sortOrder: parseInt((document.getElementById('cat-sort') as HTMLInputElement)?.value || '0'),
+      description: (document.getElementById('cat-desc') as HTMLTextAreaElement)?.value || '',
+      isActive: (document.getElementById('cat-active') as HTMLInputElement)?.checked ?? true,
     };
-    
+
+    if (!categoryData.name || !categoryData.slug) {
+      showToast('Name and slug are required', 'error');
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = editingId ? 'Saving...' : 'Creating...';
+    }
+
     try {
-      const res = await fetch('/api/admin/categories', {
-        method: 'POST',
+      const url = editingId ? `/api/admin/categories/${editingId}` : '/api/admin/categories';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(categoryData),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.success) {
-        toast.success('Category created successfully!');
-        modal?.classList.add('hidden');
-        modal?.classList.remove('flex');
-        (e.target as HTMLFormElement).reset();
+        showToast(editingId ? 'Category updated!' : 'Category created!');
+        closeModalFn();
         loadCategories();
       } else {
-        toast.error(data.error?.message || 'Failed to create category');
+        showToast(data.error?.message || 'Failed to save', 'error');
       }
     } catch (err) {
-      console.error('Error creating category:', err);
-      toast.error('Error creating category');
+      showToast('Error saving category', 'error');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = editingId ? 'Save Changes' : 'Create';
+      }
     }
   });
-  
+
   // Delete category
   (window as any).deleteCategory = async function(id: string) {
-    if (!confirm('Delete this category?')) return;
-    
+    if (!confirm('Delete this category? Sub-categories and businesses using this category may be affected.')) return;
+
     try {
       const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      
+
       if (data.success) {
-        toast.success('Category deleted');
+        showToast('Category deleted');
         loadCategories();
       } else {
-        toast.error(data.error?.message || 'Failed to delete category');
+        showToast(data.error?.message || 'Failed to delete', 'error');
       }
     } catch (err) {
-      console.error('Error deleting category:', err);
-      toast.error('Error deleting category');
+      showToast('Error deleting category', 'error');
     }
   };
-  
+
+  // Filter listeners
+  document.getElementById('level-filter')?.addEventListener('change', renderCategories);
+  document.getElementById('parent-filter')?.addEventListener('change', renderCategories);
+  document.getElementById('search')?.addEventListener('input', renderCategories);
+
   // Initialize
   loadCategories();
 </script>

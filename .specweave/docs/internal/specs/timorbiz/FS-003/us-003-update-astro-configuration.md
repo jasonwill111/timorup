@@ -2,7 +2,7 @@
 id: US-003
 feature: FS-003
 title: "Update Astro Configuration"
-status: not_started
+status: completed
 priority: P0
 created: 2026-04-18
 tldr: "**As a** developer."
@@ -21,9 +21,9 @@ project: timorbiz
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: `@astrojs/react` import removed from astro.config.mjs
-- [ ] **AC-US3-02**: `react()` removed from integrations array
-- [ ] **AC-US3-03**: tsconfig.json updated to remove React JSX settings
+- [x] **AC-US3-01**: `@astrojs/react` import removed from astro.config.mjs
+- [x] **AC-US3-02**: `react()` removed from integrations array
+- [x] **AC-US3-03**: tsconfig.json updated to remove React JSX settings
 
 ---
 
@@ -36,5 +36,5 @@ project: timorbiz
 
 ## Tasks
 
-- [ ] **T-004**: Update astro.config.mjs
-- [ ] **T-005**: Verify tsconfig.json
+- [x] **T-004**: Update astro.config.mjs
+- [x] **T-005**: Verify tsconfig.json

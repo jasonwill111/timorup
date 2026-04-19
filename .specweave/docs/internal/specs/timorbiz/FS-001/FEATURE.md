@@ -2,10 +2,10 @@
 id: FS-001
 title: "一人一店限制 (BS-013)"
 type: feature
-status: spec_completed
+status: completed
 priority: P1
 created: 2026-03-22
-lastUpdated: 2026-03-22
+lastUpdated: 2026-04-19
 tldr: "Enforce that each authenticated user can create at most one business page."
 complexity: high
 stakeholder_relevant: true
@@ -16,8 +16,10 @@ stakeholder_relevant: true
 ## TL;DR
 
 **What**: Enforce that each authenticated user can create at most one business page.
-**Status**: spec_completed | **Priority**: P1
+**Status**: completed | **Priority**: P1
 **User Stories**: 4
+
+![一人一店限制 (BS-013) illustration](assets/feature-fs-001.jpg)
 
 ## Overview
 
@@ -27,7 +29,7 @@ Enforce that each authenticated user can create at most one business page. The b
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0001-one-business-per-user](../../../../../increments/0001-one-business-per-user/spec.md) | ⏳ spec_completed | 2026-03-22 |
+| [0001-one-business-per-user](../../../../../increments/0001-one-business-per-user/spec.md) | ✅ completed | 2026-03-22 |
 
 ## User Stories
 

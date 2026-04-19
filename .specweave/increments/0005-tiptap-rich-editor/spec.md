@@ -1,14 +1,14 @@
 ---
 increment: 0005-tiptap-rich-editor
-title: "TipTap Rich Text Editor Integration"
+title: TipTap Rich Text Editor Integration
 type: feature
 priority: P1
 status: completed
-created: 2026-04-18
+created: 2026-04-18T00:00:00.000Z
 structure: user-stories
 test_mode: TDD
 coverage_target: 80
-completed: 2026-04-18
+completed: 2026-04-18T00:00:00.000Z
 ---
 
 # Feature: TipTap Rich Text Editor Integration

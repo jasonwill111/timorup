@@ -2,9 +2,9 @@
 id: US-001
 feature: FS-005
 title: "Blog Content Editing (P1)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-04-18
+created: 2026-04-18T00:00:00.000Z
 tldr: "**As a** admin user."
 project: timorbiz
 ---
@@ -21,13 +21,13 @@ project: timorbiz
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: Blog post editor supports bold text formatting (Ctrl+B)
-- [ ] **AC-US1-02**: Blog post editor supports italic text formatting (Ctrl+I)
-- [ ] **AC-US1-03**: Blog post editor supports H2 and H3 headings
-- [ ] **AC-US1-04**: Blog post editor supports bullet and numbered lists
-- [ ] **AC-US1-05**: Blog post editor supports adding links to text
-- [ ] **AC-US1-06**: Blog post editor has a placeholder text when empty
-- [ ] **AC-US1-07**: Editor content is synced to the underlying textarea for form submission
+- [x] **AC-US1-01**: Blog post editor supports bold text formatting (Ctrl+B)
+- [x] **AC-US1-02**: Blog post editor supports italic text formatting (Ctrl+I)
+- [x] **AC-US1-03**: Blog post editor supports H2 and H3 headings
+- [x] **AC-US1-04**: Blog post editor supports bullet and numbered lists
+- [x] **AC-US1-05**: Blog post editor supports adding links to text
+- [x] **AC-US1-06**: Blog post editor has a placeholder text when empty
+- [x] **AC-US1-07**: Editor content is synced to the underlying textarea for form submission
 
 ---
 

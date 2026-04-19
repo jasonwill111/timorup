@@ -1,6 +1,16 @@
 # timorbiz
 
-**A SpecWeave project** - where specifications drive development.
+**Business Directory Platform for Timor-Leste** - A SpecWeave-driven project enabling businesses to create listings, products, and services with user reviews and admin dashboard.
+
+## Features
+
+- Business directory with categories and search
+- User reviews and ratings
+- Admin dashboard for content management (blogs, heroes, categories, subscriptions)
+- TipTap rich text editor for business descriptions
+- Leaflet maps integration
+- Email reminders for business owners
+- User authentication with better-auth
 
 ## Quick Start
 

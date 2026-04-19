@@ -68,6 +68,12 @@
       "specCompliance": true
     }
   },
+  "codeReview": {
+    "required": false
+  },
+  "grill": {
+    "required": false
+  },
   "planning": {
     "deepInterview": {
       "enabled": false

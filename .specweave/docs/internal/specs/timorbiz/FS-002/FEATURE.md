@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-03-23T00:00:00.000Z
-lastUpdated: 2026-04-18
+lastUpdated: 2026-04-19
 tldr: "修复 G-02 和 G-03 两个 P0 合规问题。两者都是面向用户的前端增强加后端 API 改动。."
 complexity: medium
 stakeholder_relevant: true

@@ -2,7 +2,7 @@
 id: US-001
 feature: FS-003
 title: "Remove React Dependencies"
-status: not_started
+status: completed
 priority: P0
 created: 2026-04-18
 tldr: "**As a** developer."
@@ -21,13 +21,13 @@ project: timorbiz
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: `@astrojs/react` removed from dependencies
-- [ ] **AC-US1-02**: `@base-ui/react` removed from dependencies
-- [ ] **AC-US1-03**: `@radix-ui/react-slot` removed from dependencies
-- [ ] **AC-US1-04**: `react` and `react-dom` removed from dependencies
-- [ ] **AC-US1-05**: `class-variance-authority` removed from dependencies
-- [ ] **AC-US1-06**: `@testing-library/react`, `@types/react`, `@types/react-dom` removed from devDependencies
-- [ ] **AC-US1-07**: `sonner` removed from dependencies
+- [x] **AC-US1-01**: `@astrojs/react` removed from dependencies
+- [x] **AC-US1-02**: `@base-ui/react` removed from dependencies
+- [x] **AC-US1-03**: `@radix-ui/react-slot` removed from dependencies
+- [x] **AC-US1-04**: `react` and `react-dom` removed from dependencies
+- [x] **AC-US1-05**: `class-variance-authority` removed from dependencies
+- [x] **AC-US1-06**: `@testing-library/react`, `@types/react`, `@types/react-dom` removed from devDependencies
+- [x] **AC-US1-07**: `sonner` removed from dependencies
 
 ---
 
@@ -40,4 +40,4 @@ project: timorbiz
 
 ## Tasks
 
-- [ ] **T-001**: Remove React Dependencies
+- [x] **T-001**: Remove React Dependencies

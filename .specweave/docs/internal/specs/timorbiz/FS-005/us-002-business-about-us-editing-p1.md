@@ -2,9 +2,9 @@
 id: US-002
 feature: FS-005
 title: "Business About-Us Editing (P1)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-04-18
+created: 2026-04-18T00:00:00.000Z
 tldr: "**As a** business owner."
 project: timorbiz
 ---
@@ -21,11 +21,11 @@ project: timorbiz
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: Business about-us editor supports bold text formatting
-- [ ] **AC-US2-02**: Business about-us editor supports italic text formatting
-- [ ] **AC-US2-03**: Business about-us editor supports bullet lists
-- [ ] **AC-US2-04**: Business about-us editor has a placeholder text when empty
-- [ ] **AC-US2-05**: Editor content is synced to the underlying textarea for form submission
+- [x] **AC-US2-01**: Business about-us editor supports bold text formatting
+- [x] **AC-US2-02**: Business about-us editor supports italic text formatting
+- [x] **AC-US2-03**: Business about-us editor supports bullet lists
+- [x] **AC-US2-04**: Business about-us editor has a placeholder text when empty
+- [x] **AC-US2-05**: Editor content is synced to the underlying textarea for form submission
 
 ---
 
