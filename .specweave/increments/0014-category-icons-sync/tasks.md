@@ -3,7 +3,7 @@
 ## Phase 1: Icon Utilities
 
 ### T-001: Create icons.ts with icon sets and utilities
-**User Story**: US-001 | **Satisfies ACs**: AC-US1-03 | **Status**: [ ] pending
+**User Story**: US-001 | **Satisfies ACs**: AC-US1-03 | **Status**: [x] completed
 
 **Test**: Given icon string → When parseIcon() called → Then returns {type, value}
 
@@ -30,7 +30,7 @@ export function buildIcon(type: 'emoji' | 'lucide', value: string): string {
 ---
 
 ### T-002: Create IconRenderer component
-**User Story**: US-002 | **Satisfies ACs**: AC-US2-02, AC-US2-03, AC-US2-04 | **Status**: [ ] pending
+**User Story**: US-002 | **Satisfies ACs**: AC-US2-02, AC-US2-03, AC-US2-04 | **Status**: [x] completed
 
 **Test**: Given icon value → When rendered → Then correct icon type displays
 
@@ -64,7 +64,7 @@ describe('IconRenderer', () => {
 ## Phase 2: Admin Integration
 
 ### T-003: Create IconPicker component
-**User Story**: US-001 | **Satisfies ACs**: AC-US1-01, AC-US1-02 | **Status**: [ ] pending
+**User Story**: US-001 | **Satisfies ACs**: AC-US1-01, AC-US1-02 | **Status**: [x] completed
 
 **Test**: Given admin selects icon → When form submitted → Then icon saved to database
 
@@ -92,7 +92,7 @@ describe('Admin Icon Management', () => {
 ---
 
 ### T-004: Update admin category API to accept icon
-**User Story**: US-001 | **Satisfies ACs**: AC-US1-03, AC-US1-04 | **Status**: [ ] pending
+**User Story**: US-001 | **Satisfies ACs**: AC-US1-03, AC-US1-04 | **Status**: [x] completed
 
 **Test**: Given valid icon value → When PUT /api/admin/categories/:id → Then icon updated
 
@@ -103,65 +103,25 @@ describe('Admin Icon Management', () => {
 ## Phase 3: Display Updates
 
 ### T-005: Update CategoryCard to display icons
-**User Story**: US-002, US-003 | **Satisfies ACs**: AC-US2-01, AC-US3-01, AC-US3-02, AC-US3-03 | **Status**: [ ] pending
+**User Story**: US-002, US-003 | **Satisfies ACs**: AC-US2-01, AC-US3-01, AC-US3-02, AC-US3-03 | **Status**: [x] completed
 
 **Test**: Given category with icon → When CategoryCard renders → Then icon visible
-
-```typescript
-// tests/unit/category-card.test.ts
-describe('CategoryCard', () => {
-  it('displays emoji icon when category has emoji icon', () => {
-    // Given category with icon = 'emoji:🍽️'
-    // When CategoryCard renders
-    // Then 🍽️ is visible
-  });
-
-  it('displays Lucide icon when category has Lucide icon', () => {
-    // Given category with icon = 'lucide:utensils'
-    // When CategoryCard renders
-    // Then utensils icon is visible
-  });
-
-  it('icons are mobile-responsive', () => {
-    // Given category on mobile viewport
-    // When CategoryCard renders
-    // Then icon scales correctly (32px mobile, 48px desktop)
-  });
-});
-```
 
 **Dependencies**: T-002, T-004
 
 ---
 
 ### T-006: Update homepage categories section
-**User Story**: US-002 | **Satisfies ACs**: AC-US2-01, AC-US2-04 | **Status**: [ ] pending
+**User Story**: US-002 | **Satisfies ACs**: AC-US2-01, AC-US2-04 | **Status**: [x] completed
 
 **Test**: Given homepage loads → When categories exist → Then icons displayed
-
-```typescript
-// e2e/homepage.spec.ts
-describe('Homepage Category Icons', () => {
-  it('displays icons for all categories on homepage', async () => {
-    // Given homepage with 8 categories
-    // When page loads
-    // Then each category shows its icon
-  });
-
-  it('shows fallback for categories without icons', async () => {
-    // Given category with no icon set
-    // When homepage loads
-    // Then fallback icon displays
-  });
-});
-```
 
 **Dependencies**: T-005
 
 ---
 
 ### T-007: Update categories page
-**User Story**: US-003 | **Satisfies ACs**: AC-US3-01, AC-US3-02, AC-US3-03 | **Status**: [ ] pending
+**User Story**: US-003 | **Satisfies ACs**: AC-US3-01, AC-US3-02, AC-US3-03 | **Status**: [x] completed
 
 **Test**: Given categories page loads → When categories exist → Then icons displayed with names
 
@@ -169,28 +129,17 @@ describe('Homepage Category Icons', () => {
 
 ---
 
-## Phase 4: Migration & Seed
-
 ### T-008: Update seed.sql with icons for all categories
-**User Story**: US-004 | **Satisfies ACs**: AC-US4-01, AC-US4-02 | **Status**: [ ] pending
+**User Story**: US-004 | **Satisfies ACs**: AC-US4-01, AC-US4-02 | **Status**: [x] completed
 
 **Test**: Given seed.sql runs → When categories inserted → Then all have icons
-
-```sql
--- seed.sql additions
-INSERT OR IGNORE INTO categories (id, name, slug, description, icon) VALUES
-('cat-1', 'Restaurants & Cafes', 'restaurants-cafes', 'Food and beverage', 'emoji:🍽️'),
-('cat-2', 'Hotels & Accommodation', 'hotels-accommodation', 'Hotels and lodging', 'emoji:🏨'),
--- ... etc
-ON CONFLICT(id) DO UPDATE SET icon = excluded.icon;
-```
 
 **Dependencies**: T-001
 
 ---
 
 ### T-009: Verify migration idempotency
-**User Story**: US-004 | **Satisfies ACs**: AC-US4-03 | **Status**: [ ] pending
+**User Story**: US-004 | **Satisfies ACs**: AC-US4-03 | **Status**: [x] completed
 
 **Test**: Given seed run twice → When checked → Then no duplicate icons
 

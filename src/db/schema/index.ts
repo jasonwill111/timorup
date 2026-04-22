@@ -30,6 +30,7 @@ export const categories = sqliteTable('categories', {
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
+  icon: text('icon').default(''), // 'emoji:🍽️' or 'lucide:utensils' or ''
   parentId: text('parent_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),

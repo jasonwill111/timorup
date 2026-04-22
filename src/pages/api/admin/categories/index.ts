@@ -32,7 +32,7 @@ export async function GET() {
 export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
-    const { name, slug, description } = body;
+    const { name, slug, description, icon } = body;
 
     const id = `cat-${Date.now()}`;
     const newCategory = await db.insert(categories).values({
@@ -40,6 +40,7 @@ export async function POST({ request }: { request: Request }) {
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
       description: description || '',
+      icon: icon || '',
     }).returning();
 
     return new Response(JSON.stringify({
@@ -51,6 +52,50 @@ export async function POST({ request }: { request: Request }) {
     return new Response(JSON.stringify({
       success: false,
       error: { message: 'Failed to create category' }
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+}
+
+// PUT - Update category
+export async function PUT({ request }: { request: Request }) {
+  try {
+    const body = await request.json();
+    const { id, name, slug, description, icon } = body;
+
+    if (!id) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: 'Category ID is required' }
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const updatedCategory = await db.update(categories)
+      .set({
+        ...(name !== undefined && { name }),
+        ...(slug !== undefined && { slug }),
+        ...(description !== undefined && { description }),
+        ...(icon !== undefined && { icon }),
+        updatedAt: sql`(strftime('%s', 'now'))`,
+      })
+      .where(eq(categories.id, id))
+      .returning();
+
+    if (!updatedCategory.length) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: 'Category not found' }
+      }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: updatedCategory[0]
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  } catch (error) {
+    console.error('Update category error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: { message: 'Failed to update category' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

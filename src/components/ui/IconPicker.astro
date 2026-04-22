@@ -1,0 +1,112 @@
+---
+/**
+ * IconPicker - Admin component for selecting emoji or Lucide icons
+ *
+ * Props:
+ *   name: string - form field name
+ *   value: string - current icon value
+ *   type: 'emoji' | 'lucide' - current icon type
+ */
+import { EMOJI_ICONS, LUCIDE_ICONS } from '@/lib/icons';
+
+interface Props {
+  name: string;
+  value?: string;
+  type?: 'emoji' | 'lucide';
+}
+
+const { name, value = '', type = 'emoji' } = Astro.props;
+const iconValue = value?.replace(/^(emoji:|lucide:)/, '') ?? '';
+---
+
+<div class="space-y-3" data-icon-picker>
+  <!-- Icon Type Toggle -->
+  <div class="flex gap-2">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        name={`${name}_type`}
+        value="emoji"
+        checked={type === 'emoji'}
+        class="text-primary focus:ring-primary"
+      />
+      <span class="text-sm">Emoji</span>
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        name={`${name}_type`}
+        value="lucide"
+        checked={type === 'lucide'}
+        class="text-primary focus:ring-primary"
+      />
+      <span class="text-sm">Lucide Icon</span>
+    </label>
+  </div>
+
+  <!-- Emoji Picker -->
+  <div class="icon-type-panel" data-panel="emoji">
+    <div class="flex flex-wrap gap-2">
+      {EMOJI_ICONS.map((emoji) => (
+        <label class="cursor-pointer">
+          <input
+            type="radio"
+            name={name}
+            value={`emoji:${emoji}`}
+            checked={value === `emoji:${emoji}`}
+            class="sr-only peer"
+          />
+          <span class="inline-flex items-center justify-center w-10 h-10 text-xl rounded-lg border border-border hover:border-primary peer-checked:border-primary peer-checked:bg-primary/10 transition-colors">
+            {emoji}
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <!-- Lucide Picker -->
+  <div class="icon-type-panel hidden" data-panel="lucide">
+    <select
+      name={name}
+      class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:ring-primary focus:border-primary"
+    >
+      <option value="">Select icon...</option>
+      {LUCIDE_ICONS.map((iconName) => (
+        <option value={`lucide:${iconName}`} selected={value === `lucide:${iconName}`}>
+          {iconName}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
+<script>
+  // Toggle visibility based on type selection
+  document.querySelectorAll('[data-icon-picker]').forEach((picker) => {
+    const panels = picker.querySelectorAll('[data-panel]');
+    const radios = picker.querySelectorAll('input[type="radio"][name$="_type"]');
+
+    function showPanel(type: string) {
+      panels.forEach((panel) => {
+        const panelType = panel.getAttribute('data-panel');
+        panel.classList.toggle('hidden', panelType !== type);
+        panel.classList.toggle('block', panelType === type);
+      });
+    }
+
+    radios.forEach((radio) => {
+      radio.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.checked) {
+          showPanel(target.value);
+        }
+      });
+    });
+
+    // Initialize
+    const checked = picker.querySelector('input[type="radio"][name$="_type"]:checked') as HTMLInputElement;
+    if (checked) {
+      showPanel(checked.value);
+    }
+  });
+</script>

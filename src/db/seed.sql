@@ -1,15 +1,15 @@
 -- Seed data for timorbiz
 
--- Insert categories
-INSERT OR IGNORE INTO categories (id, name, slug, description) VALUES
-('cat-1', 'Restaurants & Cafes', 'restaurants-cafes', 'Food and beverage establishments'),
-('cat-2', 'Hotels & Accommodation', 'hotels-accommodation', 'Hotels, hostels, and lodging'),
-('cat-3', 'Shopping', 'shopping', 'Retail stores and shops'),
-('cat-4', 'Health & Beauty', 'health-beauty', 'Healthcare and beauty services'),
-('cat-5', 'Automotive', 'automotive', 'Car dealers, repair shops'),
-('cat-6', 'Professional Services', 'professional-services', 'Legal, accounting, consulting'),
-('cat-7', 'Education', 'education', 'Schools, tutoring, training'),
-('cat-8', 'Entertainment', 'entertainment', 'Bars, clubs, venues');
+-- Insert categories (icons: 'emoji:X' or 'lucide:X')
+INSERT OR IGNORE INTO categories (id, name, slug, description, icon) VALUES
+('cat-1', 'Restaurants & Cafes', 'restaurants-cafes', 'Food and beverage establishments', 'emoji:🍽️'),
+('cat-2', 'Hotels & Accommodation', 'hotels-accommodation', 'Hotels, hostels, and lodging', 'emoji:🏨'),
+('cat-3', 'Shopping', 'shopping', 'Retail stores and shops', 'emoji:🛍️'),
+('cat-4', 'Health & Beauty', 'health-beauty', 'Healthcare and beauty services', 'emoji:💆'),
+('cat-5', 'Automotive', 'automotive', 'Car dealers, repair shops', 'emoji:🚗'),
+('cat-6', 'Professional Services', 'professional-services', 'Legal, accounting, consulting', 'emoji:💼'),
+('cat-7', 'Education', 'education', 'Schools, tutoring, training', 'emoji:📚'),
+('cat-8', 'Entertainment', 'entertainment', 'Bars, clubs, venues', 'emoji:🎭');
 
 -- Insert users
 INSERT OR IGNORE INTO users (id, email, name, role) VALUES

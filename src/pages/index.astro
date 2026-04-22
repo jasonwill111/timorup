@@ -6,26 +6,28 @@ import CardContent from '../components/ui/CardContent.astro';
 import { db } from '../lib/db';
 import { businessPages, categories } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { parseIcon, buildIcon, DEFAULT_CATEGORY_ICONS } from '../lib/icons';
 
 // OPTIMIZED: Single query to fetch all data
 let featuredBusinesses: any[] = [];
 let categoriesData: any[] = [];
 
 try {
-  // Fetch categories first (usually small, <100 rows)
+  // Fetch categories with icons
   const categoriesResult = await db.select({
     id: categories.id,
     name: categories.name,
     slug: categories.slug,
     description: categories.description,
+    icon: categories.icon,
   })
   .from(categories)
   .limit(20);
 
   // Create category map from single query
-  const categoryMap: Record<string, string> = {};
+  const categoryMap: Record<string, { name: string; icon: string }> = {};
   categoriesResult.forEach((c: any) => {
-    categoryMap[c.id] = c.name;
+    categoryMap[c.id] = { name: c.name, icon: c.icon || '' };
   });
 
   // Single query for businesses with category filter already applied
@@ -48,42 +50,34 @@ try {
     id: b.id,
     title: b.title,
     slug: b.slug,
-    category: categoryMap[b.categoryId || ''] || 'Business',
+    category: categoryMap[b.categoryId || '']?.name || 'Business',
     rating: 0,
     reviews: 0,
     tags: b.tags ? JSON.parse(b.tags) : []
   }));
 
-  categoriesData = categoriesResult.map(c => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug,
-    description: c.description,
-    count: 0
-  }));
+  // Use icons from database, fallback to defaults
+  categoriesData = categoriesResult.map(c => {
+    const icon = c.icon || '';
+    const parsed = parseIcon(icon);
+    // If no icon in DB, use default from DEFAULT_CATEGORY_ICONS
+    const defaultIcon = DEFAULT_CATEGORY_ICONS[c.slug];
+    return {
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: c.description,
+      count: 0,
+      icon: parsed?.value || defaultIcon?.value || '🏢',
+      iconType: parsed?.type || defaultIcon?.type || 'emoji'
+    };
+  });
 
 } catch (e) {
   console.error('Failed to fetch database data:', e);
 }
 
-const categoryIcons: Record<string, string> = {
-  'Restaurants & Cafes': '🍽️',
-  'Hotels & Accommodation': '🏨',
-  'Shopping': '🛒',
-  'Health & Beauty': '💅',
-  'Automotive': '🚗',
-  'Professional Services': '💼',
-  'Education': '📚',
-  'Entertainment': '🎉',
-  'default': '🏢'
-};
-
-const mappedCategories = categoriesData.map((c: any) => ({
-  name: c.name,
-  slug: c.slug,
-  count: c.count,
-  icon: categoryIcons[c.name] || categoryIcons.default
-}));
+const mappedCategories = categoriesData;
 ---
 
 <Layout title="TMBIZ - Business Directory for Timor-Leste">
@@ -176,7 +170,23 @@ const mappedCategories = categoriesData.map((c: any) => ({
         {mappedCategories.map((cat: any) => (
           <a href={`/businesses?category=${cat.slug}`} class="block">
             <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-              <div class="text-3xl mb-2">{cat.icon}</div>
+              {cat.iconType === 'emoji' ? (
+                <div class="text-3xl mb-2">{cat.icon}</div>
+              ) : (
+                <div class="text-3xl mb-2 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    {cat.icon === 'utensils' && <><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></>}
+                    {cat.icon === 'bed' && <><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></>}
+                    {cat.icon === 'shopping-bag' && <><path d="M6 2h12l2 7H4"/><path d="M2 6h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/></>}
+                    {cat.icon === 'heart' && <><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 1.43-3 3.21-3 5.5 0 1.82.42 3.58 1.5 5"/><path d="M12 5 9 11 5 7 9 12 5"/></>}
+                    {cat.icon === 'car' && <><path d="M14 16H9m10 0q3 0 3-3m-3-6H6m4 0V4"/><path d="M6 16v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2"/><path d="M6 12h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2Z"/></>}
+                    {cat.icon === 'briefcase' && <><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>}
+                    {cat.icon === 'graduation-cap' && <><path d="M22 10v6M2 10l10-5 10 5M6 12v5c3 3 9 3 12 0"/></>}
+                    {cat.icon === 'music' && <><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></>}
+                    {cat.icon === 'building' && <><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></>}
+                  </svg>
+                </div>
+              )}
               <p class="font-medium text-sm">{cat.name}</p>
               <p class="text-xs text-muted-foreground">{cat.count} businesses</p>
             </div>

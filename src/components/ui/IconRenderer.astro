@@ -1,0 +1,53 @@
+---
+/**
+ * IconRenderer - Renders emoji or Lucide icon based on icon prefix
+ *
+ * Props:
+ *   icon: string - 'emoji:🍽️' or 'lucide:utensils' or ''
+ *   size: number - icon size in pixels (default: 24)
+ *   class: string - additional CSS classes
+ */
+import { Icon } from '@lucide/astro';
+import { parseIcon } from '@/lib/icons';
+
+interface Props {
+  icon?: string | null;
+  size?: number;
+  class?: string;
+}
+
+const { icon = '', size = 24, class: className = '' } = Astro.props;
+const parsed = parseIcon(icon);
+const iconValue = parsed?.value ?? 'building';
+---
+
+{parsed?.type === 'emoji' && (
+  <span
+    class:list={['inline-flex items-center justify-center', className]}
+    style={`font-size: ${size}px; line-height: 1;`}
+    data-icon-type="emoji"
+    data-icon-value={iconValue}
+  >
+    {iconValue}
+  </span>
+)}
+
+{parsed?.type === 'lucide' && (
+  <Icon
+    name={iconValue}
+    size={size}
+    class:list={['shrink-0', className]}
+    data-icon-type="lucide"
+    data-icon-value={iconValue}
+  />
+)}
+
+{!parsed && (
+  <Icon
+    name="building"
+    size={size}
+    class:list={['shrink-0 text-muted-foreground', className]}
+    data-icon-type="fallback"
+    data-icon-value="building"
+  />
+)}
