@@ -1,0 +1,11 @@
+{
+  "id": "0013-category-icons-sync",
+  "status": "planning",
+  "type": "feature",
+  "created": "2026-04-22T14:05:01.556Z",
+  "lastActivity": "2026-04-22T14:05:01.556Z",
+  "externalLinks": {},
+  "priority": "medium",
+  "testMode": "test-after",
+  "coverageTarget": 80
+}
