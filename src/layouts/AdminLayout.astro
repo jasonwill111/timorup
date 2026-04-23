@@ -17,6 +17,8 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Robots - admin pages should not be indexed -->
+    <meta name="robots" content="noindex, nofollow" />
     <!-- Theme initialization - prevents flash of wrong theme -->
     <script is:inline>
       const theme = localStorage.getItem('theme') ||
