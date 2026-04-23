@@ -354,7 +354,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | State | Nanostores | ^1.0.0 |
 | Validation | Zod v4 | ^4.3.6 |
 | Theme | Inline script (no next-themes) | - |
-| Fonts | @fontsource (Inter, Oswald) | ^5.2.8 |
+| Fonts | Local woff2 (Inter, Oswald) | - |
 | Deployment | Cloudflare Workers (Astro SSR + workerd) |
 | Testing | Vitest + Playwright |
 
@@ -463,7 +463,7 @@ Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orde
 - **Container**: All content centered in `container` class with `max-w-6xl`
 - **Grid Layout**: Use `sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4` for lists
 - **Mobile First**: All responsive designs start with mobile
-- **Fonts**: Inter (body), Oswald (headings) - loaded via @fontsource
+- **Fonts**: Inter (body), Oswald (headings) - loaded locally from `/fonts/`
 - **Theme**: Light/Dark mode with inline script in Layout.astro + nanostores (no React)
 - **Colors**: Yellow brand theme (#FFD150), light background (#FDFBF7), dark background (#0A0F1A)
 
