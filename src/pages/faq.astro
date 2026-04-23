@@ -1,0 +1,122 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// FAQ structured data
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I list my business on TMBIZ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To list your business on TMBIZ, click the 'List Your Business' button on the homepage, fill in your business details, choose a category, and submit. Your listing will be reviewed and published within 24 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is TMBIZ free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, TMBIZ is free for consumers to browse and discover local businesses. Business owners can create a basic listing at no cost. Premium features like product listings and enhanced visibility are available with paid plans."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I update my business information?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sign in to your account, go to 'My Account', select your business, and click 'Edit'. You can update your address, contact information, hours, photos, and more."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do reviews work on TMBIZ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Any registered user can leave a review for a business. Reviews help other consumers make informed decisions and help businesses understand their customers better."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What areas does TMBIZ cover?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TMBIZ currently covers businesses throughout Timor-Leste, with a focus on Dili. We're expanding to cover all municipalities including Baucau, Lospalos, Maliana, and more."
+      }
+    }
+  ]
+};
+
+const faqs = [
+  {
+    question: "How do I list my business on TMBIZ?",
+    answer: "To list your business on TMBIZ, click the 'List Your Business' button on the homepage. Fill in your business details including name, category, contact information, and address. Choose your subscription plan and submit. Your listing will be reviewed and published within 24 hours."
+  },
+  {
+    question: "Is TMBIZ free to use?",
+    answer: "Yes, TMBIZ is completely free for consumers to browse and discover local businesses. Business owners can create a basic listing at no cost. Premium features like product listings, enhanced visibility, and priority placement are available with paid subscription plans."
+  },
+  {
+    question: "How can I update my business information?",
+    answer: "Sign in to your account and navigate to 'My Account'. Select the business you want to update and click 'Edit'. You can update your address, contact information, operating hours, photos, products, and more. Changes are reflected immediately after saving."
+  },
+  {
+    question: "How do reviews work on TMBIZ?",
+    answer: "Any registered user can leave a review for a business they've visited or used. Reviews help other consumers make informed decisions and provide valuable feedback to business owners. We encourage honest and constructive reviews to maintain quality."
+  },
+  {
+    question: "What subscription plans are available?",
+    answer: "We offer three plans: Basic (free) with standard listing, Pro ($25/month) with product listings and enhanced visibility, and Max ($50/month) with all features plus priority placement and dedicated support."
+  },
+  {
+    question: "How can I contact TMBIZ support?",
+    answer: "You can reach our support team by email at support@timbiz.com or through the contact form on our website. We typically respond within 24 hours on business days."
+  }
+];
+---
+
+<Layout
+  title="FAQ - Frequently Asked Questions"
+  description="Find answers to common questions about using TMBIZ, listing your business, subscription plans, and more."
+  structuredData={faqSchema}
+>
+  <div class="container py-12 max-w-4xl">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
+      <p class="text-lg text-muted-foreground">
+        Find answers to common questions about TMBIZ
+      </p>
+    </div>
+
+    <!-- FAQ Grid -->
+    <div class="space-y-4">
+      {faqs.map((faq, index) => (
+        <details class="group bg-card border rounded-lg overflow-hidden" key={index}>
+          <summary class="flex items-center justify-between cursor-pointer p-6 font-semibold hover:bg-muted/50 transition-colors list-none">
+            <span>{faq.question}</span>
+            <svg class="w-5 h-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="px-6 pb-6 text-muted-foreground">
+            <p>{faq.answer}</p>
+          </div>
+        </details>
+      ))}
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-12 text-center bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8">
+      <h2 class="text-2xl font-bold mb-4">Still have questions?</h2>
+      <p class="text-muted-foreground mb-6">
+        Can't find the answer you're looking for? Contact our support team.
+      </p>
+      <a href="mailto:support@timbiz.com" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+        Contact Support
+      </a>
+    </div>
+  </div>
+</Layout>

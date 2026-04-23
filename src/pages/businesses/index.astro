@@ -66,7 +66,7 @@ try {
   }));
   
   categoriesData = categoriesResult;
-  
+
 } catch (e) {
   console.error('Failed to fetch database data:', e);
   businesses = [];
@@ -74,10 +74,32 @@ try {
   totalCount = 0;
 }
 
+// LocalBusiness JSON-LD for SEO
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "TMBIZ Business Directory",
+  "description": "Discover local businesses in Timor-Leste including restaurants, hotels, shops, and services.",
+  "url": "https://timorbiz.com/businesses",
+  "areaServed": {
+    "@type": "Country",
+    "name": "Timor-Leste"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Dili",
+    "addressCountry": "TL"
+  }
+};
+
 import Card from '../../components/ui/Card.astro'
 ---
 
-<Layout title="Businesses - TMBIZ">
+<Layout
+  title="Businesses - TMBIZ"
+  description="Discover local businesses in Timor-Leste. Find restaurants, hotels, shops, services, and more on the premier business directory for Timor-Leste."
+  structuredData={structuredData}
+>
   <div class="container py-8">
     <!-- Search and Filter Section -->
     <div class="mb-8">
