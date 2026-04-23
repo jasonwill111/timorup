@@ -21,7 +21,7 @@ Restore /faq and /about pages that were lost during recent changes. These pages 
 ## User Stories
 
 ### US-001: FAQ Page (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a visitor or business owner
 **I want** to find answers to common questions
@@ -34,7 +34,7 @@ Restore /faq and /about pages that were lost during recent changes. These pages 
 - [x] **AC-US1-04**: Mobile responsive design
 
 ### US-002: About Page (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a visitor
 **I want** to learn about TMBIZ

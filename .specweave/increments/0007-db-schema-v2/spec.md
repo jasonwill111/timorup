@@ -19,7 +19,7 @@ coverage_target: 80
 ## User Stories
 
 ### US-001: Users Table - Enhanced Roles
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** users to have 4 distinct roles with proper access control
@@ -35,7 +35,7 @@ coverage_target: 80
 - [x] **AC-US1-07**: user 角色只能前端登录，无法访问 /admin (Deferred to AC-US1-07 implementation)
 
 ### US-002: Categories - Two-Level Hierarchy
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** admin
 **I want** categories to support industry/sub-industry structure
@@ -48,7 +48,7 @@ coverage_target: 80
 - [x] **AC-US2-04**: 前端下拉菜单支持两级联动
 
 ### US-003: Business Pages - Status & Featured
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** business pages to have proper status workflow and featured flag
@@ -61,7 +61,7 @@ coverage_target: 80
 - [x] **AC-US3-04**: aboutUs 使用 text 类型 (长文本)
 
 ### US-004: Media - Image/Video Separation & SEO
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** media to support image/video with SEO metadata
@@ -75,7 +75,7 @@ coverage_target: 80
 - [x] **AC-US4-05**: 类型默认 `profile | banner | gallery`，用户不手动选择
 
 ### US-005: Products - SKU with Price & TipTap
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** admin
 **I want** products to support products/services with optional pricing
@@ -91,7 +91,7 @@ coverage_target: 80
 - [x] **AC-US5-07**: 创建/编辑使用 TipTap 富文本编辑器 (Deferred to business edit page with TipTap)
 
 ### US-006: Subscriptions - New Table
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** subscriptions to track business payment status
@@ -104,7 +104,7 @@ coverage_target: 80
 - [x] **AC-US6-04**: 自动计算过期时间 (Implemented in API - endDate calculated from billingCycle)
 
 ### US-007: Reviews - Disabled
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** reviews feature to be disabled for now
@@ -114,7 +114,7 @@ coverage_target: 80
 - [x] **AC-US7-01**: reviews 表保留但前端不显示评价入口 (N/A - 功能已禁用)
 
 ### US-008: Orders - Disabled
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** orders feature to be disabled for now

@@ -17,7 +17,7 @@ coverage_target: 80
 Enforce that each authenticated user can create at most one business page. The backend already has a partial check in the Hono route (`src/server/routes/businesses.ts`), but the Astro API route (`src/pages/api/businesses/create.ts`) lacks it entirely, and the frontend (`src/pages/business/create.astro`) does not pre-validate or provide a friendly UX for users who already have a business.
 
 **Feature ID**: BS-013
-**Project**: timorbiz
+**Project**: timorlist
 **Tech stack**: Astro 6 (SSR) + Hono 4.x API + Drizzle ORM + better-auth
 
 ---
@@ -25,7 +25,7 @@ Enforce that each authenticated user can create at most one business page. The b
 ## User Stories
 
 ### US-001: Prevent duplicate business creation via API
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** authenticated user **I want** the system to reject my second business creation attempt **So that** the one-business-per-user rule is enforced at the API layer
 
@@ -38,7 +38,7 @@ Enforce that each authenticated user can create at most one business page. The b
 ---
 
 ### US-002: Proactive frontend guard on create page
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** user who already owns a business **I want** the create page to tell me immediately that I cannot create another **So that** I am not misled into filling out a form only to be rejected at submit
 
@@ -51,7 +51,7 @@ Enforce that each authenticated user can create at most one business page. The b
 ---
 
 ### US-003: Expose a user-business status API endpoint
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** frontend **I want** a dedicated endpoint to check if the current user owns a business **So that** the create page can guard itself efficiently
 
@@ -63,7 +63,7 @@ Enforce that each authenticated user can create at most one business page. The b
 ---
 
 ### US-004: Unit tests for one-business-per-user logic
-**Project**: timorbiz
+**Project**: timorlist
 
 **Acceptance Criteria**:
 - [ ] **AC-US4-01**: Unit test: `POST /api/businesses` returns 400 `LIMIT_REACHED` when user already owns a business.

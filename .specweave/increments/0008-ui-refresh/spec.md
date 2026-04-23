@@ -31,7 +31,7 @@ Design inspiration from screenshots:
 ## User Stories
 
 ### US-001: Unified Color Theme (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a business owner or visitor
 **I want** consistent golden yellow branding across all pages
@@ -46,7 +46,7 @@ Design inspiration from screenshots:
 ---
 
 ### US-002: Dark Theme Background (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a user browsing at night
 **I want** a comfortable dark theme
@@ -61,7 +61,7 @@ Design inspiration from screenshots:
 ---
 
 ### US-003: Enhanced Card Styling (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a user browsing businesses
 **I want** visually appealing cards with hover effects
@@ -76,7 +76,7 @@ Design inspiration from screenshots:
 ---
 
 ### US-004: Improved Search Design (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a visitor looking for businesses
 **I want** a prominent, styled search box
@@ -91,7 +91,7 @@ Design inspiration from screenshots:
 ---
 
 ### US-005: Pill-Style Category Tags (P2)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a user filtering businesses
 **I want** pill-shaped category buttons
@@ -106,7 +106,7 @@ Design inspiration from screenshots:
 ---
 
 ### US-006: Admin Sidebar Navigation (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As an** admin user
 **I want** a dark-themed sidebar with icons
@@ -121,7 +121,7 @@ Design inspiration from screenshots:
 ---
 
 ### US-007: Unified Typography (P2)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** user reading content
 **I want** consistent, readable typography

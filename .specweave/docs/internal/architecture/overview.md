@@ -1,4 +1,4 @@
-# timorbiz
+# timorlist
 
 **A SpecWeave project** - where specifications drive development.
 

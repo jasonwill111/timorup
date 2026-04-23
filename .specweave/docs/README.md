@@ -1,6 +1,6 @@
-# timorbiz - Living Documentation
+# timorlist - Living Documentation
 
-This directory contains the living documentation for **timorbiz**.
+This directory contains the living documentation for **timorlist**.
 
 ## Structure
 

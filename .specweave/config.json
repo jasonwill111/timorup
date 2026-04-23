@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "project": {
-    "name": "timorbiz",
+    "name": "timorlist",
     "version": "0.1.0"
   },
   "adapters": {
@@ -83,7 +83,7 @@
     "enabled": false
   },
   "workspace": {
-    "name": "timorbiz",
+    "name": "timorlist",
     "repos": []
   }
 }

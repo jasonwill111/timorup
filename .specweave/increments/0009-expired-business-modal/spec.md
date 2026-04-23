@@ -21,7 +21,7 @@ Show modal overlay on expired business pages - only display business name and ce
 ## User Stories
 
 ### US-001: Expired Business Modal Display (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a visitor viewing an expired business page
 **I want** to see only the business name with a centered modal overlay
@@ -35,7 +35,7 @@ Show modal overlay on expired business pages - only display business name and ce
 - [x] **AC-US1-05**: Sidebar (map, hours, WhatsApp) is hidden when expired
 
 ### US-002: Expired Business State Detection (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** the system
 **I want** to detect subscription expiration from API response

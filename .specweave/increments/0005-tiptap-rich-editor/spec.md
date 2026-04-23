@@ -22,7 +22,7 @@ Integrate TipTap framework-agnostic rich text editor for blog posts and business
 ## User Stories
 
 ### US-001: Blog Content Editing (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** admin user
 **I want** to write blog posts with rich formatting
@@ -38,7 +38,7 @@ Integrate TipTap framework-agnostic rich text editor for blog posts and business
 - [x] **AC-US1-07**: Editor content is synced to the underlying textarea for form submission
 
 ### US-002: Business About-Us Editing (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** business owner
 **I want** to write my business description with rich formatting
@@ -52,7 +52,7 @@ Integrate TipTap framework-agnostic rich text editor for blog posts and business
 - [x] **AC-US2-05**: Editor content is synced to the underlying textarea for form submission
 
 ### US-003: Editor Integration (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** developer
 **I want** TipTap integrated using SSR-safe CDN imports

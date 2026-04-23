@@ -1,10 +1,10 @@
 ---
 increment: 0014-category-icons-sync
-title: "Category Icons Sync"
+title: Category Icons Sync
 type: feature
 priority: P1
-status: in-progress
-created: 2026-04-22
+status: completed
+created: 2026-04-22T00:00:00.000Z
 structure: user-stories
 test_mode: TDD
 coverage_target: 80
@@ -19,60 +19,60 @@ coverage_target: 80
 ## User Stories
 
 ### US-001: Admin Sets Category Icons (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** admin
 **I want** to set icons (emoji or Lucide) for each category in the admin panel
 **So that** categories are visually distinctive and engaging
 
 **Acceptance Criteria**:
-- [ ] **AC-US1-01**: Admin can select emoji from a predefined set in category edit form
-- [ ] **AC-US1-02**: Admin can select Lucide icon name from a dropdown
-- [ ] **AC-US1-03**: Icon choice persists in database `categories.icon` field
-- [ ] **AC-US1-04**: Icon is displayed in category list view after save
+- [x] **AC-US1-01**: Admin can select emoji from a predefined set in category edit form
+- [x] **AC-US1-02**: Admin can select Lucide icon name from a dropdown
+- [x] **AC-US1-03**: Icon choice persists in database `categories.icon` field
+- [x] **AC-US1-04**: Icon is displayed in category list view after save
 
 ---
 
 ### US-002: Display Icons on Homepage (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** visitor
 **I want** to see icons next to category names on the homepage
 **So that** I can quickly identify category types visually
 
 **Acceptance Criteria**:
-- [ ] **AC-US2-01**: Homepage categories section displays icons from database
-- [ ] **AC-US2-02**: Emoji icons render as emoji characters
-- [ ] **AC-US2-03**: Lucide icons render as SVG icons
-- [ ] **AC-US2-04**: Fallback icon displays if no icon is set
+- [x] **AC-US2-01**: Homepage categories section displays icons from database
+- [x] **AC-US2-02**: Emoji icons render as emoji characters
+- [x] **AC-US2-03**: Lucide icons render as SVG icons
+- [x] **AC-US2-04**: Fallback icon displays if no icon is set
 
 ---
 
 ### US-003: Display Icons on Category Listing Page (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** visitor
 **I want** to see icons on the category browsing page
 **So that** categories are visually scannable
 
 **Acceptance Criteria**:
-- [ ] **AC-US3-01**: Category listing page displays icons for all active categories
-- [ ] **AC-US3-02**: Icons align consistently with category names
-- [ ] **AC-US3-03**: Icons scale appropriately on mobile devices
+- [x] **AC-US3-01**: Category listing page displays icons for all active categories
+- [x] **AC-US3-02**: Icons align consistently with category names
+- [x] **AC-US3-03**: Icons scale appropriately on mobile devices
 
 ---
 
 ### US-004: Migrate Existing Hardcoded Icons (P2)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** system
 **I want** to migrate existing hardcoded emoji icons to the database
 **So that** all icons are managed through the unified system
 
 **Acceptance Criteria**:
-- [ ] **AC-US4-01**: Seed script populates icon field for all existing categories
-- [ ] **AC-US4-02**: No duplicate icons after migration
-- [ ] **AC-US4-03**: Migration is idempotent (re-running doesn't change data)
+- [x] **AC-US4-01**: Seed script populates icon field for all existing categories
+- [x] **AC-US4-02**: No duplicate icons after migration
+- [x] **AC-US4-03**: Migration is idempotent (re-running doesn't change data)
 
 ## Functional Requirements
 

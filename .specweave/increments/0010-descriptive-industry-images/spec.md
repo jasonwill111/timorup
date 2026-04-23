@@ -21,7 +21,7 @@ Replace emoji icons with descriptive images for industry categories. Images shou
 ## User Stories
 
 ### US-001: Industry Image Display (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** a visitor browsing categories
 **I want** to see small descriptive images for each industry
@@ -34,7 +34,7 @@ Replace emoji icons with descriptive images for industry categories. Images shou
 - [x] **AC-US1-04**: Images are visually descriptive (clear, recognizable icons/logos)
 
 ### US-002: Admin Image Upload (P1)
-**Project**: timorbiz
+**Project**: timorlist
 
 **As an** admin managing categories
 **I want** to upload descriptive images for industries

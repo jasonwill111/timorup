@@ -27,7 +27,7 @@ plan_optional: true
 ## User Stories
 
 ### US-001: Dynamic Payment QR Code
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** business owner visiting the subscribe page
 **I want** to see the current payment QR code configured by the admin
@@ -42,7 +42,7 @@ plan_optional: true
 ---
 
 ### US-002: Nominatim Address Auto-Parse
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** business owner creating or editing my business page
 **I want** the system to automatically find my latitude and longitude from my typed address

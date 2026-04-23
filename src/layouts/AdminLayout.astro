@@ -17,6 +17,12 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Theme initialization - prevents flash of wrong theme -->
+    <script is:inline>
+      const theme = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    </script>
   </head>
   <body class="min-h-screen bg-background">
     <!-- Sonner Toast Container -->
@@ -45,8 +51,9 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     </header>
 
     <!-- Mobile Menu Overlay -->
-    <div id="mobile-menu" class="md:hidden fixed inset-0 bg-black/50 z-40 hidden">
-      <div class="fixed left-0 top-0 h-full w-64 bg-card border-r pt-14">
+    <div id="mobile-menu" class="md:hidden fixed inset-0 z-40 hidden">
+      <div id="mobile-menu-backdrop" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
+      <div id="mobile-menu-panel" class="absolute left-0 top-0 h-full w-64 bg-card border-r pt-14 -translate-x-full transition-transform duration-200 ease-out">
         <nav class="p-4 space-y-1">
           <a href="/admin" class="nav-item" data-section="dashboard">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +252,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
 <style>
   @reference "../styles/globals.css";
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground transition-colors;
+    @apply flex items-center gap-3 px-3 py-3 min-h-11 rounded-lg text-sm text-muted-foreground transition-colors;
   }
   .nav-item:hover {
     @apply bg-muted text-foreground;
@@ -276,15 +283,36 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
   // Mobile menu toggle
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
-  
-  mobileMenuBtn?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
-  });
-  
-  // Close menu when clicking overlay
-  mobileMenu?.addEventListener('click', (e) => {
-    if (e.target === mobileMenu) {
+  const mobileMenuPanel = document.getElementById('mobile-menu-panel');
+  const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+
+  function openMobileMenu() {
+    if (!mobileMenu || !mobileMenuPanel || !mobileMenuBackdrop) return;
+    mobileMenu.classList.remove('hidden');
+    // Trigger reflow for animation
+    mobileMenuPanel.offsetHeight;
+    mobileMenuPanel.classList.remove('-translate-x-full');
+    mobileMenuBackdrop.classList.remove('opacity-0');
+  }
+
+  function closeMobileMenu() {
+    if (!mobileMenu || !mobileMenuPanel || !mobileMenuBackdrop) return;
+    mobileMenuPanel.classList.add('-translate-x-full');
+    mobileMenuBackdrop.classList.add('opacity-0');
+    setTimeout(() => {
       mobileMenu.classList.add('hidden');
+    }, 200);
+  }
+
+  mobileMenuBtn?.addEventListener('click', openMobileMenu);
+
+  // Close menu when clicking backdrop
+  mobileMenuBackdrop?.addEventListener('click', closeMobileMenu);
+
+  // Keyboard navigation - Escape closes menu
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !mobileMenu?.classList.contains('hidden')) {
+      closeMobileMenu();
     }
   });
   
@@ -293,20 +321,9 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
   const themeToggleMobile = document.getElementById('admin-theme-toggle-mobile');
   
   function toggleTheme() {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
+    const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }
-  
-  // Initialize theme from localStorage
-  function initTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    }
-  }
-  
-  initTheme();
   
   themeToggle?.addEventListener('click', toggleTheme);
   themeToggleMobile?.addEventListener('click', toggleTheme);

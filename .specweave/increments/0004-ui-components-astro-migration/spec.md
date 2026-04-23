@@ -37,7 +37,7 @@ Migrate all React/shadcn UI components to pure Astro `.astro` files. This is Pha
 ## User Stories
 
 ### US-001: Migrate Basic Input Components
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** developer
 **I want** to migrate basic input components (Button, Input, Label, Textarea, Select)
@@ -52,7 +52,7 @@ Migrate all React/shadcn UI components to pure Astro `.astro` files. This is Pha
 - [x] **AC-US4-06**: All components support size variants (default, sm, lg, icon)
 
 ### US-002: Migrate Display Components
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** developer
 **I want** to migrate display components (Card, Badge, Avatar, Skeleton)
@@ -65,7 +65,7 @@ Migrate all React/shadcn UI components to pure Astro `.astro` files. This is Pha
 - [x] **AC-US4-10**: Skeleton.astro created with animate-pulse
 
 ### US-003: Migrate Interactive Components
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** developer
 **I want** to migrate interactive components (Tabs, Accordion, Pagination, ThemeToggle)
@@ -78,7 +78,7 @@ Migrate all React/shadcn UI components to pure Astro `.astro` files. This is Pha
 - [x] **AC-US4-14**: ThemeToggle.astro created with vanilla JS
 
 ### US-004: Delete Old React Components
-**Project**: timorbiz
+**Project**: timorlist
 
 **As a** developer
 **I want** to delete all old React component files

@@ -1,17 +1,17 @@
 {
   "version": "1.0.0",
   "projects": {
-    "timorbiz": {
-      "id": "timorbiz",
-      "name": "timorbiz",
+    "timorlist": {
+      "id": "timorlist",
+      "name": "Timorlist",
       "techStack": [],
       "keywords": [],
-      "created": "2026-03-22T14:47:59.077Z"
+      "created": "2026-04-23T00:00:00.000Z"
     }
   },
-  "defaultProject": "timorbiz",
+  "defaultProject": "timorlist",
   "metadata": {
-    "created": "2026-03-22T14:47:59.078Z",
-    "lastModified": "2026-03-22T14:47:59.078Z"
+    "created": "2026-04-23T00:00:00.000Z",
+    "lastModified": "2026-04-23T00:00:00.000Z"
   }
 }

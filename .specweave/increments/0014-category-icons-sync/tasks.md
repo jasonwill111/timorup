@@ -151,12 +151,12 @@ describe('Admin Icon Management', () => {
 
 | Task | Phase | Status |
 |------|-------|--------|
-| T-001 icons.ts | 1 | pending |
-| T-002 IconRenderer | 1 | pending |
-| T-003 IconPicker | 2 | pending |
-| T-004 Admin API | 2 | pending |
-| T-005 CategoryCard | 3 | pending |
-| T-006 Homepage | 3 | pending |
-| T-007 Categories page | 3 | pending |
-| T-008 Seed data | 4 | pending |
-| T-009 Idempotency | 4 | pending |
+| T-001 icons.ts | 1 | ✓ completed |
+| T-002 IconRenderer | 1 | ✓ completed |
+| T-003 IconPicker | 2 | ✓ completed |
+| T-004 Admin API | 2 | ✓ completed |
+| T-005 CategoryCard | 3 | ✓ completed |
+| T-006 Homepage | 3 | ✓ completed |
+| T-007 Categories page | 3 | ✓ completed |
+| T-008 Seed data | 4 | ✓ completed |
+| T-009 Idempotency | 4 | ✓ completed |
