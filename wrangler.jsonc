@@ -2,7 +2,7 @@
   // Cloudflare Workers entrypoint (Astro 6 + @astrojs/cloudflare v13)
   "main": "@astrojs/cloudflare/entrypoints/server",
 
-  "name": "timorbiz",
+  "name": "timorlist",
 
   // Update to deployment date
   "compatibility_date": "2025-03-22",
@@ -27,8 +27,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "timorbiz",
-      "database_id": "YOUR_D1_DATABASE_ID"
+      "database_name": "timorlist",
+      "database_id": "32e09cf0-a09b-44a5-b46d-90049c4c5d1c"
     }
   ],
 
@@ -36,7 +36,7 @@
   "r2_buckets": [
     {
       "binding": "MEDIA_BUCKET",
-      "bucket_name": "timorbiz-media"
+      "bucket_name": "timorlist-media"
     }
   ],
 

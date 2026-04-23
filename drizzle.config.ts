@@ -5,6 +5,8 @@ export default defineConfig({
   schema: './src/db/schema/index.ts',
   out: './src/db/migrations',
   dbCredentials: {
-    url: './local.db',
+    url: 'file:local.db',
   },
+  // Use wrangler d1 for migrations
+  migrationsProvider: undefined,
 });

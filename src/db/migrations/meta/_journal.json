@@ -8,6 +8,13 @@
       "when": 1772173217905,
       "tag": "0000_productive_silver_fox",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1776906270900,
+      "tag": "0001_vengeful_dust",
+      "breakpoints": true
     }
   ]
 }

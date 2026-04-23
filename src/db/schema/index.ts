@@ -34,9 +34,7 @@ export const categories = sqliteTable('categories', {
   parentId: text('parent_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (categories) => ({
-  slugIdx: index('categories_slug_idx').on(categories.slug),
-}));
+});
 
 // Media table
 export const media = sqliteTable('media', {
@@ -87,7 +85,6 @@ export const businessPages = sqliteTable('business_pages', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (businessPages) => ({
-  slugIdx: index('business_slug_idx').on(businessPages.slug),
   ownerIdx: index('business_owner_idx').on(businessPages.ownerId),
   statusIdx: index('business_status_idx').on(businessPages.status),
 }));
