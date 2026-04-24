@@ -495,6 +495,36 @@ function getErrorMessage(error: unknown): string {
 }
 ```
 
+### Cloudflare Cache API
+
+Built-in edge caching reduces D1 reads by ~80%:
+
+```typescript
+// Cache at edge (free tier: 50 calls/req)
+const cache = caches.default;
+const cached = await cache.match(request);
+
+if (!cached) {
+  // Fetch from D1, then cache
+  await cache.put(request, response);
+}
+```
+
+### Rate Limiting
+
+In-memory rate limiter for abuse protection:
+
+```typescript
+import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+
+const rateLimit = checkRateLimit(`biz:${clientIP}`);
+if (!rateLimit.allowed) {
+  return new Response(null, { status: 429, headers: getRateLimitHeaders(rateLimit) });
+}
+```
+
+**Limits**: 100 requests/minute per IP
+
 ## Development Notes
 
 - Uses `pnpm` as package manager (required)
@@ -595,6 +625,60 @@ import { toastSuccess, toastError } from '@/stores/toast';
   toastSuccess('Saved successfully!');
 </script>
 ```
+
+## SEO & GEO Optimization
+
+### Structured Data (JSON-LD)
+
+Business detail pages include:
+- `LocalBusiness` / `Restaurant` / `Hotel` schema
+- `BreadcrumbList` for navigation
+- `AggregateRating` for reviews
+
+### Dynamic Meta Tags
+
+Business pages update dynamically from API data:
+- `og:title`, `og:description`, `og:image`
+- `meta[name="description"]`
+
+## Deployment & Cost
+
+### Cloudflare Workers Free Tier
+
+| Resource | Limit | Project Usage |
+|----------|-------|---------------|
+| Workers requests | 100k/day | ~30k/day (with caching) |
+| D1 reads | 5M/day | ~1M/day (80% cache hit) |
+| D1 writes | 100k/day | ~1k/day |
+| R2 Class A | 1M/month | Uploads only |
+| R2 Class B | 10M/month | Image CDN |
+| Cache API | Unlimited | Reduces D1 reads |
+
+**100k PV/month costs $0** (stays within free tier)
+
+### Hybrid Mode Configuration
+
+Static pages (`prerender = true`) bypass Workers:
+- Served directly from Cloudflare CDN
+- Zero Workers invocations
+
+`_routes.json` excludes static routes from worker:
+```json
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": ["/faq", "/pricing", "/login", "/_astro/*"]
+}
+```
+
+### Cost Protection
+
+| Protection | Mechanism |
+|------------|-----------|
+| Rate limiting | 100 req/min per IP |
+| 404 caching | 5min TTL prevents bot abuse |
+| Cache API | Edge caching reduces D1 reads |
+| Observability off | Logs disabled (reduces costs) |
 
 ## Design Context
 
