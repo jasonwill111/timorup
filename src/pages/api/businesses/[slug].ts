@@ -6,6 +6,16 @@ import { auth } from '@/lib/auth';
 import { businessPages, categories, products, reviews } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+// Cache headers for cost optimization (10k-100k PV/month stays in free tier)
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+};
+
 export async function GET({ params }: { params: { slug: string } }) {
   try {
     const { slug } = params;
@@ -27,6 +37,7 @@ export async function GET({ params }: { params: { slug: string } }) {
     }
 
     let categoryName = 'Business';
+    let categorySlug = 'business';
     if (business.categoryId) {
       const cat = await db.select()
         .from(categories)
@@ -35,6 +46,7 @@ export async function GET({ params }: { params: { slug: string } }) {
         .get();
       if (cat) {
         categoryName = cat.name;
+        categorySlug = cat.slug;
       }
     }
 
@@ -54,17 +66,21 @@ export async function GET({ params }: { params: { slug: string } }) {
       data: {
         ...business,
         categoryName,
+        categorySlug,
         products: businessProducts,
         reviews: businessReviews,
       }
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...CACHE_HEADERS,
+      },
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: error.message }
+      error: { message: getErrorMessage(error) }
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -152,10 +168,10 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
       success: true,
       data: updated
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: error.message }
+      error: { message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

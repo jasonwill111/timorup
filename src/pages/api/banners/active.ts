@@ -30,7 +30,7 @@ export async function GET({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'FETCH_ERROR', message: error.message }

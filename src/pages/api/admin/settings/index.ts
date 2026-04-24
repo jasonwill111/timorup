@@ -116,7 +116,7 @@ export async function POST({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error saving settings:', error);
     return new Response(JSON.stringify({
       success: false,

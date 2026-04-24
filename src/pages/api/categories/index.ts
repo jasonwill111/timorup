@@ -4,6 +4,11 @@ export const prerender = false;
 import { db } from '@/lib/db';
 import { categories } from '@/db/schema';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 export async function GET() {
   try {
     const allCategories = await db.select().from(categories).all();
@@ -23,10 +28,10 @@ export async function GET() {
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: error.message }
+      error: { message: getErrorMessage(error) }
     }), {
       status: 500,
       headers: {

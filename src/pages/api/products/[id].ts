@@ -32,7 +32,7 @@ export async function GET({ params }: { params: { id: string } }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { message: error.message }

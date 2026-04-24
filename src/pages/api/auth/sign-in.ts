@@ -3,6 +3,9 @@ export const prerender = false;
 
 import { auth } from '@/lib/auth';
 
+// Type helper for better-auth API access
+const authApi = (auth as unknown as { api: typeof auth.api }).api;
+
 // Rate limiter
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -20,8 +23,10 @@ function checkRateLimit(identifier: string): boolean {
   return true;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const authApi = (auth as any).api;
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
 
 export async function POST({ request }: { request: Request }) {
   const clientIP = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
@@ -59,10 +64,10 @@ export async function POST({ request }: { request: Request }) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'SIGN_IN_ERROR', message: error.message || 'Invalid credentials' }
+      error: { code: 'SIGN_IN_ERROR', message: getErrorMessage(error) || 'Invalid credentials' }
     }), { status: 401, headers: { 'Content-Type': 'application/json' } });
   }
 }

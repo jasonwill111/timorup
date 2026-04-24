@@ -40,7 +40,7 @@ export async function GET({ url }: { url: URL }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { message: error.message }
@@ -93,7 +93,7 @@ export async function POST({ request }: { request: Request }) {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { message: error.message }

@@ -41,7 +41,7 @@ export async function PUT({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'UPDATE_ERROR', message: error.message }
@@ -60,7 +60,7 @@ export async function DELETE({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'DELETE_ERROR', message: error.message }

@@ -5,6 +5,11 @@ import { db } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, like, desc, sql, or, and, asc } from 'drizzle-orm';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 export async function GET({ url }: { url: URL }) {
   try {
     const search = url.searchParams.get('search') || '';
@@ -102,10 +107,10 @@ export async function GET({ url }: { url: URL }) {
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: error.message }
+      error: { message: getErrorMessage(error) }
     }), {
       status: 500,
       headers: {

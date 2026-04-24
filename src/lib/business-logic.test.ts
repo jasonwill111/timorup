@@ -240,30 +240,40 @@ describe('Business API Business Logic', () => {
   });
 
   describe('Category Filtering', () => {
-    const matchCategory = (businessCategoryId: string, filterSlug: string, categories: any[]): boolean => {
+    interface TestCategory {
+      id: string;
+      slug: string;
+    }
+
+    const matchCategory = (businessCategoryId: string, filterSlug: string | null | undefined, categories: TestCategory[]): boolean => {
       if (!filterSlug) return true;
       const category = categories.find(c => c.slug === filterSlug);
       return category ? businessCategoryId === category.id : true;
     };
 
     it('should match category by slug', () => {
-      const categories = [
+      const categories: TestCategory[] = [
         { id: 'cat-1', slug: 'restaurants' },
         { id: 'cat-2', slug: 'hotels' },
       ];
-      
+
       expect(matchCategory('cat-1', 'restaurants', categories)).toBe(true);
       expect(matchCategory('cat-2', 'restaurants', categories)).toBe(false);
     });
 
     it('should return true for empty filter', () => {
       expect(matchCategory('cat-1', '', [])).toBe(true);
-      expect(matchCategory('cat-1', null as any, [])).toBe(true);
+      expect(matchCategory('cat-1', null, [])).toBe(true);
     });
   });
 
   describe('Business Data Transformation', () => {
-    const transformBusinessForAPI = (business: any, categoryName: string) => {
+    interface TestBusiness {
+      id: string;
+      title: string;
+    }
+
+    const transformBusinessForAPI = (business: TestBusiness, categoryName: string) => {
       return {
         id: business.id,
         title: business.title,

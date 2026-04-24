@@ -17,6 +17,8 @@ const adapter = useCloudflare
     })
   : node({
       mode: 'standalone',
+      // Ensure prerendered pages work correctly with Node adapter
+      prerenderEnvironment: undefined,
     });
 
 export default defineConfig({

@@ -5,11 +5,19 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import CardContent from '../../components/ui/CardContent.astro';
+import Card from '../../components/ui/Card.astro';
 
-import Card from '../../components/ui/Card.astro'
+const { slug } = Astro.params;
+const siteUrl = import.meta.env.SITE || 'https://timorbiz.com';
+const canonicalUrl = `${siteUrl}/business/${slug}`;
 ---
 
-<Layout title="Business - TMBIZ">
+<Layout
+  title="Business - TMBIZ"
+  description="Business listing on TMBIZ"
+  canonical={canonicalUrl}
+>
+  <!-- Dynamic JSON-LD injected by script after data load -->
   <div id="business-page">
     <!-- Loading State -->
     <div id="loading" class="min-h-screen flex items-center justify-center">
@@ -244,9 +252,80 @@ import Card from '../../components/ui/Card.astro'
       
       const business = data.data;
       currentBusiness = business;
-      
+
       // Update page title
       document.title = `${business.title} - TMBIZ`;
+
+      // Update meta description
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.content = business.aboutUs?.substring(0, 160) || `${business.title} - ${business.categoryName || 'Business'} in Timor-Leste`;
+      }
+
+      // Update OG tags
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      const ogUrl = document.querySelector('meta[property="og:url"]');
+
+      if (ogTitle) ogTitle.content = `${business.title} - TMBIZ`;
+      if (ogDesc) ogDesc.content = business.aboutUs?.substring(0, 160) || business.title;
+      if (ogImage && business.bannerImageId) ogImage.content = `/api/media/${business.bannerImageId}`;
+      if (ogUrl) ogUrl.content = canonicalUrl;
+
+      // Inject LocalBusiness JSON-LD
+      const localBusinessSchema = {
+        "@context": "https://schema.org",
+        "@type": business.categorySlug === 'restaurants' ? 'Restaurant' :
+                business.categorySlug === 'hotels' ? 'Hotel' : 'LocalBusiness',
+        "name": business.title,
+        "description": business.aboutUs || business.title,
+        "url": canonicalUrl,
+        "image": business.profileImageId ? `/api/media/${business.profileImageId}` :
+                 business.bannerImageId ? `/api/media/${business.bannerImageId}` : undefined,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": business.address,
+          "addressLocality": "Dili",
+          "addressCountry": "TL"
+        },
+        "geo": business.locationLat && business.locationLng ? {
+          "@type": "GeoCoordinates",
+          "latitude": business.locationLat,
+          "longitude": business.locationLng
+        } : undefined,
+        "telephone": business.contactNumber ? `+670 ${business.contactNumber}` : undefined,
+        "aggregateRating": business.ratingCount > 0 ? {
+          "@type": "AggregateRating",
+          "ratingValue": business.ratingAverage,
+          "reviewCount": business.ratingCount
+        } : undefined
+      };
+
+      // Inject BreadcrumbList JSON-LD
+      const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl },
+          { "@type": "ListItem", "position": 2, "name": "Businesses", "item": `${siteUrl}/businesses` },
+          { "@type": "ListItem", "position": 3, "name": business.categoryName || 'Category', "item": `${siteUrl}/businesses?category=${business.categorySlug}` },
+          { "@type": "ListItem", "position": 4, "name": business.title, "item": canonicalUrl }
+        ]
+      };
+
+      // Remove existing JSON-LD and inject new
+      document.querySelectorAll('script[type="application/ld+json"]').forEach(el => el.remove());
+
+      const ldScript1 = document.createElement('script');
+      ldScript1.type = 'application/ld+json';
+      ldScript1.textContent = JSON.stringify(localBusinessSchema);
+      document.head.appendChild(ldScript1);
+
+      const ldScript2 = document.createElement('script');
+      ldScript2.type = 'application/ld+json';
+      ldScript2.textContent = JSON.stringify(breadcrumbSchema);
+      document.head.appendChild(ldScript2);
       
       // Banner
       const bannerImage = document.getElementById('banner-image');

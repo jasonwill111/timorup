@@ -43,7 +43,7 @@ export async function GET({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'FETCH_ERROR', message: error.message }
@@ -71,7 +71,7 @@ export async function POST({ request }: { request: Request }) {
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'CREATE_ERROR', message: error.message }
