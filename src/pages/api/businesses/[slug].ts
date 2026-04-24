@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { businessPages, categories, products, reviews } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -16,7 +17,36 @@ const CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
 };
 
-export async function GET({ params }: { params: { slug: string } }) {
+// Cache 404 responses to prevent bot abuse
+const NOT_FOUND_CACHE = {
+  'Cache-Control': 'public, max-age=300, s-maxage=600',
+};
+
+function getClientIP(request: Request): string {
+  return request.headers.get('cf-connecting-ip') ||
+         request.headers.get('x-forwarded-for')?.split(',')[0] ||
+         'unknown';
+}
+
+export async function GET({ params, request }: { params: { slug: string }; request: Request }) {
+  // Rate limiting
+  const clientIP = getClientIP(request);
+  const rateLimit = checkRateLimit(`biz:${clientIP}`);
+
+  if (!rateLimit.allowed) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: { message: 'Rate limit exceeded. Please try again later.' }
+    }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': rateLimit.resetIn.toString(),
+        ...getRateLimitHeaders(rateLimit),
+      },
+    });
+  }
+
   try {
     const { slug } = params;
 
@@ -27,12 +57,16 @@ export async function GET({ params }: { params: { slug: string } }) {
       .get();
 
     if (!business) {
+      // Cache 404s to prevent bot abuse (same slug = cached response)
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Business not found' }
       }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...NOT_FOUND_CACHE,
+        },
       });
     }
 

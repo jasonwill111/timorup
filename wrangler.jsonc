@@ -15,13 +15,12 @@
   // Static assets served from dist
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist",
-    "routing": "./dist/_routes.json"
+    "directory": "./dist"
   },
 
-  // Observability (logs, traces)
+  // Observability - disable for cost savings (logs can add costs)
   "observability": {
-    "enabled": true
+    "enabled": false
   },
 
   // D1 database binding

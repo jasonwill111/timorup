@@ -4,13 +4,38 @@ export const prerender = false;
 import { db } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, like, desc, sql, or, and, asc } from 'drizzle-orm';
+import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
 }
 
-export async function GET({ url }: { url: URL }) {
+function getClientIP(request: Request): string {
+  return request.headers.get('cf-connecting-ip') ||
+         request.headers.get('x-forwarded-for')?.split(',')[0] ||
+         'unknown';
+}
+
+export async function GET({ url, request }: { url: URL; request: Request }) {
+  // Rate limiting
+  const clientIP = getClientIP(request);
+  const rateLimit = checkRateLimit(`list:${clientIP}`);
+
+  if (!rateLimit.allowed) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: { message: 'Rate limit exceeded. Please try again later.' }
+    }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': rateLimit.resetIn.toString(),
+        ...getRateLimitHeaders(rateLimit),
+      },
+    });
+  }
+
   try {
     const search = url.searchParams.get('search') || '';
     const category = url.searchParams.get('category') || '';
