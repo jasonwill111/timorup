@@ -445,6 +445,7 @@ All UI components are pure Astro `.astro` files using TailwindCSS. No React depe
 | Accordion | `accordion.astro` |
 | Avatar | `avatar.astro` |
 | ThemeToggle | `theme-toggle.astro` |
+| ToastContainer | `toast-container.astro` |
 
 ### Non-Interactive Components
 
@@ -474,6 +475,25 @@ Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orde
 
 - Astro handles page rendering and all API routes (`src/pages/api/`)
 - Database operations use Drizzle ORM with SQLite/D1
+
+### Auth API Type Assertion
+
+better-auth requires type assertion for API access:
+
+```typescript
+const authApi = (auth as unknown as { api: typeof auth.api }).api;
+```
+
+### Error Handling
+
+Use `getErrorMessage` helper for TypeScript strict mode:
+
+```typescript
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+```
 
 ## Development Notes
 
@@ -542,6 +562,38 @@ import { Moon, Sun } from '@lucide/astro';
   --color-foreground: #f1f5f9;
   /* ... dark theme colors */
 }
+```
+
+## Toast Notification System
+
+State management with nanostores (no React dependency):
+
+```typescript
+// src/stores/toast.ts
+import { atom } from 'nanostores';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export interface Toast { id: string; message: string; type: ToastType; duration?: number; }
+export const toasts = atom<Toast[]>([]);
+
+// Convenience functions
+export function toast(message: string, type?: ToastType, duration?: number)
+export function toastSuccess(message: string, duration?: number)
+export function toastError(message: string, duration?: number)
+export function toastInfo(message: string, duration?: number)
+export function toastWarning(message: string, duration?: number)
+```
+
+Usage in Astro components:
+```astro
+---
+import { toastSuccess, toastError } from '@/stores/toast';
+// or use toast-container.astro for visual rendering
+---
+<ToastContainer />
+<script>
+  import { toastSuccess } from '@/stores/toast';
+  toastSuccess('Saved successfully!');
+</script>
 ```
 
 ## Design Context
