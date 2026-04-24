@@ -3,8 +3,8 @@ export const prerender = false;
 
 import { auth } from '@/lib/auth';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const authApi = (auth as any).api;
+// Type helper for better-auth API access
+const authApi = (auth as unknown as { api: typeof auth.api }).api;
 
 export async function POST({ request }: { request: Request }) {
   const cookieHeader = request.headers.get('cookie') || '';

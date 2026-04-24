@@ -5,6 +5,15 @@ import { db } from '@/lib/db';
 import { siteSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+interface PaymentInfoValue {
+  qrCode?: string;
+}
+
 // POST - Save all settings at once
 export async function POST({ request }: { request: Request }) {
   try {
@@ -28,7 +37,7 @@ export async function POST({ request }: { request: Request }) {
         value = String(valueObj.value ?? '');
       } else if (typeof valueObj === 'object' && valueObj !== null && 'qrCode' in valueObj) {
         // Special case for payment_info: { qrCode: "..." }
-        value = String((valueObj as any).qrCode ?? '');
+        value = String((valueObj as PaymentInfoValue).qrCode ?? '');
       } else {
         value = String(valueObj ?? '');
       }
@@ -56,14 +65,14 @@ export async function POST({ request }: { request: Request }) {
       status: 200, 
       headers: { 'Content-Type': 'application/json' } 
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error saving settings:', error);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: { code: 'SAVE_ERROR', message: error.message } 
-    }), { 
-      status: 500, 
-      headers: { 'Content-Type': 'application/json' } 
+    return new Response(JSON.stringify({
+      success: false,
+      error: { code: 'SAVE_ERROR', message: getErrorMessage(error) }
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 }

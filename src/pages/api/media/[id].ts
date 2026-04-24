@@ -6,12 +6,17 @@ import { media } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 async function getCurrentUser(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
   if (!tokenMatch) return null;
   try {
-    const authApi = (auth as any).api;
+    const authApi = (auth as unknown as { api: typeof auth.api }).api;
     const { user } = await authApi.getSession({
       headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
     });
@@ -36,10 +41,10 @@ export async function GET({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'FETCH_ERROR', message: error.message }
+      error: { code: 'FETCH_ERROR', message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
@@ -84,10 +89,10 @@ export async function DELETE({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'DELETE_ERROR', message: error.message }
+      error: { code: 'DELETE_ERROR', message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

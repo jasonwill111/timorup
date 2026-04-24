@@ -6,6 +6,11 @@ import { media, businessPages } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 5 * 1024 * 1024;
 
@@ -23,7 +28,7 @@ async function getCurrentUser(request: Request) {
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
   if (!tokenMatch) return null;
   try {
-    const authApi = (auth as any).api;
+    const authApi = (auth as unknown as { api: typeof auth.api }).api;
     const { user } = await authApi.getSession({
       headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
     });
@@ -95,10 +100,10 @@ export async function GET({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'FETCH_ERROR', message: error.message }
+      error: { code: 'FETCH_ERROR', message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
@@ -212,10 +217,10 @@ export async function POST({ request }: { request: Request }) {
       success: false,
       error: { code: 'NOT_FOUND', message: 'Endpoint not found' }
     }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'UPLOAD_ERROR', message: error.message }
+      error: { code: 'UPLOAD_ERROR', message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
@@ -259,10 +264,10 @@ export async function PUT({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'UPDATE_ERROR', message: error.message }
+      error: { code: 'UPDATE_ERROR', message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
@@ -307,10 +312,10 @@ export async function DELETE({ request }: { request: Request }) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'DELETE_ERROR', message: error.message }
+      error: { code: 'DELETE_ERROR', message: getErrorMessage(error) }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

@@ -14,7 +14,7 @@ const client = createClient({
 export const db = drizzle(client, { schema });
 
 // For Cloudflare Workers (production)
-export function createDb(d1Binding: any) {
+export function createDb(d1Binding: D1Database) {
   return drizzle(d1Binding, { schema });
 }
 
