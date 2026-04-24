@@ -24,9 +24,9 @@ Remove all Hono server code and migrate all API routes to Astro API endpoints. T
 **As a** developer **I want** to remove Hono server code **So that** the codebase uses only Astro API routes
 
 **Acceptance Criteria**:
-- [ ] **AC-US1-01**: Delete `src/server/` directory completely
-- [ ] **AC-US1-02**: Remove Hono imports from `astro.config.mjs`
-- [ ] **AC-US1-03**: No `src/server/` references in any file
+- [x] **AC-US1-01**: Delete `src/server/` directory completely
+- [x] **AC-US1-02**: Remove Hono imports from `astro.config.mjs`
+- [x] **AC-US1-03**: No `src/server/` references in any file
 
 ---
 
@@ -36,9 +36,9 @@ Remove all Hono server code and migrate all API routes to Astro API endpoints. T
 **As a** developer **I want** auth endpoints in Astro API **So that** authentication works via Astro
 
 **Acceptance Criteria**:
-- [ ] **AC-US2-01**: `/api/auth/*` routes work via Astro API
-- [ ] **AC-US2-02**: Session management via better-auth
-- [ ] **AC-US2-03**: All auth flows (login, register, logout) functional
+- [x] **AC-US2-01**: `/api/auth/*` routes work via Astro API
+- [x] **AC-US2-02**: Session management via better-auth
+- [x] **AC-US2-03**: All auth flows (login, register, logout) functional
 
 ---
 
@@ -48,9 +48,9 @@ Remove all Hono server code and migrate all API routes to Astro API endpoints. T
 **As a** developer **I want** business endpoints in Astro API **So that** CRUD operations work
 
 **Acceptance Criteria**:
-- [ ] **AC-US3-01**: GET/POST/PUT/DELETE `/api/businesses` work
-- [ ] **AC-US3-02**: Business search and filtering functional
-- [ ] **AC-US3-03**: Business categories and products work
+- [x] **AC-US3-01**: GET/POST/PUT/DELETE `/api/businesses` work
+- [x] **AC-US3-02**: Business search and filtering functional
+- [x] **AC-US3-03**: Business categories and products work
 
 ---
 
@@ -60,9 +60,9 @@ Remove all Hono server code and migrate all API routes to Astro API endpoints. T
 **As a** admin **I want** admin endpoints in Astro API **So that** dashboard works
 
 **Acceptance Criteria**:
-- [ ] **AC-US4-01**: Admin stats endpoint functional
-- [ ] **AC-US4-02**: Admin CRUD for businesses, users, categories work
-- [ ] **AC-US4-03**: Admin settings endpoint functional
+- [x] **AC-US4-01**: Admin stats endpoint functional
+- [x] **AC-US4-02**: Admin CRUD for businesses, users, categories work
+- [x] **AC-US4-03**: Admin settings endpoint functional
 
 ---
 
@@ -72,11 +72,11 @@ Remove all Hono server code and migrate all API routes to Astro API endpoints. T
 **As a** developer **I want** all remaining endpoints in Astro API **So that** full functionality works
 
 **Acceptance Criteria**:
-- [ ] **AC-US5-01**: Products API (`/api/products`) functional
-- [ ] **AC-US5-02**: Reviews API (`/api/reviews`) functional
-- [ ] **AC-US5-03**: Media upload endpoint functional
-- [ ] **AC-US5-04**: Orders API functional
-- [ ] **AC-US5-05**: Sitemap endpoint functional
+- [x] **AC-US5-01**: Products API (`/api/products`) functional
+- [x] **AC-US5-02**: Reviews API (`/api/reviews`) functional
+- [x] **AC-US5-03**: Media upload endpoint functional
+- [x] **AC-US5-04**: Orders API functional
+- [x] **AC-US5-05**: Sitemap endpoint functional
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 import '../styles/globals.css';
-import { Toaster } from 'sonner';
+import ToastContainer from '../components/ui/ToastContainer.astro';
 
 interface Props {
   title: string;
@@ -27,8 +27,8 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     </script>
   </head>
   <body class="min-h-screen bg-background">
-    <!-- Sonner Toast Container -->
-    <Toaster position="top-right" />
+    <!-- Toast Container -->
+    <ToastContainer />
     <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b z-50 flex items-center justify-between px-3">
       <button id="mobile-menu-btn" class="p-2 -ml-2 hover:bg-muted rounded-lg">
@@ -268,18 +268,12 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
 </style>
 
 <script>
-  // Import Sonner toast functions globally
-  import { toast } from 'sonner';
-  
+  // Import toast from nanostores
+  import { toast } from '../stores/toast';
+
   // Make toast available globally
   (window as any).showToast = function(message: string, type: 'success' | 'error' | 'info' = 'success') {
-    if (type === 'error') {
-      toast.error(message);
-    } else if (type === 'info') {
-      toast.info(message);
-    } else {
-      toast.success(message);
-    }
+    toast(message, type);
   };
   
   // Mobile menu toggle
