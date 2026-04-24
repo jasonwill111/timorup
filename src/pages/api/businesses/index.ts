@@ -17,6 +17,35 @@ function getClientIP(request: Request): string {
          'unknown';
 }
 
+// Cache TTL (shorter for list endpoints - 30 seconds)
+const CACHE_TTL_LIST = 30;
+
+async function getCachedResponse(cacheKey: string): Promise<Response | null> {
+  try {
+    const cache = caches.default;
+    return await cache.match(cacheKey);
+  } catch {
+    return null;
+  }
+}
+
+async function cacheResponse(cacheKey: string, response: Response, ttl: number): Promise<void> {
+  try {
+    const cache = caches.default;
+    const clonedResponse = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        ...Object.fromEntries(response.headers.entries()),
+        'Cache-Control': `public, max-age=${ttl}`,
+      },
+    });
+    await cache.put(cacheKey, clonedResponse);
+  } catch {
+    // Cache API not available locally
+  }
+}
+
 export async function GET({ url, request }: { url: URL; request: Request }) {
   // Rate limiting
   const clientIP = getClientIP(request);
@@ -34,6 +63,18 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
         ...getRateLimitHeaders(rateLimit),
       },
     });
+  }
+
+  // Build cache key from query params
+  const cacheKey = `/api/businesses${url.search}`;
+
+  // Check cache (only for non-search queries to keep results fresh)
+  const hasSearch = url.searchParams.get('search');
+  if (!hasSearch) {
+    const cachedResponse = await getCachedResponse(cacheKey);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
   }
 
   try {
@@ -111,12 +152,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       categoryName: categoryMap.get(biz.categoryId)?.name || 'Business',
     }));
 
-    // Cache in production: shorter cache for filtered queries
-    const cacheHeaders = process.env.NODE_ENV === 'production'
-      ? { 'Cache-Control': 'public, max-age=30, s-maxage=30, stale-while-revalidate=300' }
-      : { 'Cache-Control': 'no-store' };
-
-    return new Response(JSON.stringify({
+    const response = new Response(JSON.stringify({
       success: true,
       data: businessesWithCategory,
       pagination: {
@@ -129,9 +165,15 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        ...cacheHeaders,
       },
     });
+
+    // Cache non-search responses for 30 seconds
+    if (!hasSearch) {
+      await cacheResponse(cacheKey, response, CACHE_TTL_LIST);
+    }
+
+    return response;
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,

@@ -12,15 +12,9 @@ function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
-// Cache headers for cost optimization (10k-100k PV/month stays in free tier)
-const CACHE_HEADERS = {
-  'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
-};
-
-// Cache 404 responses to prevent bot abuse
-const NOT_FOUND_CACHE = {
-  'Cache-Control': 'public, max-age=300, s-maxage=600',
-};
+// Cache TTL settings (in seconds)
+const CACHE_TTL = 60; // 1 minute
+const CACHE_TTL_404 = 300; // 5 minutes for not found
 
 function getClientIP(request: Request): string {
   return request.headers.get('cf-connecting-ip') ||
@@ -28,7 +22,46 @@ function getClientIP(request: Request): string {
          'unknown';
 }
 
+// Cloudflare Cache API helper
+async function getCachedResponse(cacheKey: string): Promise<Response | null> {
+  try {
+    const cache = caches.default;
+    return await cache.match(cacheKey);
+  } catch {
+    return null;
+  }
+}
+
+async function cacheResponse(cacheKey: string, response: Response, ttl: number): Promise<void> {
+  try {
+    const cache = caches.default;
+    const clonedResponse = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        ...Object.fromEntries(response.headers.entries()),
+        'Cache-Control': `public, max-age=${ttl}, s-maxage=${ttl * 5}`,
+      },
+    });
+    await cache.put(cacheKey, clonedResponse);
+  } catch {
+    // Cache API not available (e.g., local dev)
+  }
+}
+
+async function purgeCache(cacheKey: string): Promise<void> {
+  try {
+    const cache = caches.default;
+    await cache.delete(cacheKey);
+  } catch {
+    // Ignore errors
+  }
+}
+
 export async function GET({ params, request }: { params: { slug: string }; request: Request }) {
+  const { slug } = params;
+  const cacheKey = `/api/businesses/${slug}`;
+
   // Rate limiting
   const clientIP = getClientIP(request);
   const rateLimit = checkRateLimit(`biz:${clientIP}`);
@@ -47,9 +80,13 @@ export async function GET({ params, request }: { params: { slug: string }; reque
     });
   }
 
-  try {
-    const { slug } = params;
+  // Check Cloudflare Cache first
+  const cachedResponse = await getCachedResponse(cacheKey);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
 
+  try {
     const business = await db.select()
       .from(businessPages)
       .where(eq(businessPages.slug, slug))
@@ -57,17 +94,18 @@ export async function GET({ params, request }: { params: { slug: string }; reque
       .get();
 
     if (!business) {
-      // Cache 404s to prevent bot abuse (same slug = cached response)
-      return new Response(JSON.stringify({
+      // Cache 404s to prevent bot abuse
+      const notFoundResponse = new Response(JSON.stringify({
         success: false,
         error: { message: 'Business not found' }
       }), {
         status: 404,
         headers: {
           'Content-Type': 'application/json',
-          ...NOT_FOUND_CACHE,
         },
       });
+      await cacheResponse(cacheKey, notFoundResponse, CACHE_TTL_404);
+      return notFoundResponse;
     }
 
     let categoryName = 'Business';
@@ -95,7 +133,7 @@ export async function GET({ params, request }: { params: { slug: string }; reque
       .orderBy(desc(reviews.createdAt))
       .all();
 
-    return new Response(JSON.stringify({
+    const response = new Response(JSON.stringify({
       success: true,
       data: {
         ...business,
@@ -108,9 +146,13 @@ export async function GET({ params, request }: { params: { slug: string }; reque
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        ...CACHE_HEADERS,
       },
     });
+
+    // Cache successful response
+    await cacheResponse(cacheKey, response, CACHE_TTL);
+
+    return response;
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
@@ -190,6 +232,9 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
         .set(updateValues)
         .where(eq(businessPages.slug, slug))
         .run();
+
+      // Purge cache so next GET sees updated data
+      await purgeCache(`/api/businesses/${slug}`);
     }
 
     const updated = await db.select()
