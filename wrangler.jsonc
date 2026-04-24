@@ -15,7 +15,8 @@
   // Static assets served from dist
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist"
+    "directory": "./dist",
+    "routing": "./dist/_routes.json"
   },
 
   // Observability (logs, traces)
