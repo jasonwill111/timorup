@@ -1,0 +1,39 @@
+// Banners API - GET active banners
+export const prerender = false;
+
+import { db } from '@/lib/db';
+import { adBanners } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+export async function GET({ request }: { request: Request }) {
+  try {
+    const banners = await db.select({
+      id: adBanners.id,
+      title: adBanners.title,
+      description: adBanners.description,
+      imageId: adBanners.imageId,
+      linkedBusinessPageId: adBanners.linkedBusinessPageId,
+      externalUrl: adBanners.externalUrl,
+    })
+    .from(adBanners)
+    .where(eq(adBanners.isActive, true))
+    .limit(5)
+    .all();
+
+    const bannersWithImages = banners.map((banner) => ({
+      ...banner,
+      imageUrl: banner.imageId ? `/api/media/${banner.imageId}` : '/images/default-banner.jpg',
+      linkUrl: banner.externalUrl || (banner.linkedBusinessPageId ? `/business/${banner.linkedBusinessPageId}` : null),
+    }));
+
+    return new Response(JSON.stringify({ success: true, data: bannersWithImages }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: { code: 'FETCH_ERROR', message: error.message }
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+}

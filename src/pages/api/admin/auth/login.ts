@@ -19,19 +19,18 @@ export async function POST({ request }: { request: Request }) {
     }
 
     // Find user by email
-    const userResult = await db.select()
+    const user = await db.select()
       .from(users)
       .where(eq(users.email, email))
-      .limit(1);
+      .limit(1)
+      .get();
 
-    if (userResult.length === 0) {
+    if (!user) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Invalid email or password' }
       }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
-
-    const user = userResult[0];
 
     // Check if user is admin
     if (user.role !== 'admin') {

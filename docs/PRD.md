@@ -113,9 +113,9 @@ classification:
 
 | 组件 | 技术 | 备注 |
 |------|------|------|
-| 前端框架 | Astro 5.x + React 19 | SSR 模式 |
-| API 框架 | Hono 4.x | Edge 部署 |
-| UI 组件 | shadcn/ui (Base UI) | 最新版 |
+| 前端框架 | Astro 6.x | SSR 模式 |
+| API 框架 | Astro API Routes | SSR 模式 |
+| UI 组件 | 纯 Astro + TailwindCSS | 无 React |
 | 认证 | Better Auth | 支持 OAuth |
 | ORM | Drizzle ORM | D1 原生支持 |
 | 数据库 | Cloudflare D1 (SQLite) | 开发/生产 |

@@ -28,12 +28,12 @@
 - [x] src/styles/globals.css 引入 tailwind
 - [x] 配置主题颜色 (浅色/深色)
 
-### INF-004: 项目配置 shadcn/ui
+### INF-004: 项目配置 Astro UI 组件
 
 **验收标准:**
-- [x] 安装 Base UI 相关依赖
-- [x] 创建基础组件 (button, card, input, etc.)
+- [x] 创建基础组件 (Button, Card, Input, etc.)
 - [x] 组件支持浅色/深色主题
+- [x] 使用 TailwindCSS v4 @theme 配置
 
 ### INF-005: 项目配置 Drizzle ORM
 

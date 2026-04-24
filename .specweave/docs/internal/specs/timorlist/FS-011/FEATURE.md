@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-04-19T00:00:00.000Z
-lastUpdated: 2026-04-19
+lastUpdated: 2026-04-23
 tldr: "Restore /faq and /about pages that were lost during recent changes."
 complexity: medium
 stakeholder_relevant: true

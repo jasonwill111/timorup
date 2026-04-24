@@ -6,7 +6,7 @@ import { categories } from '@/db/schema';
 
 export async function GET() {
   try {
-    const allCategories = await db.select().from(categories);
+    const allCategories = await db.select().from(categories).all();
     
     // Cache in production: stale-while-revalidate for 60 seconds
     const cacheHeaders = process.env.NODE_ENV === 'production'

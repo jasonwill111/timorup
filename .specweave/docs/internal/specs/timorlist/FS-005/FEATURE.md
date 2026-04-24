@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-04-18T00:00:00.000Z
-lastUpdated: 2026-04-19
+lastUpdated: 2026-04-23
 tldr: "Integrate TipTap framework-agnostic rich text editor for blog posts and business about-us content."
 complexity: medium
 stakeholder_relevant: true

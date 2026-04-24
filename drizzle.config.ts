@@ -7,6 +7,4 @@ export default defineConfig({
   dbCredentials: {
     url: 'file:local.db',
   },
-  // Use wrangler d1 for migrations
-  migrationsProvider: undefined,
 });

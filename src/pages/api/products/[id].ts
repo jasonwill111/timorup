@@ -9,12 +9,13 @@ export async function GET({ params }: { params: { id: string } }) {
   try {
     const { id } = params;
     
-    const productList = await db.select()
+    const product = await db.select()
       .from(products)
       .where(eq(products.id, id))
-      .limit(1);
+      .limit(1)
+      .get();
 
-    if (productList.length === 0) {
+    if (!product) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Product not found' }
@@ -26,7 +27,7 @@ export async function GET({ params }: { params: { id: string } }) {
 
     return new Response(JSON.stringify({
       success: true,
-      data: productList[0]
+      data: product
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

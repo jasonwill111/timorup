@@ -14,7 +14,7 @@ export async function GET({ url }: { url: URL }) {
     const limit = parseInt(url.searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
-    let conditions = [];
+    const conditions = [];
     if (status) {
       conditions.push(eq(businessPages.status, status));
     }
@@ -41,16 +41,18 @@ export async function GET({ url }: { url: URL }) {
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(businessPages.createdAt))
     .limit(limit)
-    .offset(offset);
+    .offset(offset)
+    .all();
 
     const countResult = await db.select({ count: sql`count(*)` })
       .from(businessPages)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .get();
 
     return new Response(JSON.stringify({
       success: true,
       data: businessesResult,
-      total: Number(countResult[0]?.count) || 0,
+      total: Number(countResult?.count) || 0,
       page,
       limit
     }), {
@@ -83,9 +85,10 @@ export async function POST({ request }: { request: Request }) {
     const existing = await db.select({ id: businessPages.id })
       .from(businessPages)
       .where(eq(businessPages.slug, slug))
-      .limit(1);
+      .limit(1)
+      .get();
 
-    if (existing.length > 0) {
+    if (existing) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Slug already exists' }
@@ -93,14 +96,14 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const id = `biz-${Date.now()}`;
-    
+
     // Use first available user as default owner if not specified
     let finalOwnerId = ownerId;
     if (!finalOwnerId) {
-      const usersResult = await db.select({ id: users.id }).from(users).limit(1);
-      finalOwnerId = usersResult[0]?.id || 'user-1';
+      const usersResult = await db.select({ id: users.id }).from(users).limit(1).get();
+      finalOwnerId = usersResult?.id || 'user-1';
     }
-    
+
     await db.insert(businessPages).values({
       id,
       title,
@@ -113,14 +116,14 @@ export async function POST({ request }: { request: Request }) {
       ownerId: finalOwnerId,
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    }).run();
 
     return new Response(JSON.stringify({
       success: true,
       data: { id, title, slug }
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
-    console.error('Create business error:', error);
+    console.error('Admin businesses error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: { message: 'Failed to create business' }

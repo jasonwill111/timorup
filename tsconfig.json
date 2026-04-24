@@ -9,7 +9,6 @@
       "@lib/*": ["src/lib/*"],
       "@layouts/*": ["src/layouts/*"],
       "@pages/*": ["src/pages/*"],
-      "@server/*": ["src/server/*"],
       "@db/*": ["src/db/*"]
     }
   }

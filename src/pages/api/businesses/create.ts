@@ -56,9 +56,10 @@ export async function POST({ request }: { request: Request }) {
     const existingSlug = await db.select()
       .from(businessPages)
       .where(eq(businessPages.slug, businessSlug))
-      .limit(1);
+      .limit(1)
+      .get();
 
-    if (existingSlug.length > 0) {
+    if (existingSlug) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Business with this name already exists' }
@@ -66,11 +67,11 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const id = `biz-${Date.now()}`;
-    const newBusiness = await db.insert(businessPages).values({
+    await db.insert(businessPages).values({
       id,
       title,
       slug: businessSlug,
-      ownerId: userId, // Derived from session, not from request body
+      ownerId: userId,
       categoryId: categoryId || null,
       contactName: contactName || null,
       contactNumber: contactNumber || null,
@@ -83,11 +84,11 @@ export async function POST({ request }: { request: Request }) {
       locationLat: latitude || null,
       locationLng: longitude || null,
       status: 'draft',
-    }).returning();
+    }).run();
 
     return new Response(JSON.stringify({
       success: true,
-      data: newBusiness[0]
+      data: { id, title, slug: businessSlug }
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Create business error:', error);

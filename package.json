@@ -24,8 +24,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.3",
-    "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/cloudflare": "^13.2.0",
+    "@astrojs/sitemap": "^3.7.2",
     "@aws-sdk/client-s3": "^3.744.0",
     "@aws-sdk/lib-storage": "^3.744.0",
     "@better-auth/drizzle-adapter": "^1.5.3",
@@ -39,12 +39,11 @@
     "@tiptap/pm": "^3.20.4",
     "@tiptap/starter-kit": "^3.20.4",
     "@types/leaflet": "^1.9.21",
-    "astro": "^6.0.8",
+    "astro": "^6.1.9",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.5.3",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
-    "hono": "^4.12.5",
     "leaflet": "^1.9.4",
     "nanostores": "^1.0.0",
     "node-fetch": "3",
@@ -55,21 +54,21 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@astrojs/node": "^10.0.3",
+    "@astrojs/node": "^10.0.6",
     "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/bcryptjs": "^3.0.0",
-    "@vitest/coverage-istanbul": "^4.1.4",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.1.5",
+    "@vitest/coverage-v8": "^4.1.5",
+    "@vitest/ui": "^4.1.5",
     "drizzle-kit": "^0.31.9",
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "miniflare": "^4.20260415.0",
     "typescript": "^5.7.3",
-    "vitest": "^4.0.18",
-    "wrangler": "^4.76.0"
+    "vitest": "^4.1.5",
+    "wrangler": "^4.84.1"
   },
   "engines": {
     "node": ">=20"

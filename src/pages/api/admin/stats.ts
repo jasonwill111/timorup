@@ -3,37 +3,39 @@ export const prerender = false;
 
 import { db } from '@/lib/db';
 import { users, businessPages, orders, categories } from '@/db/schema';
-import { eq, desc, sql, count } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 export async function GET() {
   try {
     // Get total users
-    const usersResult = await db.select({ count: sql`count(*)` }).from(users);
-    const totalUsers = Number(usersResult[0]?.count) || 0;
+    const usersResult = await db.select({ count: sql`count(*)` }).from(users).get();
+    const totalUsers = Number(usersResult?.count) || 0;
 
     // Get total businesses
-    const businessesResult = await db.select({ count: sql`count(*)` }).from(businessPages);
-    const totalBusinesses = Number(businessesResult[0]?.count) || 0;
+    const businessesResult = await db.select({ count: sql`count(*)` }).from(businessPages).get();
+    const totalBusinesses = Number(businessesResult?.count) || 0;
 
     // Get live businesses
     const liveBusinessesResult = await db.select({ count: sql`count(*)` })
       .from(businessPages)
-      .where(eq(businessPages.status, 'live'));
-    const liveBusinesses = Number(liveBusinessesResult[0]?.count) || 0;
+      .where(eq(businessPages.status, 'live'))
+      .get();
+    const liveBusinesses = Number(liveBusinessesResult?.count) || 0;
 
     // Get total orders
-    const ordersResult = await db.select({ count: sql`count(*)` }).from(orders);
-    const totalOrders = Number(ordersResult[0]?.count) || 0;
+    const ordersResult = await db.select({ count: sql`count(*)` }).from(orders).get();
+    const totalOrders = Number(ordersResult?.count) || 0;
 
     // Get total revenue (sum of paid orders)
     const revenueResult = await db.select({ total: sql`COALESCE(SUM(amount), 0)` })
       .from(orders)
-      .where(eq(orders.status, 'paid'));
-    const totalRevenue = Number(revenueResult[0]?.total) || 0;
+      .where(eq(orders.status, 'paid'))
+      .get();
+    const totalRevenue = Number(revenueResult?.total) || 0;
 
     // Get categories count
-    const categoriesResult = await db.select({ count: sql`count(*)` }).from(categories);
-    const totalCategories = Number(categoriesResult[0]?.count) || 0;
+    const categoriesResult = await db.select({ count: sql`count(*)` }).from(categories).get();
+    const totalCategories = Number(categoriesResult?.count) || 0;
 
     return new Response(JSON.stringify({
       success: true,

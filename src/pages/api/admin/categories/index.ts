@@ -10,7 +10,8 @@ export async function GET() {
   try {
     const categoriesResult = await db.select()
       .from(categories)
-      .orderBy(desc(categories.createdAt));
+      .orderBy(desc(categories.createdAt))
+      .all();
 
     return new Response(JSON.stringify({
       success: true,
@@ -35,17 +36,18 @@ export async function POST({ request }: { request: Request }) {
     const { name, slug, description, icon } = body;
 
     const id = `cat-${Date.now()}`;
-    const newCategory = await db.insert(categories).values({
+
+    await db.insert(categories).values({
       id,
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
       description: description || '',
       icon: icon || '',
-    }).returning();
+    }).run();
 
     return new Response(JSON.stringify({
       success: true,
-      data: newCategory[0]
+      data: { id, name, slug }
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Create category error:', error);
@@ -78,9 +80,10 @@ export async function PUT({ request }: { request: Request }) {
         updatedAt: sql`(strftime('%s', 'now'))`,
       })
       .where(eq(categories.id, id))
-      .returning();
+      .returning()
+      .get();
 
-    if (!updatedCategory.length) {
+    if (!updatedCategory) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Category not found' }
@@ -89,7 +92,7 @@ export async function PUT({ request }: { request: Request }) {
 
     return new Response(JSON.stringify({
       success: true,
-      data: updatedCategory[0]
+      data: updatedCategory
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Update category error:', error);

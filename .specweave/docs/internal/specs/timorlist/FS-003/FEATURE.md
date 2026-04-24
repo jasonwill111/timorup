@@ -2,10 +2,10 @@
 id: FS-003
 title: "Dependencies Cleanup - Remove React/shadcn"
 type: feature
-status: planned
+status: completed
 priority: P0
 created: 2026-04-18
-lastUpdated: 2026-04-19
+lastUpdated: 2026-04-23
 tldr: "Remove React/shadcn dependencies from the project and add Astro-native alternatives."
 complexity: high
 stakeholder_relevant: true
@@ -16,7 +16,7 @@ stakeholder_relevant: true
 ## TL;DR
 
 **What**: Remove React/shadcn dependencies from the project and add Astro-native alternatives.
-**Status**: planned | **Priority**: P0
+**Status**: completed | **Priority**: P0
 **User Stories**: 4
 
 ![Dependencies Cleanup - Remove React/shadcn illustration](assets/feature-fs-003.jpg)
@@ -29,7 +29,7 @@ Remove React/shadcn dependencies from the project and add Astro-native alternati
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0003-deps-cleanup-react-removal](../../../../../increments/0003-deps-cleanup-react-removal/spec.md) | ⏳ planned | 2026-04-18 |
+| [0003-deps-cleanup-react-removal](../../../../../increments/0003-deps-cleanup-react-removal/spec.md) | ✅ completed | 2026-04-18 |
 
 ## User Stories
 

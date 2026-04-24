@@ -17,17 +17,15 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 | Component | Technology | Version | Notes |
 |-----------|------------|---------|-------|
-| **Frontend** | Astro | 5.x (latest) | SSR mode with React integration |
-| **UI Framework** | React | 19.x | Latest stable |
-| **API Framework** | Hono | 4.x | Edge-optimized |
+| **Frontend** | Astro | 6.1.x | SSR mode, pure .astro |
+| **API Framework** | Astro API Routes | - | src/pages/api/* |
 | **Database** | D1 (SQLite) | - | Cloudflare D1 |
-| **ORM** | Drizzle ORM | latest | Type-safe |
-| **Authentication** | Better Auth | latest | OAuth support |
-| **UI Components** | shadcn/ui | latest | Based on Base UI (NOT Radix) |
-| **Styling** | Tailwind CSS | 4.x | Latest stable |
-| **Rich Text Editor** | Lexical | latest | Notion-like editing |
-| **Validation** | Zod | latest | Schema validation |
-| **Toast Notifications** | Sonner | latest | Lightweight |
+| **ORM** | Drizzle ORM | 0.45.x | Type-safe |
+| **Authentication** | Better Auth | 1.5.x | OAuth support |
+| **UI Components** | Pure Astro + TailwindCSS | - | No React/shadcn |
+| **Styling** | Tailwind CSS | 4.x | @theme config |
+| **Rich Text Editor** | TipTap | 3.x | Notion-like editing |
+| **Validation** | Zod | 4.x | Schema validation |
 | **Media Storage** | Cloudflare R2 | - | S3-compatible |
 | **Maps** | Leaflet + OpenStreetMap | - | Free, open source |
 | **Package Manager** | pnpm | latest | REQUIRED |
@@ -48,21 +46,16 @@ _This file contains critical rules and patterns that AI agents must follow when 
 ```
 timorbiz/
 ├── src/
-│   ├── components/     # UI components (shadcn + custom)
-│   ├── layouts/         # Astro layouts
-│   ├── pages/           # Astro pages (routes)
-│   ├── lib/             # Utilities, clients
-│   ├── server/          # Hono API
-│   ├── api/             # API routes
-│   ├── db/              # Drizzle schema
-│   │   └── schema/      # Table definitions
-│   ├── hooks/           # React hooks
-│   ├── styles/          # Global styles
-│   └── utils/           # Helper functions
-├── public/              # Static assets
+│   ├── components/     # UI components (pure Astro + TailwindCSS)
+│   ├── layouts/       # Astro layouts
+│   ├── pages/         # Astro pages + API routes (src/pages/api/*)
+│   ├── lib/           # Utilities (auth, db, email, media)
+│   ├── db/            # Drizzle schema
+│   │   └── schema/    # Table definitions
+│   └── styles/        # Global styles (TailwindCSS v4 @theme)
+├── public/            # Static assets
 ├── wrangler.toml
 ├── astro.config.mjs
-├── tailwind.config.*
 └── package.json
 ```
 
@@ -147,26 +140,20 @@ All other sections:
 
 **Business listing and Product listing both use 2 columns on mobile.**
 
-### 3.7 shadcn/ui Components (Base UI)
+### 3.7 Astro UI Components
 
-**IMPORTANT**: Use the latest shadcn/ui which is now based on **@base-ui** (NOT Radix UI).
+**Pure Astro + TailwindCSS** — No React, No shadcn/ui.
 
-Use shadcn components from: `npx shadcn@latest add [component]`
+**Core components** (`src/components/ui/`):
+- Button, Input, Select, Textarea
+- Card, Badge, Label, Skeleton
+- Avatar, Accordion, Tabs
+- Dialog (native `<dialog>`), Toast (Sonner)
 
-**Core components to use:**
-- Button, Card, Input, Select
-- Checkbox, Radio, Switch
-- Dialog, Modal, Sheet (drawer)
-- Dropdown Menu, Tabs
-- Form, FormField
-- Avatar, Badge
-- Skeleton, Toast
-
-**Custom components extend shadcn:**
-- BusinessCard (extends Card)
-- ProductCard (extends Card)
-- WhatsAppButton (extends Button)
-- CategoryPill (extends Badge)
+**Custom components** (`src/components/`):
+- BusinessCard, ProductCard
+- WhatsAppButton, CategoryPill
+- RichTextEditor (TipTap)
 
 ### 3.8 UI Consistency Patterns
 
@@ -285,9 +272,9 @@ Use shadcn components from: `npx shadcn@latest add [component]`
 
 ---
 
-## 7. Lexical Editor Usage
+## 7. TipTap Rich Text Editor
 
-Lexical 用于:
+TipTap 3.x 用于:
 - **前端用户**: 创建/编辑商业页面内容（About Us, Latest Updates）
 - **Admin/Editor**: 创建 Posts (博客/新闻), 管理内容
 
@@ -295,6 +282,7 @@ Lexical 用于:
 - Notion-like 块编辑体验
 - 支持富文本（标题、列表、链接、图片等）
 - 移动端友好
+- 框架无关 (vanilla JS 集成)
 
 ---
 

@@ -1,67 +1,59 @@
-# Cloudflare Pages Configuration for Edge Caching
-# Place this in _headers file in the public folder
+# Cloudflare Pages/Workers - Edge Caching Headers
+# Zero-cost optimized configuration
 
 # ===========================================
-# CACHE CONTROL HEADERS
+# STATIC ASSETS - Cache Forever (immutable)
 # ===========================================
-
-# Static assets - cache aggressively at edge
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Images - cache at edge and in browser
-# Using Cloudflare Images CDN for transformations
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
 /images/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
-# HTML pages - cache at edge with SWR
-# Cache for 1 hour at edge, revalidate in background
-/index.html
+# ===========================================
+# HTML PAGES - Smart Caching
+# ===========================================
+# Static pages (no user data) - cache heavily
+~/*.html
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 
-/businesses/index.html
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+# Homepage - cache with background refresh
+/
+  Cache-Control: public, max-age=600, stale-while-revalidate=3600
 
-/search/index.html
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+# ===========================================
+# SSR PAGES - No Cache (user-specific)
+# ===========================================
+/account
+  Cache-Control: no-cache, no-store, must-revalidate
 
-# Static pages - cache for longer
-/*.html
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/search
+  Cache-Control: no-cache, no-store, must-revalidate
 
-# API endpoints - don't cache
+/business/*
+  Cache-Control: public, max-age=60, stale-while-revalidate=300
+
+# ===========================================
+# API ENDPOINTS - No Cache
+# ===========================================
 /api/*
   Cache-Control: no-cache, no-store, must-revalidate
 
 # ===========================================
 # SECURITY HEADERS
 # ===========================================
-
-# HSTS
 /*
-  Strict-Transport-Security: max-age=31536000; includeSubDomains
-
-# X-Frame-Options
-/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   X-Frame-Options: SAMEORIGIN
-
-# X-Content-Type-Options
-/*
   X-Content-Type-Options: nosniff
-
-# Referrer-Policy
-/*
   Referrer-Policy: strict-origin-when-cross-origin
-
-# Content Security Policy
-# Note: Adjust based on your needs
-/*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:;
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 # ===========================================
-# COMPRESSION
+# CONTENT NEGOTIATION
 # ===========================================
-
-# Enable Brotli compression (better than gzip)
 /*
-  Content-Encoding: br
+  Vary: Accept-Encoding

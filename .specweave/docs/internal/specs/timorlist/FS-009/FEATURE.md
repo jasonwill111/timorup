@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-04-19T00:00:00.000Z
-lastUpdated: 2026-04-19
+lastUpdated: 2026-04-23
 tldr: "Show modal overlay on expired business pages - only display business name and centered modal with subscription expired message, hiding all other content."
 complexity: medium
 stakeholder_relevant: true

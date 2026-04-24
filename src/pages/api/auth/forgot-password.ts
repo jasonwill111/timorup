@@ -18,12 +18,13 @@ export async function POST({ request }: { request: Request }) {
     }
 
     // Check if user exists
-    const userResult = await db.select()
+    const user = await db.select()
       .from(users)
       .where(eq(users.email, email))
-      .limit(1);
+      .limit(1)
+      .get();
 
-    if (userResult.length === 0) {
+    if (!user) {
       // Don't reveal if email exists
       return new Response(JSON.stringify({
         success: true,

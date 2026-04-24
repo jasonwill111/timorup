@@ -1,61 +1,68 @@
 // Auth API - Sign In
 export const prerender = false;
 
-import { db } from '@/lib/db';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+
+// Rate limiter
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000;
+const MAX_REQUESTS = 10;
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const record = rateLimitStore.get(identifier);
+  if (!record || now > record.resetTime) {
+    rateLimitStore.set(identifier, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (record.count >= MAX_REQUESTS) return false;
+  record.count++;
+  return true;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const authApi = (auth as any).api;
 
 export async function POST({ request }: { request: Request }) {
+  const clientIP = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
+
+  if (!checkRateLimit(`signin:${clientIP}`)) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Please try again later.' }
+    }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+  }
+
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, rememberMe } = body;
 
-    // Validate required fields
     if (!email || !password) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'Email and password are required' }
+        error: { code: 'INVALID_REQUEST', message: 'Email and password are required' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Find user by email
-    const userResult = await db.select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const { user, session } = await authApi.signIn({
+      body: { email, password },
+    });
 
-    if (userResult.length === 0) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: { message: 'Invalid email or password' }
-      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-    }
+    const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7;
 
-    const user = userResult[0];
-
-    // In real app, verify hashed password!
-    // For demo, accept any password
-    
-    // Create session
-    const sessionId = `session-${Date.now()}-${user.id}`;
-    
-    return new Response(JSON.stringify({
-      success: true,
-      data: {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role
-        },
-        sessionId
+    const response = new Response(JSON.stringify({ success: true, user, session }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': `better-auth.session_token=${session.token}; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Path=/`
       }
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (error) {
-    console.error('Sign in error:', error);
+    });
+
+    return response;
+  } catch (error: any) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: 'Failed to sign in' }
-    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      error: { code: 'SIGN_IN_ERROR', message: error.message || 'Invalid credentials' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } });
   }
 }

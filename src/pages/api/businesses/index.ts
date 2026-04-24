@@ -30,8 +30,9 @@ export async function GET({ url }: { url: URL }) {
       const cat = await db.select()
         .from(categories)
         .where(eq(categories.slug, category))
-        .limit(1);
-      
+        .limit(1)
+        .all();
+
       if (cat.length > 0) {
         conditions.push(eq(businessPages.categoryId, cat[0].id));
       }
@@ -59,17 +60,19 @@ export async function GET({ url }: { url: URL }) {
       .where(and(...conditions))
       .orderBy(orderBy)
       .limit(limit)
-      .offset(offset);
+      .offset(offset)
+      .all();
 
-// Get total count
+    // Get total count
     const totalResult = await db.select({ count: sql<number>`count(*)` })
       .from(businessPages)
-      .where(and(...conditions));
-    const total = Number(totalResult[0]?.count) || 0;
+      .where(and(...conditions))
+      .get();
+    const total = Number(totalResult?.count) || 0;
 
     // Get category names
     const categoryMap = new Map();
-    const allCategories = await db.select().from(categories);
+    const allCategories = await db.select().from(categories).all();
     allCategories.forEach((cat: any) => categoryMap.set(cat.id, cat));
 
     // Add category name to businesses

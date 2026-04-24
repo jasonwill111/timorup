@@ -8,7 +8,7 @@
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │   ┌─────────────┐     ┌─────────────┐     ┌─────────────┐              │
-│   │ Astro Pages │     │ Hono API   │     │   D1 DB     │              │
+│   │ Astro Pages │     │ Astro API  │     │   D1 DB     │              │
 │   │  (前端 SSR) │ ←→  │ (Workers)  │ ←→  │  (SQLite)   │              │
 │   └─────────────┘     └─────────────┘     └─────────────┘              │
 │         ↓                     ↓                   ↓                       │
@@ -31,10 +31,10 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Presentation Layer                        │
-│  (Astro Pages + React Components + shadcn/ui)              │
+│  (Astro Pages + Pure Astro + TailwindCSS)                   │
 ├─────────────────────────────────────────────────────────────┤
 │                    API Layer                                │
-│  (Hono Routes - /api/*)                                   │
+│  (Astro API Routes - src/pages/api/*)                     │
 ├─────────────────────────────────────────────────────────────┤
 │                    Business Logic Layer                     │
 │  (Services / Hooks)                                        │
@@ -55,7 +55,7 @@
 timorbiz/
 ├── src/
 │   ├── components/
-│   │   ├── ui/                    # shadcn/ui 基础组件
+│   │   ├── ui/                    # Astro UI 组件
 │   │   │   ├── button.tsx
 │   │   │   ├── card.tsx
 │   │   │   ├── input.tsx
@@ -127,22 +127,22 @@ timorbiz/
 │   │   ├── map.ts                  # 地图工具
 │   │   └── utils.ts                # 通用工具
 │   │
-│   ├── server/
-│   │   ├── index.ts                # Hono 入口
-│   │   ├── routes/
-│   │   │   ├── auth.ts              # 认证路由
-│   │   │   ├── businesses.ts        # 商家路由
-│   │   │   ├── products.ts          # 产品路由
-│   │   │   ├── reviews.ts           # 评论路由
-│   │   │   ├── media.ts             # 媒体路由
-│   │   │   ├── categories.ts        # 分类路由
-│   │   │   ├── orders.ts            # 订单路由
-│   │   │   └── settings.ts          # 设置路由
-│   │   ├── middleware/
-│   │   │   ├── auth.ts              # 认证中间件
-│   │   │   └── admin.ts             # 管理员中间件
-│   │   └── bindings/
-│   │       └── index.ts             # 环境变量绑定
+│   ├── pages/api/
+│   │   ├── admin/                   # Admin API routes
+│   │   │   ├── auth/login.ts        # 登录
+│   │   │   ├── businesses/index.ts   # 商家管理
+│   │   │   ├── categories/index.ts  # 分类管理
+│   │   │   ├── orders/index.ts      # 订单管理
+│   │   │   ├── settings/index.ts    # 设置管理
+│   │   │   ├── stats.ts             # 统计数据
+│   │   │   └── users/index.ts      # 用户管理
+│   │   ├── auth/[...all].ts         # Better Auth
+│   │   ├── businesses/[slug].ts     # 商家 CRUD
+│   │   ├── businesses/index.ts      # 商家列表
+│   │   ├── products/index.ts        # 产品管理
+│   │   ├── reviews/index.ts         # 评论管理
+│   │   ├── media/index.ts           # 媒体上传
+│   │   └── banners/index.ts         # 广告管理
 │   │
 │   ├── db/
 │   │   ├── schema/

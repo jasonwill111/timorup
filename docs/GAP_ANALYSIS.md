@@ -28,18 +28,17 @@
 |------|---------|---------|
 | 所有 19 个页面路由 | `src/pages/` | ✅ |
 | Email/Phone 注册登录 | `src/pages/api/auth/` | ✅ |
-| Google/Facebook OAuth | `src/server/routes/auth.ts` | ✅ |
+| Google/Facebook OAuth | `src/pages/api/auth/` | ✅ |
 | 商家 CRUD + 3 天试用 | `src/pages/business/create.astro` | ✅ |
 | 分类筛选 + 搜索 + 排序 | `src/pages/businesses/index.astro` | ✅ |
-| 产品管理 + 套餐配额 | `src/server/routes/products.ts` | ✅ |
+| 产品管理 + 套餐配额 | `src/pages/api/products/` | ✅ |
 | 评分评论 + 编辑/删除 | `src/components/reviews/` | ✅ |
 | Leaflet 地图展示 + 点击导航 | `src/pages/business/[slug].astro` | ✅ |
 | TipTap 富文本编辑器 | `src/components/RichTextEditor.tsx` | ✅ |
 | Blog 系统 (schema + API + Admin) | `src/db/schema/blogs.ts`, `src/pages/admin/blogs.astro` | ✅ |
-| 过期 Cron + 邮件提醒 | `src/server/routes/cron.ts`, `src/lib/email.ts` | ✅ |
+| 过期 Cron + 邮件提醒 | `src/pages/api/cron/`, `src/lib/email.ts` | ✅ |
 | Canvas 图片压缩 | `src/components/business/ImageUploader.tsx` | ✅ |
-| Admin 认证 (better-auth + 速率限制) | `src/server/routes/admin.ts` | ✅ |
-| 动态 CORS | `src/server/index.ts` | ✅ |
+| Admin 认证 (better-auth + 速率限制) | `src/pages/api/admin/` | ✅ |
 | Cloudflare R2 存储 | `src/lib/media.ts` | ✅ |
 | GitHub Actions CI/CD | `.github/workflows/` | ✅ |
 | SpecWeave 基础设施 | `.specweave/`, `scripts/check-versions.sh` | ✅ |
@@ -133,7 +132,7 @@
 #### G-10: OAuth CSRF state 参数完整性
 **PRD**: NFR-SEC-06
 **现状**: better-auth 内置 CSRF，但需确认 state 参数在 Google/Facebook OAuth 流程中正确生成和验证
-**验证**: 代码审查 `src/server/routes/auth.ts` 第 212-320 行
+**验证**: 代码审查 `src/pages/api/auth/` 认证流程
 
 #### G-11: Admin 订单确认流程完整性
 **PRD**: SB-006 — 管理员确认付款
