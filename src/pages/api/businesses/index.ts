@@ -84,10 +84,25 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '12');
     const offset = (page - 1) * limit;
+    const type = url.searchParams.get('type') || ''; // 'business' | 'organization'
+    const organizationType = url.searchParams.get('organizationType') || ''; // 'government' | 'ngo' | etc.
 
     // Build query conditions
     const conditions = [eq(businessPages.status, 'live')];
-    
+
+    // Filter by entity type
+    if (type === 'organization') {
+      conditions.push(eq(businessPages.entityType, 'organization'));
+    } else if (type === 'business') {
+      conditions.push(eq(businessPages.entityType, 'business'));
+    }
+    // Otherwise return all types
+
+    // Filter by organization type (only if type=organization or no type filter)
+    if (organizationType) {
+      conditions.push(eq(businessPages.organizationType, organizationType));
+    }
+
     if (search) {
       conditions.push(or(
         like(businessPages.title, `%${search}%`),

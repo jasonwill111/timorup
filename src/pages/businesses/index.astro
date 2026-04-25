@@ -13,7 +13,7 @@ let categoriesData: any[] = [];
 let totalCount = 0;
 
 try {
-  // Get businesses with category info
+  // Get businesses with category info (only 'business' type, not organizations)
   const businessesResult = await db.select({
     id: businessPages.id,
     title: businessPages.title,
@@ -24,12 +24,16 @@ try {
     status: businessPages.status,
     categoryId: businessPages.categoryId,
     address: businessPages.address,
+    entityType: businessPages.entityType,
   })
   .from(businessPages)
   .where(eq(businessPages.status, 'live'))
   .limit(20)
   .orderBy(desc(businessPages.likes));
-  
+
+  // Filter out organizations (they have their own page at /org)
+  const filteredBusinesses = businessesResult.filter(b => b.entityType !== 'organization');
+
   // Get total count
   const countResult = await db.select({ count: sql`count(*)` })
     .from(businessPages)
@@ -42,17 +46,17 @@ try {
     .limit(20);
   
   // Get category names for businesses
-  const categoryIds = [...new Set(businessesResult.map(b => b.categoryId).filter(Boolean))];
+  const categoryIds = [...new Set(filteredBusinesses.map(b => b.categoryId).filter(Boolean))];
   const categoryMap: Record<string, string> = {};
-  
+
   if (categoryIds.length > 0) {
     const cats = await db.select()
       .from(categories)
       .where(sql`${categories.id} IN (${categoryIds.join(',')})`);
     cats.forEach((c: any) => { categoryMap[c.id] = c.name; });
   }
-  
-  businesses = businessesResult.map((b: any) => ({
+
+  businesses = filteredBusinesses.map((b: any) => ({
     id: b.id,
     title: b.title,
     slug: b.slug,
@@ -222,6 +226,14 @@ import Card from '../../components/ui/Card.astro'
     <!-- Pagination -->
     <div id="pagination" class="flex justify-center gap-2 mt-8">
       <!-- Pagination will be rendered here -->
+    </div>
+
+    <!-- Organizations Link -->
+    <div class="mt-12 p-6 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
+      <p class="text-blue-800 dark:text-blue-200 mb-2">Looking for government agencies or NGOs?</p>
+      <a href="/org" class="text-blue-600 hover:text-blue-800 font-medium">
+        Browse Organizations →
+      </a>
     </div>
   </div>
 </Layout>

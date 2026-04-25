@@ -53,12 +53,14 @@ export const media = sqliteTable('media', {
 });
 
 // Business Pages table
+// Also used for organizations (gov, NGOs) with entityType field
 export const businessPages = sqliteTable('business_pages', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   ownerId: text('owner_id').notNull(),
   categoryId: text('category_id'),
+  entityType: text('entity_type').default('business'), // 'business' | 'organization'
   status: text('status').default('draft'),
   bannerImageId: text('banner_image_id'),
   profileImageId: text('profile_image_id'),
@@ -69,7 +71,7 @@ export const businessPages = sqliteTable('business_pages', {
   email: text('email'),
   address: text('address'),
   locationLat: real('location_lat'),
-  locationLng: real('location_lng'),
+  locationLng: real('locationLng'),
   openingHours: text('opening_hours'),
   aboutUs: text('about_us'),
   latestUpdates: text('latest_updates'),
@@ -82,11 +84,16 @@ export const businessPages = sqliteTable('business_pages', {
   planType: text('plan_type'),
   publishDate: integer('publish_date', { mode: 'timestamp' }),
   expiryDate: integer('expiry_date', { mode: 'timestamp' }),
+  // Organization-specific fields
+  registrationUrl: text('registration_url'), // Link to official registration
+  verifiedBadge: integer('verified_badge', { mode: 'boolean' }).default(false),
+  organizationType: text('organization_type'), // 'government' | 'ngo' | 'nonprofit' | 'foundation'
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (businessPages) => ({
   ownerIdx: index('business_owner_idx').on(businessPages.ownerId),
   statusIdx: index('business_status_idx').on(businessPages.status),
+  entityTypeIdx: index('business_entity_type_idx').on(businessPages.entityType),
 }));
 
 // Products table

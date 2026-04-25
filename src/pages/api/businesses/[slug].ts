@@ -122,16 +122,22 @@ export async function GET({ params, request }: { params: { slug: string }; reque
       }
     }
 
-    const businessProducts = await db.select()
-      .from(products)
-      .where(eq(products.businessPageId, business.id))
-      .all();
+    // Only fetch products and reviews for businesses, not organizations
+    let businessProducts: any[] = [];
+    let businessReviews: any[] = [];
 
-    const businessReviews = await db.select()
-      .from(reviews)
-      .where(eq(reviews.businessPageId, business.id))
-      .orderBy(desc(reviews.createdAt))
-      .all();
+    if (business.entityType !== 'organization') {
+      businessProducts = await db.select()
+        .from(products)
+        .where(eq(products.businessPageId, business.id))
+        .all();
+
+      businessReviews = await db.select()
+        .from(reviews)
+        .where(eq(reviews.businessPageId, business.id))
+        .orderBy(desc(reviews.createdAt))
+        .all();
+    }
 
     const response = new Response(JSON.stringify({
       success: true,
