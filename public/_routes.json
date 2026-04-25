@@ -16,6 +16,7 @@
     "/login",
     "/register",
     "/subscribe",
-    "/sitemap-0.xml"
+    "/sitemap-0.xml",
+    "/org"
   ]
 }
