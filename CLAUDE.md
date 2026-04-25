@@ -393,26 +393,31 @@ pnpm deploy:dry                       # Dry-run deploy
 
 ```
 src/
-├── pages/                    # Astro pages (routes) - .astro files
-│   ├── api/                  # API endpoints
-│   ├── admin/                # Admin dashboard pages
-│   └── business/             # Business listing pages
+├── pages/
+│   ├── api/                 # API endpoints
+│   ├── admin/               # Admin dashboard
+│   ├── business/            # Business pages
+│   ├── organization/         # Gov/NGO/Nonprofit pages
+│   └── ...
 ├── components/
-│   ├── ui/                  # Astro UI components - .astro files
-│   └── business/            # Business-specific components - .astro files
-├── layouts/                  # Astro layouts - .astro files
-├── pages/api/               # Astro API endpoints
-│   ├── admin/               # Admin API routes
-│   ├── auth/[...all].ts     # Better Auth handler
-│   ├── businesses/          # Business CRUD
-│   ├── products/           # Product management
-│   ├── reviews/            # Review management
-│   └── media/               # Media upload
+│   ├── ui/                 # UI components
+│   └── business/             # Business components
+├── layouts/                  # Astro layouts
 ├── db/
-│   ├── schema/              # Drizzle schema definitions - .ts files
-│   └── migrations/          # Database migrations
-└── lib/                     # Utilities (auth, db, email) - .ts files
+│   └── schema/              # Drizzle schema
+└── lib/                     # Utilities
 ```
+
+## Entity Types
+
+TMBIZ supports two entity types:
+
+| Type | Route | Features |
+|------|-------|----------|
+| `business` | `/business/[slug]` | Products, reviews, hours, ratings |
+| `organization` | `/organization/[slug]` | Gov agencies, NGOs, nonprofits |
+
+Organizations have simplified pages (info + contact only, no products/reviews).
 
 ## TailwindCSS v4 Configuration
 
@@ -461,6 +466,12 @@ All UI components are pure Astro `.astro` files using TailwindCSS. No React depe
 ## Database Schema
 
 Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orders`, `media`, `adBanners`, `siteSettings`. Auth is handled by better-auth with `sessions`, `accounts`, `verifications` tables.
+
+**businessPages entity types:**
+- `entityType`: `'business'` | `'organization'`
+- `organizationType`: `'government'` | `'ngo'` | `'nonprofit'` | `'foundation'`
+- `registrationUrl`: Link to official registration
+- `verifiedBadge`: Boolean for verified government entities
 
 ## UI/UX Guidelines
 
