@@ -108,6 +108,9 @@ timorbiz/
 │   │   ├── businesses/
 │   │   │   ├── index.astro         # 商家目录
 │   │   │   └── [slug].astro       # 商家详情
+│   │   ├── organization/              # 政府/NGO/非营利组织
+│   │   │   ├── index.astro         # 组织目录
+│   │   │   └── [slug].astro       # 组织详情
 │   │   ├── account/
 │   │   │   └── index.astro         # 用户账户
 │   │   ├── admin/
@@ -455,6 +458,7 @@ CREATE INDEX idx_business_status ON business_pages(status);
 CREATE INDEX idx_business_slug ON business_pages(slug);
 CREATE INDEX idx_business_owner ON business_pages(owner_id);
 CREATE INDEX idx_business_category ON business_pages(category_id);
+CREATE INDEX idx_business_entity_type ON business_pages(entity_type);
 
 -- reviews 表索引
 CREATE INDEX idx_reviews_business ON reviews(business_page_id);
