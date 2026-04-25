@@ -31,7 +31,7 @@ try {
   .limit(20)
   .orderBy(desc(businessPages.likes));
 
-  // Filter out organizations (they have their own page at /org)
+  // Filter out organizations (they have their own page at /organization)
   const filteredBusinesses = businessesResult.filter(b => b.entityType !== 'organization');
 
   // Get total count
@@ -231,7 +231,7 @@ import Card from '../../components/ui/Card.astro'
     <!-- Organizations Link -->
     <div class="mt-12 p-6 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
       <p class="text-blue-800 dark:text-blue-200 mb-2">Looking for government agencies or NGOs?</p>
-      <a href="/org" class="text-blue-600 hover:text-blue-800 font-medium">
+      <a href="/organization" class="text-blue-600 hover:text-blue-800 font-medium">
         Browse Organizations →
       </a>
     </div>

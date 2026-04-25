@@ -147,7 +147,7 @@ const isOrganization = type === 'organization';
             />
             <p class="text-xs text-muted-foreground mt-1" id="slug-help">
               {isOrganization
-                ? 'This will be your URL: timorbiz.com/org/your-organization-name'
+                ? 'This will be your URL: timorbiz.com/organization/your-organization-name'
                 : 'This will be your URL: timorbiz.com/business/your-business-name'
               }
             </p>
@@ -1054,7 +1054,7 @@ const isOrganization = type === 'organization';
       if (result.success) {
         const successMsg = isOrg ? 'Organization registered successfully!' : 'Business created successfully!';
         alert(successMsg);
-        window.location.href = isOrg ? `/org/${data.slug}` : `/business/${data.slug}`;
+        window.location.href = isOrg ? `/organization/${data.slug}` : `/business/${data.slug}`;
       } else if (result.error?.code === 'LIMIT_REACHED') {
         alert('You already have a page! Visit your dashboard to manage it.');
         window.location.href = '/account';

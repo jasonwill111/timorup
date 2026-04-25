@@ -147,7 +147,7 @@ import CardContent from '../../components/ui/CardContent.astro';
           : `https://ui-avatars.com/api/?name=${encodeURIComponent(org.title)}&background=2563EB&color=fff`;
 
         const card = document.createElement('a');
-        card.href = `/org/${org.slug}`;
+        card.href = `/organization/${org.slug}`;
         card.className = 'block';
 
         card.innerHTML = `
