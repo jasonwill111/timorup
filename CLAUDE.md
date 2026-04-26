@@ -1,6 +1,6 @@
-<!-- SW:META template="claude" version="1.0.579" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
+<!-- SW:META template="claude" version="1.0.581" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
 
-<!-- SW:SECTION:hook-priority version="1.0.579" -->
+<!-- SW:SECTION:hook-priority version="1.0.581" -->
 ## Hook Instructions Override Everything
 
 `<system-reminder>` hook output = **BLOCKING PRECONDITIONS**.
@@ -15,11 +15,11 @@
 **Setup actions are NOT implementation** — "connect github", "setup sync", "import issues" → route to the matching setup skill (`sw:sync-setup`, `sw:import`, `sw:progress-sync`), NOT `/sw:increment`.
 <!-- SW:END:hook-priority -->
 
-<!-- SW:SECTION:header version="1.0.579" -->
+<!-- SW:SECTION:header version="1.0.581" -->
 **Framework**: SpecWeave | **Truth**: `spec.md` + `tasks.md`
 <!-- SW:END:header -->
 
-<!-- SW:SECTION:claude-code-concepts version="1.0.579" -->
+<!-- SW:SECTION:claude-code-concepts version="1.0.581" -->
 ## Skills & Plugins
 
 **Invoke**: `/skill-name` | auto-trigger by keywords | `Skill({ skill: "name" })`
@@ -41,13 +41,13 @@
 If auto-activation fails, invoke explicitly: `Skill({ skill: "name" })`
 <!-- SW:END:claude-code-concepts -->
 
-<!-- SW:SECTION:lsp version="1.0.579" -->
+<!-- SW:SECTION:lsp version="1.0.581" -->
 ## LSP (Code Intelligence)
 
 **Native LSP broken in v2.1.0+.** Use: `specweave lsp refs|def|hover src/file.ts SymbolName`
 <!-- SW:END:lsp -->
 
-<!-- SW:SECTION:start version="1.0.579" -->
+<!-- SW:SECTION:start version="1.0.581" -->
 ## Getting Started
 
 Your first increment starts at `0001`. Just describe what you want to build:
@@ -55,7 +55,7 @@ Your first increment starts at `0001`. Just describe what you want to build:
 `/sw:increment "your-feature"`
 <!-- SW:END:start -->
 
-<!-- SW:SECTION:autodetect version="1.0.579" -->
+<!-- SW:SECTION:autodetect version="1.0.581" -->
 ## Auto-Detection
 
 SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
@@ -71,7 +71,7 @@ SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
 **Setup/config requests bypass auto-detection** → route directly to the matching skill (e.g., `sw:sync-setup`, `sw:import`)
 <!-- SW:END:autodetect -->
 
-<!-- SW:SECTION:metarule version="1.0.579" -->
+<!-- SW:SECTION:metarule version="1.0.581" -->
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default (MANDATORY)
@@ -117,7 +117,7 @@ Good: npm run build → node script.js → Success
 ```
 <!-- SW:END:metarule -->
 
-<!-- SW:SECTION:rules version="1.0.579" -->
+<!-- SW:SECTION:rules version="1.0.581" -->
 ## Rules
 
 1. **Files** → `.specweave/increments/####-name/` (see Structure section for details)
@@ -133,7 +133,7 @@ Good: npm run build → node script.js → Success
 8. **Multi-repo**: ALL repos MUST be at `repositories/{org}/{repo-name}/` — NEVER directly under `repositories/`
 <!-- SW:END:rules -->
 
-<!-- SW:SECTION:workflow version="1.0.579" -->
+<!-- SW:SECTION:workflow version="1.0.581" -->
 ## Workflow
 
 `/sw:increment "X"` → `/sw:do` → `/sw:progress` → `/sw:done 0001`
@@ -157,13 +157,13 @@ Good: npm run build → node script.js → Success
 **Large-scale changes**: For codebase-wide migrations or bulk refactors, use `/batch` — decomposes work into parallel agents with worktree isolation, each producing its own PR. Example: `/batch migrate from Solid to React`
 <!-- SW:END:workflow -->
 
-<!-- SW:SECTION:save-nested-repos version="1.0.579" -->
+<!-- SW:SECTION:save-nested-repos version="1.0.581" -->
 ## Nested Repos
 
 Before git operations, scan: `for d in repositories packages services apps libs workspace; do [ -d "$d" ] && find "$d" -maxdepth 2 -name ".git" -type d; done`
 <!-- SW:END:save-nested-repos -->
 
-<!-- SW:SECTION:reflect version="1.0.579" -->
+<!-- SW:SECTION:reflect version="1.0.581" -->
 ## Skill Memories
 
 SpecWeave learns from corrections. Learnings saved here automatically. Edit or delete as needed.
@@ -171,7 +171,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Disable**: Set `"reflect": { "enabled": false }` in `.specweave/config.json`
 <!-- SW:END:reflect -->
 
-<!-- SW:SECTION:context version="1.0.579" -->
+<!-- SW:SECTION:context version="1.0.581" -->
 ## Context
 
 **Before implementing**: Check ADRs at `.specweave/docs/internal/architecture/adr/`
@@ -179,7 +179,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Load context**: `/sw:docs <topic>` loads relevant living docs into conversation
 <!-- SW:END:context -->
 
-<!-- SW:SECTION:structure version="1.0.579" -->
+<!-- SW:SECTION:structure version="1.0.581" -->
 ## Structure
 
 ```
@@ -194,7 +194,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Everything else → subfolders**: `reports/` | `logs/` | `scripts/` | `backups/`
 <!-- SW:END:structure -->
 
-<!-- SW:SECTION:taskformat version="1.0.579" -->
+<!-- SW:SECTION:taskformat version="1.0.581" -->
 ## Task Format
 
 ```markdown
@@ -204,19 +204,19 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 ```
 <!-- SW:END:taskformat -->
 
-<!-- SW:SECTION:secrets version="1.0.579" -->
+<!-- SW:SECTION:secrets version="1.0.581" -->
 ## Secrets
 
 Before CLI tools, check existing config (`grep -q` only — never display values).
 <!-- SW:END:secrets -->
 
-<!-- SW:SECTION:syncing version="1.0.579" -->
+<!-- SW:SECTION:syncing version="1.0.581" -->
 ## External Sync
 
 Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`. Mapping: Feature→Milestone | Story→Issue | Task→Checkbox.
 <!-- SW:END:syncing -->
 
-<!-- SW:SECTION:testing version="1.0.579" -->
+<!-- SW:SECTION:testing version="1.0.581" -->
 ## Testing Pipeline (MANDATORY)
 
 **Testing is a pipeline step, not an afterthought.**
@@ -245,23 +245,23 @@ Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`.
 - Coverage targets: unit 95%, integration 90%, e2e 100% of AC scenarios
 <!-- SW:END:testing -->
 
-<!-- SW:SECTION:tdd version="1.0.579" -->
+<!-- SW:SECTION:tdd version="1.0.581" -->
 ## TDD
 
 When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Use `/sw:tdd-cycle`. Enforcement via `testing.tddEnforcement` (strict|warn|off).
 <!-- SW:END:tdd -->
 
-<!-- SW:SECTION:api version="1.0.579" -->
+<!-- SW:SECTION:api version="1.0.581" -->
 <!-- API: Enable `apiDocs` in config.json. Commands: /sw:api-docs -->
 <!-- SW:END:api -->
 
-<!-- SW:SECTION:limits version="1.0.579" -->
+<!-- SW:SECTION:limits version="1.0.581" -->
 ## Limits
 
 **Max 1500 lines/file** — extract before adding
 <!-- SW:END:limits -->
 
-<!-- SW:SECTION:troubleshooting version="1.0.579" -->
+<!-- SW:SECTION:troubleshooting version="1.0.581" -->
 ## Troubleshooting
 
 | Issue | Fix |
@@ -273,13 +273,13 @@ When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Us
 | npm E401 on update | `npm i -g specweave --registry https://registry.npmjs.org --userconfig /dev/null` |
 <!-- SW:END:troubleshooting -->
 
-<!-- SW:SECTION:lazyloading version="1.0.579" -->
+<!-- SW:SECTION:lazyloading version="1.0.581" -->
 ## Plugin Auto-Loading
 
 Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugin install <name>@specweave`. Disable: `export SPECWEAVE_DISABLE_AUTO_LOAD=1`
 <!-- SW:END:lazyloading -->
 
-<!-- SW:SECTION:principles version="1.0.579" -->
+<!-- SW:SECTION:principles version="1.0.581" -->
 ## Principles
 
 1. **Spec-first**: `/sw:increment` before coding — mandatory for ALL implementation requests, no exceptions unless user explicitly opts out
@@ -291,7 +291,7 @@ Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugi
 7. **Test before ship**: Tests pass at every step — unit after each task, E2E before close, no exceptions
 <!-- SW:END:principles -->
 
-<!-- SW:SECTION:linking version="1.0.579" -->
+<!-- SW:SECTION:linking version="1.0.581" -->
 ## Bidirectional Linking
 
 Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
@@ -299,13 +299,13 @@ Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
 Task format: `**AC**: AC-US1-01, AC-US1-02` (CRITICAL for linking)
 <!-- SW:END:linking -->
 
-<!-- SW:SECTION:mcp version="1.0.579" -->
+<!-- SW:SECTION:mcp version="1.0.581" -->
 ## External Services
 
 CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
 <!-- SW:END:mcp -->
 
-<!-- SW:SECTION:auto version="1.0.579" -->
+<!-- SW:SECTION:auto version="1.0.581" -->
 ## Auto Mode
 
 `/sw:auto` (start) | `/sw:auto-status` (check) | `/sw:cancel-auto` (emergency)
@@ -313,13 +313,13 @@ CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
 Pattern: IMPLEMENT → TEST → FAIL? → FIX → PASS → NEXT. STOP & ASK if spec conflicts or ambiguity.
 <!-- SW:END:auto -->
 
-<!-- SW:SECTION:docs version="1.0.579" -->
+<!-- SW:SECTION:docs version="1.0.581" -->
 ## Docs
 
 [verified-skill.com](https://verified-skill.com)
 <!-- SW:END:docs -->
 
-<!-- SW:SECTION:non-claude version="1.0.579" -->
+<!-- SW:SECTION:non-claude version="1.0.581" -->
 ## Using SpecWeave with Other AI Tools
 
 See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
@@ -336,7 +336,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**timorbiz** is a Business Directory Platform for Timor-Leste. It enables businesses to create listings, products, and services, with user reviews and an admin dashboard for management.
+**timorlist** is a Business Directory Platform for Timor-Leste. It enables businesses to create listings, products, and services, with user reviews and an admin dashboard for management.
 
 ## Tech Stack (Latest Versions)
 
@@ -410,14 +410,23 @@ src/
 
 ## Entity Types
 
-TMBIZ supports two entity types:
+TIMORLIST supports three entity types:
 
 | Type | Route | Features |
 |------|-------|----------|
-| `business` | `/business/[slug]` | Products, reviews, hours, ratings |
-| `organization` | `/organization/[slug]` | Gov agencies, NGOs, nonprofits |
+| `business` | `/business/[slug]` | Products, reviews, hours, ratings, industry |
+| `government` | `/govs/[slug]` | Simplified pages (info + contact) |
+| `nonprofit` | `/ngos/[slug]` | Simplified pages (info + contact) |
 
-Organizations have simplified pages (info + contact only, no products/reviews).
+**Listing & Products:**
+- `/listing` - Directory with tabs (Businesses/Govs/NGOs)
+- `/products-services` - All SKUs from all businesses
+
+**Business Industry Classifications** (defined in `src/lib/constants.ts`):
+- accommodation, food, retail, services, health, education, transport, finance, construction, professional, entertainment, agriculture, manufacturing, utilities
+
+**SKU Service Types** (for flexible pricing):
+- product, service, rental, food, accommodation, project
 
 ## TailwindCSS v4 Configuration
 
@@ -467,11 +476,15 @@ All UI components are pure Astro `.astro` files using TailwindCSS. No React depe
 
 Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orders`, `media`, `adBanners`, `siteSettings`. Auth is handled by better-auth with `sessions`, `accounts`, `verifications` tables.
 
-**businessPages entity types:**
-- `entityType`: `'business'` | `'organization'`
-- `organizationType`: `'government'` | `'ngo'` | `'nonprofit'` | `'foundation'`
+**businessPages fields:**
+- `entityType`: `'business'` | `'government'` | `'nonprofit'`
+- `industry`: Industry classification (e.g., `'food.restaurants'`)
 - `registrationUrl`: Link to official registration
 - `verifiedBadge`: Boolean for verified government entities
+
+**products/SKUs fields:**
+- `priceFields`: JSON array of `{label, value, unit}` for flexible pricing
+- `serviceType`: Determines available price units (product/service/rental/food/accommodation/project)
 
 ## UI/UX Guidelines
 
@@ -521,6 +534,29 @@ if (!cached) {
 }
 ```
 
+### XSS Prevention
+
+All user-controlled data must use DOM manipulation or `escapeHtml()`:
+
+```typescript
+// ❌ 危险：直接注入用户数据
+element.innerHTML = `<p>${userInput}</p>`;
+
+// ✅ 安全：使用 DOM 操作
+const p = document.createElement('p');
+p.textContent = userInput;
+element.appendChild(p);
+
+// ✅ 安全：使用 escapeHtml 辅助函数
+element.innerHTML = `<p>${escapeHtml(userInput)}</p>`;
+```
+
+Common files needing XSS fixes:
+- `account.astro` - User data rendering
+- `admin/reviews.astro` - Review comment display
+- `business/create.astro` - Business title/slug display
+- `verify.astro` - Email verification messages
+
 ### Rate Limiting
 
 In-memory rate limiter for abuse protection:
@@ -542,6 +578,57 @@ if (!rateLimit.allowed) {
 - Node.js >=20 required
 - All source files are TypeScript (.ts/.tsx)
 - Development mode disables all caching for real-time updates
+- Tests auto-start dev server via Playwright webServer config
+
+## Testing Workflow
+
+```bash
+# Unit tests only (fast)
+pnpm test
+
+# Unit tests with UI
+pnpm test:ui
+
+# E2E tests (auto-starts dev server)
+pnpm test:e2e
+
+# Full test suite (unit + E2E)
+pnpm test:all
+
+# Debug E2E with Playwright UI
+pnpm test:e2e:debug
+
+# Single E2E test file
+npx playwright test e2e/homepage.spec.ts
+```
+
+### Testing Tools by Scenario
+
+| Scenario | Tool | Command |
+|----------|------|---------|
+| Quick page check | `playwright-cli` | `pnpm test:quick` |
+| Visual regression | `kuri` | `pnpm test:kuri` |
+| Complex user flow | `browser-use` | `pnpm test:agent` |
+| CI/CD regression | `@playwright/test` | `pnpm test:e2e` |
+| Unit/Integration | Vitest | `pnpm test` |
+
+### Tool-Specific Usage
+
+```bash
+# Kuri - Visual testing
+kuri screenshot http://localhost:4321 --output ./test-results/screenshot.png
+kuri compare --baseline ./test-results/baseline --current ./test-results/current
+
+# Playwright CLI - Quick testing
+playwright-cli open http://localhost:4321
+playwright-cli screenshot http://localhost:4321/listing
+
+# Browser-use - AI agent testing
+browser-use --url http://localhost:4321 --task "Create a business listing flow"
+browser-use --url http://localhost:4321/listing --task "Search for restaurants"
+```
+
+**Note**: Playwright config (`playwright.config.ts`) auto-starts dev server via `webServer` config.
 - `pnpm dev` uses Node adapter on Windows (auto-detect); `pnpm dev:cf` forces Cloudflare/workerd
 - `pnpm build` (or `pnpm build:cf`) builds for Cloudflare Workers
 - Local database is `local.db` (SQLite)
@@ -654,6 +741,23 @@ Business pages update dynamically from API data:
 
 ## Deployment & Cost
 
+### Deployment Mode: SSR Only (Temporary)
+
+**暂时使用全 SSR 模式**。混合模式存在 Pages vs Workers 路由冲突 bug。
+
+```json
+// public/_routes.json
+{
+  "version": 1,
+  "include": ["/*"]
+}
+```
+
+**TODO**: 修复混合模式 bug 后切换回静态 + SSR：
+- [ ] 修复 `prerenderEnvironment` 与 `_routes.json` 冲突
+- [ ] 配置 Custom Domain 正确路由
+- [ ] 切换到混合模式提升性能
+
 ### Cloudflare Workers Free Tier
 
 | Resource | Limit | Project Usage |
@@ -755,7 +859,7 @@ This file is generated by `~/.claude/.omc/scripts/load-tech-context.js` from `~/
 
 **To regenerate** after dependency changes:
 ```bash
-node ~/.claude/.omc/scripts/load-tech-context.js "D:\Dev Projects\timorbiz"
+node ~/.claude/.omc/scripts/load-tech-context.js "D:\Dev Projects\timorlist"
 ```
 
 **Pre-commit hook** automatically runs version checks via `scripts/check-versions.sh`. See `VERSION_LOG.md` for upgrade history.

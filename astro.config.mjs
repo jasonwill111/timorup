@@ -24,12 +24,17 @@ const adapter = useCloudflare
 export default defineConfig({
   output: 'server',
 
-  site: 'https://timorbiz.com',
+  site: 'https://timorlist.com',
 
   prefetch: {
     defaultStrategy: 'viewport',
     prefetchAll: true,
     defaultBundler: 'astro',
+  },
+
+  // Enable Rust compiler for faster builds (requires @astrojs/compiler-rs)
+  experimental: {
+    rustCompiler: true,
   },
 
   adapter,

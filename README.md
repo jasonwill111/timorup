@@ -1,16 +1,58 @@
-# timorbiz
+# timorlist
 
 **Business Directory Platform for Timor-Leste** - A SpecWeave-driven project enabling businesses to create listings, products, and services with user reviews and admin dashboard.
 
 ## Features
 
-- Business directory with categories and search
+- Local Directory (`/listing`) with Businesses/Govs/NGOs tabs
+- Create Listing (`/listing/create`) - unified creation for all entity types
+- Products & Services page (`/products-services`) with SKU detail pages
+- Featured sections on homepage (12 businesses, 3 govs, 3 ngos)
+- Business/Government/Nonprofit entity types with dedicated detail pages
+- SKU product detail pages (`/business/[slug]/product/[id]`)
+- Industry classification (14 ISIC-based categories)
+- Flexible SKU pricing (hourly/daily/monthly/unit-based)
+- Admin listing management (`/admin/listing`)
+- Admin SKU management with dynamic pricing
 - User reviews and ratings
-- Admin dashboard for content management (blogs, heroes, categories, subscriptions)
-- TipTap rich text editor for business descriptions
+- TipTap rich text editor for product descriptions
 - Leaflet maps integration
-- Email reminders for business owners
+- WhatsApp inquiry integration
 - User authentication with better-auth
+- SSR pages with instant rendering
+- Seed data: 23 businesses, 128 products, 37 reviews
+
+## User Model
+
+| Entity Type | Creation | SKU Limit |
+|-------------|----------|-----------|
+| Business | Paid (Basic/Pro/Max) | 10/30/60 |
+| Government | Free | Unlimited |
+| Nonprofit | Free | Unlimited |
+
+**Each account can only create ONE listing (any type).**
+
+## Subscription Flow
+
+1. User selects plan at `/pricing`
+2. Redirects to `/subscribe?plan=xxx`
+3. System creates unpaid order
+4. User pays offline (cash/bank transfer)
+5. User contacts admin via WhatsApp
+6. Admin confirms payment at `/admin/subscriptions`
+7. System updates business page with plan + expiry date
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Framework | Astro 6.x (SSR) |
+| Database | D1 (SQLite) via Drizzle ORM |
+| Auth | better-auth 1.5.x |
+| Styling | TailwindCSS v4 |
+| Editor | TipTap 3.x |
+| Validation | Zod 4.x |
+| Media | Cloudflare R2 |
 
 ## Quick Start
 
@@ -61,7 +103,7 @@ That's it! All components ready - just use `sw:increment` to start!
 ## Project Structure
 
 ```
-timorbiz/
+timorlist/
 ├── .specweave/             # SpecWeave framework
 │   ├── config.json         # Project configuration
 │   ├── increments/         # Features (created via sw:increment)

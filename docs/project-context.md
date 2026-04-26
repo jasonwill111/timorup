@@ -1,5 +1,5 @@
 ---
-project_name: timorbiz
+project_name: timorlist
 user_name: Nick
 date: 2026-02-26
 sections_completed: ['technology_stack', 'implementation_rules', 'ui_requirements', 'development_workflow', 'ux_patterns', 'component_strategy', 'responsive_design', 'testing', 'deployment']
@@ -44,7 +44,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 ### 2.2 Project Structure
 
 ```
-timorbiz/
+timorlist/
 ├── src/
 │   ├── components/     # UI components (pure Astro + TailwindCSS)
 │   ├── layouts/       # Astro layouts
@@ -342,5 +342,5 @@ APP_URL=http://localhost:8788
 
 ---
 
-**Last Updated**: 2026-02-28
-**Development Status**: ✅ All 50 Stories Complete
+**Last Updated**: 2026-04-25
+**Development Status**: ✅ SSR 已实现 | TipTap 编辑器 | 产品详情页 | WhatsApp 品牌色 | 紧凑 UI 布局
