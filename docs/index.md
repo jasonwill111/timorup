@@ -217,10 +217,26 @@ pnpm build
 
 ---
 
-**文档版本**: 12.0
+**文档版本**: 13.0
 **最后更新**: 2026-04-26
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ /listing目录页 | /products-services商品页 | 3实体首页Featured | /business/govs/ngos详情页 | Business详情增强 | Gallery Lightbox
+**开发状态**: ✅ /listing目录页 | /products-services商品页 | 3实体首页Featured | /business/govs/ngos详情页 | Business详情增强 | Gallery Lightbox | 12 Featured Businesses | 12 Featured Products
+
+## Homepage Featured Sections
+
+| Section | Cards | Query |
+|---------|-------|-------|
+| Featured Businesses | 12 | status='live', ordered by likes DESC |
+| Featured Products & Services | 12 | products from live businesses, ordered by createdAt DESC |
+
+### ProductCard Component
+
+`src/components/business/ProductCard.astro`
+
+- Thumbnail with gradient background (color by service type)
+- Price badge overlay
+- Title + business name
+- Service type color coding (product/service/rental/food/accommodation/project)
 
 ## Business 详情页增强功能
 

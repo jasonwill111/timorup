@@ -1,0 +1,80 @@
+---
+interface Props {
+  title: string;
+  businessTitle?: string;
+  businessSlug?: string;
+  price?: string;
+  priceUnit?: string;
+  priceFields?: Array<{label: string; value: string; unit: string}>;
+  thumbnail?: string | null;
+  slug?: string;
+  serviceType?: string;
+  class?: string;
+}
+
+const {
+  title,
+  businessTitle = '',
+  businessSlug = '',
+  price = '',
+  priceUnit = '',
+  priceFields = [],
+  thumbnail = null,
+  slug = '',
+  serviceType = 'product',
+  class: className = '',
+} = Astro.props;
+
+const displayPrice = priceFields.length > 0
+  ? priceFields.map(p => `$${p.value}${p.unit}`).join(' / ')
+  : (price ? `$${price}${priceUnit ? '/' + priceUnit : ''}` : 'Price on request');
+
+const href = businessSlug ? `/business/${businessSlug}${slug ? `/product/${slug}` : ''}` : '#';
+
+const serviceTypeColors: Record<string, string> = {
+  product: 'from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40',
+  service: 'from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40',
+  rental: 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40',
+  food: 'from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/40',
+  accommodation: 'from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40',
+  project: 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/40',
+};
+
+const gradientClass = serviceTypeColors[serviceType] || serviceTypeColors.product;
+---
+
+<a
+  href={href}
+  class:list={["block group", className]}
+  data-card
+>
+  <div class="relative bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden">
+    <!-- Thumbnail -->
+    <div class:list={["aspect-square relative overflow-hidden bg-gradient-to-br", gradientClass]}>
+      {thumbnail ? (
+        <img src={thumbnail} alt={title} class="w-full h-full object-cover" loading="lazy" />
+      ) : (
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-5xl font-bold text-amber-500/40">{title.charAt(0)}</span>
+        </div>
+      )}
+
+      <!-- Price badge -->
+      <div class="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm px-2 py-1 rounded-lg">
+        <span class="text-white text-xs font-semibold">{displayPrice}</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-3">
+      <h3 class="font-semibold text-sm truncate group-hover:text-amber-600 transition-colors leading-tight">
+        {title}
+      </h3>
+      {businessTitle && (
+        <p class="text-xs text-muted-foreground truncate mt-0.5">
+          by {businessTitle}
+        </p>
+      )}
+    </div>
+  </div>
+</a>

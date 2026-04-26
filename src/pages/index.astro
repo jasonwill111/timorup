@@ -2,14 +2,16 @@
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
 import { db } from '../lib/db';
-import { businessPages, categories } from '../db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { businessPages, categories, products } from '../db/schema';
+import { eq, desc, and, inArray } from 'drizzle-orm';
 import { parseIcon, DEFAULT_CATEGORY_ICONS } from '../lib/icons';
 import BusinessCard from '../components/business/BusinessCard.astro';
+import ProductCard from '../components/business/ProductCard.astro';
 
 let featuredBusinesses: any[] = [];
 let featuredGovs: any[] = [];
 let featuredNgos: any[] = [];
+let featuredProducts: any[] = [];
 let categoriesData: any[] = [];
 
 try {
@@ -58,6 +60,7 @@ try {
       tag: tags[0] || '',
       tags,
       profileImageId: b.profileImageId,
+      entityType: b.entityType,
     };
   });
 
@@ -85,6 +88,54 @@ try {
       count: 0,
       icon: parsed?.value || defaultIcon?.value || '🏢',
       iconType: parsed?.type || defaultIcon?.type || 'emoji'
+    };
+  });
+
+  // Fetch featured products
+  const productsResult = await db.select({
+    id: products.id,
+    title: products.title,
+    price: products.price,
+    priceUnit: products.priceUnit,
+    priceFields: products.priceFields,
+    serviceType: products.serviceType,
+    businessPageId: products.businessPageId,
+  })
+  .from(products)
+  .innerJoin(businessPages, eq(products.businessPageId, businessPages.id))
+  .where(eq(businessPages.status, 'live'))
+  .orderBy(desc(products.createdAt))
+  .limit(12);
+
+  // Get business info for products
+  const businessIds = [...new Set(productsResult.map(p => p.businessPageId))];
+  const businessesForProducts = businessIds.length > 0
+    ? await db.select({
+        id: businessPages.id,
+        title: businessPages.title,
+        slug: businessPages.slug,
+      })
+      .from(businessPages)
+      .where(inArray(businessPages.id, businessIds))
+    : [];
+
+  const businessMap: Record<string, { title: string; slug: string }> = {};
+  businessesForProducts.forEach(b => {
+    businessMap[b.id] = { title: b.title, slug: b.slug };
+  });
+
+  featuredProducts = productsResult.map(p => {
+    const business = businessMap[p.businessPageId] || {};
+    const priceFields = p.priceFields ? JSON.parse(p.priceFields) : [];
+    return {
+      id: p.id,
+      title: p.title,
+      price: p.price || '',
+      priceUnit: p.priceUnit || '',
+      priceFields,
+      serviceType: p.serviceType || 'product',
+      businessTitle: business.title || '',
+      businessSlug: business.slug || '',
     };
   });
 
@@ -209,18 +260,35 @@ const mappedCategories = categoriesData;
       </section>
     )}
 
-    <!-- Products & Services -->
+    <!-- Featured Products & Services -->
     <section class="mb-12">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold">Products & Services</h2>
+        <h2 class="text-2xl font-bold">Featured Products & Services</h2>
         <a href="/products-services" class="text-amber-600 hover:text-amber-700 font-medium">View All →</a>
       </div>
-      <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-8 text-center">
-        <p class="text-muted-foreground mb-4">Browse all products and services from businesses</p>
-        <a href="/products-services">
-          <Button>Explore Products & Services</Button>
-        </a>
-      </div>
+      {featuredProducts.length > 0 ? (
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {featuredProducts.map((product: any) => (
+            <ProductCard
+              title={product.title}
+              businessTitle={product.businessTitle}
+              businessSlug={product.businessSlug}
+              price={product.price}
+              priceUnit={product.priceUnit}
+              priceFields={product.priceFields}
+              serviceType={product.serviceType}
+              slug={product.id}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-8 text-center">
+          <p class="text-muted-foreground mb-4">No products available yet. Be the first to add one!</p>
+          <a href="/business/create">
+            <Button>List Your Business</Button>
+          </a>
+        </div>
+      )}
     </section>
 
     <!-- Categories -->

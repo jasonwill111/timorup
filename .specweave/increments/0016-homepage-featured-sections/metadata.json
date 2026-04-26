@@ -1,0 +1,18 @@
+{
+  "id": "0016-homepage-featured-sections",
+  "name": "Homepage Featured Sections",
+  "description": "Add 12 Featured Businesses + 12 Featured Products to homepage, fix auth page imports",
+  "created": "2026-04-26",
+  "status": "completed",
+  "tags": [
+    "feature",
+    "homepage",
+    "bug-fix"
+  ],
+  "type": "feature",
+  "priority": "high",
+  "lastActivity": "2026-04-26",
+  "testMode": "test-after",
+  "coverageTarget": 80,
+  "externalLinks": {}
+}
