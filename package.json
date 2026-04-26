@@ -39,6 +39,7 @@
     "@fontsource/oswald": "^5.2.8",
     "@libsql/client": "^0.17.0",
     "@lucide/astro": "^1.8.0",
+    "@mastra/core": "^1.28.0",
     "@tailwindcss/vite": "^4.2.1",
     "@tiptap/extension-link": "^3.20.4",
     "@tiptap/extension-placeholder": "^3.20.4",

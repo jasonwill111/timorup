@@ -1,0 +1,690 @@
+---
+import AdminLayout from '@layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="AI Tools">
+  <div class="container py-6 px-4">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">AI Tools</h1>
+      <p class="text-sm text-muted-foreground">Generate listings, products, blog posts, and landing pages with AI</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="mb-6 border-b border-border">
+      <nav class="-mb-px flex space-x-6">
+        <button
+          id="tab-listing"
+          class="tab-btn py-3 px-1 border-b-2 font-medium text-sm border-primary text-primary"
+          data-tab="listing"
+        >
+          Listing Generator
+        </button>
+        <button
+          id="tab-sku"
+          class="tab-btn py-3 px-1 border-b-2 font-medium text-sm border-transparent text-muted-foreground hover:text-foreground"
+          data-tab="sku"
+        >
+          Product/SKU Generator
+        </button>
+        <button
+          id="tab-blog"
+          class="tab-btn py-3 px-1 border-b-2 font-medium text-sm border-transparent text-muted-foreground hover:text-foreground"
+          data-tab="blog"
+        >
+          Blog Article Generator
+        </button>
+        <button
+          id="tab-landing"
+          class="tab-btn py-3 px-1 border-b-2 font-medium text-sm border-transparent text-muted-foreground hover:text-foreground"
+          data-tab="landing"
+        >
+          Landing Page Generator
+        </button>
+      </nav>
+    </div>
+
+    <!-- Listing Generator -->
+    <div id="listing-section" class="tab-content">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-card border rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4">Create New Listing</h2>
+          <form id="listing-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Business Name *</label>
+              <input type="text" id="listing-title" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Timor Coffee Shop" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Entity Type *</label>
+              <select id="listing-entity-type" required class="w-full px-3 py-2 border rounded-md text-sm">
+                <option value="business">Business</option>
+                <option value="government">Government</option>
+                <option value="nonprofit">Non-Profit</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Category</label>
+              <select id="listing-category" class="w-full px-3 py-2 border rounded-md text-sm">
+                <option value="">Select category...</option>
+                <option value="cat-1">Restaurants & Cafes</option>
+                <option value="cat-2">Hotels & Accommodation</option>
+                <option value="cat-3">Shopping</option>
+                <option value="cat-4">Health & Beauty</option>
+                <option value="cat-5">Automotive</option>
+                <option value="cat-6">Professional Services</option>
+                <option value="cat-7">Education</option>
+                <option value="cat-8">Entertainment</option>
+                <option value="cat-9">Travel & Tours</option>
+                <option value="cat-10">Construction</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Contact Name</label>
+                <input type="text" id="listing-contact" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Contact person" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Phone</label>
+                <input type="text" id="listing-phone" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="77000000" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Email</label>
+              <input type="email" id="listing-email" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="info@example.tl" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Address</label>
+              <input type="text" id="listing-address" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Avenida Principal, Dili" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">About Us</label>
+              <textarea id="listing-about" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Tell customers about your business..."></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+              <input type="text" id="listing-tags" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="coffee, wifi, local" />
+            </div>
+            <button type="submit" class="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90">
+              Generate Listing
+            </button>
+          </form>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="bg-card border rounded-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Generated Preview</h2>
+            <span id="listing-status" class="px-2 py-1 text-xs rounded-full bg-muted">Ready</span>
+          </div>
+          <div id="listing-loading" class="hidden py-12 text-center">
+            <div class="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Generating listing...</p>
+          </div>
+          <div id="listing-preview" class="hidden space-y-4">
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Title</span>
+              <p id="preview-listing-title" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Entity Type</span>
+              <p id="preview-listing-type" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Contact</span>
+              <p id="preview-listing-contact" class="text-sm"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Address</span>
+              <p id="preview-listing-address" class="text-sm"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Tags</span>
+              <p id="preview-listing-tags" class="text-sm"></p>
+            </div>
+            <div class="flex gap-2 pt-4">
+              <button id="listing-save-btn" class="flex-1 py-2 px-4 bg-green-600 text-white rounded-md font-medium hover:opacity-90">
+                Save Listing
+              </button>
+              <button id="listing-copy-btn" class="py-2 px-4 border rounded-md font-medium hover:bg-muted">
+                Copy JSON
+              </button>
+            </div>
+          </div>
+          <div id="listing-empty" class="py-12 text-center text-muted-foreground">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <p>Fill the form and click Generate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKU Generator -->
+    <div id="sku-section" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-card border rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4">Create Product/Service</h2>
+          <form id="sku-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Product/Service Title *</label>
+              <input type="text" id="sku-title" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Wireless Headphones" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Service Type *</label>
+              <select id="sku-type" required class="w-full px-3 py-2 border rounded-md text-sm">
+                <option value="product">Product</option>
+                <option value="service">Service</option>
+                <option value="rental">Rental</option>
+                <option value="food">Food</option>
+                <option value="accommodation">Accommodation</option>
+                <option value="project">Project</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Description</label>
+              <textarea id="sku-description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Product description..."></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Price Label</label>
+              <input type="text" id="sku-price-label" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Hourly Rate, Per Day" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Price Value</label>
+                <input type="text" id="sku-price-value" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="25.00" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Unit</label>
+                <input type="text" id="sku-price-unit" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="/hour, /day" />
+              </div>
+            </div>
+            <button type="submit" class="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90">
+              Generate SKU
+            </button>
+          </form>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="bg-card border rounded-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Generated Preview</h2>
+            <span id="sku-status" class="px-2 py-1 text-xs rounded-full bg-muted">Ready</span>
+          </div>
+          <div id="sku-loading" class="hidden py-12 text-center">
+            <div class="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Generating SKU...</p>
+          </div>
+          <div id="sku-preview" class="hidden space-y-4">
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Title</span>
+              <p id="preview-sku-title" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Service Type</span>
+              <p id="preview-sku-type" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Price</span>
+              <p id="preview-sku-price" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Description</span>
+              <p id="preview-sku-desc" class="text-sm"></p>
+            </div>
+            <div class="flex gap-2 pt-4">
+              <button id="sku-save-btn" class="flex-1 py-2 px-4 bg-green-600 text-white rounded-md font-medium hover:opacity-90">
+                Save SKU
+              </button>
+              <button id="sku-copy-btn" class="py-2 px-4 border rounded-md font-medium hover:bg-muted">
+                Copy JSON
+              </button>
+            </div>
+          </div>
+          <div id="sku-empty" class="py-12 text-center text-muted-foreground">
+            <p>Fill the form and click Generate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blog Generator -->
+    <div id="blog-section" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-card border rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4">Generate Blog Article</h2>
+          <form id="blog-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Topic *</label>
+              <input type="text" id="blog-topic" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Best Coffee Shops in Dili" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Article Type</label>
+                <select id="blog-type" class="w-full px-3 py-2 border rounded-md text-sm">
+                  <option value="business-introduction">Business Introduction</option>
+                  <option value="local-highlight">Local Highlight</option>
+                  <option value="event-announcement">Event Announcement</option>
+                  <option value="how-to-guide">How-To Guide</option>
+                  <option value="industry-news">Industry News</option>
+                  <option value="community-story">Community Story</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Length</label>
+                <select id="blog-length" class="w-full px-3 py-2 border rounded-md text-sm">
+                  <option value="short">Short (~300 words)</option>
+                  <option value="medium" selected>Medium (~600 words)</option>
+                  <option value="long">Long (~1200 words)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Additional Requirements</label>
+              <textarea id="blog-prompt" rows="4" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Key points to cover, specific businesses to mention..."></textarea>
+            </div>
+            <button type="submit" class="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90">
+              Generate Article
+            </button>
+          </form>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="bg-card border rounded-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Generated Article</h2>
+            <span id="blog-status" class="px-2 py-1 text-xs rounded-full bg-muted">Ready</span>
+          </div>
+          <div id="blog-loading" class="hidden py-12 text-center">
+            <div class="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Generating article...</p>
+          </div>
+          <div id="blog-preview" class="hidden space-y-4">
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Title</span>
+              <p id="preview-blog-title" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Excerpt</span>
+              <p id="preview-blog-excerpt" class="text-sm"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Content</span>
+              <div id="preview-blog-content" class="text-sm max-h-64 overflow-y-auto"></div>
+            </div>
+            <div class="flex gap-2 pt-4">
+              <button id="blog-save-btn" class="flex-1 py-2 px-4 bg-green-600 text-white rounded-md font-medium hover:opacity-90">
+                Save Draft
+              </button>
+              <button id="blog-copy-btn" class="py-2 px-4 border rounded-md font-medium hover:bg-muted">
+                Copy
+              </button>
+            </div>
+          </div>
+          <div id="blog-empty" class="py-12 text-center text-muted-foreground">
+            <p>Fill the form and click Generate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Landing Page Generator -->
+    <div id="landing-section" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-card border rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4">Create Landing Page</h2>
+          <form id="landing-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Page Title *</label>
+              <input type="text" id="landing-title" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. Summer Sale 2026" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Page Type</label>
+              <select id="landing-type" class="w-full px-3 py-2 border rounded-md text-sm">
+                <option value="promotion">Promotion / Sale</option>
+                <option value="product-showcase">Product Showcase</option>
+                <option value="event">Event</option>
+                <option value="seasonal">Seasonal Campaign</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Description</label>
+              <textarea id="landing-description" rows="2" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Brief description..."></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Requirements for AI</label>
+              <textarea id="landing-prompt" rows="4" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Key message, target audience, specific products..."></textarea>
+            </div>
+            <button type="submit" class="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90">
+              Generate Landing Page
+            </button>
+          </form>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="bg-card border rounded-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Generated Page</h2>
+            <span id="landing-status" class="px-2 py-1 text-xs rounded-full bg-muted">Ready</span>
+          </div>
+          <div id="landing-loading" class="hidden py-12 text-center">
+            <div class="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Generating landing page...</p>
+          </div>
+          <div id="landing-preview" class="hidden space-y-4">
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Hero Title</span>
+              <p id="preview-landing-hero-title" class="font-medium"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Hero Subtitle</span>
+              <p id="preview-landing-hero-subtitle" class="text-sm"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Features</span>
+              <ul id="preview-landing-features" class="text-sm list-disc pl-4"></ul>
+            </div>
+            <div class="flex gap-2 pt-4">
+              <button id="landing-save-btn" class="flex-1 py-2 px-4 bg-green-600 text-white rounded-md font-medium hover:opacity-90">
+                Save Page
+              </button>
+              <button id="landing-copy-btn" class="py-2 px-4 border rounded-md font-medium hover:bg-muted">
+                Copy JSON
+              </button>
+            </div>
+          </div>
+          <div id="landing-empty" class="py-12 text-center text-muted-foreground">
+            <p>Fill the form and click Generate</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const sections = {
+    listing: document.getElementById('listing-section'),
+    sku: document.getElementById('sku-section'),
+    blog: document.getElementById('blog-section'),
+    landing: document.getElementById('landing-section'),
+  };
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+
+      tabBtns.forEach(b => {
+        b.classList.remove('border-primary', 'text-primary');
+        b.classList.add('border-transparent', 'text-muted-foreground');
+      });
+      btn.classList.remove('border-transparent', 'text-muted-foreground');
+      btn.classList.add('border-primary', 'text-primary');
+
+      Object.values(sections).forEach(s => s?.classList.add('hidden'));
+      sections[tab as keyof typeof sections]?.classList.remove('hidden');
+    });
+  });
+
+  // ============== LISTING GENERATOR ==============
+  let generatedListing: any = null;
+
+  document.getElementById('listing-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = (document.getElementById('listing-title') as HTMLInputElement).value;
+    const entityType = (document.getElementById('listing-entity-type') as HTMLSelectElement).value;
+    const categoryId = (document.getElementById('listing-category') as HTMLSelectElement).value;
+    const contactName = (document.getElementById('listing-contact') as HTMLInputElement).value;
+    const phone = (document.getElementById('listing-phone') as HTMLInputElement).value;
+    const email = (document.getElementById('listing-email') as HTMLInputElement).value;
+    const address = (document.getElementById('listing-address') as HTMLInputElement).value;
+    const about = (document.getElementById('listing-about') as HTMLTextAreaElement).value;
+    const tags = (document.getElementById('listing-tags') as HTMLInputElement).value;
+
+    document.getElementById('listing-loading')?.classList.remove('hidden');
+    document.getElementById('listing-preview')?.classList.add('hidden');
+    document.getElementById('listing-empty')?.classList.add('hidden');
+    const statusEl = document.getElementById('listing-status');
+    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
+
+    try {
+      const res = await fetch('/api/admin/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'listing',
+          data: { title, entityType, categoryId, contactName, phone, email, address, about, tags }
+        }),
+      });
+      const result = await res.json();
+
+      generatedListing = {
+        title,
+        entityType,
+        categoryId: categoryId || null,
+        contactName,
+        contactNumber: phone,
+        countryCode: '+670',
+        email,
+        address,
+        aboutUs: about,
+        tags: tags ? tags.split(',').map((t: string) => t.trim()) : [],
+      };
+
+      document.getElementById('preview-listing-title')!.textContent = generatedListing.title;
+      document.getElementById('preview-listing-type')!.textContent = generatedListing.entityType;
+      document.getElementById('preview-listing-contact')!.textContent = `${generatedListing.contactName} | ${generatedListing.contactNumber} | ${generatedListing.email}`;
+      document.getElementById('preview-listing-address')!.textContent = generatedListing.address;
+      document.getElementById('preview-listing-tags')!.textContent = generatedListing.tags.join(', ');
+
+      document.getElementById('listing-preview')?.classList.remove('hidden');
+      if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
+    } catch (err: any) {
+      console.error('Listing generation error:', err);
+      alert('Failed to generate listing: ' + (err.message || 'Unknown error'));
+      if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
+      document.getElementById('listing-empty')?.classList.remove('hidden');
+    } finally {
+      document.getElementById('listing-loading')?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('listing-copy-btn')?.addEventListener('click', () => {
+    if (generatedListing) {
+      navigator.clipboard.writeText(JSON.stringify(generatedListing, null, 2));
+      alert('Copied to clipboard!');
+    }
+  });
+
+  document.getElementById('listing-save-btn')?.addEventListener('click', async () => {
+    if (!generatedListing) return;
+
+    try {
+      const res = await fetch('/api/admin/listing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(generatedListing),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Listing created! ID: ' + data.data?.id);
+      } else {
+        alert('Failed to save: ' + (data.error?.message || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Failed to save listing');
+    }
+  });
+
+  // ============== SKU GENERATOR ==============
+  let generatedSku: any = null;
+
+  document.getElementById('sku-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = (document.getElementById('sku-title') as HTMLInputElement).value;
+    const serviceType = (document.getElementById('sku-type') as HTMLSelectElement).value;
+    const description = (document.getElementById('sku-description') as HTMLTextAreaElement).value;
+    const priceLabel = (document.getElementById('sku-price-label') as HTMLInputElement).value;
+    const priceValue = (document.getElementById('sku-price-value') as HTMLInputElement).value;
+    const priceUnit = (document.getElementById('sku-price-unit') as HTMLInputElement).value;
+
+    document.getElementById('sku-loading')?.classList.remove('hidden');
+    document.getElementById('sku-preview')?.classList.add('hidden');
+    document.getElementById('sku-empty')?.classList.add('hidden');
+    const statusEl = document.getElementById('sku-status');
+    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
+
+    try {
+      const res = await fetch('/api/admin/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'sku',
+          data: { title, serviceType, description, priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [] }
+        }),
+      });
+      const result = await res.json();
+
+      generatedSku = {
+        title,
+        description,
+        serviceType,
+        priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [],
+      };
+
+      document.getElementById('preview-sku-title')!.textContent = generatedSku.title;
+      document.getElementById('preview-sku-type')!.textContent = generatedSku.serviceType;
+      document.getElementById('preview-sku-price')!.textContent = generatedSku.priceFields.map((p: any) => `${p.label}: $${p.value}${p.unit}`).join(', ');
+      document.getElementById('preview-sku-desc')!.textContent = generatedSku.description;
+
+      document.getElementById('sku-preview')?.classList.remove('hidden');
+      if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
+    } catch (err: any) {
+      console.error('SKU generation error:', err);
+      alert('Failed to generate SKU: ' + (err.message || 'Unknown error'));
+      if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
+      document.getElementById('sku-empty')?.classList.remove('hidden');
+    } finally {
+      document.getElementById('sku-loading')?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('sku-copy-btn')?.addEventListener('click', () => {
+    if (generatedSku) {
+      navigator.clipboard.writeText(JSON.stringify(generatedSku, null, 2));
+      alert('Copied to clipboard!');
+    }
+  });
+
+  // ============== BLOG GENERATOR ==============
+  let generatedBlog: any = null;
+
+  document.getElementById('blog-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const topic = (document.getElementById('blog-topic') as HTMLInputElement).value;
+    const type = (document.getElementById('blog-type') as HTMLSelectElement).value;
+    const length = (document.getElementById('blog-length') as HTMLSelectElement).value;
+    const prompt = (document.getElementById('blog-prompt') as HTMLTextAreaElement).value;
+
+    document.getElementById('blog-loading')?.classList.remove('hidden');
+    document.getElementById('blog-preview')?.classList.add('hidden');
+    document.getElementById('blog-empty')?.classList.add('hidden');
+    const statusEl = document.getElementById('blog-status');
+    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
+
+    try {
+      const res = await fetch('/api/admin/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'blog',
+          data: { topic, type, length, prompt }
+        }),
+      });
+      const result = await res.json();
+
+      generatedBlog = { topic, type, length, content: result.text || 'Generated content' };
+
+      document.getElementById('preview-blog-title')!.textContent = topic;
+      document.getElementById('preview-blog-excerpt')!.textContent = (result.text || '').substring(0, 200) + '...';
+      document.getElementById('preview-blog-content')!.innerHTML = (result.text || '').replace(/\n/g, '<br>');
+
+      document.getElementById('blog-preview')?.classList.remove('hidden');
+      if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
+    } catch (err: any) {
+      console.error('Blog generation error:', err);
+      alert('Failed to generate blog: ' + (err.message || 'Unknown error'));
+      if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
+      document.getElementById('blog-empty')?.classList.remove('hidden');
+    } finally {
+      document.getElementById('blog-loading')?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('blog-copy-btn')?.addEventListener('click', () => {
+    if (generatedBlog) {
+      navigator.clipboard.writeText(JSON.stringify(generatedBlog, null, 2));
+      alert('Copied to clipboard!');
+    }
+  });
+
+  // ============== LANDING PAGE GENERATOR ==============
+  let generatedLanding: any = null;
+
+  document.getElementById('landing-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = (document.getElementById('landing-title') as HTMLInputElement).value;
+    const type = (document.getElementById('landing-type') as HTMLSelectElement).value;
+    const description = (document.getElementById('landing-description') as HTMLTextAreaElement).value;
+    const prompt = (document.getElementById('landing-prompt') as HTMLTextAreaElement).value;
+
+    document.getElementById('landing-loading')?.classList.remove('hidden');
+    document.getElementById('landing-preview')?.classList.add('hidden');
+    document.getElementById('landing-empty')?.classList.add('hidden');
+    const statusEl = document.getElementById('landing-status');
+    if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
+
+    try {
+      const res = await fetch('/api/admin/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'landing',
+          data: { title, type, description, prompt }
+        }),
+      });
+      const result = await res.json();
+
+      generatedLanding = { title, type, content: result.text || 'Generated landing page' };
+
+      document.getElementById('preview-landing-hero-title')!.textContent = title;
+      document.getElementById('preview-landing-hero-subtitle')!.textContent = description;
+
+      const featuresEl = document.getElementById('preview-landing-features')!;
+      featuresEl.innerHTML = '<li>Hero section with title and CTA</li><li>Features section</li><li>Call to action</li>';
+
+      document.getElementById('landing-preview')?.classList.remove('hidden');
+      if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
+    } catch (err: any) {
+      console.error('Landing page generation error:', err);
+      alert('Failed to generate landing page: ' + (err.message || 'Unknown error'));
+      if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
+      document.getElementById('landing-empty')?.classList.remove('hidden');
+    } finally {
+      document.getElementById('landing-loading')?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('landing-copy-btn')?.addEventListener('click', () => {
+    if (generatedLanding) {
+      navigator.clipboard.writeText(JSON.stringify(generatedLanding, null, 2));
+      alert('Copied to clipboard!');
+    }
+  });
+</script>
