@@ -1,0 +1,222 @@
+---
+// Products & Services - /products-services
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Input from '../../components/ui/Input.astro';
+import { db } from '@/lib/db';
+import { products, businessPages } from '@/db/schema';
+import { desc, eq, like } from 'drizzle-orm';
+
+const PAGE_SIZE = 12;
+const search = Astro.url.searchParams.get('search') || '';
+const businessId = Astro.url.searchParams.get('business') || '';
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const sort = Astro.url.searchParams.get('sort') || 'recent';
+
+// Get all businesses for filter
+const allBusinesses = await db
+  .select({
+    id: businessPages.id,
+    title: businessPages.title,
+    slug: businessPages.slug,
+    entityType: businessPages.entityType,
+  })
+  .from(businessPages)
+  .where(eq(businessPages.status, 'live'))
+  .all();
+
+// Get all products with business info
+const allProducts = await db
+  .select({
+    id: products.id,
+    title: products.title,
+    description: products.description,
+    price: products.price,
+    priceUnit: products.priceUnit,
+    priceFields: products.priceFields,
+    serviceType: products.serviceType,
+    businessPageId: products.businessPageId,
+    createdAt: products.createdAt,
+  })
+  .from(products)
+  .orderBy(desc(products.createdAt))
+  .all();
+
+// Join with business data
+const productsWithBusiness = allProducts
+  .map(p => {
+    const business = allBusinesses.find(b => b.id === p.businessPageId);
+    return {
+      ...p,
+      businessTitle: business?.title || 'Unknown',
+      businessSlug: business?.slug || '',
+      businessType: business?.entityType || 'business',
+    };
+  })
+  .filter(p => p.businessTitle !== 'Unknown');
+
+// Apply filters
+let filteredProducts = productsWithBusiness;
+
+if (search) {
+  filteredProducts = filteredProducts.filter(p =>
+    p.title.toLowerCase().includes(search.toLowerCase()) ||
+    p.businessTitle.toLowerCase().includes(search.toLowerCase())
+  );
+}
+
+if (businessId) {
+  filteredProducts = filteredProducts.filter(p => p.businessPageId === businessId);
+}
+
+// Sort
+if (sort === 'name') {
+  filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
+} else if (sort === 'price-low') {
+  filteredProducts.sort((a, b) => parseFloat(a.price || '0') - parseFloat(b.price || '0'));
+} else if (sort === 'price-high') {
+  filteredProducts.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0'));
+}
+
+// Pagination
+const offset = (page - 1) * PAGE_SIZE;
+const total = filteredProducts.length;
+const productsList = filteredProducts.slice(offset, offset + PAGE_SIZE);
+const totalPages = Math.ceil(total / PAGE_SIZE);
+
+const getPageUrl = (p: number) => {
+  const params = new URLSearchParams({
+    page: String(p),
+    search,
+    business: businessId,
+    sort,
+  });
+  return `/products-services?${params.toString()}`;
+};
+
+// Format price
+const formatPrice = (product: typeof productsList[0]) => {
+  if (product.priceFields) {
+    try {
+      const fields = JSON.parse(product.priceFields);
+      if (fields.length > 0 && fields[0].value) {
+        const unit = fields[0].unit ? `/${fields[0].unit.replace('/', '')}` : '';
+        return `$${fields[0].value}${unit}`;
+      }
+    } catch {}
+  }
+  if (product.price) {
+    const unit = product.priceUnit ? `/${product.priceUnit.replace('/', '')}` : '';
+    return `$${product.price}${unit}`;
+  }
+  return 'Ask for price';
+};
+---
+
+<Layout title="Products & Services - TIMORLIST" description="Browse all products and services from businesses in Timor-Leste">
+  <div class="container py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold">Products & Services</h1>
+        <p class="text-sm text-muted-foreground">Browse all products and services from businesses</p>
+      </div>
+      <a href="/listing" class="text-sm text-primary hover:underline">← Back to Directory</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 mb-6">
+      <Input
+        id="search"
+        type="search"
+        placeholder="Search products..."
+        value={search}
+        class="w-64"
+      />
+
+      <select id="business-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+        <option value="">All Businesses</option>
+        {allBusinesses.map(b => (
+          <option value={b.id} selected={businessId === b.id}>
+            {b.title}
+          </option>
+        ))}
+      </select>
+
+      <select id="sort-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+        <option value="recent" selected={sort === 'recent'}>Most Recent</option>
+        <option value="name" selected={sort === 'name'}>Name (A-Z)</option>
+        <option value="price-low" selected={sort === 'price-low'}>Price (Low to High)</option>
+        <option value="price-high" selected={sort === 'price-high'}>Price (High to Low)</option>
+      </select>
+    </div>
+
+    <!-- Results Count -->
+    <div class="mb-4 text-sm text-muted-foreground">
+      Showing {productsList.length} of {total} products
+    </div>
+
+    <!-- Products Grid -->
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {productsList.map(product => (
+        <a
+          href={product.businessType === 'business' ? `/business/${product.businessSlug}/product/${product.id}` : `/${product.businessType}/${product.businessSlug}`}
+          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group"
+        >
+          <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
+            <span class="text-4xl font-bold text-amber-500/40">{product.title.charAt(0)}</span>
+            {product.serviceType && (
+              <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] bg-white/90 dark:bg-black/70 rounded-full capitalize">
+                {product.serviceType}
+              </span>
+            )}
+          </div>
+          <div class="p-3">
+            <h3 class="font-semibold text-sm truncate group-hover:text-primary transition-colors">{product.title}</h3>
+            <p class="text-xs text-muted-foreground truncate">{product.businessTitle}</p>
+            <p class="text-sm font-bold text-primary mt-1">{formatPrice(product)}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {productsList.length === 0 && (
+      <div class="text-center py-12 text-muted-foreground">
+        No products found
+      </div>
+    )}
+
+    <!-- Pagination -->
+    {totalPages > 1 && (
+      <div class="flex justify-center gap-2 mt-8">
+        {page > 1 && (
+          <a href={getPageUrl(page - 1)} class="px-4 py-2 border rounded hover:bg-muted">Previous</a>
+        )}
+        <span class="px-4 py-2">Page {page} of {totalPages}</span>
+        {page < totalPages && (
+          <a href={getPageUrl(page + 1)} class="px-4 py-2 border rounded hover:bg-muted">Next</a>
+        )}
+      </div>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const searchInput = document.getElementById('search') as HTMLInputElement;
+  const businessFilter = document.getElementById('business-filter') as HTMLSelectElement;
+  const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
+
+  const buildUrl = () => {
+    const params = new URLSearchParams({
+      page: '1',
+      search: searchInput?.value || '',
+      business: businessFilter?.value || '',
+      sort: sortFilter?.value || 'recent',
+    });
+    return `/products-services?${params.toString()}`;
+  };
+
+  searchInput?.addEventListener('change', () => window.location.href = buildUrl());
+  businessFilter?.addEventListener('change', () => window.location.href = buildUrl());
+  sortFilter?.addEventListener('change', () => window.location.href = buildUrl());
+</script>

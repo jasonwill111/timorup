@@ -1,0 +1,234 @@
+---
+// Admin edit listing page
+export const prerender = false;
+
+import Layout from '../../../../../layouts/Layout.astro';
+import Button from '../../../../../components/ui/Button.astro';
+import Input from '../../../../../components/ui/Input.astro';
+import Textarea from '../../../../../components/ui/Textarea.astro';
+import { db } from '@/lib/db';
+import { businessPages, categories } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { ENTITY_TYPES, INDUSTRIES } from '@/lib/constants';
+
+const { id } = Astro.params;
+
+const listing = await db
+  .select()
+  .from(businessPages)
+  .where(eq(businessPages.id, id ?? ''))
+  .get();
+
+if (!listing) {
+  return Astro.redirect('/admin/listing');
+}
+
+const allCategories = await db.select().from(categories).all();
+const tags = listing.tags ? JSON.parse(listing.tags) : [];
+---
+
+<Layout title={`Edit ${listing.title} - Admin`} requireAuth adminOnly>
+  <div class="container py-8 max-w-4xl">
+    <div class="mb-6">
+      <a href="/admin/listing" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
+        ← Back to Listings
+      </a>
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Edit Listing</h1>
+        <span class={`px-2 py-0.5 text-xs rounded-full ${
+          listing.status === 'live' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+        }`}>
+          {listing.status || 'draft'}
+        </span>
+      </div>
+    </div>
+
+    <form id="listing-form" class="space-y-6">
+      <!-- Type (read-only) -->
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="text-lg font-semibold mb-4">Listing Type</h2>
+        <div class="flex items-center gap-4">
+          <span class="text-3xl">
+            {listing.entityType === 'business' ? '🏪' : listing.entityType === 'government' ? '🏛️' : '❤️'}
+          </span>
+          <div>
+            <div class="font-medium">{ENTITY_TYPES.find(t => t.value === listing.entityType)?.label || listing.entityType}</div>
+            <div class="text-xs text-muted-foreground">Type cannot be changed after creation</div>
+          </div>
+        </div>
+        <input type="hidden" name="entityType" value={listing.entityType} />
+      </div>
+
+      <!-- Basic Info -->
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="text-lg font-semibold mb-4">Basic Information</h2>
+        <div class="grid gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Title *</label>
+            <Input name="title" value={listing.title} required />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Category *</label>
+              <select name="categoryId" required class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                {allCategories.map(cat => (
+                  <option value={cat.id} selected={cat.id === listing.categoryId}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {listing.entityType === 'business' && (
+              <div id="industry-field">
+                <label class="block text-sm font-medium mb-1">Industry</label>
+                <select name="industry" class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="">Select industry</option>
+                  {Object.entries(INDUSTRIES).map(([key, group]) => (
+                    <optgroup label={group.label}>
+                      {group.items.map(item => {
+                        const value = `${key}.${item.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                        return (
+                          <option value={value} selected={listing.industry === value}>
+                            {item}
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="text-lg font-semibold mb-4">Contact Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Contact Name</label>
+            <Input name="contactName" value={listing.contactName || ''} />
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-sm font-medium mb-1">Code</label>
+              <Input name="countryCode" value={listing.countryCode || '+670'} />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-sm font-medium mb-1">Phone</label>
+              <Input name="contactNumber" value={listing.contactNumber || ''} />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Email</label>
+            <Input name="email" type="email" value={listing.email || ''} />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Website</label>
+            <Input name="registrationUrl" value={listing.registrationUrl || ''} />
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium mb-1">Address</label>
+          <Input name="address" value={listing.address || ''} />
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="text-lg font-semibold mb-4">About</h2>
+        <div>
+          <label class="block text-sm font-medium mb-1">About Us</label>
+          <Textarea name="aboutUs" rows={4}>{listing.aboutUs || ''}</Textarea>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium mb-1">Tags (comma separated)</label>
+          <Input name="tags" value={tags.join(', ')} />
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium mb-1">Year of Establishment</label>
+          <Input
+            name="yearOfEstablishment"
+            type="number"
+            value={listing.yearOfEstablishment || ''}
+            min="1900"
+            max="2026"
+          />
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="text-lg font-semibold mb-4">Status</h2>
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center gap-2">
+            <input type="radio" name="status" value="draft" checked={listing.status === 'draft'} />
+            <span>Draft</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="status" value="live" checked={listing.status === 'live'} />
+            <span>Live</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="status" value="suspended" checked={listing.status === 'suspended'} />
+            <span>Suspended</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="flex items-center justify-end gap-4">
+        <a href="/admin/listing">
+          <Button type="button" variant="outline">Cancel</Button>
+        </a>
+        <Button type="submit">Save Changes</Button>
+      </div>
+    </form>
+  </div>
+</Layout>
+
+<script>
+  const form = document.getElementById('listing-form') as HTMLFormElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    const data = {
+      title: formData.get('title'),
+      categoryId: formData.get('categoryId'),
+      industry: formData.get('industry') || null,
+      contactName: formData.get('contactName') || null,
+      countryCode: formData.get('countryCode') || '+670',
+      contactNumber: formData.get('contactNumber') || null,
+      email: formData.get('email') || null,
+      registrationUrl: formData.get('registrationUrl') || null,
+      address: formData.get('address') || null,
+      aboutUs: formData.get('aboutUs') || null,
+      tags: formData.get('tags') ? formData.get('tags')?.toString().split(',').map(t => t.trim()) : null,
+      yearOfEstablishment: formData.get('yearOfEstablishment') ? parseInt(formData.get('yearOfEstablishment') as string) : null,
+      status: formData.get('status'),
+    };
+
+    try {
+      const res = await fetch(window.location.pathname.replace('/edit', ''), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (res.ok) {
+        alert('Listing updated successfully!');
+        window.location.reload();
+      } else {
+        const error = await res.json();
+        alert('Failed to update listing: ' + (error.message || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Failed to update listing');
+    }
+  });
+</script>

@@ -1,0 +1,263 @@
+---
+// Local Directory - /listing
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Input from '../../components/ui/Input.astro';
+import { db } from '@/lib/db';
+import { businessPages, categories } from '@/db/schema';
+import { eq, desc, like } from 'drizzle-orm';
+import { INDUSTRIES } from '@/lib/constants';
+
+const PAGE_SIZE = 12;
+const type = Astro.url.searchParams.get('type') || 'business';
+const search = Astro.url.searchParams.get('search') || '';
+const industry = Astro.url.searchParams.get('industry') || '';
+const category = Astro.url.searchParams.get('category') || '';
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const sort = Astro.url.searchParams.get('sort') || 'recent';
+
+// Build entity type filter
+let entityFilter;
+if (type === 'business') {
+  entityFilter = eq(businessPages.entityType, 'business');
+} else if (type === 'govs') {
+  entityFilter = eq(businessPages.entityType, 'government');
+} else if (type === 'ngos') {
+  entityFilter = eq(businessPages.entityType, 'nonprofit');
+}
+
+// Get categories for filter
+const allCategories = await db.select().from(categories).all();
+
+// Query listings
+const offset = (page - 1) * PAGE_SIZE;
+
+let query = db
+  .select({
+    id: businessPages.id,
+    title: businessPages.title,
+    slug: businessPages.slug,
+    entityType: businessPages.entityType,
+    industry: businessPages.industry,
+    categoryId: businessPages.categoryId,
+    profileImageId: businessPages.profileImageId,
+    address: businessPages.address,
+    ratingAverage: businessPages.ratingAverage,
+    likes: businessPages.likes,
+    createdAt: businessPages.createdAt,
+  })
+  .from(businessPages)
+  .where(eq(businessPages.status, 'live'));
+
+if (entityFilter) {
+  // @ts-ignore
+  query = query.where(entityFilter);
+}
+
+const allListings = await query.orderBy(desc(businessPages.createdAt)).all();
+
+// Apply search/filter in memory (for simplicity)
+let filteredListings = allListings;
+
+if (search) {
+  filteredListings = filteredListings.filter(l =>
+    l.title.toLowerCase().includes(search.toLowerCase())
+  );
+}
+
+if (industry && type === 'business') {
+  filteredListings = filteredListings.filter(l =>
+    l.industry?.startsWith(industry)
+  );
+}
+
+if (category) {
+  filteredListings = filteredListings.filter(l =>
+    l.categoryId === category
+  );
+}
+
+// Sort
+if (sort === 'name') {
+  filteredListings.sort((a, b) => a.title.localeCompare(b.title));
+} else if (sort === 'rating') {
+  filteredListings.sort((a, b) => (b.ratingAverage || 0) - (a.ratingAverage || 0));
+} else if (sort === 'popular') {
+  filteredListings.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+}
+
+// Pagination
+const total = filteredListings.length;
+const listings = filteredListings.slice(offset, offset + PAGE_SIZE);
+const totalPages = Math.ceil(total / PAGE_SIZE);
+
+// Get category names
+const categoryMap = Object.fromEntries(allCategories.map(c => [c.id, c.name]));
+
+// Get page base URL
+const pageBase = `/listing?type=${type}`;
+const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&industry=${industry}&category=${category}&sort=${sort}`;
+---
+
+<Layout title="Local Directory - TIMORLIST" description="Browse businesses, government agencies, and nonprofits in Timor-Leste">
+  <div class="container py-8">
+    <h1 class="text-3xl font-bold mb-6">Local Directory</h1>
+
+    <!-- Type Tabs -->
+    <div class="flex gap-4 mb-6 border-b">
+      <a
+        href="/listing?type=business"
+        class={`px-4 py-2 border-b-2 transition-colors ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+      >
+        Businesses
+      </a>
+      <a
+        href="/listing?type=govs"
+        class={`px-4 py-2 border-b-2 transition-colors ${type === 'govs' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+      >
+        Government
+      </a>
+      <a
+        href="/listing?type=ngos"
+        class={`px-4 py-2 border-b-2 transition-colors ${type === 'ngos' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+      >
+        NGOs & Non-Profits
+      </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 mb-6">
+      <Input
+        id="search"
+        type="search"
+        placeholder="Search by name..."
+        value={search}
+        class="w-64"
+      />
+
+      {type === 'business' && (
+        <select id="industry-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+          <option value="">All Industries</option>
+          {Object.entries(INDUSTRIES).map(([key, group]) => (
+            <optgroup label={group.label}>
+              {group.items.map(item => (
+                <option value={key} selected={industry === key}>
+                  {item}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
+
+      {(type === 'govs' || type === 'ngos') && (
+        <select id="category-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+          <option value="">All Categories</option>
+          {allCategories.map(cat => (
+            <option value={cat.id} selected={category === cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      )}
+
+      <select id="sort-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+        <option value="recent" selected={sort === 'recent'}>Most Recent</option>
+        <option value="name" selected={sort === 'name'}>Name (A-Z)</option>
+        <option value="rating" selected={sort === 'rating'}>Highest Rated</option>
+        <option value="popular" selected={sort === 'popular'}>Most Popular</option>
+      </select>
+    </div>
+
+    <!-- Results Count -->
+    <div class="mb-4 text-sm text-muted-foreground">
+      Showing {listings.length} of {total} listings
+    </div>
+
+    <!-- Listings Grid -->
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {listings.map(listing => (
+        <a
+          href={type === 'business' ? `/business/${listing.slug}` : `/${type}/${listing.slug}`}
+          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group"
+        >
+          <div class="aspect-[4/3] bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative">
+            {listing.profileImageId ? (
+              <img src={`/api/media/${listing.profileImageId}`} alt={listing.title} class="w-full h-full object-cover" />
+            ) : (
+              <div class="absolute inset-0 flex items-center justify-center text-4xl font-bold text-amber-500/40">
+                {listing.title.charAt(0)}
+              </div>
+            )}
+            {listing.ratingAverage && listing.ratingAverage > 0 && (
+              <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded-full">
+                ★ {listing.ratingAverage.toFixed(1)}
+              </div>
+            )}
+          </div>
+          <div class="p-3">
+            <h3 class="font-semibold text-sm truncate group-hover:text-primary transition-colors">{listing.title}</h3>
+            {listing.address && (
+              <p class="text-xs text-muted-foreground truncate mt-1">{listing.address.split(',')[0]}</p>
+            )}
+            {type === 'business' && industry && (
+              <p class="text-xs text-muted-foreground mt-1">
+                {Object.entries(INDUSTRIES).find(([k]) => k === industry)?.[1]?.items?.[0] || industry}
+              </p>
+            )}
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {listings.length === 0 && (
+      <div class="text-center py-12 text-muted-foreground">
+        No listings found
+      </div>
+    )}
+
+    <!-- Pagination -->
+    {totalPages > 1 && (
+      <div class="flex justify-center gap-2 mt-8">
+        {page > 1 && (
+          <a href={getPageUrl(page - 1)} class="px-4 py-2 border rounded hover:bg-muted">Previous</a>
+        )}
+        <span class="px-4 py-2">Page {page} of {totalPages}</span>
+        {page < totalPages && (
+          <a href={getPageUrl(page + 1)} class="px-4 py-2 border rounded hover:bg-muted">Next</a>
+        )}
+      </div>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const searchInput = document.getElementById('search') as HTMLInputElement;
+  const industryFilter = document.getElementById('industry-filter') as HTMLSelectElement;
+  const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
+  const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
+
+  const buildUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', '1');
+
+    if (searchInput?.value) params.set('search', searchInput.value);
+    else params.delete('search');
+
+    if (industryFilter?.value) params.set('industry', industryFilter.value);
+    else params.delete('industry');
+
+    if (categoryFilter?.value) params.set('category', categoryFilter.value);
+    else params.delete('category');
+
+    if (sortFilter?.value) params.set('sort', sortFilter.value);
+
+    return `/listing?${params.toString()}`;
+  };
+
+  searchInput?.addEventListener('change', () => window.location.href = buildUrl());
+  industryFilter?.addEventListener('change', () => window.location.href = buildUrl());
+  categoryFilter?.addEventListener('change', () => window.location.href = buildUrl());
+  sortFilter?.addEventListener('change', () => window.location.href = buildUrl());
+</script>
