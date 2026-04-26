@@ -1,12 +1,5 @@
 {
   "skills": {
-    "sw": {
-      "version": "1.0.323",
-      "sha": "58d2432538ae",
-      "tier": "VERIFIED",
-      "installedAt": "2026-04-18T09:16:50.085Z",
-      "source": "local:specweave"
-    },
     "skill-creator": {
       "version": "1.0.0",
       "sha": "dcd4803e61e913e6fc27294184cd3a71f09f5e924ff20c8a9a20173e7b3c2bcf",
@@ -22,5 +15,5 @@
   "agents": [
     "claude-code"
   ],
-  "updatedAt": "2026-04-18T09:17:14.044Z"
+  "updatedAt": "2026-04-25T02:18:38.861Z"
 }
