@@ -12,7 +12,7 @@ import CardDescription from '../components/ui/CardDescription.astro'
 import CardContent from '../components/ui/CardContent.astro'
 ---
 
-<Layout title="Verify Email - TMBIZ">
+<Layout title="Verify Email - TIMORLIST">
   <div class="container max-w-md py-16">
     <Card>
       <CardHeader>
@@ -76,26 +76,49 @@ import CardContent from '../components/ui/CardContent.astro'
 
   function showSuccess(message: string) {
     if (!statusContainer) return;
-    statusContainer.innerHTML = `
-      <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p class="text-lg font-medium text-green-600">${message}</p>
-    `;
+    // Use textContent for user messages to prevent XSS
+    statusContainer.textContent = '';
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'w-16 h-16 text-green-500 mx-auto mb-4');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+
+    const p = document.createElement('p');
+    p.className = 'text-lg font-medium text-green-600';
+    p.textContent = message;
+
+    statusContainer.appendChild(svg);
+    statusContainer.appendChild(p);
     toast.success(message);
   }
 
   function showError(message: string) {
     if (!statusContainer) return;
-    statusContainer.innerHTML = `
-      <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p class="text-lg font-medium text-red-600">${message}</p>
-      <a href="/login" class="inline-block mt-4">
-        <Button>Go to Login</Button>
-      </a>
-    `;
+    // Use textContent for user messages to prevent XSS
+    statusContainer.textContent = '';
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'w-16 h-16 text-red-500 mx-auto mb-4');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+
+    const p = document.createElement('p');
+    p.className = 'text-lg font-medium text-red-600';
+    p.textContent = message;
+
+    const link = document.createElement('a');
+    link.href = '/login';
+    link.className = 'inline-block mt-4';
+    link.innerHTML = '<button class="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90">Go to Login</button>';
+
+    statusContainer.appendChild(svg);
+    statusContainer.appendChild(p);
+    statusContainer.appendChild(link);
     toast.error(message);
   }
 
