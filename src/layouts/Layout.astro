@@ -17,7 +17,7 @@ interface Props {
 
 const {
   title,
-  description = 'Discover local businesses in Timor-Leste. Find restaurants, hotels, shops, and more on TMBIZ - the premier business directory for Timor-Leste.',
+  description = 'Discover local businesses in Timor-Leste. Find restaurants, hotels, shops, and more on TIMORLIST - the premier business directory for Timor-Leste.',
   image = '/images/og-default.jpg',
   type = 'website',
   publishedTime,
@@ -27,10 +27,10 @@ const {
   noFollow = false
 } = Astro.props;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://timorbiz.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://timorlist.com';
 const currentPath = Astro.url.pathname;
 const canonicalUrl = `${siteUrl}${currentPath}`;
-const fullTitle = title.includes('TMBIZ') ? title : `${title} | TMBIZ`;
+const fullTitle = title.includes('TIMORLIST') ? title : `${title} | TIMORLIST`;
 
 // Robots meta
 const robotsContent = [
@@ -42,7 +42,7 @@ const robotsContent = [
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "TMBIZ",
+  "name": "TIMORLIST",
   "url": siteUrl,
   "logo": `${siteUrl}/images/logo.png`,
   "description": "Business directory for Timor-Leste",
@@ -66,12 +66,12 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "TMBIZ",
+  "name": "TIMORLIST",
   "url": siteUrl,
   "description": "Discover local businesses in Timor-Leste",
   "publisher": {
     "@type": "Organization",
-    "name": "TMBIZ"
+    "name": "TIMORLIST"
   },
   "potentialAction": {
     "@type": "SearchAction",
@@ -131,7 +131,7 @@ const websiteSchema = {
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={`${siteUrl}${image}`} />
-    <meta property="og:site_name" content="TMBIZ" />
+    <meta property="og:site_name" content="TIMORLIST" />
     <meta property="og:locale" content="en_US" />
 
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
@@ -158,7 +158,7 @@ const websiteSchema = {
     <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 
     <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://timorbiz-media.r2.cloudflarestorage.com" />
+    <link rel="preconnect" href="https://timorlist-media.r2.cloudflarestorage.com" />
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />

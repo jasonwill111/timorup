@@ -19,28 +19,28 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
           <span class="text-white font-bold text-lg">T</span>
         </div>
-        <span class="font-bold text-xl hidden sm:inline-block">TMBIZ</span>
+        <span class="font-bold text-xl hidden sm:inline-block">TIMORLIST</span>
       </a>
 
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex items-center gap-6">
         <a
-          href="/businesses"
+          href="/listing"
           class:list={[
             "text-sm font-medium transition-colors hover:text-primary",
-            currentPath.startsWith('/businesses') ? "text-primary" : "text-muted-foreground"
+            currentPath.startsWith('/listing') ? "text-primary" : "text-muted-foreground"
           ]}
         >
-          Businesses
+          Directory
         </a>
         <a
-          href="/categories"
+          href="/products-services"
           class:list={[
             "text-sm font-medium transition-colors hover:text-primary",
-            currentPath.startsWith('/categories') ? "text-primary" : "text-muted-foreground"
+            currentPath.startsWith('/products-services') ? "text-primary" : "text-muted-foreground"
           ]}
         >
-          Categories
+          Products & Services
         </a>
         <a
           href="/pricing"
@@ -50,6 +50,12 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
           ]}
         >
           Pricing
+        </a>
+        <a
+          href="/listing/create"
+          class="text-sm font-medium bg-primary text-black px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          + Create
         </a>
       </nav>
 
