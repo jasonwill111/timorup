@@ -1,4 +1,4 @@
-# TMBIZ - 产品需求文档 (PRD)
+# TIMORLIST - 产品需求文档 (PRD)
 
 ---
 classification:
@@ -29,7 +29,7 @@ classification:
 ### 1.3 核心价值主张
 
 - **低门槛**：免费注册
-- **实惠的迷你网站解决方案**：$39/月 或 $390/年
+- **实惠的迷你网站解决方案**：$29/月 或 $290/年
 - **高曝光率**：商业目录展示、产品&服务列表、SEO优化
 - **完整展示**：Banner主图、Logo/首字母、Business基本信息、联系信息(包括静态地图)、产品服务展示
 
@@ -61,13 +61,15 @@ classification:
 - 免费试用 (3天)
 
 ### Growth (增长阶段)
-- 产品/服务管理
+- 产品/服务管理 (灵活定价)
 - 高级搜索和筛选
 - 商家评分系统
 - 社交分享功能
 - 收藏/书签功能
 - 广告横幅管理
-- **组织页面** - 政府机构、NGO、非营利组织专属页面
+- **组织页面** - 政府机构、非营利组织专属页面
+- **行业分类** - ISIC标准分类 (14个主类)
+- **灵活定价** - 支持多种价格单位 (小时/天/月/件等)
 
 ### Vision (愿景)
 - 多语言支持
@@ -82,10 +84,11 @@ classification:
 
 ### Journey 1: 消费者浏览商家
 1. 访问首页 → 查看精选商家
-2. 进入商家目录 → 筛选分类
-3. 使用搜索 → 查找特定商家
-4. 查看商家详情 → 了解产品/服务
-5. 查看联系方式 → 通过WhatsApp/电话联系
+2. 进入探索页面 → 浏览分类和商家
+3. 点击分类 → 查看该分类下的商家
+4. 使用标签筛选 → 精确定位
+5. 查看商家详情 → 了解产品/服务
+6. 查看联系方式 → 通过WhatsApp/电话联系
 
 ### Journey 2: 商家注册并创建页面
 1. 访问首页 → 点击"创建商家"
@@ -126,7 +129,7 @@ classification:
 | 验证 | Zod | |
 | Toast | Sonner | |
 | 地图 | Leaflet + OpenStreetMap | 免费开源 |
-| 部署 | Cloudflare Pages + Workers | 免费额度 |
+| 部署 | Cloudflare Workers (SSR) | 免费额度 |
 
 ---
 
@@ -185,9 +188,9 @@ classification:
 
 | 套餐 | 价格 (月付) | 价格 (年付) | 产品/SKU 限制 | 每产品图片限制 | 视频限制 |
 |------|------------|------------|--------------|---------------|----------|
-| **Basic** | $39/月 | $390/年 | 10 | 5 | 1 |
-| **Pro** | $69/月 | $690/年 | 30 | 5 | 1 |
-| **Max** | $99/月 | $990/年 | 60 | 5 | 1 |
+| **Basic** | $29/月 | $290/年 | 10 | 5 | 1 |
+| **Pro** | $59/月 | $590/年 | 30 | 5 | 1 |
+| **Max** | $89/月 | $890/年 | 60 | 5 | 1 |
 
 **注意**：
 - 所有套餐均支持 3 天免费试用
@@ -301,6 +304,12 @@ classification:
 | planType | String | 'basic'/'pro'/'max' |
 | publishDate | DateTime | 发布/试用开始日期 |
 | expiryDate | DateTime | 过期日期 |
+| socialLinks | JSON | {facebook, instagram, tiktok} 社交媒体链接 |
+| photoGallery | JSON Array | 相册图片ID数组 (最多6张图片+1个视频) |
+| latestUpdate | String | 最新动态 (500字符) |
+| latestUpdateImages | JSON Array | 最新动态图片ID数组 (最多3张) |
+| latestUpdateDate | DateTime | 最新动态更新时间 (每周限制) |
+| yearOfEstablishment | Number | 成立年份 |
 
 ### 8.3 Products (产品/服务)
 
@@ -510,7 +519,7 @@ classification:
 | **SDK** | AWS S3 SDK (@aws-sdk/client-s3) |
 | **上传方式** | 直接上传 (生产) / Base64 (开发) |
 | **CDN** | 通过 Cloudflare Images 转换优化 |
-| **URL 格式** | `https://timorbiz.com/cdn-cgi/image/width=xxx,quality=75,format=webp/{R2_URL}` |
+| **URL 格式** | `https://timorlist.com/cdn-cgi/image/width=xxx,quality=75,format=webp/{R2_URL}` |
 
 ---
 
@@ -583,5 +592,5 @@ classification:
 
 ---
 
-**文档版本**: 3.1
-**最后更新**: 2026-03-22
+**文档版本**: 3.2
+**最后更新**: 2026-04-26

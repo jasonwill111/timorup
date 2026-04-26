@@ -1,4 +1,4 @@
-# TMBIZ - 架构设计文档
+# TIMORLIST - 架构设计文档
 
 ## 1. 系统架构总览
 
@@ -52,7 +52,7 @@
 ## 3. 目录结构
 
 ```
-timorbiz/
+timorlist/
 ├── src/
 │   ├── components/
 │   │   ├── ui/                    # Astro UI 组件
@@ -107,10 +107,17 @@ timorbiz/
 │   │   ├── index.astro             # 首页
 │   │   ├── businesses/
 │   │   │   ├── index.astro         # 商家目录
-│   │   │   └── [slug].astro       # 商家详情
+│   │   │   └── [slug].astro       # 商家详情 (SSR)
+│   │   │   └── product/
+│   │   │       ├── new/
+│   │   │       │   └── index.astro # 创建产品
+│   │   │       ├── [id]/
+│   │   │       │   ├── index.astro # 产品详情 (SSR)
+│   │   │       │   └── edit/
+│   │   │       │       └── index.astro # 编辑产品
 │   │   ├── organization/              # 政府/NGO/非营利组织
 │   │   │   ├── index.astro         # 组织目录
-│   │   │   └── [slug].astro       # 组织详情
+│   │   │   └── [slug].astro       # 组织详情 (SSR)
 │   │   ├── account/
 │   │   │   └── index.astro         # 用户账户
 │   │   ├── admin/
@@ -208,15 +215,16 @@ timorbiz/
 │   ├── POST   /reset-password       # 重置密码
 │   └── GET    /verify/:token       # 验证邮箱
 │
-├── /businesses
-│   ├── GET    /                     # 获取商家列表
-│   ├── GET    /:slug                # 获取商家详情
-│   ├── POST   /                     # 创建商家
-│   ├── PUT    /:id                  # 更新商家
-│   ├── DELETE /:id                  # 删除商家
-│   ├── POST   /:id/like             # 点赞
-│   ├── POST   /:id/save             # 收藏
-│   └── GET    /featured             # 获取精选商家
+├── /categories
+│   ├── GET    /                     # 获取分类列表 (探索页面)
+│   ├── GET    /:slug/listings       # 获取分类下的商家列表 (支持分页)
+│   ├── POST   /                     # 创建分类
+│   └── PUT    /:id                  # 更新分类
+│
+├── /account
+│   ├── GET    /profile/:uid         # 获取用户资料
+│   ├── GET    /businesses/:uid     # 获取用户商家列表
+│   └── GET    /subscription/:uid    # 获取用户订阅信息
 │
 ├── /products
 │   ├── GET    /                     # 获取产品列表
@@ -238,7 +246,36 @@ timorbiz/
 │
 ├── /categories
 │   ├── GET    /                     # 获取分类列表
-│   └── ...
+│   └── GET    /:slug/listings      # 获取分类下的商家列表
+│
+├── /businesses
+│   ├── GET    /?category=          # 获取商家列表 (支持分类筛选)
+│   ├── GET    /:slug               # 获取商家详情
+│   ├── POST   /                    # 创建商家
+│   ├── PUT    /:id                 # 更新商家
+│   ├── DELETE /:id                 # 删除商家
+│   ├── POST   /:id/like            # 点赞
+│   ├── POST   /:id/save            # 收藏
+│   └── GET    /featured            # 获取精选商家
+│
+├── /organizations
+│   ├── GET    /                    # 获取组织列表
+│   └── GET    /:slug               # 获取组织详情
+│
+├── /admin/listing
+│   ├── GET    /                     # 列出所有 listings (business/gov/nonprofit)
+│   ├── POST   /                     # 创建 listing
+│   ├── GET    /new                  # 新建页面 (类型选择)
+│   ├── GET    /:id                  # 获取单个 listing
+│   ├── PUT    /:id                  # 更新 listing
+│   └── DELETE /:id                  # 删除 listing
+│
+├── /admin/skus
+│   ├── GET    /                     # 列出所有 SKUs
+│   ├── POST   /                     # 创建 SKU
+│   ├── GET    /:id                  # 获取单个 SKU
+│   ├── PUT    /:id                  # 更新 SKU
+│   └── DELETE /:id                  # 删除 SKU
 │
 ├── /orders
 │   ├── GET    /                     # 获取订单列表
@@ -360,7 +397,7 @@ POST /api/media/upload → 服务器验证
 ### 7.2 R2 存储结构
 
 ```
-r2://timorbiz-media/
+r2://timorlist-media/
 ├── users/
 │   └── {user-id}/
 │       └── {filename}
@@ -417,7 +454,7 @@ crons = ["0 9 * * *"]  # 每天 UTC 9 点
 // 只允许同源和已知的域名
 const corsOrigins = [
   'http://localhost:8788',
-  'https://timorbiz.pages.dev',
+  'https://timorlist.pages.dev',
   // 生产域名
 ];
 ```
@@ -431,7 +468,31 @@ const corsOrigins = [
 
 - 所有输入使用 Zod 验证
 - SQL 注入防护 (使用 Drizzle 参数化查询)
-- XSS 防护 (React 默认转义)
+- XSS 防护 (使用 DOM 操作 + textContent 或 escapeHtml 辅助函数)
+
+### 9.4 XSS 防护模式
+
+Pure Astro 组件必须使用 DOM 操作：
+
+```typescript
+// ✅ 安全：使用 DOM 操作
+const p = document.createElement('p');
+p.textContent = userInput;
+container.appendChild(p);
+
+// ✅ 安全：使用 escapeHtml 辅助函数
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+```
+
+已修复 XSS 的文件：
+- `account.astro` - 用户数据渲染
+- `admin/reviews.astro` - 评论内容显示
+- `business/create.astro` - 商家标题/URL 显示
+- `verify.astro` - 邮箱验证消息
 
 ---
 
@@ -474,7 +535,7 @@ CREATE INDEX idx_reviews_user ON reviews(user_id);
 CF_ACCOUNT_ID=your_account_id
 R2_ACCESS_KEY_ID=your_access_key_id
 R2_SECRET_ACCESS_KEY=your_secret_key
-R2_BUCKET_NAME=timorbiz
+R2_BUCKET_NAME=timorlist
 R2_PUBLIC_URL=your-public-url.r2.cloudflarestorage.com
 
 # Auth
@@ -493,6 +554,25 @@ NODE_ENV=development
 
 ---
 
-**文档版本**: 3.0
-**最后更新**: 2026-03-22
-**开发状态**: ✅ 架构已完成
+**文档版本**: 8.0
+**最后更新**: 2026-04-26
+**开发状态**: ✅ SSR 已实现 | TipTap 编辑器 | 产品详情页 | WhatsApp 品牌色 | 紧凑 UI 布局 | Business详情增强
+
+## 12. Business 详情页增强 (2026-04-26)
+
+### 12.1 新增字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| socialLinks | JSON | {facebook, instagram, tiktok} 社交媒体链接 |
+| photoGallery | JSON Array | 相册图片ID数组 (最多6张) |
+| latestUpdate | String | 最新动态内容 (500字符) |
+| latestUpdateDate | Timestamp | 最新动态更新时间 (每周限制) |
+
+### 12.2 详情页展示
+
+- **Views/Likes/Saves**: Icon下方显示数字统计
+- **Social Links Card**: FB/IG/TikTok 图标按钮 (彩色)
+- **Photo Gallery**: 3x2 网格展示
+- **Latest Update**: 左侧强调边框高亮显示
+- **Year of Establishment**: "Est. YYYY" 显示

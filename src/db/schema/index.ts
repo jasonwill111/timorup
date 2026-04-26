@@ -1,4 +1,4 @@
-// Database schema for timorbiz
+// Database schema for timorlist
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
@@ -14,6 +14,7 @@ export { blogPosts };
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
+  emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
   phone: text('phone'),
   name: text('name').notNull(),
   image: text('image'),
@@ -53,14 +54,14 @@ export const media = sqliteTable('media', {
 });
 
 // Business Pages table
-// Also used for organizations (gov, NGOs) with entityType field
+// Also used for organizations (gov, nonprofits) with entityType field
 export const businessPages = sqliteTable('business_pages', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   ownerId: text('owner_id').notNull(),
   categoryId: text('category_id'),
-  entityType: text('entity_type').default('business'), // 'business' | 'organization'
+  entityType: text('entity_type').default('business'), // 'business' | 'government' | 'nonprofit'
   status: text('status').default('draft'),
   bannerImageId: text('banner_image_id'),
   profileImageId: text('profile_image_id'),
@@ -71,11 +72,13 @@ export const businessPages = sqliteTable('business_pages', {
   email: text('email'),
   address: text('address'),
   locationLat: real('location_lat'),
-  locationLng: real('locationLng'),
+  locationLng: real('location_lng'),
   openingHours: text('opening_hours'),
   aboutUs: text('about_us'),
   latestUpdates: text('latest_updates'),
   tags: text('tags'),
+  // Industry for businesses (e.g., 'food.restaurants', 'retail.clothing')
+  industry: text('industry'),
   likes: integer('likes').default(0),
   saves: integer('saves').default(0),
   ratingAverage: real('rating_average').default(0),
@@ -87,7 +90,14 @@ export const businessPages = sqliteTable('business_pages', {
   // Organization-specific fields
   registrationUrl: text('registration_url'), // Link to official registration
   verifiedBadge: integer('verified_badge', { mode: 'boolean' }).default(false),
-  organizationType: text('organization_type'), // 'government' | 'ngo' | 'nonprofit' | 'foundation'
+  // Social media links
+  socialLinks: text('social_links'), // JSON: { facebook, instagram, tiktok }
+  // Photo gallery (separate from banner/profile)
+  photoGallery: text('photo_gallery'), // JSON array of media IDs (max 6 images + 1 video)
+  // Latest update tracking (weekly limit)
+  latestUpdate: text('latest_update'), // Text content
+  latestUpdateImages: text('latest_update_images'), // JSON array of media IDs (max 3)
+  latestUpdateDate: integer('latest_update_date', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (businessPages) => ({
@@ -96,13 +106,20 @@ export const businessPages = sqliteTable('business_pages', {
   entityTypeIdx: index('business_entity_type_idx').on(businessPages.entityType),
 }));
 
-// Products table
+// Products/SKUs table with flexible pricing
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
-  price: text('price').notNull(),
   description: text('description'),
   businessPageId: text('business_page_id').notNull(),
+  // Flexible pricing: JSON array of { label, value, unit }
+  // Example: [{ "label": "Hourly Rate", "value": "25.00", "unit": "/hour" }, { "label": "Daily Rate", "value": "150.00", "unit": "/day" }]
+  priceFields: text('price_fields'),
+  // Service type for determining available price units
+  serviceType: text('service_type').default('product'), // 'product' | 'service' | 'rental' | 'food' | 'accommodation' | 'project'
+  // Fallback single price (for simple products)
+  price: text('price'),
+  priceUnit: text('price_unit'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (products) => ({

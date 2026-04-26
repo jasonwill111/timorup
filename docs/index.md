@@ -1,5 +1,5 @@
 ---
-project_name: timorbiz
+project_name: timorlist
 documentation_date: 2026-02-26
 scan_level: exhaustive
 ---
@@ -11,7 +11,7 @@ scan_level: exhaustive
 - **项目名称**: TimorBiz (东帝汶商业目录平台)
 - **项目类型**: Web 应用 (Astro SSR)
 - **架构**: Monolithic (单体应用)
-- **部署平台**: Cloudflare Pages + Workers
+- **部署平台**: Cloudflare Workers (SSR) | 未来支持: 静态 + SSR 混合模式
 
 ## 技术栈
 
@@ -40,7 +40,7 @@ scan_level: exhaustive
 ## 目录结构
 
 ```
-timorbiz/
+timorlist/
 ├── src/
 │   ├── components/           # UI 组件
 │   │   ├── ui/              # Astro UI 组件
@@ -63,6 +63,7 @@ timorbiz/
 | 路由 | 文件 | 描述 |
 |------|------|------|
 | `/api/auth/*` | `src/pages/api/auth/` | 认证 |
+| `/api/account/*` | `src/pages/api/account/` | 用户账户 (profile, businesses, subscription) |
 | `/api/businesses/*` | `src/pages/api/businesses/` | 商家管理 |
 | `/api/products/*` | `src/pages/api/products/` | 产品管理 |
 | `/api/reviews/*` | `src/pages/api/reviews/` | 评论管理 |
@@ -72,6 +73,58 @@ timorbiz/
 | `/api/admin/*` | `src/pages/api/admin/` | 管理后台 |
 | `/api/blogs/*` | `src/pages/api/blogs/` | 博客 CRUD |
 | `/api/banners/*` | `src/pages/api/banners/` | 横幅管理 |
+
+## 实体类型
+
+| 类型 | 路由 | 特点 |
+|------|------|------|
+| `business` | `/business/[slug]` | 产品、评论、评分、行业分类 |
+| `government` | `/govs/[slug]` | 简化页面（信息+联系方式） |
+| `nonprofit` | `/ngos/[slug]` | 简化页面（信息+联系方式） |
+
+## 导航结构
+
+| 导航项 | 路由 | 描述 |
+|--------|------|------|
+| Directory | `/listing` | 统一目录页，含 Businesses/Govs/NGOs 三个标签页 |
+| Products & Services | `/products-services` | 所有 SKU 的汇总展示页面 |
+| Pricing | `/pricing` | 定价页面 |
+| + Create | `/listing/create` | 创建 listing（Business 需订阅，Gov/NGO 免费） |
+
+## 订阅流程
+
+```
+用户选套餐 (/pricing) → /subscribe?plan=xxx → 创建订单 → 线下支付 → Admin 确认 → 订阅生效
+
+订阅过期 → /account 页面显示 "Expired" → 用户选择新套餐 → 创建新订单 → 重复上述流程
+```
+
+### 套餐 SKU 限制
+
+| 套餐 | SKU 限额 | 价格 |
+|------|----------|------|
+| Basic | 10 | $29/月 或 $290/年 |
+| Pro | 30 | $59/月 或 $590/年 |
+| Max | 60 | $89/月 或 $890/年 |
+
+### 订阅 API
+
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/api/admin/orders` | GET | 列出所有订单 |
+| `/api/admin/orders/[id]` | GET | 获取订单详情 |
+| `/api/admin/orders/[id]` | PUT | 更新订单（套餐/金额/状态/期限/备注） |
+| `/api/admin/orders/[id]` | DELETE | 删除订单 |
+| `/api/orders` | POST | 创建订单 |
+| `/api/account/subscription/[uid]` | GET | 获取用户订阅信息 |
+
+### SKU 管理 API
+
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/api/products` | GET | 列出产品 |
+| `/api/products` | POST | 创建产品（带 SKU 限制检查） |
+| `/api/products/[businessPageId]/sku-usage` | GET | 获取 SKU 使用情况 |
 
 ## 生成的文档
 
@@ -97,18 +150,23 @@ timorbiz/
 # 安装依赖
 pnpm install
 
-# 启动前端开发服务器
+# 启动前端开发服务器（使用 Rust 编译器）
 pnpm dev
 
-# 启动 API 开发服务器
-pnpm dev:api
-
-# 运行测试
-pnpm test
-
-# 构建
+# 构建（使用 Rust 编译器）
 pnpm build
 ```
+
+### 测试命令
+
+| 命令 | 工具 | 用途 |
+|------|------|------|
+| `pnpm test` | Vitest | 单元/集成测试 |
+| `pnpm test:e2e` | Playwright | E2E 自动化 |
+| `pnpm test:quick` | playwright-cli | 快速页面检查 |
+| `pnpm test:kuri` | kuri | 截图对比 |
+| `pnpm test:agent` | browser-use | AI agent 流程测试 |
+| `pnpm test:all` | 组合 | 完整测试套件 |
 
 ### 环境变量
 
@@ -116,23 +174,23 @@ pnpm build
 
 ## 页面路由
 
-| 页面 | 路由 |
-|------|------|
-| 首页 | `/` |
-| 商家目录 | `/businesses` |
-| 商家详情 | `/business/[slug]` |
-| 产品详情 | `/business/[slug]/product/[id]` |
-| 创建产品 | `/business/[slug]/product/new` |
-| 编辑产品 | `/business/[slug]/product/[id]/edit` |
-| 用户账户 | `/account` |
-| 管理后台 | `/admin` |
-| Admin 商家管理 | `/admin/businesses` |
-| Admin 博客管理 | `/admin/blogs` |
-| 创建商家 | `/business/create` |
-| 登录 | `/login` |
-| 注册 | `/register` |
-| 定价 | `/pricing` |
-| 订阅 | `/subscribe` |
+| 页面 | 路由 | SSR |
+|------|------|-----|
+| 首页 | `/` | ✅ |
+| Local Directory | `/listing` | ✅ |
+| Create Listing | `/listing/create` | ✅ |
+| Products & Services | `/products-services` | ✅ |
+| 商家详情 | `/business/[slug]` | ✅ |
+| SKU 详情 | `/business/[slug]/product/[id]` | ✅ |
+| Govs 详情 | `/govs/[slug]` | ✅ |
+| NGOs 详情 | `/ngos/[slug]` | ✅ |
+| 用户账户 | `/account` | - |
+| 管理后台 | `/admin` | - |
+| Admin Listing 管理 | `/admin/listing` | ✅ |
+| Admin SKUs 管理 | `/admin/skus` | ✅ |
+| 登录 | `/login` | - |
+| 注册 | `/register` | - |
+| FAQ | `/faq` | - |
 
 ## 数据库表
 
@@ -159,7 +217,23 @@ pnpm build
 
 ---
 
-**文档版本**: 3.0
-**最后更新**: 2026-03-22
+**文档版本**: 12.0
+**最后更新**: 2026-04-26
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ⚠️ 55/57 Stories 完成 (2 个缺口) | 12 个 Epic 全部完成 | 剩余 12 个功能缺口待修复（详见 GAP_ANALYSIS.md）
+**开发状态**: ✅ /listing目录页 | /products-services商品页 | 3实体首页Featured | /business/govs/ngos详情页 | Business详情增强 | Gallery Lightbox
+
+## Business 详情页增强功能
+
+| 功能 | 字段 | 说明 |
+|------|------|------|
+| 统计数据 | views, likes, saves | Icon下方显示数字 |
+| 社交链接 | socialLinks | {facebook, instagram, tiktok} |
+| 相册 | photoGallery | 3x2网格 + Lightbox弹窗 |
+| 最新动态 | latestUpdate | Products上方, 每周更新限制 |
+| 成立年份 | yearOfEstablishment | Est. YYYY 显示 |
+
+### Gallery Lightbox
+
+- 点击图片 → 全屏弹窗
+- ← → 箭头/键盘切换
+- ESC/点击空白关闭

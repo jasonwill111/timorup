@@ -14,7 +14,9 @@ import CardDescription from '@/components/ui/CardDescription.astro'
 import CardContent from '@/components/ui/CardContent.astro'
 ---
 
-<Layout title="Add Product - TMBIZ">
+<Layout title="Add Product - TIMORLIST">
+  <!-- TipTap CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/@tiptap/core@3.22.3/dist/tiptap.min.css" />
   <div class="container py-8">
     <!-- Back Link -->
     <a id="back-link" href="#" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
@@ -105,13 +107,8 @@ import CardContent from '@/components/ui/CardContent.astro'
             <!-- Description -->
             <div>
               <Label for="description">Description</Label>
-              <textarea 
-                id="description" 
-                name="description" 
-                rows="4"
-                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="Describe your product or service..."
-              ></textarea>
+              <div id="description-editor"></div>
+              <input type="hidden" id="description" name="description" value="" />
             </div>
 
             <!-- Product Images -->
@@ -151,6 +148,62 @@ import CardContent from '@/components/ui/CardContent.astro'
 </Layout>
 
 <script>
+  // ── TipTap Editor Helper ─────────────────────────────────────────────────────
+  async function initTipTapEditor(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
+    const textareaId = `${element.id}-content`;
+
+    // Create hidden textarea for form submission
+    const textarea = document.createElement('textarea');
+    textarea.id = textareaId;
+    textarea.name = 'description';
+    textarea.className = 'hidden';
+    element.insertAdjacentElement('afterend', textarea);
+
+    // Dynamic imports for TipTap
+    const [tiptapCore, tiptapStarterKit, tiptapLink, tiptapPlaceholder] = await Promise.all([
+      import('https://esm.sh/@tiptap/core@3.22.3'),
+      import('https://esm.sh/@tiptap/starter-kit@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-link@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-placeholder@3.22.3'),
+    ]);
+
+    const { Editor } = tiptapCore;
+    const { default: StarterKit } = tiptapStarterKit;
+    const { default: Link } = tiptapLink;
+    const { default: Placeholder } = tiptapPlaceholder;
+
+    const editor = new Editor({
+      element,
+      extensions: [
+        StarterKit.configure({
+          heading: { levels: [2, 3] },
+        }),
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: { class: 'text-primary underline' },
+        }),
+        Placeholder.configure({
+          placeholder: options.placeholder || 'Describe your product or service...',
+          emptyEditorClass: 'is-editor-empty',
+        }),
+      ],
+      content: options.content || '',
+      onUpdate: ({ editor }) => {
+        textarea.value = editor.getHTML();
+      },
+      editorProps: {
+        attributes: {
+          class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[100px] px-3 py-2 border rounded-lg bg-background',
+        },
+      },
+    });
+
+    // Initial sync
+    textarea.value = editor.getHTML();
+
+    return editor;
+  }
+
   // Get slug from URL
   const pathParts = window.location.pathname.split('/').filter(Boolean);
   const slugIndex = pathParts.indexOf('business');
@@ -253,6 +306,14 @@ import CardContent from '@/components/ui/CardContent.astro'
       backLink.setAttribute('href', `/business/${slug}/products`);
     }
 
+    // Initialize TipTap editor for description
+    const descEditor = document.getElementById('description-editor');
+    if (descEditor) {
+      await initTipTapEditor(descEditor, {
+        placeholder: 'Describe your product or service...',
+      });
+    }
+
     // Show content
     loading?.classList.add('hidden');
     content?.classList.remove('hidden');
@@ -264,7 +325,7 @@ import CardContent from '@/components/ui/CardContent.astro'
     
     const title = (document.getElementById('title') as HTMLInputElement).value;
     const price = (document.getElementById('price') as HTMLInputElement).value;
-    const description = (document.getElementById('description') as HTMLTextAreaElement).value;
+    const description = (document.getElementById('description') as HTMLInputElement).value;
     const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
     
     if (!title || !price) {

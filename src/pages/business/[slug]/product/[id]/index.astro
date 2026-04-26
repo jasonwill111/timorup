@@ -1,273 +1,275 @@
 ---
-// This page needs SSR for dynamic product data
+// Product detail page with SSR
 export const prerender = false;
 
 import Layout from '@layouts/Layout.astro';
 import Button from '@components/ui/Button.astro';
-import Card from '@components/ui/Card.astro'
+import Card from '@components/ui/Card.astro';
 import CardContent from '@components/ui/CardContent.astro';
+import { Share2, ArrowLeft, ChevronLeft, ChevronRight, ArrowRight } from '@lucide/astro';
+import { db } from '@/lib/db';
+import { products, productImages, businessPages, categories } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+const { slug } = Astro.params;
+
+// Extract product ID from path: /business/[slug]/product/[id]
+const pathParts = Astro.url.pathname.split('/').filter(Boolean);
+const productIdIndex = pathParts.indexOf('product');
+const productId = productIdIndex >= 0 ? pathParts[productIdIndex + 1] : '';
+
+const siteUrl = import.meta.env.SITE || 'https://timorlist.com';
+
+// SSR: Load product
+const product = productId
+  ? await db.select().from(products).where(eq(products.id, productId)).get()
+  : null;
+
+// Redirect if not found
+if (!product) {
+  return Astro.redirect('/businesses');
+}
+
+// Load business info
+const business = await db.select().from(businessPages).where(eq(businessPages.id, product.businessPageId)).get();
+
+// Redirect if business slug mismatch
+if (!business || business.slug !== slug) {
+  return Astro.redirect(`/business/${business?.slug || ''}`);
+}
+
+// Load product images
+const images = await db.select().from(productImages).where(eq(productImages.productId, productId)).all();
+
+// Load category
+const category = business.categoryId
+  ? await db.select().from(categories).where(eq(categories.id, business.categoryId)).get()
+  : null;
+
+// Canonical URL
+const canonicalUrl = `${siteUrl}/business/${slug}/product/${productId}`;
+
+// Title & description
+const pageTitle = `${product.title} - TIMORLIST`;
+const pageDesc = product.description?.substring(0, 160) || `${product.title} - ${business.title}`;
 ---
 
-<Layout title="Product - TMBIZ">
-  <div id="product-page">
-    <!-- Loading State -->
-    <div id="loading" class="min-h-screen flex items-center justify-center">
-      <div class="text-center">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p class="mt-4 text-muted-foreground">Loading...</p>
-      </div>
-    </div>
-    
-    <!-- Error State -->
-    <div id="error" class="hidden min-h-screen flex items-center justify-center">
-      <div class="text-center">
-        <h1 class="text-2xl font-bold">Product Not Found</h1>
-        <p class="mt-2 text-muted-foreground">The product you're looking for doesn't exist.</p>
-        <a href="/businesses" class="mt-4 inline-block">
-          <Button>Browse Businesses</Button>
+<Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "description": product.description,
+    "url": canonicalUrl,
+    "image": images.map(img => `/api/media/${img.mediaId}`),
+    "offers": product.price ? {
+      "@type": "Offer",
+      "price": product.price.replace(/[^0-9.]/g, ''),
+      "priceCurrency": "USD"
+    } : undefined,
+    "seller": {
+      "@type": "LocalBusiness",
+      "name": business.title
+    }
+  })} />
+
+  <div class="bg-background min-h-screen pb-20">
+    <!-- Header -->
+    <div class="sticky top-0 z-50 bg-background border-b">
+      <div class="container">
+        <a href={`/business/${slug}`} class="flex items-center gap-2 py-3 text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft class="w-5 h-5" />
+          Back to {business.title}
         </a>
       </div>
     </div>
-    
-    <!-- Product Content -->
-    <div id="content" class="hidden">
-      <!-- Header with back button -->
-      <div class="sticky top-0 z-50 bg-background border-b">
-        <div class="container">
-          <a id="back-btn" href="#" class="flex items-center gap-2 py-3 text-muted-foreground hover:text-foreground transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Back to Business
-          </a>
-        </div>
-      </div>
-      
-      <!-- Product Details -->
-      <div class="container py-6">
-        <div class="max-w-4xl mx-auto">
-          <!-- Image Carousel -->
-          <div class="mb-6">
-            <div id="product-images" class="relative aspect-square rounded-xl overflow-hidden bg-muted">
-              <!-- Images will be loaded here -->
+
+    <div class="container py-6">
+      <div class="max-w-4xl mx-auto">
+        <!-- Image Carousel -->
+        <div class="mb-6">
+          <!-- Main Image - smaller, scrollable -->
+          <div class="max-w-2xl mx-auto">
+            <div id="main-image" class="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted">
+              {images.length > 0 ? (
+                <img id="current-image" src={`/api/media/${images[0]?.mediaId}`} alt={product.title} class="w-full h-full object-cover" />
+              ) : (
+                <div class="w-full h-full flex items-center justify-center text-6xl font-bold text-muted-foreground bg-gradient-to-br from-amber-100 to-amber-200">
+                  {product.title.charAt(0)}
+                </div>
+              )}
             </div>
-            <!-- Image indicators -->
-            <div id="image-indicators" class="flex justify-center gap-2 mt-4"></div>
           </div>
-          
-          <!-- Product Info -->
-          <div class="mb-6">
-            <h1 id="product-title" class="text-2xl md:text-3xl font-bold mb-2"></h1>
-            <p id="product-price" class="text-2xl font-semibold text-amber-600"></p>
-          </div>
-          
-          <!-- Description -->
+
+          <!-- Thumbnail Navigation (if multiple images) -->
+          {images.length > 1 && (
+            <div class="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+              <button id="scroll-left" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
+                <ChevronLeft class="w-5 h-5" />
+              </button>
+              {images.map((img, index) => (
+                <button
+                  class={`thumbnail-btn w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${index === 0 ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'}`}
+                  data-index={index}
+                >
+                  <img src={`/api/media/${img.mediaId}`} alt="" class="w-full h-full object-cover" />
+                </button>
+              ))}
+              <button id="scroll-right" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
+                <ChevronRight class="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          <!-- Image Counter -->
+          {images.length > 1 && (
+            <div class="flex justify-center gap-1 mt-3">
+              {images.map((_, index) => (
+                <span class={`image-dot w-2 h-2 rounded-full transition-colors ${index === 0 ? 'bg-amber-500' : 'bg-gray-300'}`}></span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Product Info -->
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold mb-2">{product.title}</h1>
+          {product.price && (
+            <p class="text-2xl font-semibold text-primary">{product.price}</p>
+          )}
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 mb-6">
+          {business.contactNumber ? (
+            <a
+              href={`https://wa.me/${business.contactNumber.replace(/\s/g, '')}?text=Hi, I'm interested in "${product.title}" from ${encodeURIComponent(business.title)}`}
+              target="_blank"
+              class="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              Ask for Price
+            </a>
+          ) : (
+            <Button>Contact Business</Button>
+          )}
+
+          <Button id="share-btn" variant="outline" size="icon">
+            <Share2 class="w-5 h-5" />
+          </Button>
+        </div>
+
+        <!-- Description -->
+        {product.description && (
           <Card class="mb-6">
             <CardContent class="p-6">
               <h2 class="text-lg font-semibold mb-3">Description</h2>
-              <div id="product-description" class="prose dark:prose-invert max-w-none"></div>
+              <div class="prose dark:prose-invert max-w-none" set:html={product.description}></div>
             </CardContent>
           </Card>
-          
-          <!-- Business Info -->
-          <Card class="mb-20">
+        )}
+
+        <!-- Business Info -->
+        <a href={`/business/${slug}`} class="block">
+          <Card class="hover:bg-muted/30 transition-colors">
             <CardContent class="p-6">
               <h2 class="text-lg font-semibold mb-3">Sold by</h2>
-              <a id="business-link" href="#" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                <div id="business-logo" class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                  <span id="business-initial" class="text-2xl font-bold text-white"></span>
+              <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden border-2 border-background shadow">
+                  {business.profileImageId ? (
+                    <img src={`/api/media/${business.profileImageId}`} alt="" class="w-full h-full object-cover" />
+                  ) : (
+                    <span class="text-2xl font-bold text-white">{business.title.charAt(0)}</span>
+                  )}
                 </div>
                 <div>
-                  <h3 id="business-name" class="font-semibold text-lg"></h3>
-                  <p id="business-category" class="text-sm text-muted-foreground"></p>
+                  <h3 class="font-semibold text-lg">{business.title}</h3>
+                  {category && (
+                    <p class="text-sm text-muted-foreground">{category.name}</p>
+                  )}
+                  {business.address && (
+                    <p class="text-sm text-muted-foreground mt-1">{business.address}</p>
+                  )}
                 </div>
-              </a>
+                <ArrowRight class="w-5 h-5 ml-auto text-muted-foreground" />
+              </div>
             </CardContent>
           </Card>
-        </div>
+        </a>
       </div>
-      
-      <!-- Bottom Action Bar -->
-      <div class="fixed bottom-0 left-0 right-0 bg-background border-t p-4">
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-          <div class="flex gap-2">
-            <Button id="like-btn" variant="outline" size="icon">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-              </svg>
-            </Button>
-            <Button id="save-btn" variant="outline" size="icon">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-              </svg>
-            </Button>
-            <Button id="share-btn" variant="outline" size="icon">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-              </svg>
-            </Button>
-          </div>
-          <a id="whatsapp-btn" href="#" class="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            Contact on WhatsApp
-          </a>
-        </div>
-      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Action Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-background border-t p-4 md:hidden">
+    <div class="max-w-4xl mx-auto flex items-center gap-3">
+      {business.contactNumber ? (
+        <a
+          href={`https://wa.me/${business.contactNumber.replace(/\s/g, '')}?text=Hi, I'm interested in "${product.title}" from ${encodeURIComponent(business.title)}`}
+          target="_blank"
+          class="flex-1 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Ask for Price
+        </a>
+      ) : (
+        <Button class="flex-1">Contact Business</Button>
+      )}
+      <Button id="mobile-share-btn" variant="outline" size="icon">
+        <Share2 class="w-5 h-5" />
+      </Button>
     </div>
   </div>
 </Layout>
 
 <script>
-  // Get slug and id from URL
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-  const slugIndex = pathParts.indexOf('business');
-  const slug = slugIndex >= 0 ? pathParts[slugIndex + 1] : '';
-  const productId = pathParts[pathParts.length - 1];
-  
-  const loading = document.getElementById('loading');
-  const error = document.getElementById('error');
-  const content = document.getElementById('content');
-  
-  let currentProduct: any = null;
-  let currentBusiness: any = null;
-  let currentImageIndex = 0;
-  
-  async function loadProduct() {
-    if (!productId || !slug) return;
-    
-    try {
-      // Load product
-      const productRes = await fetch(`/api/products/${productId}`);
-      const productData = await productRes.json();
-      
-      if (!productData.success) {
-        loading?.classList.add('hidden');
-        error?.classList.remove('hidden');
-        return;
+  // Image carousel functionality
+  const thumbnails = document.querySelectorAll('.thumbnail-btn');
+  const mainImage = document.getElementById('current-image');
+  const dots = document.querySelectorAll('.image-dot');
+  const thumbnailContainer = document.querySelector('.overflow-x-auto');
+
+  thumbnails.forEach((thumb, index) => {
+    thumb.addEventListener('click', () => {
+      // Update main image
+      const img = thumb.querySelector('img');
+      if (mainImage && img) {
+        mainImage.src = img.src;
       }
-      
-      currentProduct = productData.data;
-      
-      // Load business info
-      const businessRes = await fetch(`/api/businesses/${slug}`);
-      const businessData = await businessRes.json();
-      
-      if (businessData.success) {
-        currentBusiness = businessData.data;
-      }
-      
-      // Update page title
-      document.title = `${currentProduct.title} - TMBIZ`;
-      
-      // Set back button link
-      const backBtn = document.getElementById('back-btn');
-      if (backBtn) {
-        backBtn.setAttribute('href', `/business/${slug}`);
-      }
-      
-      // Render images
-      renderImages();
-      
-      // Update product info
-      const titleEl = document.getElementById('product-title');
-      if (titleEl) titleEl.textContent = currentProduct.title;
-      
-      const priceEl = document.getElementById('product-price');
-      if (priceEl) priceEl.textContent = currentProduct.price;
-      
-      const descEl = document.getElementById('product-description');
-      if (descEl) {
-        descEl.innerHTML = currentProduct.description || '<p class="text-muted-foreground">No description available.</p>';
-      }
-      
-      // Update business info
-      const businessLink = document.getElementById('business-link');
-      if (businessLink) {
-        businessLink.setAttribute('href', `/business/${slug}`);
-      }
-      
-      const businessName = document.getElementById('business-name');
-      if (businessName && currentBusiness) {
-        businessName.textContent = currentBusiness.title;
-      }
-      
-      const businessInitial = document.getElementById('business-initial');
-      if (businessInitial && currentBusiness) {
-        businessInitial.textContent = currentBusiness.title?.charAt(0) || 'B';
-      }
-      
-      const businessCategory = document.getElementById('business-category');
-      if (businessCategory && currentBusiness) {
-        businessCategory.textContent = currentBusiness.categoryName || 'Business';
-      }
-      
-      // Setup WhatsApp button
-      if (currentBusiness && currentProduct) {
-        const whatsappBtn = document.getElementById('whatsapp-btn');
-        if (whatsappBtn && currentBusiness.contactNumber) {
-          const phone = `${currentBusiness.countryCode || '+670'}`.replace('+', '') + currentBusiness.contactNumber.replace(/\s/g, '');
-          const message = encodeURIComponent(`Hi, I'm interested in "${currentProduct.title}" from ${currentBusiness.title}`);
-          whatsappBtn.setAttribute('href', `https://wa.me/${phone}?text=${message}`);
-        }
-      }
-      
-      // Show content
-      loading?.classList.add('hidden');
-      content?.classList.remove('hidden');
-      
-    } catch (err) {
-      console.error('Error loading product:', err);
-      loading?.classList.add('hidden');
-      error?.classList.remove('hidden');
-    }
-  }
-  
-  function renderImages() {
-    const container = document.getElementById('product-images');
-    const indicators = document.getElementById('image-indicators');
-    
-    if (!container || !indicators) return;
-    
-    const images = currentProduct?.images || [];
-    const defaultImage = '/placeholder-product.svg';
-    
-    if (images.length === 0) {
-      container.innerHTML = `
-        <div class="w-full h-full flex items-center justify-center">
-          <span class="text-6xl font-bold text-muted-foreground">${currentProduct?.title?.charAt(0) || 'P'}</span>
-        </div>
-      `;
-      return;
-    }
-    
-    container.innerHTML = images.map((img: any, index: number) => `
-      <div class="absolute inset-0 transition-opacity duration-300 ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'}" data-index="${index}">
-        <img src="/api/media/${img.mediaId}" alt="${currentProduct?.title}" class="w-full h-full object-cover" />
-      </div>
-    `).join('');
-    
-    // Render indicators
-    indicators.innerHTML = images.map((_: any, index: number) => `
-      <button class="w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-amber-500' : 'bg-gray-300'}" data-index="${index}"></button>
-    `).join('');
-    
-    // Add click handlers
-    container.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentImageIndex = parseInt(btn.getAttribute('data-index') || '0');
-        renderImages();
+
+      // Update active states
+      thumbnails.forEach((t, i) => {
+        t.classList.toggle('border-primary', i === index);
+        t.classList.toggle('border-transparent', i !== index);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('bg-amber-500', i === index);
+        dot.classList.toggle('bg-gray-300', i !== index);
       });
     });
-  }
-  
-  // Event listeners
+  });
+
+  // Scroll buttons for thumbnails
+  document.getElementById('scroll-left')?.addEventListener('click', () => {
+    thumbnailContainer?.scrollBy({ left: -160, behavior: 'smooth' });
+  });
+
+  document.getElementById('scroll-right')?.addEventListener('click', () => {
+    thumbnailContainer?.scrollBy({ left: 160, behavior: 'smooth' });
+  });
+
+  // Share button
   document.getElementById('share-btn')?.addEventListener('click', () => {
     if (navigator.share) {
       navigator.share({
-        title: currentProduct?.title,
-        text: `Check out ${currentProduct?.title} at ${currentBusiness?.title}`,
+        title: document.title,
+        text: 'Check out this product on TimorLIST',
         url: window.location.href,
       });
     } else {
@@ -275,6 +277,17 @@ import CardContent from '@components/ui/CardContent.astro';
       alert('Link copied to clipboard!');
     }
   });
-  
-  loadProduct();
+
+  document.getElementById('mobile-share-btn')?.addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({
+        title: document.title,
+        text: 'Check out this product on TimorLIST',
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  });
 </script>
