@@ -1,422 +1,195 @@
-<!-- SW:META template="agents" version="0.0.0" sections="rules,orchestration,principles,commands,nonclaudetools,syncworkflow,contextloading,structure,agents,skills,taskformat,usformat,workflows,troubleshooting,docs" -->
+# AGENTS.md
 
-<!-- SW:SECTION:rules version="0.0.0" -->
-## Essential Rules
+> 本文件是 AI agent 的开发规范入口。所有 AI coding agents 应遵循此文件。
 
-```
-1. NEVER pollute project root with .md files
-2. Increment IDs unique (0001-9999)
-3. ONLY 4 files in increment root: metadata.json, spec.md, plan.md, tasks.md
-4. ALL reports/scripts/logs → increment subfolders (NEVER at root!)
-5. metadata.json MUST exist BEFORE spec.md can be created
-6. tasks.md + spec.md = SOURCE OF TRUTH (update after every task!)
-7. EVERY User Story MUST have **Project**: field
-8. For 2-level structures: EVERY US also needs **Board**: field
-```
+## 本地知识库 (必须先加载)
 
-### Increment Folder Structure
+**按顺序加载，再写任何代码：**
 
 ```
-.specweave/increments/0001-feature/
-├── metadata.json                  # REQUIRED - create FIRST
-├── spec.md                        # WHAT & WHY
-├── plan.md                        # HOW (optional)
-├── tasks.md                       # Task checklist
-├── reports/                       # ALL other .md files go here!
-├── scripts/                       # Helper scripts
-└── logs/                          # Execution logs
-    └── 2026-01-04/
-```
-<!-- SW:END:rules -->
-
-<!-- SW:SECTION:orchestration version="0.0.0" -->
-## Workflow Orchestration
-
-### 1. Plan Before Code (MANDATORY)
-
-BEFORE implementing ANY task — create an increment FIRST:
-1. Create increment: spec.md (WHAT/WHY) + plan.md (HOW) + tasks.md (checklist)
-2. Get user approval before implementing
-3. If something goes sideways → STOP and re-plan
-
-**No exceptions for "simple" tasks** — "simple", "quick", "basic" still require an increment. The only exception: user explicitly says "don't create an increment."
-
-**Setup/config actions are NOT implementation** — "connect github", "setup sync", "import issues" → use the matching setup command directly, not the increment workflow.
-
-See **Task Format** and **User Story Format** sections for templates.
-
-### 2. Verify Before Done
-
-Never mark a task complete without proving it works:
-- Code compiles/builds successfully
-- Run tests after every task: `npx vitest run` + `npx playwright test`
-- Review code quality before committing — check for duplication, readability issues, and inefficiencies (Claude Code: `/simplify`; other tools: manual review or linter)
-- `sw:grill` writes `grill-report.json` — CLI blocks closure without it
-- `sw:judge-llm` writes `judge-llm-report.json` — WAIVED if consent denied
-- Acceptance criteria actually satisfied
-
-### 2b. Auto-Closure (MANDATORY)
-
-When ALL tasks are complete, IMMEDIATELY run `sw:done` — do NOT stop to ask for user confirmation. Quality gates (grill, judge-llm, PM validation) ARE the review. If gates fail, the increment stays open. User can re-open if they disagree with closure.
-
-### 4. Large-Scale Changes
-
-For codebase-wide migrations or bulk refactors:
-- **Claude Code**: Use `/batch` — decomposes work into parallel agents with worktree isolation, each producing its own PR
-- **Other tools**: Break work into isolated branches (one per unit), implement each independently, review and merge separately
-- Always get approval on the decomposition plan before executing
-
-### 3. Dependencies First
-
-Satisfy dependencies BEFORE dependent operations.
-
-```
-Bad:  node script.js → Error → npm run build
-Good: npm run build → node script.js → Success
-```
-<!-- SW:END:orchestration -->
-
-<!-- SW:SECTION:principles version="0.0.0" -->
-## Core Principles (Quality)
-
-### Simplicity First
-- Write the simplest code that solves the problem
-- Avoid over-engineering and premature optimization
-- One function = one responsibility
-- If you can delete code and tests still pass, delete it
-- **Match tooling to complexity** — simple tasks (calculator, todo) need 0 domain plugins and vanilla code. Don't load heavyweight frameworks, design systems, or i18n for trivial features
-
-### No Laziness
-- Don't leave TODO comments for "later"
-- Don't skip error handling because "it probably won't fail"
-- Don't copy-paste without understanding
-- Test edge cases, not just happy paths
-
-### Minimal Impact
-- Change only what's necessary for the task
-- Don't refactor adjacent code unless asked
-- Keep PRs focused and reviewable
-- Preserve existing patterns unless improving them is the task
-
-### Demand Elegance (Balanced)
-- Code should be readable by humans first
-- Names should reveal intent
-- BUT: Don't over-abstract for hypothetical futures
-- Pragmatic > Perfect
-
-### DRY (Don't Repeat Yourself)
-- Flag repetitions aggressively — duplicated logic, config, or patterns
-- Extract shared code into reusable functions/modules
-- If you see the same block twice, refactor before adding a third
-- Applies to code, config, tests, and documentation alike
-
-### Plan Review Before Code
-- Review the full plan thoroughly before writing any code
-- Verify plan covers all ACs and edge cases before implementation
-- If the plan has gaps, fix the plan first — don't discover them mid-coding
-- Re-read the plan between tasks to stay aligned
-
-### Test Before Ship
-- Tests pass at every step — unit after each task, E2E before close, no exceptions
-- `sw:increment` generates BDD test plans during design via the sw-planner agent — verify they exist before `sw:do`
-- TDD cycle: `sw:tdd-red` → `sw:tdd-green` → `sw:tdd-refactor`
-- E2E with Playwright CLI (`npx playwright test`) is a blocking closure gate
-<!-- SW:END:principles -->
-
-<!-- SW:SECTION:commands version="0.0.0" -->
-## Commands Reference
-
-Commands are shown as `sw:<name>`. How you invoke them depends on your AI tool:
-
-| Tool | Invocation | Example |
-|------|-----------|---------|
-| **Claude Code** | Slash command | `/sw:do` |
-| **Cursor / Windsurf** | Type in chat | `sw:do` or describe the action |
-| **Copilot / ChatGPT** | Describe in chat | "Execute increment tasks" |
-| **Gemini CLI / Codex** | Reference in prompt | "Run sw:do on my increment" |
-| **Any tool** | SpecWeave CLI (where available) | `specweave validate 0001` |
-
-| Command | Purpose |
-|---------|---------|
-| `sw:increment "name"` | Plan new feature (PM-led) |
-| `sw:do` | Execute tasks from active increment |
-| `sw:done 0001` | Close increment (validates gates) |
-| `sw:progress` | Show task completion status |
-| `sw:validate 0001` | Quality check before closing |
-| `sw:progress-sync` | Sync tasks.md with reality |
-| `sw:sync-docs update` | Sync to living docs |
-| `sw-github:sync 0001` | Sync increment to GitHub issue |
-| `sw-jira:sync 0001` | Sync to Jira |
-| `sw-ado:sync 0001` | Sync to Azure DevOps |
-| `sw:sync-setup` | Connect GitHub/Jira/ADO integration |
-| `sw:import` | Import issues from external tools |
-<!-- SW:END:commands -->
-
-<!-- SW:SECTION:nonclaudetools version="0.0.0" -->
-## Non-Claude Tools (Cursor, Copilot, etc.)
-
-Claude Code has automatic hooks and orchestration. Other tools must do these manually.
-
-### Capability Comparison
-
-| Capability | Claude Code | Non-Claude Tools |
-|------------|-------------|------------------|
-| **Plan Mode** | `EnterPlanMode` → `/sw:increment` | Manual: Create spec.md + plan.md + tasks.md |
-| **Subagents** | `Task` tool for parallel work | Split into multiple chat sessions |
-| **Verification** | PostToolUse hooks auto-validate | Manual: Run tests, check ACs |
-| **Code quality** | `/simplify` (3 parallel review agents) | Manual: lint, review for duplication/readability/perf |
-| **Batch migration** | `/batch` (worktree-isolated parallel agents) | Manual: one branch per unit, implement separately |
-| **Hooks** | Auto-run on events | YOU must mimic (see below) |
-| **Task sync** | Automatic AC updates | Manual: Edit tasks.md + spec.md |
-| **Skills** | Auto-activate on keywords | Read SKILL.md, follow manually |
-
-### Manual Hook Checklist
-
-**After EVERY task completion:**
-1. Update tasks.md: `[ ] pending` → `[x] completed`
-2. Update spec.md ACs if satisfied: `[ ] AC` → `[x] AC`
-3. Review code quality: check for duplication, readability, performance issues (Claude Code: `/simplify`)
-4. Run `sw:progress-sync`
-5. Run `sw-github:sync <id>` (if GitHub configured)
-
-**After all ACs for a User Story are done:**
-- Run `sw:sync-docs update`
-
-**After increment completion:**
-1. `sw:validate <id>`
-2. `sw:sync-docs update`
-3. `sw-github:close-issue <id>`
-
-**Session start:**
-1. `specweave jobs` (check background jobs)
-2. `sw:progress` (check current state)
-3. `sw:do` (continue work)
-
-**Background jobs**: Monitor with `specweave jobs` (clone-repos, import-issues, living-docs-builder, sync-external).
-<!-- SW:END:nonclaudetools -->
-
-<!-- SW:SECTION:syncworkflow version="0.0.0" -->
-## Sync Workflow
-
-### Source of Truth
-
-| Level | Location | Update Method |
-|-------|----------|---------------|
-| **Source** | tasks.md + spec.md | Edit directly |
-| **Derived** | .specweave/docs/internal/specs/ | `sw:sync-docs update` |
-| **Mirror** | GitHub/Jira/ADO | `sw-github:sync`, `sw-jira:sync`, `sw-ado:sync` |
-
-**Update order**: ALWAYS tasks.md/spec.md FIRST → progress-sync → sync-docs → external tools
-
-### Sync Commands
-
-| Command | When to Run |
-|---------|-------------|
-| `sw:progress-sync` | After editing tasks.md |
-| `sw:sync-docs update` | After US complete |
-| `sw-github:sync <id>` | After each task |
-| `sw-github:close-issue <id>` | On increment done |
-| `sw-jira:sync <id>` | After each task |
-| `sw-ado:sync <id>` | After each task |
-<!-- SW:END:syncworkflow -->
-
-<!-- SW:SECTION:contextloading version="0.0.0" -->
-## Context Loading
-
-### Efficient Context Management
-
-```
-Read only what's needed for the current task:
-- Active increment: spec.md, tasks.md (always)
-- Supporting docs: only when referenced in tasks
-- Living docs: load per-US when implementing
+1. ~/.claude/rules/testing.md    - 测试策略
+2. ~/.claude/rules/security.md   - 安全基线
+3. ~/.claude/rules/code-quality.md - 代码质量
+4. ~/.claude/rules/ts.md         - TypeScript 规范
+5. ~/.claude/rules/ui.md         - UI 规范
+6. ~/.claude/rules/d1.md        - D1/SQLite 规范
+7. ~/.claude/rules/cloudflare-workers-pages.md - Cloudflare 部署
 ```
 
-### Token-Efficient Approach
+**禁止**: 直接用记忆写代码，不查本地或官方知识
 
-1. Start with increment's `tasks.md` - contains current task list
-2. Reference `spec.md` for acceptance criteria
-3. Load living docs only when needed for context
-4. Avoid loading entire documentation trees
-<!-- SW:END:contextloading -->
+---
 
-<!-- SW:SECTION:structure version="0.0.0" -->
+## 验证触发词 (强制)
+
+| 触发词 | 必须执行 |
+|--------|----------|
+| 已完成 / done / fixed / 好了 | 完整验证流程 |
+| 进度如何 | 验证当前状态 |
+
+**验证流程**:
+```bash
+1. pnpm build        # exit 0
+2. pnpm dev &        # 后台启动
+3. sleep 5
+4. curl localhost:4321/  # HTTP 200
+5. 关键页面 curl 测试
+```
+
+**禁止**: 未完成验证声称"完成"
+
+---
+
+## Tech Stack
+
+| Category | Technology | Version |
+|----------|------------|---------|
+| Framework | Astro | ^6.1.9 |
+| Adapter | @astrojs/cloudflare | ^13.2.0 |
+| Database | SQLite via libsql + Drizzle ORM | ^0.45.1 |
+| Auth | better-auth + drizzle-adapter | ^1.5.3 |
+| Styling | TailwindCSS v4 + @tailwindcss/vite | ^4.2.1 |
+| UI Components | Pure Astro (.astro) + TailwindCSS | - |
+| Icons | @lucide/astro | ^1.8.0 |
+| Rich Text | TipTap | ^3.20.4 |
+| State | Nanostores | ^1.0.0 |
+| Validation | Zod v4 | ^4.3.6 |
+| Deployment | Cloudflare Workers (Astro SSR + workerd) |
+| Testing | Vitest + Playwright |
+
+**All source code uses TypeScript (.ts/.tsx)** - No JavaScript files in src/.
+
+---
+
+## Commands
+
+```bash
+# Development
+pnpm dev                              # Start dev server
+pnpm dev:cf                          # Cloudflare/workerd
+
+# Build
+pnpm build                            # Build (auto-detect)
+pnpm build:cf                         # Cloudflare Workers
+
+# Testing
+pnpm test                             # Vitest unit tests
+pnpm test:ui                          # Vitest with UI
+pnpm test:e2e                         # Playwright E2E
+pnpm test:all                         # Full suite
+
+# Database
+pnpm db:generate                      # Drizzle generate
+pnpm db:push                          # Drizzle push
+pnpm db:studio                        # Drizzle Studio
+
+# Deployment
+pnpm deploy                           # Deploy to Cloudflare
+```
+
+---
+
+## Code Standards
+
+### TypeScript
+- **Strict mode** required
+- **No `any`** - use `unknown` + type guards
+- **ESM only** - import/export
+
+### Security
+- **All user input** must be Zod-validated
+- **XSS prevention**: DOM manipulation or `escapeHtml()` - NEVER `innerHTML`
+- **SQL injection**: Use ORM/drizzle parameterized queries
+- **Secrets**: Never hardcode, use env vars
+
+### UI Components
+- **Pure Astro** - no React/shadcn
+- **TailwindCSS v4** - CSS-based config in `globals.css`
+- **Mobile first** responsive design
+
+### Database
+- **Drizzle ORM** with D1/SQLite
+- **Schema**: `src/db/schema/`
+- **Local dev**: `./local.db`
+
+---
+
 ## Project Structure
 
 ```
-.specweave/
-├── increments/           # Feature increments (0001-9999)
-│   └── 0001-feature/
-│       ├── metadata.json # Increment metadata - REQUIRED
-│       ├── spec.md       # WHAT & WHY (user stories, ACs)
-│       ├── plan.md       # HOW (architecture, APIs) - optional
-│       └── tasks.md      # Task checklist with test plans
-├── docs/internal/
-│   ├── strategy/         # PRD, business requirements
-│   ├── specs/            # Living docs (extracted user stories)
-│   │   └── {project}/    # Per-project specs
-│   ├── architecture/     # HLD, ADRs, technical design
-│   └── delivery/         # CI/CD, deployment guides
-└── state/                # Runtime state (active increment, caches)
+src/
+├── pages/
+│   ├── api/              # API endpoints
+│   ├── business/          # Business pages
+│   ├── organization/     # Gov/NGO pages
+│   ├── admin/            # Admin dashboard
+│   └── listing/           # Listing pages
+├── components/
+│   ├── ui/               # UI components (pure Astro)
+│   └── business/          # Business components
+├── layouts/              # Astro layouts
+├── db/
+│   └── schema/           # Drizzle schema
+└── lib/                  # Utilities
 ```
 
-### Repository Structure
+---
 
-**Every workspace uses `repositories/` to organize code. Each repo has its own `.specweave/`:**
+## Testing Requirements
 
-```
-workspace/
-├── .specweave/config.json          # Workspace config ONLY
-├── repositories/
-│   ├── org/frontend/
-│   │   └── .specweave/increments/  # Frontend increments HERE
-│   ├── org/backend/
-│   │   └── .specweave/increments/  # Backend increments HERE
-│   └── org/shared/
-│       └── .specweave/increments/  # Shared increments HERE
-```
+### Unit Tests
+- Lib utilities: `src/lib/*.test.ts`
+- Run: `pnpm test`
 
-**Rules**: Each repo manages its own increments. Never create increments in the workspace root.
-<!-- SW:END:structure -->
+### E2E Tests
+- Critical flows: registration, login, create listing
+- Run: `pnpm test:e2e`
 
-<!-- SW:SECTION:agents version="0.0.0" -->
-## Agents (Roles)
+### Coverage Targets
+- Unit: 95%
+- Integration: 90%
+- E2E: 100% of AC scenarios
 
-{AGENTS_SECTION}
+---
 
-**Usage**: Adopt role perspective when working on related tasks.
-<!-- SW:END:agents -->
+## Entity Types
 
-<!-- SW:SECTION:skills version="0.0.0" -->
-## Skills (Capabilities)
+| Type | Route | Features |
+|------|-------|----------|
+| `business` | `/business/[slug]` | Products, reviews, hours, ratings |
+| `government` | `/govs/[slug]` | Simplified (info + contact) |
+| `nonprofit` | `/ngos/[slug]` | Simplified (info + contact) |
 
-{SKILLS_SECTION}
+---
 
-**Claude Code**: Skills auto-activate based on keywords in your prompt.
+## Pages
 
-**Non-Claude Tools**: Skills are installed in your tool's native rules folder:
+| Page | Route | SSR |
+|------|-------|-----|
+| Homepage | `/` | ✅ |
+| Directory | `/listing` | ✅ |
+| Products | `/products-services` | ✅ |
+| Business Detail | `/business/[slug]` | ✅ |
+| Product Detail | `/business/[slug]/product/[id]` | ✅ |
 
-| Tool | Skills Location | Auto-loaded? |
-|------|----------------|-------------|
-| Cursor | `.cursor/skills/` | Yes |
-| GitHub Copilot | `.github/skills/` | Yes (as workspace instructions) |
-| Gemini CLI | `.gemini/` | Reference in prompt |
-| OpenAI Codex | `.codex/skills/` | Reference in prompt |
-| Windsurf | `.windsurf/skills/` | Yes |
-| Continue.dev | `.continue/skills/` | Yes |
-| Cline | `.cline/skills/` | Yes |
-| Zed | `.zed/skills/` | Yes |
-| Amazon Q Developer | `.amazonq/skills/` | Yes |
-| JetBrains AI | `.junie/skills/` | Yes |
-| Aider | `.aider/skills/` | Reference in prompt |
-| Tabnine | `.tabnine/skills/` | Yes |
-| Generic (any tool) | `AGENTS.md` (inlined) | Manual |
+---
 
-Install/refresh skills: `specweave refresh-plugins`
-<!-- SW:END:skills -->
+## Claude Code
 
-<!-- SW:SECTION:taskformat version="0.0.0" -->
-## Task Format
+Claude Code 使用 `CLAUDE.md` 获取 SpecWeave 工作流配置：
 
-```markdown
-### T-001: Task Title
-**User Story**: US-001
-**Satisfies ACs**: AC-US1-01, AC-US1-02
-**Status**: [ ] pending / [x] completed
+- `/sw:increment` - 创建新功能
+- `/sw:do` - 执行实现
+- `/sw:done` - 关闭功能
+- `/sw:validate` - 质量检查
 
-**Test Plan** (BDD):
-- Given [context] → When [action] → Then [result]
-```
-<!-- SW:END:taskformat -->
+**See `CLAUDE.md` for SpecWeave workflow details.**
 
-<!-- SW:SECTION:usformat version="0.0.0" -->
-## User Story Format (CRITICAL for spec.md)
+---
 
-**MANDATORY: Every User Story MUST have `**Project**:` field!**
+## Notes
 
-```markdown
-### US-001: Feature Name
-**Project**: my-app          # ← MANDATORY! Get from: specweave context projects
-**Board**: digital-ops       # ← MANDATORY for 2-level structures ONLY
-
-**As a** user
-**I want** [goal]
-**So that** [benefit]
-
-**Acceptance Criteria**:
-- [ ] **AC-US1-01**: [Criterion 1]
-- [ ] **AC-US1-02**: [Criterion 2]
-```
-
-**How to get Project/Board values:**
-```bash
-# Run BEFORE creating any increment:
-specweave context projects
-
-# 1-level output (single project):
-# {"level":1,"projects":[{"id":"my-app"}]}
-# → Use: **Project**: my-app
-
-# 2-level output (multi-project with boards):
-# {"level":2,"projects":[...],"boardsByProject":{"corp":[{"id":"digital-ops"}]}}
-# → Use: **Project**: corp AND **Board**: digital-ops
-```
-<!-- SW:END:usformat -->
-
-<!-- SW:SECTION:workflows version="0.0.0" -->
-## Workflows
-
-### Creating Increment
-1. Run `specweave context projects` → store project IDs
-2. `mkdir -p .specweave/increments/XXXX-feature`
-3. Create `metadata.json` (MUST be FIRST)
-4. Create `spec.md` — every US needs `**Project**:` field (see User Story Format)
-5. Create `tasks.md` (task checklist with BDD tests)
-6. Optional: `plan.md` for complex features
-7. **Verify** tasks.md has `**Test Plan**:` for every task with testable ACs
-8. **Verify** E2E scenarios exist for user-facing user stories — re-run `sw:plan --force` if missing
-
-### Completing Tasks
-1. Implement the task
-2. Run unit tests: `npx vitest run`
-3. Run E2E tests (if task touches UI/API): `npx playwright test`
-4. Only mark task `[x]` after tests pass
-5. Review code quality before committing (Claude Code: `/simplify`; other tools: lint + manual review)
-6. Update tasks.md: `[ ] pending` → `[x] completed`
-7. Update spec.md: check off satisfied ACs
-8. Sync to external trackers if enabled
-9. If 3 consecutive test failures: STOP, re-plan, ask user
-
-### Closing Increment (AUTO — do NOT stop to ask)
-1. Full test suite: `npx vitest run`
-2. Full E2E: `npx playwright test`
-3. `sw:grill <id>` — writes `grill-report.json` (CLI requires it)
-4. `sw:done <id>` — validates report files + PM 3 gates (tasks, tests, docs) + syncs to GitHub/Jira/ADO
-
-**CRITICAL**: When all tasks are done, IMMEDIATELY chain to closure. Quality gates (grill, judge-llm, PM validation) ARE the review. Never stop to ask "should I close?" — just close it. If a gate fails, the increment stays open. User can re-open if they disagree.
-<!-- SW:END:workflows -->
-
-<!-- SW:SECTION:troubleshooting version="0.0.0" -->
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| Commands not working (non-Claude) | Read `plugins/specweave/commands/<name>.md`, follow manually |
-| GitHub/Jira not updating | `sw:progress-sync` → `sw:sync-docs update` → `sw-github:sync <id>` |
-| .md files in project root | `mv *.md .specweave/increments/<current>/reports/` |
-| Progress % wrong | Update tasks.md manually or `sw:progress-sync` |
-| Tool crashes on start | Load only active increment's spec.md + tasks.md, not entire docs/ |
-| Missing **Project**: field | `specweave context projects`, add `**Project**:` to every US |
-| Skills not activating (non-Claude) | Expected — read SKILL.md from `plugins/specweave*/skills/` |
-<!-- SW:END:troubleshooting -->
-
-<!-- SW:SECTION:docs version="0.0.0" -->
-## Documentation
-
-| Resource | Purpose |
-|----------|---------|
-| CLAUDE.md | Quick reference (Claude Code) |
-| AGENTS.md | This file (all AI tools) |
-| verified-skill.com | Official documentation |
-| .specweave/docs/ | Project-specific docs |
-<!-- SW:END:docs -->
+- 本项目使用 **SpecWeave** 管理功能开发流程
+- 所有功能开发应通过 increment 进行
+- 遵循 TDD 模式 (RED→GREEN→REFACTOR)
+- 提交前必须运行测试

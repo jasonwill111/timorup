@@ -1,516 +1,215 @@
-<!-- SW:META template="claude" version="1.0.581" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
+<!-- SW:META template="claude" version="1.0.581" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude,agents-md" -->
 
-<!-- SW:SECTION:hook-priority version="1.0.581" -->
+<!-- SW:SECTION:hook-priority -->
 ## Hook Instructions Override Everything
 
-`<system-reminder>` hook output = **BLOCKING PRECONDITIONS**.
+`<system-reminder>` hook output = **BLOCKING PRECEDENTS**.
 
 | Hook Message | Action |
 |---|---|
 | **"RESTART REQUIRED"** | ALL tools blocked → STOP, wait for restart |
 | **"SKILL FIRST"** | Call shown skill FIRST → chain domain skills → implement |
 
-**"SKILL FIRST" is mandatory** — "simple", "quick", "basic" are NOT opt-out phrases. The ONLY exception: user explicitly says "don't create an increment" or similar. Perceived simplicity never overrides hook instructions.
-
-**Setup actions are NOT implementation** — "connect github", "setup sync", "import issues" → route to the matching setup skill (`sw:sync-setup`, `sw:import`, `sw:progress-sync`), NOT `/sw:increment`.
+**"SKILL FIRST" is mandatory** — "simple", "quick", "basic" are NOT opt-out phrases. Perceived simplicity never overrides hook instructions.
 <!-- SW:END:hook-priority -->
 
-<!-- SW:SECTION:header version="1.0.581" -->
+<!-- SW:SECTION:header -->
 **Framework**: SpecWeave | **Truth**: `spec.md` + `tasks.md`
 <!-- SW:END:header -->
 
-<!-- SW:SECTION:claude-code-concepts version="1.0.581" -->
+<!-- SW:SECTION:claude-code-concepts -->
 ## Skills & Plugins
-
-**Invoke**: `/skill-name` | auto-trigger by keywords | `Skill({ skill: "name" })`
-**Parallel work**: Append "use subagents" to requests
 
 **Key skills**: `sw:pm`, `sw:architect`, `sw:grill`, `sw:tdd-cycle`
 
-**Skill chaining** — skills are NOT "one and done":
-1. **Planning**: `sw:pm` (specs) → `sw:architect` (design)
-2. **Implementation**: Use `sw:architect` for all domains. Optional domain plugins available via `vskill install` (mobile, marketing, etc.)
-3. **Closure**: `sw:code-reviewer` + `/simplify` + `sw:grill` run automatically via `/sw:done`
-
-**Complexity gate** — before chaining domain skills:
-1. **Tech stack specified?** → Chain ONLY the matching skill. If unspecified, ASK or default to minimal (vanilla JS/HTML, simple Express)
-2. **Complexity triage** → Simple (calculator, todo) = 0 domain plugins. Medium (auth, dashboard) = 1-2. Complex (SaaS) = full chain
-3. **Sanity check** → Would a senior engineer use this tool for this task? If obviously not, don't invoke it
-4. **Never** load all available plugins for a domain — pick ONE per domain based on the actual tech stack
-
-If auto-activation fails, invoke explicitly: `Skill({ skill: "name" })`
+**Skill chaining**: sw:pm → sw:architect → implement → sw:done
 <!-- SW:END:claude-code-concepts -->
 
-<!-- SW:SECTION:lsp version="1.0.581" -->
-## LSP (Code Intelligence)
-
-**Native LSP broken in v2.1.0+.** Use: `specweave lsp refs|def|hover src/file.ts SymbolName`
-<!-- SW:END:lsp -->
-
-<!-- SW:SECTION:start version="1.0.581" -->
+<!-- SW:SECTION:start -->
 ## Getting Started
-
-Your first increment starts at `0001`. Just describe what you want to build:
 
 `/sw:increment "your-feature"`
 <!-- SW:END:start -->
 
-<!-- SW:SECTION:autodetect version="1.0.581" -->
+<!-- SW:SECTION:autodetect -->
 ## Auto-Detection
 
-SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
-
-**Signals** (5+ = auto-route): Project name | Features list (3+) | Tech stack | Timeline/MVP | Problem statement | Business model
-
 **Opt-out phrases**: "Don't plan yet" | "Quick discussion" | "Let's explore ideas"
-
-**Brainstorm routing**: "Just brainstorm first" | "brainstorm" | "ideate" | "what are our options" → routes to `/sw:brainstorm`
-
-**NOT opt-out phrases**: "simple" | "quick" | "basic" | "small" — these still require `/sw:increment`
-
-**Setup/config requests bypass auto-detection** → route directly to the matching skill (e.g., `sw:sync-setup`, `sw:import`)
+**NOT opt-out**: "simple" | "quick" | "basic" | "small"
 <!-- SW:END:autodetect -->
 
-<!-- SW:SECTION:metarule version="1.0.581" -->
-## Workflow Orchestration
-
-### 1. Plan Mode Default (MANDATORY)
-- **ALWAYS enter plan mode** for ANY non-trivial task (3+ steps or architectural decisions)
-- Call `EnterPlanMode` BEFORE writing specs, plans, or task breakdowns
-- Do NOT start implementation until the plan is reviewed and approved
-- If something goes sideways, **STOP and re-plan** -- do not keep pushing
-- Write detailed specs upfront to reduce ambiguity
-- `/sw:increment` REQUIRES plan mode -- never skip it
-
-### 2. Subagent Strategy (Context Economy)
-- **Protect main context** — the main agent's context window is precious; delegate anything that produces large output
-- **Research via subagents** — when the user provides URLs, links, or references external docs, spawn a subagent to fetch and summarize instead of loading raw content into main context
-- **Codebase exploration** — use Explore subagents for broad searches; only bring concise findings back to main context
-- **One task per subagent** — focused execution produces better results and cleaner summaries
-- **Parallel research** — launch multiple subagents concurrently when investigating independent questions
-- **Summarize, don't relay** — subagent results should be distilled to actionable insights before acting on them in main context
-- Append "use subagents" to requests for safe parallelization
-- In team mode, sub-agents submit plans for team lead review before implementing
-
-### 3. Verification Before Done
-- Never mark a task complete without proving it works
-- Run tests after every task: `npx vitest run` + `npx playwright test`
-- `sw:code-reviewer` writes `code-review-report.json` — CLI blocks closure if critical/high/medium findings remain
-- `/simplify` runs after code-review — catches duplication, readability issues, and inefficiencies via 3 parallel review agents
-- `/sw:grill` writes `grill-report.json` — CLI blocks closure without it
-- `/sw:judge-llm` writes `judge-llm-report.json` — WAIVED if consent denied
-- Ask yourself: **"Would a staff engineer approve this?"**
-
-### 5. Auto-Closure After Implementation (MANDATORY)
-- When `/sw:do` completes all tasks, IMMEDIATELY invoke `/sw:done` — do NOT stop to ask for review
-- The quality gates inside `/sw:done` (code-review, simplify, grill, judge-llm, PM validation) ARE the review — no user confirmation needed
-- `/sw:done` handles: code-review loop, simplify, grill report, judge-llm, PM gates, closure, sync to GitHub/Jira/ADO
-- If a gate fails, the increment stays open automatically — no risk of premature closure
-- If the user disagrees, they can re-open the increment
-- **Anti-pattern**: "All tasks complete. Should I close?" — NEVER ask this. Just close it.
-
-### 4. Think-Before-Act (Dependencies)
-**Satisfy dependencies BEFORE dependent operations.**
-```
-Bad:  node script.js → Error → npm run build
-Good: npm run build → node script.js → Success
-```
-<!-- SW:END:metarule -->
-
-<!-- SW:SECTION:rules version="1.0.581" -->
-## Rules
-
-1. **Files** → `.specweave/increments/####-name/` (see Structure section for details)
-2. **Update immediately**: `Edit("tasks.md", "[ ] pending", "[x] completed")` + `Edit("spec.md", "[ ] AC-", "[x] AC-")`
-3. **Unique IDs**: Check ALL folders (active, archive, abandoned):
-   ```bash
-   find .specweave/increments -maxdepth 2 -type d -name "[0-9]*" | grep -oE '[0-9]{4}E?' | sort -u | tail -5
-   ```
-4. **Emergency**: "emergency mode" → 1 edit, 50 lines max, no agents
-5. **Initialization guard**: `.specweave/` folders MUST ONLY exist where `specweave init` was run
-6. **Plugin refresh**: Use `specweave refresh-plugins` CLI (not `scripts/refresh-marketplace.sh`)
-7. **Numbered folder collisions**: Before creating `docs/NN-*` folders, CHECK existing prefixes
-8. **Multi-repo**: ALL repos MUST be at `repositories/{org}/{repo-name}/` — NEVER directly under `repositories/`
-<!-- SW:END:rules -->
-
-<!-- SW:SECTION:workflow version="1.0.581" -->
+<!-- SW:SECTION:metarule -->
 ## Workflow
-
-`/sw:increment "X"` → `/sw:do` → `/sw:progress` → `/sw:done 0001`
 
 | Cmd | Action |
 |-----|--------|
 | `/sw:increment` | Plan feature |
 | `/sw:do` | Execute tasks |
-| `/sw:auto` | Autonomous execution |
-| `/sw:auto-status` | Check auto session |
-| `/sw:cancel-auto` | EMERGENCY ONLY manual cancel |
-| `/sw:validate` | Quality check |
 | `/sw:done` | Close |
-| `/sw:progress-sync` | Sync progress to all external tools |
-| `/sw-github:push` | Push progress to GitHub |
-| `/sw:sync-setup` | Connect GitHub/Jira/ADO integration |
-| `/sw:import` | Import issues from external tools |
+| `/sw:validate` | Quality check |
 
-**Natural language**: "Let's build X" → `/sw:increment` | "What's status?" → `/sw:progress` | "We're done" → `/sw:done` | "Ship while sleeping" → `/sw:auto`
+**禁止绕过**: 即使"简单"任务也要走流程
+<!-- SW:END:metarule -->
 
-**Large-scale changes**: For codebase-wide migrations or bulk refactors, use `/batch` — decomposes work into parallel agents with worktree isolation, each producing its own PR. Example: `/batch migrate from Solid to React`
+<!-- SW:SECTION:rules -->
+## Rules
+
+1. **Files** → `.specweave/increments/####-name/`
+2. **Update immediately**: tasks.md + spec.md
+3. **Emergency**: "emergency mode" → 1 edit, 50 lines max, no agents
+<!-- SW:END:rules -->
+
+<!-- SW:SECTION:workflow -->
+## SpecWeave Workflow
+
+`/sw:increment "X"` → `/sw:do` → `/sw:progress` → `/sw:done 0001`
 <!-- SW:END:workflow -->
 
-<!-- SW:SECTION:save-nested-repos version="1.0.581" -->
-## Nested Repos
-
-Before git operations, scan: `for d in repositories packages services apps libs workspace; do [ -d "$d" ] && find "$d" -maxdepth 2 -name ".git" -type d; done`
-<!-- SW:END:save-nested-repos -->
-
-<!-- SW:SECTION:reflect version="1.0.581" -->
+<!-- SW:SECTION:reflect -->
 ## Skill Memories
-
-SpecWeave learns from corrections. Learnings saved here automatically. Edit or delete as needed.
-
-**Disable**: Set `"reflect": { "enabled": false }` in `.specweave/config.json`
 <!-- SW:END:reflect -->
 
-<!-- SW:SECTION:context version="1.0.581" -->
+<!-- SW:SECTION:context -->
 ## Context
-
 **Before implementing**: Check ADRs at `.specweave/docs/internal/architecture/adr/`
-
-**Load context**: `/sw:docs <topic>` loads relevant living docs into conversation
 <!-- SW:END:context -->
 
-<!-- SW:SECTION:structure version="1.0.581" -->
+<!-- SW:SECTION:structure -->
 ## Structure
 
 ```
 .specweave/
-├── increments/####-name/     # metadata.json, spec.md, plan.md, tasks.md
-├── docs/internal/specs/      # Living docs
-└── config.json
+├── increments/####-name/  # metadata.json, spec.md, plan.md, tasks.md
+└── docs/internal/specs/    # Living docs
 ```
-
-**Increment root**: ONLY `metadata.json`, `spec.md`, `plan.md`, `tasks.md`
-
-**Everything else → subfolders**: `reports/` | `logs/` | `scripts/` | `backups/`
 <!-- SW:END:structure -->
 
-<!-- SW:SECTION:taskformat version="1.0.581" -->
-## Task Format
-
-```markdown
-### T-001: Title
-**User Story**: US-001 | **Satisfies ACs**: AC-US1-01 | **Status**: [x] completed
-**Test**: Given [X] → When [Y] → Then [Z]
-```
-<!-- SW:END:taskformat -->
-
-<!-- SW:SECTION:secrets version="1.0.581" -->
-## Secrets
-
-Before CLI tools, check existing config (`grep -q` only — never display values).
-<!-- SW:END:secrets -->
-
-<!-- SW:SECTION:syncing version="1.0.581" -->
-## External Sync
-
-Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`. Mapping: Feature→Milestone | Story→Issue | Task→Checkbox.
-<!-- SW:END:syncing -->
-
-<!-- SW:SECTION:testing version="1.0.581" -->
+<!-- SW:SECTION:testing -->
 ## Testing Pipeline (MANDATORY)
 
-**Testing is a pipeline step, not an afterthought.**
-
-### During Design (`/sw:increment`)
-- `/sw:increment` generates tasks.md with BDD test plans (Given/When/Then) for every AC via the sw-planner agent
-- Every task MUST have a `**Test Plan**:` block before implementation begins
-- E2E test scenarios MUST be specified for user-facing features
-
-### During Implementation (`/sw:do`)
 - TDD cycle: `/sw:tdd-red` → `/sw:tdd-green` → `/sw:tdd-refactor`
-- Run tests after EVERY task: `npx vitest run` (unit) + `npx playwright test` (E2E when applicable)
+- Run tests after EVERY task
 - Never mark a task `[x]` until its tests pass
-
-### Before Closing (`/sw:done`)
-- `sw:code-reviewer` writes `code-review-report.json` — blocks closure if critical/high/medium findings remain (fix loop, max 3 iterations)
-- `/simplify` runs after code-review passes — cleans up code before grill
-- `/sw:grill` writes `grill-report.json` — CLI blocks closure without it
-- `/sw:judge-llm` writes `judge-llm-report.json` — WAIVED if consent denied
-- `/sw:validate` — 130+ rule checks
-- E2E: `npx playwright test` (blocking gate)
-
-### Test Stack
-- Unit/Integration: Vitest (`.test.ts`), ESM mocking with `vi.hoisted()` + `vi.mock()`
-- E2E: Playwright CLI (`npx playwright test`)
-- Coverage targets: unit 95%, integration 90%, e2e 100% of AC scenarios
 <!-- SW:END:testing -->
 
-<!-- SW:SECTION:tdd version="1.0.581" -->
+<!-- SW:SECTION:tdd -->
 ## TDD
 
-When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Use `/sw:tdd-cycle`. Enforcement via `testing.tddEnforcement` (strict|warn|off).
+`testing.defaultTestMode: "TDD"` → Use `/sw:tdd-cycle`
 <!-- SW:END:tdd -->
 
-<!-- SW:SECTION:api version="1.0.581" -->
-<!-- API: Enable `apiDocs` in config.json. Commands: /sw:api-docs -->
-<!-- SW:END:api -->
-
-<!-- SW:SECTION:limits version="1.0.581" -->
+<!-- SW:SECTION:limits -->
 ## Limits
 
-**Max 1500 lines/file** — extract before adding
+**Max 1500 lines/file**
 <!-- SW:END:limits -->
 
-<!-- SW:SECTION:troubleshooting version="1.0.581" -->
+<!-- SW:SECTION:troubleshooting -->
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
 | Skills missing | Restart Claude Code |
-| Plugins outdated | `specweave refresh-plugins` |
-| Out of sync | `/sw:sync-progress` |
-| Session stuck | `rm -f .specweave/state/*.lock` + restart |
-| npm E401 on update | `npm i -g specweave --registry https://registry.npmjs.org --userconfig /dev/null` |
 <!-- SW:END:troubleshooting -->
 
-<!-- SW:SECTION:lazyloading version="1.0.581" -->
+<!-- SW:SECTION:lazyloading -->
 ## Plugin Auto-Loading
 
-Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugin install <name>@specweave`. Disable: `export SPECWEAVE_DISABLE_AUTO_LOAD=1`
+`specweave refresh-plugins`
 <!-- SW:END:lazyloading -->
 
-<!-- SW:SECTION:principles version="1.0.581" -->
+<!-- SW:SECTION:principles -->
 ## Principles
 
-1. **Spec-first**: `/sw:increment` before coding — mandatory for ALL implementation requests, no exceptions unless user explicitly opts out
+1. **Spec-first**: `/sw:increment` before coding
 2. **Docs = truth**: Specs guide implementation
 3. **Simplicity First**: Minimal code, minimal impact
 4. **No Laziness**: Root causes, senior standards
-5. **DRY**: Don't Repeat Yourself — flag and eliminate repetitions aggressively
+5. **DRY**: Don't Repeat Yourself
 6. **Plan Review**: Review the plan thoroughly before making any code changes
-7. **Test before ship**: Tests pass at every step — unit after each task, E2E before close, no exceptions
+7. **Test before ship**: Tests pass at every step
 <!-- SW:END:principles -->
 
-<!-- SW:SECTION:linking version="1.0.581" -->
+<!-- SW:SECTION:linking -->
 ## Bidirectional Linking
 
-Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
-
-Task format: `**AC**: AC-US1-01, AC-US1-02` (CRITICAL for linking)
+Tasks ↔ User Stories auto-linked via AC-IDs
 <!-- SW:END:linking -->
 
-<!-- SW:SECTION:mcp version="1.0.581" -->
+<!-- SW:SECTION:mcp -->
 ## External Services
 
-CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
+CLI tools first → MCP for complex integrations
 <!-- SW:END:mcp -->
 
-<!-- SW:SECTION:auto version="1.0.581" -->
+<!-- SW:SECTION:auto -->
 ## Auto Mode
 
-`/sw:auto` (start) | `/sw:auto-status` (check) | `/sw:cancel-auto` (emergency)
-
-Pattern: IMPLEMENT → TEST → FAIL? → FIX → PASS → NEXT. STOP & ASK if spec conflicts or ambiguity.
+`/sw:auto` | `/sw:auto-status` | `/sw:cancel-auto`
 <!-- SW:END:auto -->
 
-<!-- SW:SECTION:docs version="1.0.581" -->
+<!-- SW:SECTION:docs -->
 ## Docs
 
 [verified-skill.com](https://verified-skill.com)
 <!-- SW:END:docs -->
 
-<!-- SW:SECTION:non-claude version="1.0.581" -->
+<!-- SW:SECTION:non-claude -->
 ## Using SpecWeave with Other AI Tools
 
 See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
-
-**Command format note**: This file uses `/sw:do` (Claude Code slash-command format). AGENTS.md uses `sw:do` (tool-agnostic format). Both refer to the same commands.
 <!-- SW:END:non-claude -->
 
+<!-- SW:SECTION:agents-md -->
+## AGENTS.md
+
+**通用 AI agent 规范在 `AGENTS.md`**
+
+`AGENTS.md` 包含：
+- 本地知识库加载顺序
+- 验证触发词 (强制)
+- Tech Stack, Commands, Code Standards
+- Project Structure, Testing Requirements
+
+**本文件仅包含 Claude Code + SpecWeave 专用配置**
+<!-- SW:END:agents-md -->
+
 ---
-<!-- ↓ ORIGINAL ↓ -->
 
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **重要**: 通用规范见 `AGENTS.md`。本文件仅包含项目特定配置。
 
 ## Project Overview
 
-**timorlist** is a Business Directory Platform for Timor-Leste. It enables businesses to create listings, products, and services, with user reviews and an admin dashboard for management.
-
-## Tech Stack (Latest Versions)
-
-| Category | Technology | Version |
-|----------|------------|---------|
-| Framework | Astro | ^6.1.9 |
-| Adapter | @astrojs/cloudflare | ^13.2.0 |
-| Database | SQLite via libsql + Drizzle ORM | ^0.45.1 |
-| Auth | better-auth + drizzle-adapter | ^1.5.3 |
-| Styling | TailwindCSS v4 + @tailwindcss/vite | ^4.2.1 |
-| UI Components | Pure Astro (.astro) + TailwindCSS | - |
-| Icons | @lucide/astro | ^1.8.0 |
-| Rich Text | TipTap (framework-agnostic) | ^3.20.4 |
-| State | Nanostores | ^1.0.0 |
-| Validation | Zod v4 | ^4.3.6 |
-| Theme | Inline script (no next-themes) | - |
-| Fonts | Local woff2 (Inter, Oswald) | - |
-| Deployment | Cloudflare Workers (Astro SSR + workerd) |
-| Testing | Vitest + Playwright |
-
-**All source code uses TypeScript (.ts/.tsx)** - No JavaScript files in src/.
-
-## Common Commands
-
-```bash
-# Development
-pnpm dev                              # Start Astro dev server (Node adapter on Windows)
-pnpm dev:cf                          # Start Astro dev server (Cloudflare/workerd)
-
-# Building
-pnpm build                            # Build Astro app (auto-detect platform)
-pnpm build:cf                         # Build for Cloudflare Workers explicitly
-pnpm preview                          # Preview production build
-pnpm preview:cf                       # Preview via wrangler pages dev
-
-# Testing
-pnpm test                             # Run unit tests
-pnpm test:ui                          # Run unit tests with UI
-pnpm test:coverage                    # Run tests with coverage report
-pnpm test:e2e                         # Run Playwright e2e tests
-pnpm test:e2e:ui                      # Run Playwright with UI
-
-# Database
-pnpm db:generate                      # Generate Drizzle migrations
-pnpm db:push                          # Push schema to database
-pnpm db:studio                        # Open Drizzle Studio
-
-# Deployment
-pnpm deploy                           # Deploy to Cloudflare Workers
-pnpm deploy:dry                       # Dry-run deploy
-```
-
-## Project Structure
-
-```
-src/
-├── pages/
-│   ├── api/                 # API endpoints
-│   ├── admin/               # Admin dashboard
-│   ├── business/            # Business pages
-│   ├── organization/         # Gov/NGO/Nonprofit pages
-│   └── ...
-├── components/
-│   ├── ui/                 # UI components
-│   └── business/             # Business components
-├── layouts/                  # Astro layouts
-├── db/
-│   └── schema/              # Drizzle schema
-└── lib/                     # Utilities
-```
+**timorlist** - Timor-Leste 商业目录平台
 
 ## Entity Types
 
-TIMORLIST supports three entity types:
-
 | Type | Route | Features |
 |------|-------|----------|
-| `business` | `/business/[slug]` | Products, reviews, hours, ratings, industry |
-| `government` | `/govs/[slug]` | Simplified pages (info + contact) |
-| `nonprofit` | `/ngos/[slug]` | Simplified pages (info + contact) |
+| `business` | `/business/[slug]` | Products, reviews, hours, ratings |
+| `government` | `/govs/[slug]` | Simplified (info + contact) |
+| `nonprofit` | `/ngos/[slug]` | Simplified (info + contact) |
 
-**Listing & Products:**
-- `/listing` - Directory with tabs (Businesses/Govs/NGOs)
-- `/products-services` - All SKUs from all businesses
+## Business Features
 
-**Business Industry Classifications** (defined in `src/lib/constants.ts`):
-- accommodation, food, retail, services, health, education, transport, finance, construction, professional, entertainment, agriculture, manufacturing, utilities
+- `entityType`: `'business'` | `'government'` | `'nonprofit'`
+- `socialLinks`: {facebook, instagram, tiktok}
+- `photoGallery`: up to 6 images + 1 video
+- `latestUpdate`: 500 chars, weekly cooldown
 
-**SKU Service Types** (for flexible pricing):
+## SKU Service Types
+
 - product, service, rental, food, accommodation, project
 
-## TailwindCSS v4 Configuration
-
-TailwindCSS v4 uses CSS-based configuration in `src/styles/globals.css`:
-
-```css
-@import "tailwindcss";
-
-@theme {
-  --color-background: #FDFBF7;
-  --color-primary: #FFD150;
-  /* ... custom colors */
-}
-```
-
-**Note**: No `tailwind.config.mjs` needed for v4.
-
-## UI Components (Pure Astro)
-
-All UI components are pure Astro `.astro` files using TailwindCSS. No React dependencies.
-
-### Interactive Components
-
-| Component | File |
-|-----------|------|
-| Button | `button.astro` |
-| Input | `input.astro` |
-| Select | `select.astro` |
-| Tabs | `tabs.astro` |
-| Accordion | `accordion.astro` |
-| Avatar | `avatar.astro` |
-| ThemeToggle | `theme-toggle.astro` |
-| ToastContainer | `toast-container.astro` |
-
-### Non-Interactive Components
-
-| Component | Implementation |
-|-----------|---------------|
-| Card | styled `<div>` |
-| Badge | styled `<span>` |
-| Label | styled `<label>` |
-| Textarea | styled `<textarea>` |
-| Skeleton | styled `<div>` |
-| Pagination | uses Button component |
-
-## Database Schema
-
-Key tables: `users`, `categories`, `businessPages`, `products`, `reviews`, `orders`, `media`, `adBanners`, `siteSettings`. Auth is handled by better-auth with `sessions`, `accounts`, `verifications` tables.
-
-**businessPages fields:**
-- `entityType`: `'business'` | `'government'` | `'nonprofit'`
-- `industry`: Industry classification (e.g., `'food.restaurants'`)
-- `registrationUrl`: Link to official registration
-- `verifiedBadge`: Boolean for verified government entities
-
-**products/SKUs fields:**
-- `priceFields`: JSON array of `{label, value, unit}` for flexible pricing
-- `serviceType`: Determines available price units (product/service/rental/food/accommodation/project)
-
-## UI/UX Guidelines
-
-- **Container**: All content centered in `container` class with `max-w-6xl`
-- **Grid Layout**: Use `sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4` for lists
-- **Mobile First**: All responsive designs start with mobile
-- **Fonts**: Inter (body), Oswald (headings) - loaded locally from `/fonts/`
-- **Theme**: Light/Dark mode with inline script in Layout.astro + nanostores (no React)
-- **Colors**: Yellow brand theme (#FFD150), light background (#FDFBF7), dark background (#0A0F1A)
-
-## API Architecture
-
-- Astro handles page rendering and all API routes (`src/pages/api/`)
-- Database operations use Drizzle ORM with SQLite/D1
-
-### Auth API Type Assertion
-
-better-auth requires type assertion for API access:
+## Auth API
 
 ```typescript
 const authApi = (auth as unknown as { api: typeof auth.api }).api;
 ```
 
-### Error Handling
-
-Use `getErrorMessage` helper for TypeScript strict mode:
+## Error Handling
 
 ```typescript
 function getErrorMessage(error: unknown): string {
@@ -519,347 +218,14 @@ function getErrorMessage(error: unknown): string {
 }
 ```
 
-### Cloudflare Cache API
-
-Built-in edge caching reduces D1 reads by ~80%:
+## Cloudflare Cache
 
 ```typescript
-// Cache at edge (free tier: 50 calls/req)
 const cache = caches.default;
 const cached = await cache.match(request);
-
 if (!cached) {
-  // Fetch from D1, then cache
   await cache.put(request, response);
 }
 ```
 
-### XSS Prevention
-
-All user-controlled data must use DOM manipulation or `escapeHtml()`:
-
-```typescript
-// ❌ 危险：直接注入用户数据
-element.innerHTML = `<p>${userInput}</p>`;
-
-// ✅ 安全：使用 DOM 操作
-const p = document.createElement('p');
-p.textContent = userInput;
-element.appendChild(p);
-
-// ✅ 安全：使用 escapeHtml 辅助函数
-element.innerHTML = `<p>${escapeHtml(userInput)}</p>`;
-```
-
-Common files needing XSS fixes:
-- `account.astro` - User data rendering
-- `admin/reviews.astro` - Review comment display
-- `business/create.astro` - Business title/slug display
-- `verify.astro` - Email verification messages
-
-### Rate Limiting
-
-In-memory rate limiter for abuse protection:
-
-```typescript
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
-
-const rateLimit = checkRateLimit(`biz:${clientIP}`);
-if (!rateLimit.allowed) {
-  return new Response(null, { status: 429, headers: getRateLimitHeaders(rateLimit) });
-}
-```
-
-**Limits**: 100 requests/minute per IP
-
-## Development Notes
-
-- Uses `pnpm` as package manager (required)
-- Node.js >=20 required
-- All source files are TypeScript (.ts/.tsx)
-- Development mode disables all caching for real-time updates
-- Tests auto-start dev server via Playwright webServer config
-
-## Testing Workflow
-
-```bash
-# Unit tests only (fast)
-pnpm test
-
-# Unit tests with UI
-pnpm test:ui
-
-# E2E tests (auto-starts dev server)
-pnpm test:e2e
-
-# Full test suite (unit + E2E)
-pnpm test:all
-
-# Debug E2E with Playwright UI
-pnpm test:e2e:debug
-
-# Single E2E test file
-npx playwright test e2e/homepage.spec.ts
-```
-
-### Testing Tools by Scenario
-
-| Scenario | Tool | Command |
-|----------|------|---------|
-| Quick page check | `playwright-cli` | `pnpm test:quick` |
-| Visual regression | `kuri` | `pnpm test:kuri` |
-| Complex user flow | `browser-use` | `pnpm test:agent` |
-| CI/CD regression | `@playwright/test` | `pnpm test:e2e` |
-| Unit/Integration | Vitest | `pnpm test` |
-
-### Tool-Specific Usage
-
-```bash
-# Kuri - Visual testing
-kuri screenshot http://localhost:4321 --output ./test-results/screenshot.png
-kuri compare --baseline ./test-results/baseline --current ./test-results/current
-
-# Playwright CLI - Quick testing
-playwright-cli open http://localhost:4321
-playwright-cli screenshot http://localhost:4321/listing
-
-# Browser-use - AI agent testing
-browser-use --url http://localhost:4321 --task "Create a business listing flow"
-browser-use --url http://localhost:4321/listing --task "Search for restaurants"
-```
-
-**Note**: Playwright config (`playwright.config.ts`) auto-starts dev server via `webServer` config.
-- `pnpm dev` uses Node adapter on Windows (auto-detect); `pnpm dev:cf` forces Cloudflare/workerd
-- `pnpm build` (or `pnpm build:cf`) builds for Cloudflare Workers
-- Local database is `local.db` (SQLite)
-- Image optimization uses Sharp
-- Theme toggle uses inline script in Layout.astro + nanostores (no React)
-- TailwindCSS v4 uses `@tailwindcss/vite` plugin (not @astrojs/tailwind)
-
-## Dark Mode Implementation (Pure Astro)
-
-### Layout.astro - Inline Theme Script
-Add this script in `<head>` to prevent flash of wrong theme:
-```html
-<script is:inline>
-  const getThemePreference = () => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      return localStorage.getItem('theme');
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  };
-  const isDark = getThemePreference() === 'dark';
-  document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
-
-  if (typeof localStorage !== 'undefined') {
-    const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.classList.contains('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-  }
-</script>
-```
-
-### ThemeToggle Component
-Uses vanilla JS with nanostores for state:
-```astro
----
-import { Moon, Sun } from '@lucide/astro';
----
-<button onclick="toggleTheme()">
-  <span class="sun-icon"><Sun /></span>
-  <span class="moon-icon"><Moon /></span>
-</button>
-
-<script>
-  // Vanilla JS theme toggle
-</script>
-```
-
-### CSS Variables (globals.css)
-```css
-:root {
-  --color-background: #FDFBF7;
-  --color-foreground: #1a1a1a;
-  /* ... light theme colors */
-}
-
-.dark {
-  --color-background: #0A0F1A;
-  --color-foreground: #f1f5f9;
-  /* ... dark theme colors */
-}
-```
-
-## Toast Notification System
-
-State management with nanostores (no React dependency):
-
-```typescript
-// src/stores/toast.ts
-import { atom } from 'nanostores';
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
-export interface Toast { id: string; message: string; type: ToastType; duration?: number; }
-export const toasts = atom<Toast[]>([]);
-
-// Convenience functions
-export function toast(message: string, type?: ToastType, duration?: number)
-export function toastSuccess(message: string, duration?: number)
-export function toastError(message: string, duration?: number)
-export function toastInfo(message: string, duration?: number)
-export function toastWarning(message: string, duration?: number)
-```
-
-Usage in Astro components:
-```astro
----
-import { toastSuccess, toastError } from '@/stores/toast';
-// or use toast-container.astro for visual rendering
----
-<ToastContainer />
-<script>
-  import { toastSuccess } from '@/stores/toast';
-  toastSuccess('Saved successfully!');
-</script>
-```
-
-## SEO & GEO Optimization
-
-### Structured Data (JSON-LD)
-
-Business detail pages include:
-- `LocalBusiness` / `Restaurant` / `Hotel` schema
-- `BreadcrumbList` for navigation
-- `AggregateRating` for reviews
-
-### Dynamic Meta Tags
-
-Business pages update dynamically from API data:
-- `og:title`, `og:description`, `og:image`
-- `meta[name="description"]`
-
-## Deployment & Cost
-
-### Deployment Mode: SSR Only (Temporary)
-
-**暂时使用全 SSR 模式**。混合模式存在 Pages vs Workers 路由冲突 bug。
-
-```json
-// public/_routes.json
-{
-  "version": 1,
-  "include": ["/*"]
-}
-```
-
-**TODO**: 修复混合模式 bug 后切换回静态 + SSR：
-- [ ] 修复 `prerenderEnvironment` 与 `_routes.json` 冲突
-- [ ] 配置 Custom Domain 正确路由
-- [ ] 切换到混合模式提升性能
-
-### Cloudflare Workers Free Tier
-
-| Resource | Limit | Project Usage |
-|----------|-------|---------------|
-| Workers requests | 100k/day | ~30k/day (with caching) |
-| D1 reads | 5M/day | ~1M/day (80% cache hit) |
-| D1 writes | 100k/day | ~1k/day |
-| R2 Class A | 1M/month | Uploads only |
-| R2 Class B | 10M/month | Image CDN |
-| Cache API | Unlimited | Reduces D1 reads |
-
-**100k PV/month costs $0** (stays within free tier)
-
-### Hybrid Mode Configuration
-
-Static pages (`prerender = true`) bypass Workers:
-- Served directly from Cloudflare CDN
-- Zero Workers invocations
-
-`_routes.json` excludes static routes from worker:
-```json
-{
-  "version": 1,
-  "include": ["/*"],
-  "exclude": ["/faq", "/pricing", "/login", "/_astro/*"]
-}
-```
-
-### Cost Protection
-
-| Protection | Mechanism |
-|------------|-----------|
-| Rate limiting | 100 req/min per IP |
-| 404 caching | 5min TTL prevents bot abuse |
-| Cache API | Edge caching reduces D1 reads |
-| Observability off | Logs disabled (reduces costs) |
-
-## Design Context
-
-### Users
-- **Primary**: Small business owners in Timor-Leste (Dili-based entrepreneurs, local shops, restaurants, hotels, service providers)
-- **Secondary**: Consumers/tourists looking for local businesses, products, and services
-- **Context**: Mobile-first users with variable internet connectivity; mix of English and local languages (Tetum, Portuguese)
-- **Job**: Create business listings, manage products/services, discover local businesses
-
-### Brand Personality
-- **Voice**: Professional yet approachable, local-first pride
-- **Tone**: Warm, welcoming, community-focused — celebrating Timor-Leste entrepreneurship
-- **3-word personality**: **Local, Professional, Accessible**
-- **Emotional goals**: Confidence (reliable platform), pride (celebrating local business), ease (simple publishing)
-
-### Aesthetic Direction
-- **Visual tone**: Clean, modern business aesthetic with warm yellow accents reflecting Timor-Leste's tropical sunshine
-- **Theme**: Light/dark mode with warm cream backgrounds (#FDFBF7) and golden yellow primary (#FFD150)
-- **Typography**: Inter (body), Oswald (headings) — modern, readable, professional
-- **References**: Yelp meets local charm — professional directory with community warmth
-
-### Design Principles
-1. **Mobile-First**: All layouts start mobile, scale up gracefully
-2. **Warm & Professional**: Yellow accents convey warmth/trust; clean whites/creams for readability
-3. **Accessible by Default**: WCAG AA contrast, keyboard navigation, semantic HTML
-4. **Content-Focused**: Business listings, products, and descriptions take center stage
-5. **Fast & Lightweight**: Minimal JS, no heavy frameworks, vanilla interactive components
-
-### Color Palette
-| Token | Light Mode | Dark Mode | Usage |
-|-------|-----------|-----------|-------|
-| Background | `#FDFBF7` | `#0A0F1A` | Page background |
-| Primary | `#FFD150` | `#FFD150` | CTAs, accents |
-| Card | `#ffffff` | `#1e293b` | Card surfaces |
-| Muted | `#f5f5f4` | `#1e293b` | Secondary surfaces |
-| Border | `#e5e5e5` | `#334155` | Dividers |
-| Text | `#1a1a1a` | `#f1f5f9` | Body text |
-
-### Anti-References
-- No cold corporate blues
-- No heavy gradients
-- No Instagram-style aesthetics
-- No bulky React component libraries
-
-## Environment
-
-Create `.env` from `.env.example`. Key variables include:
-- Database URL
-- Auth secrets
-- AWS S3 credentials for media storage
-
-## Local Docs First (Auto-Loaded)
-
-This project has a **local tech-stack context system** that is automatically loaded on session start:
-
-> 项目技术栈上下文: `.omc/tech-context.md`
-
-This file is generated by `~/.claude/.omc/scripts/load-tech-context.js` from `~/.claude/memory/MANIFEST.json` and maps all dependencies in `package.json` to their corresponding memory files. It includes:
-- Version coverage status for all tech stacks (Astro 6, Drizzle, TailwindCSS, TipTap, better-auth, Nanostores, Zod, Cloudflare Workers)
-- Stale version warnings (e.g. if memory files are based on older versions)
-- Links to primary and domain-specific memory files for each stack
-- MCP supplement suggestions for uncovered packages
-
-**To regenerate** after dependency changes:
-```bash
-node ~/.claude/.omc/scripts/load-tech-context.js "D:\Dev Projects\timorlist"
-```
-
-**Pre-commit hook** automatically runs version checks via `scripts/check-versions.sh`. See `VERSION_LOG.md` for upgrade history.
+**See `AGENTS.md` for full specs, testing, and deployment.**
