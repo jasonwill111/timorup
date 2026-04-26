@@ -14,6 +14,7 @@
 - Flexible SKU pricing (hourly/daily/monthly/unit-based)
 - Admin listing management (`/admin/listing`)
 - Admin SKU management with dynamic pricing
+- Admin AI Tools (`/admin/ai-tools`) - Generate listing/SKU/blog/landing pages
 - User reviews and ratings
 - TipTap rich text editor for product descriptions
 - Leaflet maps integration

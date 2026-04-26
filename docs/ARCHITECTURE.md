@@ -277,6 +277,9 @@ timorlist/
 │   ├── PUT    /:id                  # 更新 SKU
 │   └── DELETE /:id                  # 删除 SKU
 │
+├── /admin/ai-generate
+│   └── POST   /                     # AI 生成 (listing/SKU/blog/landing)
+│
 ├── /orders
 │   ├── GET    /                     # 获取订单列表
 │   ├── GET    /:id                  # 获取订单详情
@@ -554,9 +557,9 @@ NODE_ENV=development
 
 ---
 
-**文档版本**: 8.0
+**文档版本**: 9.0
 **最后更新**: 2026-04-26
-**开发状态**: ✅ SSR 已实现 | TipTap 编辑器 | 产品详情页 | WhatsApp 品牌色 | 紧凑 UI 布局 | Business详情增强
+**开发状态**: ✅ SSR | TipTap 编辑器 | AI Tools | entityType分离
 
 ## 12. Business 详情页增强 (2026-04-26)
 
@@ -576,3 +579,48 @@ NODE_ENV=development
 - **Photo Gallery**: 3x2 网格展示
 - **Latest Update**: 左侧强调边框高亮显示
 - **Year of Establishment**: "Est. YYYY" 显示
+
+## 13. AI Tools (Mastra + MiniMax)
+
+### 13.1 架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    /admin/ai-tools                         │
+│         (Listing | SKU | Blog | Landing Page)               │
+└─────────────────────────────┬───────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│              POST /api/admin/ai-generate                     │
+│                  (type: listing|SKU|blog|landing)          │
+└─────────────────────────────┬───────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   src/mastra/agents/                         │
+│  listingCreator | skuCreator | blogCreator | landingPageCreator │
+└─────────────────────────────┬───────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                   MiniMax API (MiniMax-M2.7)                 │
+│                      MINIMAX_API_KEY                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 13.2 Agents
+
+| Agent | 用途 | 输出 |
+|-------|------|------|
+| `listingCreator` | 生成 listing 数据 | JSON: title, entityType, categoryId, contact... |
+| `skuCreator` | 生成 SKU/产品数据 | JSON: title, description, serviceType, priceFields |
+| `blogCreator` | 生成博客文章 | JSON: title, excerpt, content (HTML), tags |
+| `landingPageCreator` | 生成落地页 | JSON: hero, features, cta |
+
+### 13.3 Categories entityType 分离
+
+Categories 表包含 `entityType` 字段，按实体类型分离：
+
+| entityType | 用途 | 示例 |
+|------------|------|------|
+| `business` | 商业分类 | Restaurants, Hotels, Shopping |
+| `government` | 政府分类 | Ministry, Department, Agency |
+| `nonprofit` | 非营利分类 | NGO, Foundation, Charity |

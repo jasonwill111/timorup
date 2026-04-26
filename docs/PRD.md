@@ -592,5 +592,44 @@ classification:
 
 ---
 
-**文档版本**: 3.2
+**文档版本**: 4.0
 **最后更新**: 2026-04-26
+**新增**: AI Tools (Admin) | Categories entityType 分离
+
+---
+
+## 16. AI Tools (Admin)
+
+### 16.1 概述
+
+Admin AI Tools 使用 Mastra + MiniMax API 帮助管理员快速生成内容。
+
+### 16.2 功能
+
+| Generator | 描述 | 输出 |
+|-----------|------|------|
+| Listing Generator | 生成 business/gov/nonprofit listing | JSON: title, entityType, contact, tags |
+| SKU Generator | 生成产品/服务数据 | JSON: title, description, priceFields |
+| Blog Generator | 生成博客文章 | HTML content, excerpt, tags |
+| Landing Page Generator | 生成促销/活动落地页 | hero, features, cta |
+
+### 16.3 技术架构
+
+```
+Frontend: /admin/ai-tools
+    ↓
+API: POST /api/admin/ai-generate (type: listing|SKU|blog|landing)
+    ↓
+Mastra Agents: src/mastra/agents/index.ts
+    ↓
+MiniMax API: MiniMax-M2.7
+```
+
+### 16.4 Categories entityType 分离
+
+| entityType | 用途 |
+|------------|------|
+| `business` | 商业分类 (Restaurants, Hotels, Shopping) |
+| `government` | 政府分类 (Ministry, Agency) |
+| `nonprofit` | 非营利分类 (NGO, Foundation) |
+| `null` | 通用分类 (所有类型可用) |

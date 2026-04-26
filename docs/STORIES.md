@@ -641,7 +641,71 @@
 
 ---
 
-**文档版本**: 3.0
-**最后更新**: 2026-03-22
+**文档版本**: 4.0
+**最后更新**: 2026-04-26
 **开发状态**: ⚠️ 49/51 Stories 完成 | 2 个未完成 (BS-013, SB-003 部分)
-**新增**: Blog 系统 (BL-001~BL-003) + 基础设施增强 (INFX-001~INFX-004)
+**新增**: AI Tools (AI-001~AI-004) + Categories entityType 分离
+
+---
+
+## Phase 13: AI Tools (AI) ✅ 新增 2026-04-26
+
+### AI-001: Admin AI Tools 页面
+
+**验收标准:**
+- [x] `/admin/ai-tools` 页面存在
+- [x] 4个tab: Listing | SKU | Blog | Landing Page
+- [x] Tab 切换正常工作
+- [x] 表单提交调用 API
+
+### AI-002: Listing Generator
+
+**验收标准:**
+- [x] 生成 business/gov/nonprofit listing 数据
+- [x] POST `/api/admin/ai-generate` (type: listing)
+- [x] `listingCreator` agent 工作正常
+- [x] 预览显示生成结果
+
+### AI-003: SKU/Product Generator
+
+**验收标准:**
+- [x] 生成 product/service/rental/food/accommodation/project SKU
+- [x] POST `/api/admin/ai-generate` (type: sku)
+- [x] `skuCreator` agent 工作正常
+- [x] 支持 priceFields 数组
+
+### AI-004: Blog Article Generator
+
+**验收标准:**
+- [x] 生成 local-highlight/how-to/event/community 文章
+- [x] POST `/api/admin/ai-generate` (type: blog)
+- [x] `blogCreator` agent 工作正常
+- [x] 输出 HTML 内容
+
+### AI-005: Landing Page Generator
+
+**验收标准:**
+- [x] 生成 promotion/event/product-showcase/seasonal 落地页
+- [x] POST `/api/admin/ai-generate` (type: landing)
+- [x] `landingPageCreator` agent 工作正常
+- [x] 输出 hero/features/cta 结构
+
+---
+
+## Phase 14: Categories entityType 分离 (CAT) ✅ 新增 2026-04-26
+
+### CAT-001: Categories entityType 字段
+
+**验收标准:**
+- [x] `categories` 表添加 `entityType` 字段
+- [x] 支持 business/government/nonprofit/null 值
+- [x] API 支持按 entityType 过滤
+- [x] Admin 表单支持选择 entityType
+
+### CAT-002: Admin Categories 页面
+
+**验收标准:**
+- [x] 表格显示 Entity 列
+- [x] 表格显示 Level 列 (Industry/Sub)
+- [x] 创建/编辑表单包含 entityType 下拉
+- [x] 统计按 entityType 分组

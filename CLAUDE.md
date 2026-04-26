@@ -229,3 +229,22 @@ if (!cached) {
 ```
 
 **See `AGENTS.md` for full specs, testing, and deployment.**
+
+## AI Tools
+
+AI功能通过 Mastra + MiniMax API 实现：
+
+| Generator | Route | 功能 |
+|-----------|-------|------|
+| Listing | `/admin/ai-tools` (tab 1) | 生成 business/gov/nonprofit listing |
+| SKU | `/admin/ai-tools` (tab 2) | 生成 product/service/rental 等 |
+| Blog | `/admin/ai-tools` (tab 3) | 生成文章 (local-highlight/how-to等) |
+| Landing | `/admin/ai-tools` (tab 4) | 生成 promotion/event 等落地页 |
+
+**API**: `POST /api/admin/ai-generate`
+**Agents**: `src/mastra/agents/index.ts`
+
+### MiniMax API Key
+
+本地: `.dev.vars` 设置 `MINIMAX_API_KEY`
+生产: `wrangler secret put MINIMAX_API_KEY`
