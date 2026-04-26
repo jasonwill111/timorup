@@ -49,20 +49,29 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const { user, session } = await authApi.signUp({
+    const result = await authApi.signUpEmail({
       body: { email, password, name },
     });
 
+    const user = result.user;
+    const session = result.session;
+
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    });
+
+    if (session?.token) {
+      headers.set('Set-Cookie', `better-auth.session_token=${session.token}; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}; Path=/`);
+    }
+
     const response = new Response(JSON.stringify({ success: true, user, session }), {
       status: 201,
-      headers: {
-        'Content-Type': 'application/json',
-        'Set-Cookie': `better-auth.session_token=${session.token}; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}; Path=/`
-      }
+      headers,
     });
 
     return response;
   } catch (error) {
+    console.error('Sign-up error:', error);
     const errorMessage = getErrorMessage(error);
     if (errorMessage.toLowerCase().includes('email') &&
         (errorMessage.toLowerCase().includes('exists') ||

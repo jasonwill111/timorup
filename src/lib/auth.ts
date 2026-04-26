@@ -15,6 +15,8 @@ const isGoogleConfigured = !!googleClientId && !!googleClientSecret;
 const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:4321',
+
   database: drizzleAdapter(db, {
     provider: 'sqlite',
     schema: {
@@ -24,7 +26,7 @@ export const auth = betterAuth({
       verification: verifications,
     },
   }),
-  
+
   // Email and password authentication
   emailAndPassword: {
     enabled: true,

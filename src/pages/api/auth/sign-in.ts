@@ -49,18 +49,26 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const { user, session } = await authApi.signIn({
+    const result = await authApi.signInEmail({
       body: { email, password },
     });
 
+    const user = result.user;
+    const token = result.token;
+
     const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7;
 
-    const response = new Response(JSON.stringify({ success: true, user, session }), {
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    });
+
+    if (token) {
+      headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Path=/`);
+    }
+
+    const response = new Response(JSON.stringify({ success: true, user }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Set-Cookie': `better-auth.session_token=${session.token}; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Path=/`
-      }
+      headers,
     });
 
     return response;
