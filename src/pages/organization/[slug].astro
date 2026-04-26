@@ -1,148 +1,290 @@
 ---
-// Organization page - simplified version for gov/NGOs/nonprofits
+// Organization page with SSR
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Card from '../../components/ui/Card.astro';
-import CardContent from '../../components/ui/CardContent.astro';
+import { db } from '@/lib/db';
+import { businessPages } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 const { slug } = Astro.params;
-const siteUrl = import.meta.env.SITE || 'https://timorbiz.com';
+const siteUrl = import.meta.env.SITE || 'https://timorlist.com';
 const canonicalUrl = `${siteUrl}/organization/${slug}`;
+
+// SSR: Load organization data
+const org = await db.select()
+  .from(businessPages)
+  .where(eq(businessPages.slug, slug ?? ''))
+  .get();
+
+// Redirect if not found or not an organization
+if (!org || org.entityType !== 'organization') {
+  return Astro.redirect('/organization');
+}
+
+// Type labels
+const typeLabels: Record<string, string> = {
+  government: 'Government',
+  ngo: 'NGO',
+  nonprofit: 'Non-Profit',
+  foundation: 'Foundation',
+};
+
+// Parse opening hours
+const openingHours = org.openingHours ? JSON.parse(org.openingHours) : null;
+
+// Title & description
+const pageTitle = `${org.title} - TIMORLIST`;
+const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - ${typeLabels[org.organizationType || ''] || 'Organization'} in Timor-Leste`;
 ---
 
-<Layout
-  title="Organization - TMBIZ"
-  description="Organization listing on TMBIZ"
-  canonical={canonicalUrl}
->
-  <!-- Loading State -->
-  <div id="loading" class="min-h-screen flex items-center justify-center">
-    <div class="text-center">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      <p class="mt-4 text-muted-foreground">Loading...</p>
-    </div>
-  </div>
+<Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "GovernmentOrganization",
+    "name": org.title,
+    "description": org.aboutUs,
+    "url": canonicalUrl,
+    "image": org.profileImageId ? `/api/media/${org.profileImageId}` : undefined,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": org.address,
+      "addressLocality": "Dili",
+      "addressCountry": "TL"
+    },
+    "telephone": org.contactNumber ? `${org.countryCode} ${org.contactNumber}` : undefined,
+  })} />
 
-  <!-- Error State -->
-  <div id="error" class="hidden min-h-screen flex items-center justify-center">
-    <div class="text-center">
-      <h1 class="text-2xl font-bold">Organization Not Found</h1>
-      <p class="mt-2 text-muted-foreground">The organization you're looking for doesn't exist.</p>
-      <a href="/organization" class="mt-4 inline-block">
-        <Button>Browse Organizations</Button>
-      </a>
-    </div>
-  </div>
-
-  <!-- Organization Content -->
-  <div id="content" class="hidden">
-    <!-- Banner Section -->
-    <div id="banner-section" class="relative h-64 md:h-80 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30">
-      <img id="banner-image" class="w-full h-full object-cover hidden" />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+  <div class="bg-background min-h-screen">
+    <!-- Banner -->
+    <div class="relative h-48 md:h-64 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30">
+      {org.bannerImageId && (
+        <img src={`/api/media/${org.bannerImageId}`} class="w-full h-full object-cover" alt="" />
+      )}
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
     </div>
 
-    <!-- Main Content -->
-    <div class="container -mt-12 relative z-10">
-      <div class="flex flex-col md:flex-row gap-6">
-        <!-- Left: Main Info -->
+    <div class="container max-w-6xl mx-auto px-4 md:px-6 -mt-16 relative z-10">
+      <!-- Profile Header -->
+      <div class="flex flex-col md:flex-row gap-6 mb-8">
+        <!-- Main Content -->
         <div class="flex-1">
           <!-- Profile Card -->
-          <Card class="mb-6">
-            <CardContent class="p-6">
-              <div class="flex flex-col md:flex-row gap-6 items-start">
-                <!-- Profile Image -->
-                <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-muted flex-shrink-0 -mt-16 md:-mt-20 border-4 border-background shadow-lg">
-                  <img id="profile-image" class="w-full h-full object-cover" />
+          <div class="bg-card border rounded-xl shadow p-6 mb-6">
+            <div class="flex flex-col md:flex-row gap-6">
+              <!-- Profile Image -->
+              <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-muted flex-shrink-0 border-4 border-background shadow-lg">
+                {org.profileImageId ? (
+                  <img src={`/api/media/${org.profileImageId}`} class="w-full h-full object-cover" alt={org.title} />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center text-4xl font-bold text-white bg-blue-600">
+                    {org.title.split(' ').map((w: string) => w[0]).join('').substring(0, 2)}
+                  </div>
+                )}
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h1 class="text-2xl md:text-3xl font-bold">{org.title}</h1>
+                  {org.verifiedBadge && (
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Verified
+                    </span>
+                  )}
                 </div>
 
-                <!-- Organization Info -->
-                <div class="flex-1">
-                  <div class="flex flex-wrap gap-2 mb-2">
-                    <span id="type-badge" class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"></span>
-                    <span id="verified-badge" class="hidden px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">✓ Verified</span>
-                  </div>
-                  <p id="category-name" class="text-muted-foreground"></p>
+                <!-- Type Badge -->
+                <div class="flex items-center gap-2 mb-2">
+                  <span class={`px-2 py-1 text-xs font-medium rounded-full ${
+                    org.organizationType === 'government' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
+                    org.organizationType === 'ngo' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                    'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                  }`}>
+                    {typeLabels[org.organizationType || ''] || 'Organization'}
+                  </span>
+                </div>
 
-                  <!-- Contact Info -->
-                  <div class="mt-4 space-y-2">
-                    <p id="contact-name" class="font-medium"></p>
-                    <p id="contact-phone" class="text-sm text-muted-foreground"></p>
-                    <p id="contact-email" class="text-sm text-muted-foreground"></p>
-                    <p id="contact-address" class="text-sm text-muted-foreground"></p>
-                  </div>
+                <!-- Contact -->
+                <div class="space-y-1 mt-4">
+                  {org.contactName && (
+                    <p class="font-medium">{org.contactName}</p>
+                  )}
+                  {org.contactNumber && (
+                    <p class="text-sm text-muted-foreground">
+                      <a href={`tel:${org.countryCode}${org.contactNumber}`} class="hover:text-primary">
+                        {org.countryCode} {org.contactNumber}
+                      </a>
+                    </p>
+                  )}
+                  {org.email && (
+                    <p class="text-sm text-muted-foreground">
+                      <a href={`mailto:${org.email}`} class="hover:text-primary">{org.email}</a>
+                    </p>
+                  )}
+                  {org.address && (
+                    <p class="text-sm text-muted-foreground">{org.address}</p>
+                  )}
+                </div>
 
-                  <!-- Registration Link -->
-                  <div id="registration-section" class="hidden mt-4 p-4 bg-muted/50 rounded-lg">
-                    <p class="text-sm text-muted-foreground mb-2">Official Registration:</p>
-                    <a id="registration-url" href="#" target="_blank" rel="noopener" class="text-primary hover:underline flex items-center gap-1">
-                      <span>View Registration</span>
+                <!-- Registration Link -->
+                {org.registrationUrl && (
+                  <div class="mt-4">
+                    <a href={org.registrationUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm text-primary hover:underline">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                       </svg>
+                      View Official Registration
                     </a>
                   </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex gap-2">
-                  <Button id="save-btn" variant="outline" size="icon">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-                    </svg>
-                  </Button>
-                  <Button id="share-btn" variant="outline" size="icon">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                    </svg>
-                  </Button>
-                </div>
+                )}
               </div>
-            </CardContent>
+
+              <!-- Actions -->
+              <div class="flex gap-2 flex-shrink-0">
+                <Button id="share-btn" size="sm" variant="outline">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                  </svg>
+                  Share
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid md:grid-cols-3 gap-6 pb-12">
+        <!-- Left Sidebar -->
+        <div class="space-y-6">
+          <!-- About -->
+          <Card>
+            <div class="p-4">
+              <h3 class="font-semibold mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                About
+              </h3>
+              {org.aboutUs ? (
+                <p class="text-sm text-muted-foreground whitespace-pre-line">{org.aboutUs}</p>
+              ) : (
+                <p class="text-sm text-muted-foreground italic">No description available.</p>
+              )}
+            </div>
           </Card>
 
-          <!-- About Section -->
-          <Card class="mb-6">
-            <CardContent class="p-6">
-              <h2 class="text-xl font-semibold mb-4">About</h2>
-              <div id="about-us" class="prose dark:prose-invert max-w-none"></div>
-            </CardContent>
+          <!-- Hours -->
+          <Card>
+            <div class="p-4">
+              <h3 class="font-semibold mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Hours
+              </h3>
+              {openingHours ? (
+                <div class="space-y-1 text-sm">
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
+                    const dayData = openingHours[day];
+                    const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                    if (dayData?.open === 'closed') {
+                      return <div class="flex justify-between"><span>{dayName}</span><span class="text-red-500">Closed</span></div>;
+                    }
+                    if (dayData?.open && dayData?.close) {
+                      return <div class="flex justify-between"><span>{dayName}</span><span>{dayData.open} - {dayData.close}</span></div>;
+                    }
+                    return null;
+                  })}
+                </div>
+              ) : (
+                <p class="text-sm text-muted-foreground italic">Hours not available.</p>
+              )}
+            </div>
+          </Card>
+
+          <!-- Location -->
+          <Card>
+            <div class="p-4">
+              <h3 class="font-semibold mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Location
+              </h3>
+              {org.address ? (
+                <div>
+                  <p class="text-sm text-muted-foreground">{org.address}</p>
+                  {org.locationLat && org.locationLng && (
+                    <a href={`https://www.openstreetmap.org/?mlat=${org.locationLat}&mlon=${org.locationLng}#map=15/${org.locationLat}/${org.locationLng}`} target="_blank" class="text-sm text-primary hover:underline mt-2 inline-block">
+                      View on Map →
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <p class="text-sm text-muted-foreground italic">Location not available.</p>
+              )}
+            </div>
           </Card>
         </div>
 
-        <!-- Right: Sidebar -->
-        <div class="w-full md:w-80 space-y-6">
-          <!-- Map Card -->
+        <!-- Right Content: Info -->
+        <div class="md:col-span-2">
           <Card>
-            <CardContent class="p-4">
-              <div id="map" class="h-64 rounded-lg bg-muted"></div>
-              <a id="map-link" href="#" target="_blank" class="block mt-2 text-sm text-primary hover:underline">
-                Open in Maps →
-              </a>
-            </CardContent>
+            <div class="p-4 border-b">
+              <h2 class="text-xl font-semibold">Organization Information</h2>
+            </div>
+            <div class="p-6">
+              {org.aboutUs ? (
+                <div class="space-y-4">
+                  <div>
+                    <h4 class="font-medium mb-2">Overview</h4>
+                    <p class="text-muted-foreground">{org.aboutUs}</p>
+                  </div>
+
+                  {org.contactName && (
+                    <div>
+                      <h4 class="font-medium mb-2">Contact Person</h4>
+                      <p class="text-muted-foreground">{org.contactName}</p>
+                    </div>
+                  )}
+
+                  {org.yearOfEstablishment && (
+                    <div>
+                      <h4 class="font-medium mb-2">Established</h4>
+                      <p class="text-muted-foreground">{org.yearOfEstablishment}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div class="text-center py-8">
+                  <svg class="w-12 h-12 mx-auto text-muted-foreground mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0H3"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21v-4m0 0h6a2 2 0 012 2v4m-8-6H7a2 2 0 00-2 2v4m0-6v6"/>
+                  </svg>
+                  <p class="text-muted-foreground">No detailed information available.</p>
+                </div>
+              )}
+            </div>
           </Card>
 
-          <!-- Contact Card -->
-          <Card>
-            <CardContent class="p-4">
-              <h3 class="font-semibold mb-3">Contact</h3>
-              <div id="contact-info" class="space-y-3 text-sm">
-                <!-- Populated by JS -->
-              </div>
-            </CardContent>
-          </Card>
-
-          <!-- Add Your Organization CTA -->
-          <Card class="bg-primary/10 border-primary/20">
-            <CardContent class="p-4 text-center">
+          <!-- CTA -->
+          <Card class="mt-6 bg-primary/5 border-primary/20">
+            <div class="p-6 text-center">
               <h3 class="font-semibold mb-2">Is your organization missing?</h3>
-              <p class="text-sm text-muted-foreground mb-4">Register your government agency, NGO, or nonprofit on TMBIZ.</p>
+              <p class="text-sm text-muted-foreground mb-4">Register your government agency, NGO, or nonprofit on TIMORLIST.</p>
               <a href="/register?type=organization">
-                <Button size="sm">Add Your Organization</Button>
+                <Button>Add Your Organization</Button>
               </a>
-            </CardContent>
+            </div>
           </Card>
         </div>
       </div>
@@ -151,205 +293,17 @@ const canonicalUrl = `${siteUrl}/organization/${slug}`;
 </Layout>
 
 <script>
-  const slug = window.location.pathname.split('/').pop();
-
-  const loading = document.getElementById('loading');
-  const error = document.getElementById('error');
-  const content = document.getElementById('content');
-
-  async function loadOrganization() {
-    if (!slug) return;
-
-    try {
-      const res = await fetch(`/api/businesses/${slug}?type=organization`);
-      const data = await res.json();
-
-      if (!data.success || !data.data) {
-        loading?.classList.add('hidden');
-        error?.classList.remove('hidden');
-        return;
-      }
-
-      const org = data.data;
-
-      // Update page title
-      document.title = `${org.title} - TMBIZ`;
-
-      // Update meta description
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.content = org.aboutUs?.substring(0, 160) || org.title;
-      }
-
-      // Banner
-      const bannerImage = document.getElementById('banner-image');
-      if (bannerImage && org.bannerImageId) {
-        bannerImage.src = `/api/media/${org.bannerImageId}`;
-        bannerImage.classList.remove('hidden');
-      }
-
-      // Profile
-      const profileImage = document.getElementById('profile-image');
-      if (profileImage && org.profileImageId) {
-        profileImage.src = `/api/media/${org.profileImageId}`;
-      } else if (profileImage) {
-        // Use initials avatar for organizations
-        const initials = org.title.split(' ').map(w => w[0]).join('').substring(0, 2);
-        profileImage.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=2563EB&color=fff&size=128`;
-      }
-
-      // Type badge
-      const typeBadge = document.getElementById('type-badge');
-      if (typeBadge && org.organizationType) {
-        const typeLabels: Record<string, string> = {
-          government: 'Government',
-          ngo: 'NGO',
-          nonprofit: 'Non-Profit',
-          foundation: 'Foundation',
-        };
-        typeBadge.textContent = typeLabels[org.organizationType] || org.organizationType;
-      }
-
-      // Verified badge
-      const verifiedBadge = document.getElementById('verified-badge');
-      if (verifiedBadge && org.verifiedBadge) {
-        verifiedBadge.classList.remove('hidden');
-      }
-
-      // Category
-      if (document.getElementById('category-name') && org.categoryName) {
-        document.getElementById('category-name')!.textContent = org.categoryName;
-      }
-
-      // Contact info
-      if (document.getElementById('contact-name') && org.contactName) {
-        document.getElementById('contact-name')!.textContent = org.contactName;
-      }
-      if (document.getElementById('contact-phone') && org.contactNumber) {
-        document.getElementById('contact-phone')!.textContent = `${org.countryCode || '+670'} ${org.contactNumber}`;
-      }
-      if (document.getElementById('contact-email') && org.email) {
-        document.getElementById('contact-email')!.textContent = org.email;
-      }
-      if (document.getElementById('contact-address') && org.address) {
-        document.getElementById('contact-address')!.textContent = org.address;
-      }
-
-      // Registration URL
-      const registrationSection = document.getElementById('registration-section');
-      const registrationUrl = document.getElementById('registration-url');
-      if (registrationSection && registrationUrl && org.registrationUrl) {
-        registrationSection.classList.remove('hidden');
-        registrationUrl.href = org.registrationUrl;
-      }
-
-      // About
-      const aboutUs = document.getElementById('about-us');
-      if (aboutUs) {
-        aboutUs.innerHTML = org.aboutUs || '<p class="text-muted-foreground">No description available.</p>';
-      }
-
-      // Map
-      if (org.locationLat && org.locationLng) {
-        initMap(org.locationLat, org.locationLng, org.title);
-      } else {
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-          mapContainer.innerHTML = '<div class="flex items-center justify-center h-full text-muted-foreground">No location available</div>';
-        }
-      }
-
-      // Init buttons
-      initButtons(org.id);
-
-      // Show content
-      loading?.classList.add('hidden');
-      content?.classList.remove('hidden');
-
-    } catch (err) {
-      console.error('Error loading organization:', err);
-      loading?.classList.add('hidden');
-      error?.classList.remove('hidden');
-    }
-  }
-
-  function initMap(lat: number, lng: number, title: string) {
-    const mapContainer = document.getElementById('map');
-    const mapLink = document.getElementById('map-link');
-
-    if (!mapContainer) return;
-
-    // Load Leaflet
-    if (!document.getElementById('leaflet-css')) {
-      const link = document.createElement('link');
-      link.id = 'leaflet-css';
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-    }
-
-    if (!(window as any).L) {
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.onload = () => createMap(lat, lng, title);
-      document.head.appendChild(script);
+  // Share button
+  document.getElementById('share-btn')?.addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({
+        title: document.title,
+        text: 'Check out this organization on TimorLIST',
+        url: window.location.href,
+      });
     } else {
-      createMap(lat, lng, title);
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
     }
-
-    if (mapLink) {
-      mapLink.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
-    }
-  }
-
-  function createMap(lat: number, lng: number, title: string) {
-    const mapContainer = document.getElementById('map');
-    const mapLink = document.getElementById('map-link');
-    if (!mapContainer || !(window as any).L) return;
-
-    const map = (window as any).L.map(mapContainer).setView([lat, lng], 15);
-
-    (window as any).L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(map);
-
-    (window as any).L.marker([lat, lng]).addTo(map)
-      .bindPopup(`<strong>${title}</strong>`);
-
-    map.on('click', () => {
-      window.open(`https://www.openstreetmap.org/directions?from=&to=${lat},${lng}`, '_blank');
-    });
-  }
-
-  function initButtons(orgId: string) {
-    const saveBtn = document.getElementById('save-btn');
-    const shareBtn = document.getElementById('share-btn');
-
-    let saved = false;
-
-    if (saveBtn) {
-      saveBtn.addEventListener('click', async () => {
-        if (saved) return;
-        saved = true;
-        // TODO: Call save API
-        saveBtn.classList.add('text-blue-500');
-      });
-    }
-
-    if (shareBtn) {
-      shareBtn.addEventListener('click', () => {
-        if (navigator.share) {
-          navigator.share({
-            title: document.title,
-            url: window.location.href,
-          });
-        } else {
-          navigator.clipboard.writeText(window.location.href);
-        }
-      });
-    }
-  }
-
-  loadOrganization();
+  });
 </script>
