@@ -1,338 +1,259 @@
 ---
-// This page needs SSR for personalized user data
+// Account page with SSR
 export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
-import Card from '../components/ui/Card.astro'
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardDescription from '../components/ui/CardDescription.astro';
+import CardContent from '../components/ui/CardContent.astro';
+import CardFooter from '../components/ui/CardFooter.astro';
 
-import CardHeader from '../components/ui/CardHeader.astro'
-import CardTitle from '../components/ui/CardTitle.astro'
-import CardDescription from '../components/ui/CardDescription.astro'
-import CardContent from '../components/ui/CardContent.astro'
-import CardFooter from '../components/ui/CardFooter.astro'
+// Check auth via session cookie
+const cookieHeader = Astro.request.headers.get('cookie') || '';
+let user: { id: string; name: string; email: string } | null = null;
+let userBusiness: { id: string; title: string; slug: string; planType: string | null; expiryDate: Date | null } | null = null;
+let subscription: { planType: string; amount: number; status: string; expiryDate: Date | null } | null = null;
+
+try {
+  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+
+  if (tokenMatch) {
+    const { db } = await import('@/lib/db');
+    const { sessions, users, businessPages, orders } = await import('@/db/schema');
+    const { eq, and, desc } = await import('drizzle-orm');
+
+    const session = await db.select()
+      .from(sessions)
+      .where(eq(sessions.token, tokenMatch[1]))
+      .limit(1)
+      .get();
+
+    if (session && session.expiresAt && new Date(session.expiresAt) > new Date()) {
+      const userRecord = await db.select()
+        .from(users)
+        .where(eq(users.id, session.userId))
+        .limit(1)
+        .get();
+
+      if (userRecord) {
+        user = { id: userRecord.id, name: userRecord.name || '', email: userRecord.email };
+
+        // Get user's business
+        const business = await db.select({
+          id: businessPages.id,
+          title: businessPages.title,
+          slug: businessPages.slug,
+          planType: businessPages.planType,
+          expiryDate: businessPages.expiryDate,
+        })
+        .from(businessPages)
+        .where(eq(businessPages.ownerId, user.id))
+        .limit(1)
+        .get();
+
+        if (business) {
+          userBusiness = business;
+
+          // Get latest paid subscription
+          const latestOrder = await db.select()
+            .from(orders)
+            .where(and(
+              eq(orders.businessPageId, business.id),
+              eq(orders.status, 'paid')
+            ))
+            .orderBy(desc(orders.paidDate))
+            .limit(1)
+            .get();
+
+          if (latestOrder) {
+            subscription = {
+              planType: latestOrder.planType || 'basic',
+              amount: latestOrder.amount || 0,
+              status: latestOrder.status,
+              expiryDate: latestOrder.expiryDate,
+            };
+          }
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.error('Auth check failed:', e);
+}
+
+// Redirect if not logged in
+if (!user) {
+  return Astro.redirect('/login?redirect=/account');
+}
+
+// Check if subscription is expired
+const isSubscriptionExpired = subscription?.expiryDate ? new Date(subscription.expiryDate) < new Date() : false;
+
+// Check if subscription is active (paid and not expired)
+const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionExpired;
 ---
 
-<Layout title="My Account - TMBIZ">
+<Layout title="My Account - TIMORLIST">
   <div class="container py-8">
     <div class="flex items-center justify-between mb-8">
       <h1 class="text-3xl font-bold">My Account</h1>
-      <!-- Admin Link (for demo - check user role in production) -->
-      <a href="/admin" class="text-sm text-muted-foreground hover:text-primary">
-        Admin Dashboard →
-      </a>
     </div>
-    
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Profile Section -->
+      <!-- Main Content -->
       <div class="lg:col-span-2">
+        <!-- Profile Section -->
         <Card class="mb-6">
           <CardHeader>
             <CardTitle>Profile Information</CardTitle>
             <CardDescription>Manage your account details</CardDescription>
           </CardHeader>
           <CardContent>
-            <form id="profile-form" class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="name" class="block text-sm font-medium mb-1">Name</label>
-                  <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
-                    class="w-full px-3 py-2 border rounded-lg bg-background"
-                    placeholder="Your name"
-                  />
-                </div>
-                <div>
-                  <label for="email" class="block text-sm font-medium mb-1">Email</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    class="w-full px-3 py-2 border rounded-lg bg-background"
-                    disabled
-                    placeholder="your@email.com"
-                  />
-                </div>
-                <div>
-                  <label for="phone" class="block text-sm font-medium mb-1">Phone</label>
-                  <input 
-                    type="tel" 
-                    id="phone" 
-                    name="phone" 
-                    class="w-full px-3 py-2 border rounded-lg bg-background"
-                    placeholder="+670 7x xxx xxx"
-                  />
-                </div>
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold">
+                {user.name.charAt(0).toUpperCase()}
               </div>
-              <Button type="submit">Save Changes</Button>
-            </form>
-          </CardContent>
-        </Card>
-        
-        <!-- My Businesses -->
-        <Card>
-          <CardHeader class="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>My Businesses</CardTitle>
-              <CardDescription>Manage your business listings</CardDescription>
-            </div>
-            <a href="/business/create">
-              <Button>Add Business</Button>
-            </a>
-          </CardHeader>
-          <CardContent>
-            <div id="businesses-list" class="space-y-4">
-              <p class="text-center text-muted-foreground py-8">Loading...</p>
+              <div>
+                <p class="font-semibold">{user.name}</p>
+                <p class="text-sm text-muted-foreground">{user.email}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        <!-- My Business -->
+        {userBusiness ? (
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>My Business</CardTitle>
+                <CardDescription>{userBusiness.title}</CardDescription>
+              </div>
+              <div class="flex gap-2">
+                <a href={`/business/${userBusiness.slug}`}>
+                  <Button variant="outline" size="sm">View</Button>
+                </a>
+                <a href={`/business/${userBusiness.slug}/edit`}>
+                  <Button size="sm">Edit</Button>
+                </a>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div class="flex items-center gap-4">
+                <span class={`px-3 py-1 text-sm rounded-full ${isSubscriptionActive ? 'bg-green-100 text-green-800' : isSubscriptionExpired ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  {isSubscriptionActive ? 'Active' : isSubscriptionExpired ? 'Expired' : 'Inactive'}
+                </span>
+                <span class="text-sm text-muted-foreground">
+                  {subscription ? `${subscription.planType.replace('-', ' ').toUpperCase()} Plan` : 'Free Plan'}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Your Business</CardTitle>
+              <CardDescription>Get started with your first business listing</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <a href="/listing/create?type=business">
+                <Button>Create Business</Button>
+              </a>
+            </CardContent>
+          </Card>
+        )}
       </div>
-      
+
       <!-- Sidebar -->
       <div>
-        <!-- Subscription Status -->
+        <!-- Subscription Card -->
         <Card class="mb-6">
           <CardHeader>
             <CardTitle>Subscription</CardTitle>
           </CardHeader>
           <CardContent>
-            <div id="subscription-status">
-              <p class="text-center text-muted-foreground">Loading...</p>
-            </div>
+            {isSubscriptionActive ? (
+              <div class="text-center">
+                <p class="text-2xl font-bold text-green-600">Active</p>
+                <p class="text-sm text-muted-foreground mt-1">
+                  {subscription?.planType.replace('-', ' ').toUpperCase()} Plan
+                </p>
+                {subscription?.expiryDate && (
+                  <p class="text-xs text-muted-foreground mt-2">
+                    Expires: {new Date(subscription.expiryDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div class="text-center">
+                {isSubscriptionExpired ? (
+                  <>
+                    <p class="text-2xl font-bold text-red-600">Expired</p>
+                    <p class="text-sm text-muted-foreground mt-1">
+                      Your subscription has expired
+                    </p>
+                    <p class="text-xs text-muted-foreground mt-2">
+                      Renew to continue enjoying premium features
+                    </p>
+                  </>
+                ) : userBusiness ? (
+                  <>
+                    <p class="text-2xl font-bold text-yellow-600">Inactive</p>
+                    <p class="text-sm text-muted-foreground mt-1">
+                      No active subscription
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p class="text-2xl font-bold text-gray-500">Free</p>
+                    <p class="text-sm text-muted-foreground mt-1">
+                      Create a business to get started
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </CardContent>
-          <CardFooter>
+          <CardFooter class="flex-col gap-2">
             <a href="/pricing" class="w-full">
-              <Button variant="outline" class="w-full">View Plans</Button>
+              <Button variant="outline" class="w-full">
+                {isSubscriptionExpired ? 'Renew Subscription' : isSubscriptionActive ? 'Change Plan' : 'View Plans'}
+              </Button>
             </a>
+            {!isSubscriptionActive && userBusiness && (
+              <a href={`/subscribe?plan=basic-monthly`} class="w-full">
+                <Button class="w-full">Subscribe Now</Button>
+              </a>
+            )}
           </CardFooter>
         </Card>
-        
+
         <!-- Quick Links -->
         <Card>
           <CardHeader>
             <CardTitle>Quick Links</CardTitle>
           </CardHeader>
           <CardContent class="space-y-2">
-            <a href="/businesses" class="block">
-              <Button variant="ghost" class="w-full justify-start">Browse Businesses</Button>
+            <a href="/listing" class="block">
+              <Button variant="ghost" class="w-full justify-start">Browse Directory</Button>
+            </a>
+            <a href="/products-services" class="block">
+              <Button variant="ghost" class="w-full justify-start">Products & Services</Button>
             </a>
             <a href="/pricing" class="block">
               <Button variant="ghost" class="w-full justify-start">Pricing</Button>
             </a>
-            <button id="logout-btn" class="block w-full">
-              <Button variant="ghost" class="w-full justify-start text-red-500 hover:text-red-600">Log Out</Button>
-            </button>
+            <form action="/api/auth/sign-out" method="POST">
+              <Button type="submit" variant="ghost" class="w-full justify-start text-red-500 hover:text-red-600">
+                Log Out
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
     </div>
   </div>
 </Layout>
-
-<script>
-  let userId = null;
-  
-  // Get session from cookie-based auth
-  async function getSession() {
-    try {
-      const res = await fetch('/api/auth/session');
-      const data = await res.json();
-      
-      if (data.session?.user) {
-        return data.session.user;
-      }
-      // Not logged in, redirect to login
-      window.location.href = '/login';
-      return null;
-    } catch (err) {
-      console.error('Error getting session:', err);
-      window.location.href = '/login';
-      return null;
-    }
-  }
-  
-  // Initialize - get session and load data
-  async function init() {
-    const user = await getSession();
-    if (!user) return;
-    
-    userId = user.id;
-    
-    // Load profile
-    loadProfile(user);
-    
-    // Load businesses
-    loadBusinesses(userId);
-    
-    // Load subscription
-    loadSubscription(userId);
-  }
-  
-  // Load profile
-  async function loadProfile(user) {
-    // Use user data from session directly
-    const nameInput = document.getElementById('name') as HTMLInputElement;
-    const emailInput = document.getElementById('email') as HTMLInputElement;
-    const phoneInput = document.getElementById('phone') as HTMLInputElement;
-    
-    if (nameInput) nameInput.value = user.name || '';
-    if (emailInput) emailInput.value = user.email || '';
-    if (phoneInput) phoneInput.value = user.phone || '';
-  }
-  
-  // Load profile from API (for businesses)
-  async function loadProfileFromApi(uid) {
-    try {
-      const res = await fetch(`/api/account/profile/${uid}`);
-      const data = await res.json();
-      
-      if (data.success) {
-        const user = data.data;
-        (document.getElementById('name') as HTMLInputElement).value = user.name || '';
-        (document.getElementById('email') as HTMLInputElement).value = user.email || '';
-        (document.getElementById('phone') as HTMLInputElement).value = user.phone || '';
-      }
-    } catch (err) {
-      console.error('Error loading profile:', err);
-    }
-  }
-
-  // Load businesses
-  async function loadBusinesses(uid) {
-    try {
-      const res = await fetch(`/api/account/businesses/${uid}`);
-      const data = await res.json();
-      
-      const container = document.getElementById('businesses-list');
-      if (!container) return;
-      
-      if (!data.success || data.data.length === 0) {
-        container.innerHTML = `
-          <p class="text-center text-muted-foreground py-8">
-            You haven't created any businesses yet.
-          </p>
-        `;
-        return;
-      }
-      
-      container.innerHTML = data.data.map((biz: any) => `
-        <div class="flex items-center justify-between p-4 border rounded-lg">
-          <div>
-            <h3 class="font-semibold">${biz.title}</h3>
-            <p class="text-sm text-muted-foreground">Status: ${biz.status}</p>
-          </div>
-          <div class="flex gap-2">
-            <a href="/business/${biz.slug}" class="text-sm text-primary hover:underline">View</a>
-            <a href="/business/${biz.slug}/products" class="text-sm text-primary hover:underline">Products</a>
-            <a href="/business/${biz.slug}/edit" class="text-sm text-primary hover:underline">Edit</a>
-          </div>
-        </div>
-      `).join('');
-    } catch (err) {
-      console.error('Error loading businesses:', err);
-    }
-  }
-  
-  // Load subscription status
-  async function loadSubscription(uid) {
-    try {
-      const res = await fetch(`/api/account/subscriptions/${uid}`);
-      const data = await res.json();
-      
-      const container = document.getElementById('subscription-status');
-      if (!container) return;
-      
-      if (!data.success || data.data.length === 0) {
-        container.innerHTML = `
-          <div class="text-center mb-4">
-            <p class="text-lg font-semibold text-gray-500">Free Plan</p>
-            <p class="text-sm text-muted-foreground mt-1">Get started with basic features</p>
-          </div>
-        `;
-        return;
-      }
-      
-      const latest = data.data[0];
-      const statusColors: Record<string, string> = {
-        paid: 'text-green-600',
-        unpaid: 'text-yellow-600',
-        cancelled: 'text-red-600'
-      };
-      
-      const statusLabels: Record<string, string> = {
-        paid: 'Active',
-        unpaid: 'Trial',
-        cancelled: 'Cancelled'
-      };
-      
-      // Calculate days remaining for trial/unpaid
-      let daysRemaining = '';
-      if (latest.status === 'unpaid' && latest.expiryDate) {
-        const days = Math.ceil((new Date(latest.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-        if (days > 0) {
-          daysRemaining = `<p class="text-sm text-orange-600 mt-2 font-medium">${days} day${days > 1 ? 's' : ''} remaining in trial</p>`;
-        }
-      }
-      
-      const planNames: Record<string, string> = {
-        monthly: 'Monthly Plan',
-        yearly: 'Yearly Plan'
-      };
-      
-      container.innerHTML = `
-        <div class="text-center">
-          <p class="text-2xl font-bold ${statusColors[latest.status] || ''}">${statusLabels[latest.status] || latest.status.toUpperCase()}</p>
-          <p class="text-sm text-muted-foreground mt-1">${planNames[latest.planType] || latest.planType} - $${latest.amount}</p>
-          ${daysRemaining}
-          ${latest.expiryDate && latest.status === 'paid' ? `<p class="text-xs text-muted-foreground mt-2">Expires: ${new Date(latest.expiryDate).toLocaleDateString()}</p>` : ''}
-        </div>
-      `;
-    } catch (err) {
-      console.error('Error loading subscription:', err);
-    }
-  }
-  
-  // Save profile
-  document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target as HTMLFormElement);
-    const data = {
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-    };
-    
-    try {
-      const res = await fetch(`/api/account/profile/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      
-      const result = await res.json();
-      if (result.success) {
-        alert('Profile updated successfully!');
-      } else {
-        alert('Error updating profile: ' + result.error.message);
-      }
-    } catch (err) {
-      console.error('Error saving profile:', err);
-      alert('Error saving profile');
-    }
-  });
-  
-  // Logout
-  document.getElementById('logout-btn')?.addEventListener('click', async () => {
-    try {
-      await fetch('/api/auth/sign-out', { method: 'POST' });
-    } catch (err) {
-      console.error('Error logging out:', err);
-    }
-    window.location.href = '/';
-  });
-  
-  // Initialize
-  init();
-</script>

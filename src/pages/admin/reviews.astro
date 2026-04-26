@@ -43,29 +43,79 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       }
       
       countEl.textContent = `${data.data.length} review${data.data.length !== 1 ? 's' : ''}`;
-      
-      // Render reviews
-      container.innerHTML = data.data.map((review: any) => `
-        <div class="p-3 border rounded text-sm">
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="font-medium">Business: ${review.businessPageId.slice(0, 8)}...</span>
-                <span class="text-xs text-muted-foreground">User: ${review.userId.slice(0, 8)}...</span>
-              </div>
-              <div class="flex items-center gap-1 mb-2">
-                ${renderStars(review.rating)}
-              </div>
-              <p class="text-muted-foreground text-xs">${review.comment || 'No comment'}</p>
-              <div class="flex items-center gap-2 mt-2">
-                <span class="text-xs text-muted-foreground">${review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</span>
-                ${review.isEdited ? '<span class="text-xs text-yellow-600">(edited)</span>' : ''}
-              </div>
-            </div>
-            <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1 border border-red-200 dark:border-red-800 rounded" onclick="deleteReview('${review.id}')">Delete</button>
-          </div>
-        </div>
-      `).join('');
+
+      // Clear and use DOM for safe rendering
+      container.textContent = '';
+
+      data.data.forEach((review: any) => {
+        const reviewDiv = document.createElement('div');
+        reviewDiv.className = 'p-3 border rounded text-sm';
+
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'flex items-start justify-between gap-2';
+
+        // Left content
+        const leftDiv = document.createElement('div');
+        leftDiv.className = 'min-w-0 flex-1';
+
+        // Header with IDs
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-center gap-2 mb-1';
+
+        const bizSpan = document.createElement('span');
+        bizSpan.className = 'font-medium';
+        bizSpan.textContent = `Business: ${(review.businessPageId || '').slice(0, 8)}...`;
+
+        const userSpan = document.createElement('span');
+        userSpan.className = 'text-xs text-muted-foreground';
+        userSpan.textContent = `User: ${(review.userId || '').slice(0, 8)}...`;
+
+        headerDiv.appendChild(bizSpan);
+        headerDiv.appendChild(userSpan);
+
+        // Stars
+        const starsDiv = document.createElement('div');
+        starsDiv.className = 'flex items-center gap-1 mb-2';
+        starsDiv.innerHTML = renderStars(review.rating || 0);
+
+        // Comment
+        const commentP = document.createElement('p');
+        commentP.className = 'text-muted-foreground text-xs';
+        commentP.textContent = review.comment || 'No comment';
+
+        // Meta row
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'flex items-center gap-2 mt-2';
+
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'text-xs text-muted-foreground';
+        dateSpan.textContent = review.createdAt ? new Date(review.createdAt).toLocaleDateString() : '';
+
+        metaDiv.appendChild(dateSpan);
+
+        if (review.isEdited) {
+          const editedSpan = document.createElement('span');
+          editedSpan.className = 'text-xs text-yellow-600';
+          editedSpan.textContent = '(edited)';
+          metaDiv.appendChild(editedSpan);
+        }
+
+        leftDiv.appendChild(headerDiv);
+        leftDiv.appendChild(starsDiv);
+        leftDiv.appendChild(commentP);
+        leftDiv.appendChild(metaDiv);
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'text-red-500 hover:text-red-600 text-xs px-2 py-1 border border-red-200 dark:border-red-800 rounded';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => deleteReview(review.id));
+
+        innerDiv.appendChild(leftDiv);
+        innerDiv.appendChild(deleteBtn);
+        reviewDiv.appendChild(innerDiv);
+        container.appendChild(reviewDiv);
+      });
     } catch (err) {
       console.error('Error loading reviews:', err);
       toast.error('Failed to load reviews');

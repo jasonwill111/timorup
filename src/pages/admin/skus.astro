@@ -1,19 +1,36 @@
 ---
 import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
+import { db } from '@/lib/db';
+import { businessPages } from '@/db/schema';
+import { SKU_SERVICE_TYPES } from '@/lib/constants';
+
+// Get all businesses for dropdown
+const businesses = await db.select({
+  id: businessPages.id,
+  title: businessPages.title,
+  entityType: businessPages.entityType,
+}).from(businessPages).all();
+
+const businessOptions = businesses.map(b => ({
+  value: b.id,
+  label: b.title,
+  type: b.entityType,
+}));
 ---
 
-<AdminLayout title="SKUs">
+<AdminLayout title="SKUs / Products">
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
     <div class="mb-4 md:mb-6">
       <h1 class="text-xl md:text-2xl font-bold">SKUs / Products</h1>
+      <p class="text-sm text-muted-foreground">Manage products and services with flexible pricing</p>
     </div>
-    
+
     <!-- SKUs List -->
     <div class="bg-card border rounded-lg p-3 md:p-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-        <h3 class="font-semibold text-sm md:text-base">All Products</h3>
+        <h3 class="font-semibold text-sm md:text-base">All SKUs</h3>
         <Button id="add-sku-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add SKU</Button>
       </div>
       <div id="skus-list" class="space-y-2">
@@ -22,11 +39,11 @@ import Button from '@components/ui/Button.astro';
     </div>
   </div>
 
-  <!-- Create SKU Modal -->
+  <!-- Create/Edit SKU Modal -->
   <div id="sku-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-card border rounded-lg w-full max-w-md">
-      <div class="p-4 border-b flex items-center justify-between">
-        <h2 class="text-lg font-bold">Create SKU</h2>
+    <div class="bg-card border rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="p-4 border-b flex items-center justify-between sticky top-0 bg-card">
+        <h2 id="modal-title" class="text-lg font-bold">Create SKU</h2>
         <button id="close-modal" class="p-1 hover:bg-muted rounded">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -34,182 +51,343 @@ import Button from '@components/ui/Button.astro';
         </button>
       </div>
       <form id="sku-form" class="p-4 space-y-4">
+        <input type="hidden" id="sku-id" name="id" value="" />
+
+        <!-- Business -->
         <div>
           <label for="sku-business" class="block text-sm font-medium mb-1">Business *</label>
           <select id="sku-business" name="businessPageId" required class="w-full px-3 py-2 border rounded-md text-sm">
             <option value="">Select a business...</option>
           </select>
         </div>
+
+        <!-- Title -->
         <div>
-          <label for="sku-title" class="block text-sm font-medium mb-1">Product Name *</label>
-          <input type="text" id="sku-title" name="title" required class="w-full px-3 py-2 border rounded-md text-sm" />
+          <label for="sku-title" class="block text-sm font-medium mb-1">Product/Service Name *</label>
+          <input type="text" id="sku-title" name="title" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g., Hourly Massage Service" />
         </div>
+
+        <!-- Service Type -->
         <div>
-          <label for="sku-price" class="block text-sm font-medium mb-1">Price *</label>
-          <input type="text" id="sku-price" name="price" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. $50.00" />
+          <label for="sku-service-type" class="block text-sm font-medium mb-1">Service Type</label>
+          <select id="sku-service-type" name="serviceType" class="w-full px-3 py-2 border rounded-md text-sm">
+            {SKU_SERVICE_TYPES.map(type => (
+              <option value={type.value}>{type.icon} {type.label}</option>
+            ))}
+          </select>
         </div>
+
+        <!-- Price Fields -->
+        <div id="price-fields-container">
+          <label class="block text-sm font-medium mb-2">Pricing Options</label>
+          <div id="price-fields" class="space-y-2">
+            <!-- Price fields will be added dynamically -->
+          </div>
+          <button type="button" id="add-price-field" class="mt-2 text-xs text-primary hover:underline">
+            + Add another price option
+          </button>
+        </div>
+
+        <!-- Description -->
         <div>
           <label for="sku-description" class="block text-sm font-medium mb-1">Description</label>
-          <textarea id="sku-description" name="description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Product description..."></textarea>
+          <textarea id="sku-description" name="description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Brief description..."></textarea>
         </div>
-        <div class="flex gap-2 justify-end">
+
+        <!-- Actions -->
+        <div class="flex gap-2 justify-end pt-2">
           <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
-          <Button type="submit" class="text-xs py-1 h-8">Create</Button>
+          <Button type="submit" class="text-xs py-1 h-8">Save</Button>
         </div>
       </form>
     </div>
   </div>
 </AdminLayout>
 
-<script>
-  import { toast } from '../../stores/toast';
-  
-  let businesses: any[] = [];
-  
-  // Load businesses for dropdown
-  async function loadBusinesses() {
-    try {
-      const res = await fetch('/api/admin/businesses?limit=100');
-      const data = await res.json();
-      
-      if (data.success && data.data) {
-        businesses = data.data;
-        const select = document.getElementById('sku-business') as HTMLSelectElement;
-        if (select) {
-          select.innerHTML = '<option value="">Select a business...</option>' +
-            businesses.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
-        }
-      }
-    } catch (err) {
-      console.error('Error loading businesses:', err);
-    }
+<script define:vars={{ businessOptions }}>
+  import { SKU_SERVICE_TYPES, PRICE_UNITS, getPriceUnitsForServiceType } from '../../lib/constants';
+
+  let businesses = [];
+  let editingId = null;
+
+  // Populate business dropdown
+  function populateBusinesses(selectedId = '') {
+    const select = document.getElementById('sku-business');
+    if (!select) return;
+    select.innerHTML = '<option value="">Select a business...</option>' +
+      businessOptions.map(b => `<option value="${b.value}" ${b.value === selectedId ? 'selected' : ''}>${b.label}</option>`).join('');
   }
-  
+
+  // Render price fields based on service type
+  function renderPriceFields(serviceType = 'product', existingFields = []) {
+    const container = document.getElementById('price-fields');
+    if (!container) return;
+
+    const units = getPriceUnitsForServiceType(serviceType);
+
+    // Add first field if empty
+    if (existingFields.length === 0) {
+      existingFields.push({ label: '', value: '', unit: '' });
+    }
+
+    container.innerHTML = existingFields.map((field, idx) => `
+      <div class="flex gap-2 items-center price-field-row" data-index="${idx}">
+        <input type="text" name="priceLabel_${idx}" value="${field.label}" placeholder="Label (e.g., Hourly Rate)" class="flex-1 px-2 py-1 border rounded text-xs" />
+        <input type="number" name="priceValue_${idx}" value="${field.value}" placeholder="${field.unit ? '0.00' : 'Ask for price'}" class="w-20 px-2 py-1 border rounded text-xs" step="0.01" />
+        <select name="priceUnit_${idx}" class="px-2 py-1 border rounded text-xs">
+          ${units.map(u => `<option value="${u.value}" ${u.value === field.unit ? 'selected' : ''}>${u.label}</option>`).join('')}
+        </select>
+        <button type="button" class="remove-price-field text-red-500 hover:text-red-600 p-1" ${idx === 0 ? 'style="visibility:hidden"' : ''}>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+
+    // Store field count
+    document.getElementById('price-fields-container').dataset.fieldCount = existingFields.length;
+  }
+
+  // Add new price field
+  document.getElementById('add-price-field')?.addEventListener('click', () => {
+    const container = document.getElementById('price-fields-container');
+    const count = parseInt(container.dataset.fieldCount || '1') + 1;
+    const serviceType = document.getElementById('sku-service-type')?.value || 'product';
+    const units = getPriceUnitsForServiceType(serviceType);
+
+    const row = document.createElement('div');
+    row.className = 'flex gap-2 items-center price-field-row';
+    row.dataset.index = String(count - 1);
+    row.innerHTML = `
+      <input type="text" name="priceLabel_${count - 1}" placeholder="Label (e.g., Weekend Rate)" class="flex-1 px-2 py-1 border rounded text-xs" />
+      <input type="number" name="priceValue_${count - 1}" placeholder="0.00" class="w-20 px-2 py-1 border rounded text-xs" step="0.01" />
+      <select name="priceUnit_${count - 1}" class="px-2 py-1 border rounded text-xs">
+        ${units.map(u => `<option value="${u.value}">${u.label}</option>`).join('')}
+      </select>
+      <button type="button" class="remove-price-field text-red-500 hover:text-red-600 p-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    `;
+    document.getElementById('price-fields').appendChild(row);
+    container.dataset.fieldCount = String(count);
+  });
+
+  // Remove price field (event delegation)
+  document.getElementById('price-fields')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remove-price-field');
+    if (btn) {
+      const row = btn.closest('.price-field-row');
+      row.remove();
+    }
+  });
+
+  // Service type change
+  document.getElementById('sku-service-type')?.addEventListener('change', (e) => {
+    const serviceType = e.target.value;
+    renderPriceFields(serviceType);
+  });
+
   // Load SKUs
   async function loadSKUs() {
     const container = document.getElementById('skus-list');
     if (!container) return;
-    
+
     try {
-      // Load all products across all businesses (admin mode)
       const res = await fetch('/api/products?isAdmin=true');
       const data = await res.json();
-      
+
       if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">No SKUs yet</p>';
+        container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">No SKUs yet. Click "+ Add SKU" to create one.</p>';
         return;
       }
-      
-      // Get business names
-      const bizMap = new Map(businesses.map(b => [b.id, b.title]));
-      
-      container.innerHTML = data.data.map((sku: any) => `
-        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
-          <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">${sku.title}</p>
-            <p class="text-xs text-muted-foreground">${sku.price} - ${bizMap.get(sku.businessPageId) || 'Unknown'}</p>
+
+      const bizMap = new Map(businessOptions.map(b => [b.value, b.label]));
+
+      container.innerHTML = data.data.map((sku) => {
+        let priceDisplay = 'Ask for price';
+        try {
+          const fields = sku.priceFields ? JSON.parse(sku.priceFields) : [];
+          if (fields.length > 0 && fields[0].value) {
+            const unit = fields[0].unit ? ` / ${fields[0].unit.replace('/', '')}` : '';
+            priceDisplay = `$${fields[0].value}${unit}`;
+          }
+        } catch {}
+
+        return `
+          <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm hover:bg-muted/30">
+            <div class="min-w-0 flex-1">
+              <p class="font-medium truncate">${sku.title}</p>
+              <p class="text-xs text-muted-foreground">
+                ${priceDisplay} - ${bizMap.get(sku.businessPageId) || 'Unknown'}
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="edit-sku text-primary hover:text-primary/80 text-xs px-2 py-1" data-id="${sku.id}">Edit</button>
+              <button class="delete-sku text-red-500 hover:text-red-600 text-xs px-2 py-1" data-id="${sku.id}">Del</button>
+            </div>
           </div>
-          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteSKU('${sku.id}')">Del</button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
+      // Edit handlers
+      container.querySelectorAll('.edit-sku').forEach(btn => {
+        btn.addEventListener('click', () => editSKU(btn.dataset.id));
+      });
+
+      // Delete handlers
+      container.querySelectorAll('.delete-sku').forEach(btn => {
+        btn.addEventListener('click', () => deleteSKU(btn.dataset.id));
+      });
     } catch (err) {
       console.error('Error loading SKUs:', err);
       container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">Error loading SKUs</p>';
     }
   }
-  
+
+  // Edit SKU
+  async function editSKU(id) {
+    try {
+      const res = await fetch(`/api/products/${id}`);
+      const data = await res.json();
+
+      if (!data.id) {
+        alert('SKU not found');
+        return;
+      }
+
+      editingId = id;
+      document.getElementById('modal-title').textContent = 'Edit SKU';
+      document.getElementById('sku-id').value = id;
+      document.getElementById('sku-title').value = data.title || '';
+      document.getElementById('sku-business').value = data.businessPageId || '';
+      document.getElementById('sku-service-type').value = data.serviceType || 'product';
+      document.getElementById('sku-description').value = data.description || '';
+
+      // Parse price fields
+      let priceFields = [];
+      try {
+        priceFields = data.priceFields ? JSON.parse(data.priceFields) : [];
+      } catch {}
+      renderPriceFields(data.serviceType || 'product', priceFields);
+
+      openModal();
+    } catch (err) {
+      console.error('Error loading SKU:', err);
+      alert('Failed to load SKU');
+    }
+  }
+
+  // Delete SKU
+  async function deleteSKU(id) {
+    if (!confirm('Are you sure you want to delete this SKU?')) return;
+
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadSKUs();
+      } else {
+        alert('Failed to delete SKU');
+      }
+    } catch (err) {
+      alert('Failed to delete SKU');
+    }
+  }
+
   // Modal controls
-  const modal = document.getElementById('sku-modal');
-  const addBtn = document.getElementById('add-sku-btn');
-  const closeBtn = document.getElementById('close-modal');
-  const cancelBtn = document.getElementById('cancel-btn');
-  
-  addBtn?.addEventListener('click', () => {
+  function openModal() {
+    const modal = document.getElementById('sku-modal');
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
-  });
-  
-  closeBtn?.addEventListener('click', () => {
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('sku-modal');
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
+    editingId = null;
+    document.getElementById('sku-form').reset();
+    document.getElementById('sku-id').value = '';
+    document.getElementById('modal-title').textContent = 'Create SKU';
+  }
+
+  document.getElementById('add-sku-btn')?.addEventListener('click', () => {
+    populateBusinesses();
+    renderPriceFields('product');
+    editingId = null;
+    document.getElementById('modal-title').textContent = 'Create SKU';
+    openModal();
   });
-  
-  cancelBtn?.addEventListener('click', () => {
-    modal?.classList.add('hidden');
-    modal?.classList.remove('flex');
+
+  document.getElementById('close-modal')?.addEventListener('click', closeModal);
+  document.getElementById('cancel-btn')?.addEventListener('click', closeModal);
+
+  document.getElementById('sku-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'sku-modal') closeModal();
   });
-  
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  });
-  
+
   // Form submission
   document.getElementById('sku-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    
+    const formData = new FormData(e.target);
+
+    // Collect price fields
+    const fieldCount = parseInt(document.getElementById('price-fields-container').dataset.fieldCount || '1');
+    const priceFields = [];
+    for (let i = 0; i < fieldCount; i++) {
+      const label = formData.get(`priceLabel_${i}`);
+      const value = formData.get(`priceValue_${i}`);
+      const unit = formData.get(`priceUnit_${i}`);
+      if (label || value) {
+        priceFields.push({ label, value: value || '', unit: unit || '' });
+      }
+    }
+
     const skuData = {
-      title: String(formData.get('title') || ''),
-      price: String(formData.get('price') || ''),
-      description: String(formData.get('description') || ''),
-      businessPageId: String(formData.get('businessPageId') || ''),
-      isAdmin: true, // Admin bypass
+      title: formData.get('title'),
+      businessPageId: formData.get('businessPageId'),
+      serviceType: formData.get('serviceType'),
+      priceFields: priceFields.length > 0 ? JSON.stringify(priceFields) : null,
+      description: formData.get('description'),
+      isAdmin: true,
     };
-    
+
     if (!skuData.businessPageId) {
-      toast.error('Please select a business');
+      alert('Please select a business');
       return;
     }
-    
+
+    if (!skuData.title) {
+      alert('Please enter a title');
+      return;
+    }
+
     try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
+      const url = editingId ? `/api/products/${editingId}` : '/api/products';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(skuData),
       });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        toast.success('SKU created successfully!');
-        modal?.classList.add('hidden');
-        modal?.classList.remove('flex');
-        (e.target as HTMLFormElement).reset();
+
+      if (res.ok) {
+        closeModal();
         loadSKUs();
       } else {
-        toast.error(data.error?.message || 'Failed to create SKU');
+        const error = await res.json();
+        alert('Failed to save SKU: ' + (error.message || 'Unknown error'));
       }
     } catch (err) {
-      console.error('Error creating SKU:', err);
-      toast.error('Error creating SKU');
+      alert('Failed to save SKU');
     }
   });
-  
-  // Delete SKU
-  (window as any).deleteSKU = async function(id: string) {
-    if (!confirm('Delete this SKU?')) return;
-    
-    try {
-      const res = await fetch(`/api/products/${id}?isAdmin=true`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        toast.success('SKU deleted');
-        loadSKUs();
-      } else {
-        toast.error('Failed to delete SKU');
-      }
-    } catch (err) {
-      console.error('Error deleting SKU:', err);
-      toast.error('Error deleting SKU');
-    }
-  };
-  
-  // Initialize
-  loadBusinesses().then(loadSKUs);
+
+  // Init
+  populateBusinesses();
+  renderPriceFields('product');
+  loadSKUs();
 </script>
