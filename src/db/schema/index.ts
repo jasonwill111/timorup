@@ -26,6 +26,7 @@ export const users = sqliteTable('users', {
 }));
 
 // Categories table - use string reference to avoid circular
+// entityType: 'business' | 'government' | 'nonprofit' | null (null = all types)
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -33,6 +34,7 @@ export const categories = sqliteTable('categories', {
   description: text('description'),
   icon: text('icon').default(''), // 'emoji:🍽️' or 'lucide:utensils' or ''
   parentId: text('parent_id'),
+  entityType: text('entity_type').default('business'), // 'business' | 'government' | 'nonprofit' | null (all types)
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });

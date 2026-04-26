@@ -3,15 +3,32 @@ export const prerender = false;
 
 import { db } from '@/lib/db';
 import { categories } from '@/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, or, isNull } from 'drizzle-orm';
 
-// GET - List all categories
-export async function GET() {
+// GET - List all categories (with optional entityType filter)
+export async function GET({ request }: { request: Request }) {
   try {
-    const categoriesResult = await db.select()
-      .from(categories)
-      .orderBy(desc(categories.createdAt))
-      .all();
+    const url = new URL(request.url);
+    const entityType = url.searchParams.get('entityType');
+
+    let categoriesResult;
+
+    if (entityType) {
+      // Get categories matching entityType OR null (universal categories)
+      categoriesResult = await db.select()
+        .from(categories)
+        .where(or(
+          eq(categories.entityType, entityType),
+          isNull(categories.entityType)
+        ))
+        .orderBy(desc(categories.createdAt))
+        .all();
+    } else {
+      categoriesResult = await db.select()
+        .from(categories)
+        .orderBy(desc(categories.createdAt))
+        .all();
+    }
 
     return new Response(JSON.stringify({
       success: true,
@@ -33,7 +50,7 @@ export async function GET() {
 export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
-    const { name, slug, description, icon } = body;
+    const { name, slug, description, icon, entityType, parentId } = body;
 
     const id = `cat-${Date.now()}`;
 
@@ -43,11 +60,13 @@ export async function POST({ request }: { request: Request }) {
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
       description: description || '',
       icon: icon || '',
+      entityType: entityType || 'business', // Default to business
+      parentId: parentId || null,
     }).run();
 
     return new Response(JSON.stringify({
       success: true,
-      data: { id, name, slug }
+      data: { id, name, slug, entityType }
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Create category error:', error);
@@ -62,7 +81,7 @@ export async function POST({ request }: { request: Request }) {
 export async function PUT({ request }: { request: Request }) {
   try {
     const body = await request.json();
-    const { id, name, slug, description, icon } = body;
+    const { id, name, slug, description, icon, entityType, parentId } = body;
 
     if (!id) {
       return new Response(JSON.stringify({
@@ -77,6 +96,8 @@ export async function PUT({ request }: { request: Request }) {
         ...(slug !== undefined && { slug }),
         ...(description !== undefined && { description }),
         ...(icon !== undefined && { icon }),
+        ...(entityType !== undefined && { entityType }),
+        ...(parentId !== undefined && { parentId }),
         updatedAt: sql`(strftime('%s', 'now'))`,
       })
       .where(eq(categories.id, id))

@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { db } from '@/lib/db';
 import { businessPages } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, like, or } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
@@ -31,9 +31,32 @@ function generateSlug(title: string): string {
   return `${base}-${nanoid(6)}`;
 }
 
-export const GET: APIRoute = async () => {
-  const listings = await db.select().from(businessPages).all();
-  return new Response(JSON.stringify(listings), {
+export const GET: APIRoute = async ({ url }) => {
+  const entityType = url.searchParams.get('entityType');
+  const status = url.searchParams.get('status');
+  const search = url.searchParams.get('search');
+
+  let query = db.select().from(businessPages);
+
+  const conditions = [];
+
+  if (entityType) {
+    conditions.push(eq(businessPages.entityType, entityType));
+  }
+
+  if (status) {
+    conditions.push(eq(businessPages.status, status));
+  }
+
+  if (search) {
+    conditions.push(like(businessPages.title, `%${search}%`));
+  }
+
+  const listings = conditions.length > 0
+    ? await query.where(and(...conditions)).all()
+    : await query.all();
+
+  return new Response(JSON.stringify({ success: true, data: listings }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
   });

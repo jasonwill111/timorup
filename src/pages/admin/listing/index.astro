@@ -1,46 +1,10 @@
 ---
-// Admin listing management page
+// Admin listing management page - API driven
 export const prerender = false;
 
 import Layout from '../../../layouts/Layout.astro';
 import Button from '../../../components/ui/Button.astro';
-import { db } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
-import { desc, eq, count } from 'drizzle-orm';
 import { ENTITY_TYPES } from '@/lib/constants';
-
-// Get all listings with counts
-const listings = await db
-  .select({
-    id: businessPages.id,
-    title: businessPages.title,
-    entityType: businessPages.entityType,
-    status: businessPages.status,
-    categoryId: businessPages.categoryId,
-    likes: businessPages.likes,
-    ratingAverage: businessPages.ratingAverage,
-    publishDate: businessPages.publishDate,
-  })
-  .from(businessPages)
-  .orderBy(desc(businessPages.createdAt))
-  .limit(100);
-
-// Get categories for display
-const allCategories = await db.select().from(categories).all();
-const categoryMap = Object.fromEntries(allCategories.map(c => [c.id, c.name]));
-
-const statusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  live: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  expired: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  suspended: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-};
-
-const entityColors: Record<string, string> = {
-  business: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  government: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  nonprofit: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-};
 ---
 
 <Layout title="Listing Management - Admin" requireAuth adminOnly>
@@ -63,19 +27,19 @@ const entityColors: Record<string, string> = {
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-card rounded-lg border p-4">
-        <div class="text-2xl font-bold">{listings.length}</div>
+        <div class="text-2xl font-bold" id="stat-total">-</div>
         <div class="text-xs text-muted-foreground">Total Listings</div>
       </div>
       <div class="bg-card rounded-lg border p-4">
-        <div class="text-2xl font-bold">{listings.filter(l => l.entityType === 'business').length}</div>
+        <div class="text-2xl font-bold text-blue-600" id="stat-businesses">-</div>
         <div class="text-xs text-muted-foreground">Businesses</div>
       </div>
       <div class="bg-card rounded-lg border p-4">
-        <div class="text-2xl font-bold">{listings.filter(l => l.entityType === 'government').length}</div>
+        <div class="text-2xl font-bold text-purple-600" id="stat-government">-</div>
         <div class="text-xs text-muted-foreground">Government</div>
       </div>
       <div class="bg-card rounded-lg border p-4">
-        <div class="text-2xl font-bold">{listings.filter(l => l.entityType === 'nonprofit').length}</div>
+        <div class="text-2xl font-bold text-orange-600" id="stat-nonprofit">-</div>
         <div class="text-xs text-muted-foreground">Non-Profits</div>
       </div>
     </div>
@@ -84,22 +48,22 @@ const entityColors: Record<string, string> = {
     <div class="flex flex-wrap gap-4 mb-6">
       <select id="filter-type" class="h-10 px-3 rounded-md border border-input bg-background">
         <option value="">All Types</option>
-        {ENTITY_TYPES.map(type => (
-          <option value={type.value}>{type.label}</option>
-        ))}
+        <option value="business">Businesses</option>
+        <option value="government">Government</option>
+        <option value="nonprofit">Non-Profits</option>
       </select>
       <select id="filter-status" class="h-10 px-3 rounded-md border border-input bg-background">
         <option value="">All Status</option>
         <option value="draft">Draft</option>
         <option value="live">Live</option>
+        <option value="paid">Paid</option>
         <option value="expired">Expired</option>
-        <option value="suspended">Suspended</option>
       </select>
-      <Input
+      <input
         id="search"
         type="search"
         placeholder="Search listings..."
-        class="w-64"
+        class="h-10 px-3 rounded-md border border-input bg-background w-64"
       />
     </div>
 
@@ -110,106 +74,170 @@ const entityColors: Record<string, string> = {
           <tr>
             <th class="text-left px-4 py-3 text-sm font-medium">Title</th>
             <th class="text-left px-4 py-3 text-sm font-medium">Type</th>
-            <th class="text-left px-4 py-3 text-sm font-medium">Category</th>
             <th class="text-left px-4 py-3 text-sm font-medium">Status</th>
-            <th class="text-left px-4 py-3 text-sm font-medium">Rating</th>
+            <th class="text-left px-4 py-3 text-sm font-medium">Likes</th>
             <th class="text-right px-4 py-3 text-sm font-medium">Actions</th>
           </tr>
         </thead>
         <tbody id="listings-body" class="divide-y">
-          {listings.map(listing => (
-            <tr
-              class="listing-row hover:bg-muted/30"
-              data-type={listing.entityType}
-              data-status={listing.status}
-              data-title={listing.title.toLowerCase()}
-            >
-              <td class="px-4 py-3">
-                <div class="font-medium">{listing.title}</div>
-                <div class="text-xs text-muted-foreground">
-                  {listing.publishDate
-                    ? `Published ${new Date(listing.publishDate).toLocaleDateString()}`
-                    : 'Not published'
-                  }
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <span class={`px-2 py-0.5 text-xs rounded-full ${entityColors[listing.entityType || 'business']}`}>
-                  {listing.entityType || 'business'}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm">
-                {categoryMap[listing.categoryId || ''] || '-'}
-              </td>
-              <td class="px-4 py-3">
-                <span class={`px-2 py-0.5 text-xs rounded-full ${statusColors[listing.status || 'draft']}`}>
-                  {listing.status || 'draft'}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                {listing.ratingAverage && listing.ratingAverage > 0 ? (
-                  <span class="text-sm">
-                    {listing.ratingAverage.toFixed(1)} ★
-                  </span>
-                ) : '-'}
-              </td>
-              <td class="px-4 py-3 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <a
-                    href={`/admin/listing/${listing.id}/edit`}
-                    class="text-sm text-primary hover:underline"
-                  >
-                    Edit
-                  </a>
-                  <a
-                    href={listing.entityType === 'business' ? `/business/${listing.id}` : `/organization/${listing.id}`}
-                    target="_blank"
-                    class="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    View →
-                  </a>
-                </div>
-              </td>
-            </tr>
-          ))}
+          <tr>
+            <td colspan="5" class="text-center py-8 text-muted-foreground">
+              <div class="flex justify-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
 
-      {listings.length === 0 && (
-        <div class="text-center py-12 text-muted-foreground">
-          No listings found
-        </div>
-      )}
+      <div id="no-results" class="hidden text-center py-12 text-muted-foreground">
+        No listings found
+      </div>
     </div>
   </div>
 </Layout>
 
 <script>
-  const searchInput = document.getElementById('search') as HTMLInputElement;
+  interface Listing {
+    id: string;
+    title: string;
+    slug: string;
+    entityType: string;
+    status: string;
+    likes: number;
+    ratingAverage: number | null;
+    publishDate: string | null;
+  }
+
+  let listings: Listing[] = [];
+
   const typeFilter = document.getElementById('filter-type') as HTMLSelectElement;
   const statusFilter = document.getElementById('filter-status') as HTMLSelectElement;
-  const rows = document.querySelectorAll('.listing-row');
+  const searchInput = document.getElementById('search') as HTMLInputElement;
+  const tbody = document.getElementById('listings-body') as HTMLTableSectionElement;
+  const noResults = document.getElementById('no-results') as HTMLDivElement;
 
-  const filter = () => {
-    const search = searchInput.value.toLowerCase();
-    const type = typeFilter.value;
-    const status = statusFilter.value;
-
-    rows.forEach(row => {
-      const el = row as HTMLElement;
-      const title = el.dataset.title || '';
-      const rowType = el.dataset.type || '';
-      const rowStatus = el.dataset.status || '';
-
-      const matchSearch = !search || title.includes(search);
-      const matchType = !type || rowType === type;
-      const matchStatus = !status || rowStatus === status;
-
-      el.style.display = matchSearch && matchType && matchStatus ? '' : 'none';
-    });
+  const typeColors: Record<string, string> = {
+    business: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    government: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    nonprofit: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   };
 
-  searchInput?.addEventListener('input', filter);
-  typeFilter?.addEventListener('change', filter);
-  statusFilter?.addEventListener('change', filter);
+  const statusColors: Record<string, string> = {
+    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    live: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    expired: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  };
+
+  const typeLabels: Record<string, string> = {
+    business: 'Business',
+    government: 'Government',
+    nonprofit: 'Non-Profit',
+  };
+
+  async function loadListings() {
+    const type = typeFilter?.value || '';
+    const status = statusFilter?.value || '';
+
+    const params = new URLSearchParams();
+    if (type) params.set('entityType', type);
+    if (status) params.set('status', status);
+
+    try {
+      const res = await fetch(`/api/admin/listing?${params}`);
+      const data = await res.json();
+
+      if (data.success) {
+        listings = data.data;
+        updateStats();
+        renderListings();
+      }
+    } catch (err) {
+      console.error('Failed to load listings:', err);
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">Failed to load listings</td></tr>';
+    }
+  }
+
+  function updateStats() {
+    const total = listings.length;
+    const businesses = listings.filter(l => l.entityType === 'business').length;
+    const government = listings.filter(l => l.entityType === 'government').length;
+    const nonprofit = listings.filter(l => l.entityType === 'nonprofit').length;
+
+    document.getElementById('stat-total')!.textContent = String(total);
+    document.getElementById('stat-businesses')!.textContent = String(businesses);
+    document.getElementById('stat-government')!.textContent = String(government);
+    document.getElementById('stat-nonprofit')!.textContent = String(nonprofit);
+  }
+
+  function renderListings() {
+    const search = searchInput?.value.toLowerCase() || '';
+
+    const filtered = listings.filter(l =>
+      (!search || l.title.toLowerCase().includes(search))
+    );
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      noResults.classList.remove('hidden');
+      return;
+    }
+
+    noResults.classList.add('hidden');
+
+    tbody.innerHTML = filtered.map(listing => `
+      <tr class="hover:bg-muted/30">
+        <td class="px-4 py-3">
+          <div class="font-medium">${escapeHtml(listing.title)}</div>
+          <div class="text-xs text-muted-foreground">
+            ${listing.publishDate
+              ? `Published ${new Date(listing.publishDate).toLocaleDateString()}`
+              : 'Not published'
+            }
+          </div>
+        </td>
+        <td class="px-4 py-3">
+          <span class="px-2 py-0.5 text-xs rounded-full ${typeColors[listing.entityType] || typeColors.business}">
+            ${typeLabels[listing.entityType] || listing.entityType}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          <span class="px-2 py-0.5 text-xs rounded-full ${statusColors[listing.status] || statusColors.draft}">
+            ${listing.status || 'draft'}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          ${listing.ratingAverage && listing.ratingAverage > 0
+            ? `<span class="text-sm">${listing.ratingAverage.toFixed(1)} ★</span>`
+            : '-'
+          }
+        </td>
+        <td class="px-4 py-3 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <a href="/admin/listing/${listing.id}/edit" class="text-sm text-primary hover:underline">
+              Edit
+            </a>
+            <a href="/business/${listing.slug}" target="_blank" class="text-sm text-muted-foreground hover:text-foreground">
+              View →
+            </a>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function escapeHtml(str: string) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Event listeners
+  typeFilter?.addEventListener('change', loadListings);
+  statusFilter?.addEventListener('change', loadListings);
+  searchInput?.addEventListener('input', renderListings);
+
+  // Init
+  loadListings();
 </script>
