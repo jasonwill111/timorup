@@ -7,7 +7,7 @@
  * TC-003: Two rapid calls (within 500ms) → second call waits full 1100ms debounce
  * TC-004: Network error → resolves to null
  * TC-005: Query includes "Timor-Leste" suffix
- * TC-006: Request includes User-Agent: TMBIZ/1.0 header
+ * TC-006: Request includes User-Agent: TIMORLIST/1.0 header
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -127,7 +127,7 @@ describe('TC-006: User-Agent header', () => {
     vi.useRealTimers();
   });
 
-  it('includes User-Agent: TMBIZ/1.0 in the request', async () => {
+  it('includes User-Agent: TIMORLIST/1.0 in the request', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => [{ lat: '-8.5', lon: '125.5' }],
@@ -137,6 +137,6 @@ describe('TC-006: User-Agent header', () => {
 
     const [, options] = mockFetch.mock.calls[0] as [string, RequestInit];
     const headers = options.headers as Record<string, string>;
-    expect(headers['User-Agent']).toBe('TMBIZ/1.0');
+    expect(headers['User-Agent']).toBe('TIMORLIST/1.0');
   });
 });

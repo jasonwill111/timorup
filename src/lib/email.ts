@@ -12,7 +12,7 @@ export interface EmailProvider {
   send(options: EmailOptions): Promise<void>;
 }
 
-// SMTP Email Provider
+// SMTP Email Provider (requires nodemailer package)
 export class SMTPProvider implements EmailProvider {
   private host: string;
   private port: number;
@@ -35,27 +35,18 @@ export class SMTPProvider implements EmailProvider {
   }
 
   async send(options: EmailOptions): Promise<void> {
-    // In production, implement actual SMTP sending
-    // For now, log the email
-    console.log('📧 Email sent:', {
-      from: this.from,
+    // TODO: Install nodemailer and implement SMTP sending
+    // const nodemailer = await import('nodemailer');
+    // const transporter = nodemailer.createTransport({ ... });
+    // await transporter.sendMail({ from: this.from, ...options });
+    console.log('📧 SMTP Email (not implemented):', {
       to: options.to,
       subject: options.subject,
     });
-    
-    // TODO: Implement actual SMTP sending using nodemailer
-    // const nodemailer = require('nodemailer');
-    // const transporter = nodemailer.createTransport({
-    //   host: this.host,
-    //   port: this.port,
-    //   secure: this.port === 465,
-    //   auth: { user: this.user, pass: this.pass },
-    // });
-    // await transporter.sendMail({ from: this.from, ...options });
   }
 }
 
-// SendGrid Email Provider
+// SendGrid Email Provider (requires @sendgrid/mail package)
 export class SendGridProvider implements EmailProvider {
   private apiKey: string;
   private from: string;
@@ -66,26 +57,25 @@ export class SendGridProvider implements EmailProvider {
   }
 
   async send(options: EmailOptions): Promise<void> {
-    console.log('📧 SendGrid Email:', {
+    // TODO: Install @sendgrid/mail and implement
+    // const sgMail = await import('@sendgrid/mail');
+    // await sgMail.default.send({ ... });
+    console.log('📧 SendGrid Email (not implemented):', {
       to: options.to,
       subject: options.subject,
     });
-    
-    // TODO: Implement actual SendGrid API call
-    // const sgMail = require('@sendgrid/mail');
-    // sgMail.setApiKey(this.apiKey);
-    // await sgMail.send({ to: options.to, from: this.from, subject: options.subject, html: options.html });
   }
 }
 
-// Null provider for development
+// Null provider for development (logs to console)
 export class NullEmailProvider implements EmailProvider {
   async send(options: EmailOptions): Promise<void> {
-    console.log('📧 [DEV] Email would be sent:', {
-      to: options.to,
-      subject: options.subject,
-      preview: options.text?.substring(0, 100) || options.html.substring(0, 100),
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📧 [DEV] Email:', {
+        to: options.to,
+        subject: options.subject,
+      });
+    }
   }
 }
 
@@ -100,13 +90,13 @@ export function getEmailProvider(): EmailProvider {
         port: parseInt(process.env.SMTP_PORT || '587'),
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || '',
-        from: process.env.EMAIL_FROM || 'noreply@timorbiz.com',
+        from: process.env.EMAIL_FROM || 'noreply@timorlist.com',
       });
     
     case 'sendgrid':
       return new SendGridProvider({
         apiKey: process.env.SENDGRID_API_KEY || '',
-        from: process.env.EMAIL_FROM || 'noreply@timorbiz.com',
+        from: process.env.EMAIL_FROM || 'noreply@timorlist.com',
       });
     
     default:
@@ -120,7 +110,7 @@ export const emailTemplates = {
     subject: 'Verify your email address',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1>Welcome to TMBIZ!</h1>
+        <h1>Welcome to TIMORLIST!</h1>
         <p>Hi ${name},</p>
         <p>Thank you for signing up. Please verify your email address by clicking the button below:</p>
         <a href="${verifyUrl}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Verify Email</a>
@@ -158,9 +148,9 @@ export const emailTemplates = {
         <p>Hi ${name},</p>
         <p>Your subscription for <strong>${businessName}</strong> is expiring on <strong>${expiryDate}</strong>.</p>
         <p>To continue enjoying all features, please renew your subscription.</p>
-        <a href="https://timorbiz.com/subscribe" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Renew Now</a>
+        <a href="https://timorlist.com/subscribe" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Renew Now</a>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-        <p style="color: #999; font-size: 12px;">Thank you for using TMBIZ!</p>
+        <p style="color: #999; font-size: 12px;">Thank you for using TIMORLIST!</p>
       </div>
     `,
   }),
@@ -176,9 +166,9 @@ export const emailTemplates = {
           <li>Plan: ${planType}</li>
           <li>Status: Active</li>
         </ul>
-        <a href="https://timorbiz.com/business/${businessName.toLowerCase().replace(/\s+/g, '-')}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">View Your Business Page</a>
+        <a href="https://timorlist.com/business/${businessName.toLowerCase().replace(/\s+/g, '-')}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">View Your Business Page</a>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-        <p style="color: #999; font-size: 12px;">Thank you for using TMBIZ!</p>
+        <p style="color: #999; font-size: 12px;">Thank you for using TIMORLIST!</p>
       </div>
     `,
   }),

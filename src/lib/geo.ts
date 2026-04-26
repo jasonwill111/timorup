@@ -45,7 +45,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   let response: Response;
   try {
     response = await fetch(url, {
-      headers: { 'User-Agent': 'TMBIZ/1.0' },
+      headers: { 'User-Agent': 'TIMORLIST/1.0' },
     });
   } catch {
     // Network error

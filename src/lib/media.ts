@@ -6,7 +6,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 const R2_ENDPOINT = process.env.R2_ENDPOINT || process.env.CF_R2_ENDPOINT;
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.CF_R2_ACCESS_KEY_ID;
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.CF_R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'timorbiz-media';
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'timorlist-media';
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || `https://${R2_BUCKET_NAME}.r2.cloudflarestorage.com`;
 
 // File size limits (in bytes)
@@ -163,7 +163,7 @@ export function getOptimizedImageUrl(
   transforms.push(`quality=${quality}`);
   transforms.push(`format=${format}`);
   
-  return `https://timorbiz.com/cdn-cgi/image/${transforms.join(',')}/${R2_PUBLIC_URL}/${key}`;
+  return `https://timorlist.com/cdn-cgi/image/${transforms.join(',')}/${R2_PUBLIC_URL}/${key}`;
 }
 
 // Check if running in Cloudflare environment
