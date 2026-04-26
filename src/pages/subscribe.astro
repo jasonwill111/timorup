@@ -1,191 +1,251 @@
 ---
-export const prerender = true;
+// Subscribe page - create order and show payment info
+export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
-import Card from '../components/ui/Card.astro'
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardDescription from '../components/ui/CardDescription.astro';
+import CardContent from '../components/ui/CardContent.astro';
 
-import CardHeader from '../components/ui/CardHeader.astro'
-import CardTitle from '../components/ui/CardTitle.astro'
-import CardDescription from '../components/ui/CardDescription.astro'
-import CardContent from '../components/ui/CardContent.astro'
----
+// Check auth via session cookie
+const cookieHeader = Astro.request.headers.get('cookie') || '';
+let user: { id: string } | null = null;
+let userBusiness: { id: string; title: string } | null = null;
 
-<Layout title="Subscribe - TMBIZ">
-  <div class="container py-12">
-    <div class="max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold text-center mb-4">Complete Your Subscription</h1>
-      <p class="text-center text-muted-foreground mb-8">
-        You've chosen the <span id="plan-name" class="font-semibold text-primary"></span> plan.
-      </p>
-      
-      <!-- Order Summary -->
-      <Card class="mb-8">
-        <CardHeader>
-          <CardTitle>Order Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="flex justify-between items-center py-2">
-            <span>Plan</span>
-            <span id="plan-display" class="font-medium"></span>
-          </div>
-          <div class="flex justify-between items-center py-2 border-t">
-            <span>Amount</span>
-            <span id="plan-price" class="font-bold text-xl"></span>
-          </div>
-          <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-            <p class="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>3-Day Free Trial:</strong> Your business will be live for 3 days. If you don't complete payment, it will be downgraded to basic display.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <!-- Payment Instructions -->
-      <Card class="mb-8">
-        <CardHeader>
-          <CardTitle>Payment Instructions</CardTitle>
-          <CardDescription>Choose your preferred payment method</CardDescription>
-        </CardHeader>
-        <CardContent class="space-y-6">
-          <!-- QR Code -->
-          <div class="text-center">
-            <p class="font-medium mb-2">Scan QR Code</p>
-            <div class="inline-block p-4 bg-white rounded-lg border min-h-[192px] flex items-center justify-center">
-              <!-- Loading skeleton -->
-              <div id="qr-skeleton" class="w-48 h-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse hidden">
-              </div>
-              <!-- QR image (shown when loaded) -->
-              <img
-                id="qr-code"
-                src="/images/payment-qr.png"
-                alt="Payment QR Code"
-                class="w-48 h-48 object-contain hidden"
-                loading="lazy"
-              />
-              <!-- Placeholder when not configured -->
-              <div id="qr-placeholder" class="hidden w-full px-4">
-                <p class="text-muted-foreground text-sm py-4">
-                  Payment QR code not yet configured. Please contact us for payment details.
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="border-t pt-6">
-            <p class="font-medium mb-3">Other Payment Methods:</p>
-            <ul class="space-y-2 text-muted-foreground">
-              <li class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Cash payment at our office
-              </li>
-              <li class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                Bank transfer
-              </li>
-            </ul>
-          </div>
-          
-          <div class="border-t pt-6">
-            <p class="font-medium mb-2">Contact Information:</p>
-            <p class="text-muted-foreground">Email: contact@timorbiz.com</p>
-            <p class="text-muted-foreground">Phone: +670</p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <!-- Confirmation -->
-      <Card class="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-        <CardContent class="pt-6">
-          <div class="flex gap-4">
-            <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <p class="font-medium text-green-800 dark:text-green-200">How to confirm your payment:</p>
-              <ol class="mt-2 text-sm text-green-700 dark:text-green-300 space-y-1">
-                <li>1. Make your payment using any method above</li>
-                <li>2. Contact us via WhatsApp with your payment proof</li>
-                <li>3. We'll confirm and activate your subscription within 24 hours</li>
-              </ol>
-              <a 
-                href="https://wa.me/670" 
-                class="inline-flex items-center gap-2 mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                Contact via WhatsApp
-              </a>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </div>
-</ Layout>
+try {
+  // Try to get user from session table directly
+  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 
-<script>
-  // Get plan from URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  const plan = urlParams.get('plan') || 'monthly';
+  if (tokenMatch) {
+    const { db } = await import('@/lib/db');
+    const { sessions, users, businessPages } = await import('@/db/schema');
+    const { eq } = await import('drizzle-orm');
 
-  const plans: Record<string, { name: string; price: string }> = {
-    monthly: { name: 'Monthly Plan', price: '$39/month' },
-    yearly: { name: 'Yearly Plan', price: '$390/year' },
-  };
+    // Find session by token
+    const session = await db.select()
+      .from(sessions)
+      .where(eq(sessions.token, tokenMatch[1]))
+      .limit(1)
+      .get();
 
-  const selectedPlan = plans[plan] || plans.monthly;
+    if (session && session.expiresAt && new Date(session.expiresAt) > new Date()) {
+      // Session valid, get user
+      const userRecord = await db.select()
+        .from(users)
+        .where(eq(users.id, session.userId))
+        .limit(1)
+        .get();
 
-  // Update UI
-  const planName = document.getElementById('plan-name');
-  const planDisplay = document.getElementById('plan-display');
-  const planPrice = document.getElementById('plan-price');
+      if (userRecord) {
+        user = { id: userRecord.id };
 
-  if (planName) planName.textContent = selectedPlan.name;
-  if (planDisplay) planDisplay.textContent = selectedPlan.name;
-  if (planPrice) planPrice.textContent = selectedPlan.price;
+        // Get user's business
+        const business = await db.select({
+          id: businessPages.id,
+          title: businessPages.title,
+        })
+        .from(businessPages)
+        .where(eq(businessPages.ownerId, user.id))
+        .limit(1)
+        .get();
 
-  // Fetch payment QR code dynamically (AC-US1-01, AC-US1-02)
-  async function loadPaymentQR() {
-    const skeleton = document.getElementById('qr-skeleton');
-    const img = document.getElementById('qr-code') as HTMLImageElement | null;
-    const placeholder = document.getElementById('qr-placeholder');
-
-    // Show skeleton while loading
-    if (skeleton) skeleton.classList.remove('hidden');
-    if (img) img.classList.add('hidden');
-    if (placeholder) placeholder.classList.add('hidden');
-
-    try {
-      const res = await fetch('/api/settings/public');
-      const json = await res.json();
-
-      if (json.success && json.data?.payment_qr) {
-        // Configured: show image
-        if (skeleton) skeleton.classList.add('hidden');
-        if (placeholder) placeholder.classList.add('hidden');
-        if (img) {
-          img.src = json.data.payment_qr;
-          img.classList.remove('hidden');
-        }
-      } else {
-        // Not configured: show placeholder
-        if (skeleton) skeleton.classList.add('hidden');
-        if (img) img.classList.add('hidden');
-        if (placeholder) placeholder.classList.remove('hidden');
+        userBusiness = business || null;
       }
-    } catch {
-      // Network error: show placeholder as fallback
-      if (skeleton) skeleton.classList.add('hidden');
-      if (img) img.classList.add('hidden');
-      if (placeholder) placeholder.classList.remove('hidden');
     }
   }
+} catch (e) {
+  console.error('Auth check failed:', e);
+}
 
-  loadPaymentQR();
-</script>
+// Redirect if not logged in
+if (!user) {
+  return Astro.redirect('/login?redirect=/subscribe');
+}
+
+const url = new URL(Astro.request.url);
+const planParam = url.searchParams.get('plan') || 'basic-monthly';
+
+// Parse plan
+const PLAN_PRICES: Record<string, { name: string; amount: number; period: string }> = {
+  'basic-monthly': { name: 'Basic', amount: 29, period: 'monthly' },
+  'basic-yearly': { name: 'Basic', amount: 290, period: 'yearly' },
+  'pro-monthly': { name: 'Pro', amount: 59, period: 'monthly' },
+  'pro-yearly': { name: 'Pro', amount: 590, period: 'yearly' },
+  'max-monthly': { name: 'Max', amount: 89, period: 'monthly' },
+  'max-yearly': { name: 'Max', amount: 890, period: 'yearly' },
+};
+
+const selectedPlan = PLAN_PRICES[planParam] || PLAN_PRICES['basic-monthly'];
+
+// Check for existing unpaid order for this plan
+let existingOrder: { id: string; status: string } | null = null;
+
+try {
+  const { db } = await import('@/lib/db');
+  const { orders } = await import('@/db/schema');
+  const { eq, and } = await import('drizzle-orm');
+
+  const order = await db.select({ id: orders.id, status: orders.status })
+    .from(orders)
+    .where(and(
+      eq(orders.userId, user.id),
+      eq(orders.planType, planParam),
+      eq(orders.status, 'unpaid')
+    ))
+    .limit(1)
+    .get();
+
+  existingOrder = order || null;
+} catch (e) {
+  console.error('Order check failed:', e);
+}
+
+// Create order if none exists
+let orderId = existingOrder?.id || null;
+
+if (!existingOrder && userBusiness) {
+  try {
+    const { db } = await import('@/lib/db');
+    const { orders } = await import('@/db/schema');
+
+    orderId = `order-${Date.now()}`;
+    await db.insert(orders).values({
+      id: orderId,
+      userId: user.id,
+      businessPageId: userBusiness.id,
+      planType: planParam,
+      amount: selectedPlan.amount,
+      status: 'unpaid',
+    }).run();
+  } catch (e) {
+    console.error('Create order failed:', e);
+  }
+}
+---
+
+<Layout title="Subscribe - TIMORLIST">
+  <div class="container py-12">
+    <div class="max-w-2xl mx-auto">
+      {!userBusiness ? (
+        <!-- No business created yet -->
+        <div class="text-center">
+          <h1 class="text-3xl font-bold mb-4">Create a Business First</h1>
+          <p class="text-muted-foreground mb-6">You need to create a business listing before subscribing to a plan.</p>
+          <a href="/listing/create?type=business">
+            <Button>Create Business</Button>
+          </a>
+        </div>
+      ) : orderId ? (
+        <!-- Order created, show payment info -->
+        <div>
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2">Complete Your Subscription</h1>
+            <p class="text-muted-foreground">
+              Order ID: <code class="bg-muted px-2 py-1 rounded text-sm">{orderId.slice(0, 16)}...</code>
+            </p>
+          </div>
+
+          <!-- Order Summary -->
+          <Card class="mb-6">
+            <CardHeader>
+              <CardTitle>Order Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="flex justify-between items-center py-2">
+                <span>Business</span>
+                <span class="font-medium">{userBusiness.title}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-t">
+                <span>Plan</span>
+                <span class="font-medium">{selectedPlan.name} ({selectedPlan.period})</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-t">
+                <span>Amount</span>
+                <span class="font-bold text-xl text-primary">${selectedPlan.amount}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-t">
+                <span>Status</span>
+                <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800">Unpaid</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Payment Instructions -->
+          <Card class="mb-6">
+            <CardHeader>
+              <CardTitle>Payment Instructions</CardTitle>
+              <CardDescription>Choose your preferred payment method</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-4">
+              <div class="text-center p-6 bg-muted/50 rounded-lg">
+                <p class="font-medium mb-2">Scan QR Code</p>
+                <div id="qr-placeholder" class="text-muted-foreground text-sm">
+                  QR code not yet configured
+                </div>
+              </div>
+
+              <div class="border-t pt-4">
+                <p class="font-medium mb-3">Other Payment Methods:</p>
+                <ul class="space-y-2 text-muted-foreground">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Cash payment at our office
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="current Color" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Bank transfer
+                  </li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          <!-- Confirmation Instructions -->
+          <Card class="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+            <CardContent class="pt-6">
+              <div class="flex gap-4">
+                <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                  <p class="font-medium text-green-800 dark:text-green-200">How to confirm your payment:</p>
+                  <ol class="mt-2 text-sm text-green-700 dark:text-green-300 space-y-1">
+                    <li>1. Make your payment using any method above</li>
+                    <li>2. Contact us via WhatsApp with your payment proof and Order ID</li>
+                    <li>3. We'll confirm and activate your subscription within 24 hours</li>
+                  </ol>
+                  <a
+                    href="https://wa.me/67077000000?text=I%20just%20paid%20for%20TIMORLIST%20subscription.%20Order%20ID:%20" + orderId
+                    target="_blank"
+                    class="inline-flex items-center gap-2 mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Contact via WhatsApp
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <!-- Error creating order -->
+        <div class="text-center">
+          <h1 class="text-3xl font-bold mb-4">Unable to Create Order</h1>
+          <p class="text-muted-foreground mb-6">There was an issue creating your subscription order.</p>
+          <a href="/account">
+            <Button>Go to Account</Button>
+          </a>
+        </div>
+      )}
+    </div>
+  </div>
+</Layout>

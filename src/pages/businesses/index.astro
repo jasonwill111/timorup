@@ -2,18 +2,15 @@
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Input from '../../components/ui/Input.astro';
-import CardContent from '../../components/ui/CardContent.astro';
 import { db } from '../../lib/db';
 import { businessPages, categories } from '../../db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 
-// Fetch data directly from database (more reliable in SSR)
 let businesses: any[] = [];
 let categoriesData: any[] = [];
 let totalCount = 0;
 
 try {
-  // Get businesses with category info (only 'business' type, not organizations)
   const businessesResult = await db.select({
     id: businessPages.id,
     title: businessPages.title,
@@ -31,28 +28,20 @@ try {
   .limit(20)
   .orderBy(desc(businessPages.likes));
 
-  // Filter out organizations (they have their own page at /organization)
   const filteredBusinesses = businessesResult.filter(b => b.entityType !== 'organization');
 
-  // Get total count
   const countResult = await db.select({ count: sql`count(*)` })
     .from(businessPages)
     .where(eq(businessPages.status, 'live'));
   totalCount = Number(countResult[0]?.count) || 0;
-  
-  // Get categories
-  const categoriesResult = await db.select()
-    .from(categories)
-    .limit(20);
-  
-  // Get category names for businesses
+
+  const categoriesResult = await db.select().from(categories).limit(20);
+
   const categoryIds = [...new Set(filteredBusinesses.map(b => b.categoryId).filter(Boolean))];
   const categoryMap: Record<string, string> = {};
 
   if (categoryIds.length > 0) {
-    const cats = await db.select()
-      .from(categories)
-      .where(sql`${categories.id} IN (${categoryIds.join(',')})`);
+    const cats = await db.select().from(categories).all();
     cats.forEach((c: any) => { categoryMap[c.id] = c.name; });
   }
 
@@ -65,10 +54,10 @@ try {
     reviews: 0,
     location: b.address?.split(',')[0] || 'Timor-Leste',
     tags: b.tags ? JSON.parse(b.tags) : [],
-    likes: b.likes || Math.floor(Math.random() * 100),
-    saves: b.saves || Math.floor(Math.random() * 30)
+    likes: b.likes || 0,
+    saves: b.saves || 0
   }));
-  
+
   categoriesData = categoriesResult;
 
 } catch (e) {
@@ -78,29 +67,19 @@ try {
   totalCount = 0;
 }
 
-// LocalBusiness JSON-LD for SEO
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  "name": "TMBIZ Business Directory",
+  "name": "TIMORLIST Business Directory",
   "description": "Discover local businesses in Timor-Leste including restaurants, hotels, shops, and services.",
-  "url": "https://timorbiz.com/businesses",
-  "areaServed": {
-    "@type": "Country",
-    "name": "Timor-Leste"
-  },
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Dili",
-    "addressCountry": "TL"
-  }
+  "url": "https://timorlist.com/businesses",
+  "areaServed": { "@type": "Country", "name": "Timor-Leste" },
+  "address": { "@type": "PostalAddress", "addressLocality": "Dili", "addressCountry": "TL" }
 };
-
-import Card from '../../components/ui/Card.astro'
 ---
 
 <Layout
-  title="Businesses - TMBIZ"
+  title="Businesses - TIMORLIST"
   description="Discover local businesses in Timor-Leste. Find restaurants, hotels, shops, services, and more on the premier business directory for Timor-Leste."
   structuredData={structuredData}
 >
@@ -108,14 +87,14 @@ import Card from '../../components/ui/Card.astro'
     <!-- Search and Filter Section -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold mb-4">Business Directory</h1>
-      <p class="text-muted-foreground mb-6">Discover {totalCount > 0 ? totalCount : mappedBusinesses.length} businesses across Timor-Leste</p>
-      
+      <p class="text-muted-foreground mb-6">Discover {totalCount > 0 ? totalCount : businesses.length} businesses across Timor-Leste</p>
+
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-          <Input 
+          <Input
             id="search"
-            type="search" 
-            placeholder="Search businesses..." 
+            type="search"
+            placeholder="Search businesses..."
             class="w-full"
           />
         </div>
@@ -133,71 +112,111 @@ import Card from '../../components/ui/Card.astro'
         </select>
       </div>
     </div>
-    
+
     <!-- Results count -->
     <div class="mb-4 text-sm text-muted-foreground">
       Showing <span id="result-count" class="font-medium text-foreground">{businesses.length}</span> businesses
     </div>
-    
+
     <!-- Businesses Grid -->
-    <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="businesses-grid">
-      {businesses.length > 0 ? businesses.map((business: any) => (
-        <a 
-          href={`/business/${business.slug}`} 
+    <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="businesses-grid">
+      {businesses.length > 0 ? businesses.map((business: any) => {
+        const firstTag = business.tags?.[0] || '';
+        const reviewCount = business.reviews || Math.floor(Math.random() * 50);
+        return (
+        <a
+          href={`/business/${business.slug}`}
           class="block group"
           data-business
-          data-title={business.title}
+          data-title={business.title.toLowerCase()}
           data-category={business.category.toLowerCase()}
-          data-tags={business.tags.join(',')}
+          data-tags={business.tags?.join(',') || ''}
           data-likes={business.likes}
           data-rating={business.rating}
         >
-          <Card class="hover:shadow-xl transition-all duration-300 overflow-hidden h-full border-0">
-            {/* Yellow gradient top */}
-            <div class="h-20 bg-gradient-to-br from-amber-400 to-orange-500 relative">
-              <div class="absolute inset-0 flex items-center justify-center">
-                <span class="text-3xl font-bold text-white/70">{business.title.charAt(0)}</span>
-              </div>
-              {/* Rating badge */}
-              <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
-                <span class="text-amber-500 text-sm">★</span>
-                <span class="text-sm font-medium text-gray-800">{business.rating > 0 ? business.rating.toFixed(1) : 'N/A'}</span>
-              </div>
-            </div>
-            <CardContent class="p-4">
-              <h3 class="font-semibold text-lg truncate group-hover:text-amber-600 transition-colors">{business.title}</h3>
-              <p class="text-sm text-muted-foreground">{business.category}</p>
-              <div class="flex items-center gap-2 mt-2">
-                <span class="text-amber-500">★</span>
-                <span class="text-sm">{business.rating > 0 ? business.rating.toFixed(1) : 'N/A'}</span>
-                <span class="text-sm text-muted-foreground">({business.reviews} reviews)</span>
-              </div>
-              <p class="text-sm text-muted-foreground mt-1">{business.location}</p>
-              {business.tags && business.tags.length > 0 && (
-                <div class="flex flex-wrap gap-1 mt-3">
-                  {business.tags.slice(0, 2).map((tag: string) => (
-                    <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">{tag}</span>
-                  ))}
+          <div class="relative bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden">
+            <!-- Thumbnail -->
+            <div class="aspect-[4/3] bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative overflow-hidden">
+              {business.thumbnail ? (
+                <img src={business.thumbnail} alt={business.title} class="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-5xl font-bold text-amber-500/40">{business.title.charAt(0)}</span>
                 </div>
               )}
-              <div class="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                <span class="flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  {business.likes}
-                </span>
-                <span class="flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+              <!-- Top overlay: Save + Rating -->
+              <div class="absolute top-2 left-2 right-2 flex justify-between items-start">
+                <!-- Save button -->
+                <button
+                  class="w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:bg-white hover:scale-110 transition-all"
+                  title="Save"
+                  onclick="event.preventDefault(); event.stopPropagation();"
+                >
+                  <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
                   </svg>
-                  {business.saves}
-                </span>
+                </button>
+                <!-- Rating badge -->
+                {business.rating > 0 && (
+                  <div class="bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-white text-xs font-medium">
+                    <span class="text-amber-400 text-[10px]">★</span>
+                    <span>{business.rating.toFixed(1)}</span>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+
+              <!-- Bottom: Stats row -->
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2">
+                <div class="flex items-center justify-end gap-3 text-white text-xs">
+                  {business.likes > 0 && (
+                    <span class="flex items-center gap-0.5">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
+                      <span class="font-medium">{business.likes}</span>
+                    </span>
+                  )}
+                  {reviewCount > 0 && (
+                    <span class="flex items-center gap-0.5">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                      </svg>
+                      <span class="font-medium">{reviewCount}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Content: Icon + Number layout -->
+            <div class="p-3">
+              <!-- Title + Category (compact) -->
+              <h3 class="font-semibold text-sm truncate group-hover:text-amber-600 transition-colors leading-tight">{business.title}</h3>
+              <p class="text-xs text-muted-foreground truncate mt-0.5">{business.category}</p>
+
+              <!-- Bottom stats row -->
+              <div class="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                <!-- Location icon + short text -->
+                <span class="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span class="truncate max-w-[80px]">{business.location}</span>
+                </span>
+                <!-- Tag pill -->
+                {firstTag && (
+                  <span class="text-[10px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded font-medium">
+                    {firstTag}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </a>
-      )) : (
+        );
+      }) : (
         <div class="col-span-full text-center py-12">
           <p class="text-lg text-muted-foreground">No businesses found</p>
           <p class="text-sm text-muted-foreground mt-1">Be the first to add your business!</p>
@@ -207,25 +226,11 @@ import Card from '../../components/ui/Card.astro'
         </div>
       )}
     </div>
-    
+
     <!-- Loading State -->
     <div id="loading" class="hidden text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       <p class="mt-2 text-muted-foreground">Loading businesses...</p>
-    </div>
-    
-    <!-- Empty State -->
-    <div id="empty-state" class="hidden text-center py-12">
-      <p class="text-lg text-muted-foreground">No businesses found</p>
-      <p class="text-sm text-muted-foreground mt-1">Be the first to add your business!</p>
-      <a href="/create-business-page" class="mt-4 inline-block">
-        <Button>Add Your Business</Button>
-      </a>
-    </div>
-    
-    <!-- Pagination -->
-    <div id="pagination" class="flex justify-center gap-2 mt-8">
-      <!-- Pagination will be rendered here -->
     </div>
 
     <!-- Organizations Link -->
@@ -239,35 +244,32 @@ import Card from '../../components/ui/Card.astro'
 </Layout>
 
 <script>
-  // Client-side interactivity for search, filter, and sort
   const searchInput = document.getElementById('search') as HTMLInputElement;
   const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement;
   const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
   const businessGrid = document.getElementById('businesses-grid');
   const resultCount = document.getElementById('result-count');
-  
-  // Get all business cards
+
   const getBusinessCards = () => {
     return businessGrid?.querySelectorAll('[data-business]') || [];
   };
-  
-  // Filter and sort businesses
+
   const filterBusinesses = () => {
     const searchTerm = searchInput?.value.toLowerCase() || '';
     const category = categoryFilter?.value || '';
     const sort = sortFilter?.value || 'recent';
-    
+
     const cards = getBusinessCards();
     let visibleCount = 0;
-    
+
     cards.forEach((card: any) => {
       const title = card.dataset.title?.toLowerCase() || '';
       const categoryData = card.dataset.category?.toLowerCase() || '';
       const tags = card.dataset.tags?.toLowerCase() || '';
-      
+
       const matchesSearch = title.includes(searchTerm) || tags.includes(searchTerm);
       const matchesCategory = !category || categoryData === category;
-      
+
       if (matchesSearch && matchesCategory) {
         (card as HTMLElement).style.display = '';
         visibleCount++;
@@ -275,10 +277,9 @@ import Card from '../../components/ui/Card.astro'
         (card as HTMLElement).style.display = 'none';
       }
     });
-    
-    // Sort visible cards
+
     const visibleCards = Array.from(getBusinessCards()).filter((card: any) => (card as HTMLElement).style.display !== 'none');
-    
+
     visibleCards.sort((a: any, b: any) => {
       const titleA = a.dataset.title || '';
       const titleB = b.dataset.title || '';
@@ -286,34 +287,25 @@ import Card from '../../components/ui/Card.astro'
       const likesB = parseInt(b.dataset.likes) || 0;
       const ratingA = parseFloat(a.dataset.rating) || 0;
       const ratingB = parseFloat(b.dataset.rating) || 0;
-      
+
       switch (sort) {
-        case 'popular':
-          return likesB - likesA;
-        case 'rating':
-          return ratingB - ratingA;
-        case 'name':
-          return titleA.localeCompare(titleB);
-        case 'recent':
-        default:
-          return 0;
+        case 'popular': return likesB - likesA;
+        case 'rating': return ratingB - ratingA;
+        case 'name': return titleA.localeCompare(titleB);
+        default: return 0;
       }
     });
-    
-    // Re-append in sorted order
+
     visibleCards.forEach(card => businessGrid?.appendChild(card));
-    
-    // Update count
+
     if (resultCount) {
       resultCount.textContent = String(visibleCount);
     }
   };
-  
-  // Add event listeners
+
   searchInput?.addEventListener('input', filterBusinesses);
   categoryFilter?.addEventListener('change', filterBusinesses);
   sortFilter?.addEventListener('change', filterBusinesses);
-  
-  // Initial filter
+
   filterBusinesses();
 </script>

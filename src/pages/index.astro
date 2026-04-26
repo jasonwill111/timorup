@@ -1,19 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
-import Card from '../components/ui/Card.astro'
-import CardContent from '../components/ui/CardContent.astro';
 import { db } from '../lib/db';
 import { businessPages, categories } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { parseIcon, buildIcon, DEFAULT_CATEGORY_ICONS } from '../lib/icons';
+import { parseIcon, DEFAULT_CATEGORY_ICONS } from '../lib/icons';
+import BusinessCard from '../components/business/BusinessCard.astro';
 
-// OPTIMIZED: Single query to fetch all data
 let featuredBusinesses: any[] = [];
+let featuredGovs: any[] = [];
+let featuredNgos: any[] = [];
 let categoriesData: any[] = [];
 
 try {
-  // Fetch categories with icons
   const categoriesResult = await db.select({
     id: categories.id,
     name: categories.name,
@@ -24,13 +23,11 @@ try {
   .from(categories)
   .limit(20);
 
-  // Create category map from single query
   const categoryMap: Record<string, { name: string; icon: string }> = {};
   categoriesResult.forEach((c: any) => {
     categoryMap[c.id] = { name: c.name, icon: c.icon || '' };
   });
 
-  // Single query for businesses with category filter already applied
   const businessesResult = await db.select({
     id: businessPages.id,
     title: businessPages.title,
@@ -39,28 +36,46 @@ try {
     likes: businessPages.likes,
     status: businessPages.status,
     categoryId: businessPages.categoryId,
+    entityType: businessPages.entityType,
+    profileImageId: businessPages.profileImageId,
   })
   .from(businessPages)
   .where(eq(businessPages.status, 'live'))
-  .limit(8)
-  .orderBy(desc(businessPages.likes));
+  .orderBy(desc(businessPages.likes))
+  .limit(20);
 
-  // Transform data using the category map
-  featuredBusinesses = businessesResult.map(b => ({
-    id: b.id,
-    title: b.title,
-    slug: b.slug,
-    category: categoryMap[b.categoryId || '']?.name || 'Business',
-    rating: 0,
-    reviews: 0,
-    tags: b.tags ? JSON.parse(b.tags) : []
-  }));
+  const allListings = businessesResult.map(b => {
+    const tags = b.tags ? JSON.parse(b.tags) : [];
+    return {
+      id: b.id,
+      title: b.title,
+      slug: b.slug,
+      category: categoryMap[b.categoryId || '']?.name || 'Business',
+      rating: 0,
+      reviews: 0,
+      likes: b.likes || 0,
+      location: 'Dili',
+      tag: tags[0] || '',
+      tags,
+      profileImageId: b.profileImageId,
+    };
+  });
 
-  // Use icons from database, fallback to defaults
+  featuredBusinesses = allListings
+    .filter(b => b.entityType === 'business')
+    .slice(0, 12);
+
+  featuredGovs = allListings
+    .filter(b => b.entityType === 'government')
+    .slice(0, 3);
+
+  featuredNgos = allListings
+    .filter(b => b.entityType === 'nonprofit')
+    .slice(0, 3);
+
   categoriesData = categoriesResult.map(c => {
     const icon = c.icon || '';
     const parsed = parseIcon(icon);
-    // If no icon in DB, use default from DEFAULT_CATEGORY_ICONS
     const defaultIcon = DEFAULT_CATEGORY_ICONS[c.slug];
     return {
       id: c.id,
@@ -80,25 +95,22 @@ try {
 const mappedCategories = categoriesData;
 ---
 
-<Layout title="TMBIZ - Business Directory for Timor-Leste">
-  <!-- Hero Section with Yellow Gradient -->
+<Layout title="TIMORLIST - Business Directory for Timor-Leste">
+  <!-- Hero -->
   <div class="relative h-[400px] md:h-[500px] bg-gradient-to-br from-amber-400 via-orange-400 to-amber-500 overflow-hidden">
-    <!-- Decorative elements -->
     <div class="absolute inset-0 opacity-30">
       <div class="absolute top-10 left-10 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
       <div class="absolute bottom-10 right-10 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
       <div class="absolute top-1/2 left-1/3 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
     </div>
-
-    <!-- Hero Content -->
     <div class="relative z-10 h-full flex items-center justify-center">
       <div class="text-center text-white max-w-3xl px-4">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">TMBIZ</h1>
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">TIMORLIST</h1>
         <p class="text-lg md:text-xl mb-6 opacity-90">Discover Local Businesses in Timor-Leste</p>
         <p class="text-sm md:text-base mb-8 opacity-80 max-w-xl mx-auto">Your guide to the best restaurants, hotels, services, and more across Timor-Leste</p>
         <div class="flex gap-4 justify-center flex-wrap">
-          <a href="/businesses">
-            <Button size="lg" class="bg-white text-amber-600 hover:bg-amber-50 font-semibold shadow-lg">Browse Businesses</Button>
+          <a href="/listing">
+            <Button size="lg" class="bg-white text-amber-600 hover:bg-amber-50 font-semibold shadow-lg">Browse Directory</Button>
           </a>
           <a href="/business/create">
             <Button size="lg" variant="outline" class="text-white border-white hover:bg-white/20 font-semibold">List Your Business</Button>
@@ -106,8 +118,6 @@ const mappedCategories = categoriesData;
         </div>
       </div>
     </div>
-
-    <!-- Bottom wave decoration -->
     <div class="absolute bottom-0 left-0 right-0">
       <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-16">
         <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
@@ -116,44 +126,26 @@ const mappedCategories = categoriesData;
   </div>
 
   <div class="container py-12">
-    <!-- Featured Businesses with Yellow Gradient Cards -->
+    <!-- Featured Businesses -->
     <section class="mb-12">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold">Featured Businesses</h2>
-        <a href="/businesses" class="text-amber-600 hover:text-amber-700 font-medium">View All →</a>
+        <a href="/listing?type=business" class="text-amber-600 hover:text-amber-700 font-medium">View All →</a>
       </div>
-
-      <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {featuredBusinesses.length > 0 ? featuredBusinesses.map((business: any) => (
-          <a href={`/business/${business.slug}`} class="block group">
-            <Card class="hover:shadow-xl transition-all duration-300 overflow-hidden h-full border-0">
-              {/* Yellow gradient top */}
-              <div class="h-24 bg-gradient-to-br from-amber-400 to-orange-500 relative">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <span class="text-4xl font-bold text-white/70">{business.title.charAt(0)}</span>
-                </div>
-                {/* Rating badge */}
-                <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
-                  <span class="text-amber-500 text-sm">★</span>
-                  <span class="text-sm font-medium text-gray-800">{business.rating > 0 ? business.rating.toFixed(1) : 'N/A'}</span>
-                </div>
-              </div>
-              <CardContent class="p-4">
-                <h3 class="font-semibold text-lg truncate group-hover:text-amber-600 transition-colors">{business.title}</h3>
-                <p class="text-sm text-muted-foreground">{business.category}</p>
-                <div class="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                  <span>{business.reviews} reviews</span>
-                </div>
-                {business.tags && business.tags.length > 0 && (
-                  <div class="flex flex-wrap gap-1 mt-3">
-                    {business.tags.slice(0, 2).map((tag: string) => (
-                      <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </a>
+          <BusinessCard
+            title={business.title}
+            slug={business.slug}
+            category={business.category}
+            thumbnail={null}
+            rating={business.rating}
+            likes={business.likes}
+            reviews={business.reviews}
+            location={business.location}
+            tag={business.tag}
+            type="business"
+          />
         )) : (
           <div class="col-span-full text-center py-8 text-muted-foreground">
             <p>No featured businesses yet.</p>
@@ -163,39 +155,96 @@ const mappedCategories = categoriesData;
       </div>
     </section>
 
-    <!-- Categories with Icons -->
+    <!-- Featured Government -->
+    {featuredGovs.length > 0 && (
+      <section class="mb-12">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">Government</h2>
+          <a href="/listing?type=govs" class="text-purple-600 hover:text-purple-700 font-medium">View All →</a>
+        </div>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {featuredGovs.map((gov: any) => (
+            <a href={`/govs/${gov.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
+              <div class="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 relative flex items-center justify-center">
+                {gov.profileImageId ? (
+                  <img src={`/api/media/${gov.profileImageId}`} alt={gov.title} class="w-full h-full object-cover" />
+                ) : (
+                  <span class="text-5xl font-bold text-purple-400">{gov.title.charAt(0)}</span>
+                )}
+              </div>
+              <div class="p-3">
+                <h3 class="font-semibold truncate group-hover:text-purple-600 transition-colors">{gov.title}</h3>
+                <p class="text-xs text-muted-foreground truncate">{gov.category}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Featured NGOs -->
+    {featuredNgos.length > 0 && (
+      <section class="mb-12">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">NGOs & Non-Profits</h2>
+          <a href="/listing?type=ngos" class="text-orange-600 hover:text-orange-700 font-medium">View All →</a>
+        </div>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {featuredNgos.map((ngo: any) => (
+            <a href={`/ngos/${ngo.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
+              <div class="aspect-[4/3] bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 relative flex items-center justify-center">
+                {ngo.profileImageId ? (
+                  <img src={`/api/media/${ngo.profileImageId}`} alt={ngo.title} class="w-full h-full object-cover" />
+                ) : (
+                  <span class="text-5xl font-bold text-orange-400">{ngo.title.charAt(0)}</span>
+                )}
+              </div>
+              <div class="p-3">
+                <h3 class="font-semibold truncate group-hover:text-orange-600 transition-colors">{ngo.title}</h3>
+                <p class="text-xs text-muted-foreground truncate">{ngo.category}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Products & Services -->
+    <section class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold">Products & Services</h2>
+        <a href="/products-services" class="text-amber-600 hover:text-amber-700 font-medium">View All →</a>
+      </div>
+      <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-8 text-center">
+        <p class="text-muted-foreground mb-4">Browse all products and services from businesses</p>
+        <a href="/products-services">
+          <Button>Explore Products & Services</Button>
+        </a>
+      </div>
+    </section>
+
+    <!-- Categories -->
     <section class="mb-12">
       <h2 class="text-2xl font-bold mb-6">Browse by Category</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
         {mappedCategories.map((cat: any) => (
-          <a href={`/businesses?category=${cat.slug}`} class="block">
+          <a href={`/listing?type=business&industry=${cat.slug}`} class="block">
             <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
               {cat.iconType === 'emoji' ? (
                 <div class="text-3xl mb-2">{cat.icon}</div>
               ) : (
                 <div class="text-3xl mb-2 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    {cat.icon === 'utensils' && <><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></>}
-                    {cat.icon === 'bed' && <><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></>}
-                    {cat.icon === 'shopping-bag' && <><path d="M6 2h12l2 7H4"/><path d="M2 6h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/></>}
-                    {cat.icon === 'heart' && <><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 1.43-3 3.21-3 5.5 0 1.82.42 3.58 1.5 5"/><path d="M12 5 9 11 5 7 9 12 5"/></>}
-                    {cat.icon === 'car' && <><path d="M14 16H9m10 0q3 0 3-3m-3-6H6m4 0V4"/><path d="M6 16v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2"/><path d="M6 12h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2Z"/></>}
-                    {cat.icon === 'briefcase' && <><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>}
-                    {cat.icon === 'graduation-cap' && <><path d="M22 10v6M2 10l10-5 10 5M6 12v5c3 3 9 3 12 0"/></>}
-                    {cat.icon === 'music' && <><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></>}
-                    {cat.icon === 'building' && <><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></>}
-                  </svg>
+                  <span class="text-2xl">🏢</span>
                 </div>
               )}
               <p class="font-medium text-sm">{cat.name}</p>
-              <p class="text-xs text-muted-foreground">{cat.count} businesses</p>
             </div>
           </a>
         ))}
       </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- CTA -->
     <section class="text-center py-12 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl">
       <h2 class="text-2xl font-bold mb-4">Ready to Grow Your Business?</h2>
       <p class="text-muted-foreground mb-6 max-w-xl mx-auto">Join thousands of businesses in Timor-Leste and reach more customers today.</p>
