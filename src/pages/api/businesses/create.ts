@@ -1,54 +1,79 @@
-// Businesses API - Create new business or organization
+// Businesses API - Create new listing (business/government/nonprofit)
 export const prerender = false;
 
 import { db } from '@/lib/db';
-import { auth } from '@/lib/auth';
-import { hasUserBusiness } from '@/lib/business-logic';
-import { businessPages, users } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { sessions, users, businessPages } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function POST({ request }: { request: Request }) {
   try {
-    // 1. Authenticate via better-auth session
+    // 1. Authenticate via session cookie
     const cookieHeader = request.headers.get('cookie') || '';
-    const session = await auth.api.getSession({
-      headers: { cookie: cookieHeader },
-    });
+    const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 
-    if (!session?.user) {
+    if (!tokenMatch) {
       return new Response(JSON.stringify({
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'You must be logged in to create a page' }
       }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const userId = session.user.id;
+    // Find session by token
+    const session = await db.select()
+      .from(sessions)
+      .where(eq(sessions.token, tokenMatch[1]))
+      .limit(1)
+      .get();
+
+    if (!session || !session.expiresAt || new Date(session.expiresAt) < new Date()) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Session expired. Please log in again.' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Get user
+    const user = await db.select()
+      .from(users)
+      .where(eq(users.id, session.userId))
+      .limit(1)
+      .get();
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'User not found' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const userId = user.id;
     const body = await request.json();
     const {
       title, slug, categoryId, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
-      latitude, longitude, entityType, organizationType, registrationUrl,
+      latitude, longitude, entityType, registrationUrl,
       publishNow
     } = body;
 
-    // Determine if this is an organization
-    const isOrganization = entityType === 'organization';
+    // Validate entity type
+    const validTypes = ['business', 'government', 'nonprofit'];
+    const finalEntityType = validTypes.includes(entityType) ? entityType : 'business';
 
-    // 2. Check one-page-per-user limit (by entity type)
-    // Users can have one business AND one organization
-    const existingBusiness = await hasUserBusiness(db, userId);
-    if (existingBusiness) {
-      // Allow if user is creating org and has business, or vice versa
-      if (existingBusiness.entityType !== entityType) {
-        const existingType = existingBusiness.entityType === 'organization' ? 'organization' : 'business';
-        return new Response(JSON.stringify({
-          success: false,
-          error: { code: 'LIMIT_REACHED', message: `You already have a ${existingType}. You can only create one of each type.` }
-        }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-      }
+    // 2. Check one-listing-per-user limit
+    // Each user can only have ONE listing (any type)
+    const existingListing = await db.select()
+      .from(businessPages)
+      .where(eq(businessPages.ownerId, userId))
+      .limit(1)
+      .get();
+
+    if (existingListing) {
       return new Response(JSON.stringify({
         success: false,
-        error: { code: 'LIMIT_REACHED', message: 'You can only create one page of this type' }
+        error: {
+          code: 'LIMIT_REACHED',
+          message: `You already have a ${existingListing.entityType} listing. Each account can only create one listing.`
+        }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -57,13 +82,6 @@ export async function POST({ request }: { request: Request }) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'Title is required' }
-      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    if (isOrganization && !organizationType) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: { message: 'Organization type is required' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -95,8 +113,7 @@ export async function POST({ request }: { request: Request }) {
       slug: businessSlug,
       ownerId: userId,
       categoryId: categoryId || null,
-      entityType: entityType || 'business',
-      organizationType: isOrganization ? organizationType : null,
+      entityType: finalEntityType,
       contactName: contactName || null,
       contactNumber: contactNumber || null,
       countryCode: countryCode || '+670',
@@ -113,7 +130,7 @@ export async function POST({ request }: { request: Request }) {
 
     return new Response(JSON.stringify({
       success: true,
-      data: { id, title, slug: businessSlug, entityType: entityType || 'business' }
+      data: { id, title, slug: businessSlug, entityType: finalEntityType }
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Create page error:', error);
