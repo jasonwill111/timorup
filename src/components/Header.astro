@@ -27,7 +27,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/listing"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
             currentPath.startsWith('/listing') ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -36,7 +36,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/products-services"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
             currentPath.startsWith('/products-services') ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -45,7 +45,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/pricing"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
             currentPath === '/pricing' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -53,7 +53,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         </a>
         <a
           href="/listing/create"
-          class="text-sm font-medium bg-primary text-black px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
+          class="text-sm font-medium bg-primary text-black px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           + Create
         </a>

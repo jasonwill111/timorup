@@ -101,19 +101,19 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
     <div class="flex gap-4 mb-8 border-b">
       <button
         data-filter="all"
-        class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
       >
         All
       </button>
       <button
         data-filter="business"
-        class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
       >
         Businesses
       </button>
       <button
         data-filter="organization"
-        class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
       >
         Organizations
       </button>
@@ -178,11 +178,11 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
 
           ${cat.tags && cat.tags.length > 0 ? `
             <div class="flex flex-wrap gap-1 mb-3">
-              <button class="tag-filter px-2 py-0.5 text-[10px] rounded-full border transition-colors ${!activeTag ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted/80'}" data-category="${cat.id}" data-tag="">
+              <button class="tag-filter px-2 py-0.5 text-[10px] rounded-full border transition-colors cursor-pointer ${!activeTag ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted/80'}" data-category="${cat.id}" data-tag="">
                 All
               </button>
               ${cat.tags.map(tag => `
-                <button class="tag-filter px-2 py-0.5 text-[10px] rounded-full border transition-colors ${activeTag === tag ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted/80'}" data-category="${cat.id}" data-tag="${tag}">
+                <button class="tag-filter px-2 py-0.5 text-[10px] rounded-full border transition-colors cursor-pointer ${activeTag === tag ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted/80'}" data-category="${cat.id}" data-tag="${tag}">
                   ${tag}
                 </button>
               `).join('')}
@@ -191,7 +191,7 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
 
           <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
             ${filteredListings.map(item => `
-              <a href="${getUrl(item)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group">
+              <a href="${getUrl(item)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer">
                 <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative">
                   ${item.profileImageId
                     ? `<img src="/api/media/${item.profileImageId}" alt="${item.title}" class="w-full h-full object-cover" />`

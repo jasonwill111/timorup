@@ -27,7 +27,7 @@ const {
 >
   {items.map((item) => (
     <details class="group">
-      <summary class="flex cursor-pointer items-center justify-between py-4 font-medium list-none hover:underline">
+      <summary class="flex cursor-pointer items-center justify-between py-4 font-medium list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
         {item.title}
         <svg
           class="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180"

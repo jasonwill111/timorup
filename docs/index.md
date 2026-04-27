@@ -70,7 +70,11 @@ timorlist/
 | `/api/media/*` | `src/pages/api/media/` | 媒体上传 |
 | `/api/categories/*` | `src/pages/api/categories/` | 分类 |
 | `/api/orders/*` | `src/pages/api/orders/` | 订单 |
-| `/api/admin/*` | `src/pages/api/admin/` | 管理后台 |
+| `/api/admin/listing` | `src/pages/api/admin/listing/` | Admin Listing 管理 |
+| `/api/admin/skus` | `src/pages/api/admin/skus/` | Admin SKU 管理 |
+| `/api/admin/blogs` | `src/pages/api/admin/blogs/` | Admin Blog 管理 |
+| `/api/admin/ai-generate` | `src/pages/api/admin/ai-generate.ts` | AI 内容生成 |
+| `/api/admin/settings` | `src/pages/api/admin/settings/` | Admin Settings |
 | `/api/blogs/*` | `src/pages/api/blogs/` | 博客 CRUD |
 | `/api/banners/*` | `src/pages/api/banners/` | 横幅管理 |
 
@@ -81,6 +85,7 @@ timorlist/
 | `business` | `/business/[slug]` | 产品、评论、评分、行业分类 |
 | `government` | `/govs/[slug]` | 简化页面（信息+联系方式） |
 | `nonprofit` | `/ngos/[slug]` | 简化页面（信息+联系方式） |
+| `organization` | `/organization/[slug]` | 政府/NGO/Nonprofit 统一入口 |
 
 ## 导航结构
 
@@ -184,13 +189,50 @@ pnpm build
 | SKU 详情 | `/business/[slug]/product/[id]` | ✅ |
 | Govs 详情 | `/govs/[slug]` | ✅ |
 | NGOs 详情 | `/ngos/[slug]` | ✅ |
+| Organizations | `/organization/[slug]` | ✅ |
 | 用户账户 | `/account` | - |
 | 管理后台 | `/admin` | - |
-| Admin Listing 管理 | `/admin/listing` | ✅ |
-| Admin SKUs 管理 | `/admin/skus` | ✅ |
+| Admin Dashboard | `/admin` | ✅ |
+| Admin Listings | `/admin/listing` | ✅ |
+| Admin AI Tools | `/admin/ai-tools` | ✅ |
+| Admin SKUs | `/admin/skus` | ✅ |
+| Admin Blog Posts | `/admin/blogs` | ✅ |
+| Admin Settings | `/admin/settings` | ✅ |
 | 登录 | `/login` | - |
 | 注册 | `/register` | - |
 | FAQ | `/faq` | - |
+
+## Admin 管理后台
+
+### 页面列表
+
+| 页面 | 功能 |
+|------|------|
+| `/admin` | Dashboard，统计数据概览 |
+| `/admin/listing` | 统一管理 business/gov/nonprofit，支持类型/状态筛选 |
+| `/admin/ai-tools` | AI 生成内容（Listing/SKU/Blog/Landing） |
+| `/admin/skus` | 产品/服务管理，灵活定价 |
+| `/admin/blogs` | 博客文章 CRUD，TipTap 富文本编辑 |
+| `/admin/settings` | 站点设置（站点名称、联系方式、支付二维码） |
+
+### AI Tools 功能
+
+| Tab | Generator | API |
+|-----|-----------|-----|
+| Listing Generator | business/gov/nonprofit | `POST /api/admin/ai-generate` |
+| Product/SKU Generator | product/service/rental/food/accommodation/project | `POST /api/admin/ai-generate` |
+| Blog Article Generator | local-highlight/how-to/tips/news/event | `POST /api/admin/ai-generate` |
+| Landing Page Generator | promotion/event | `POST /api/admin/ai-generate` |
+
+### Admin API 端点
+
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/api/admin/listing` | GET | 获取所有 listings |
+| `/api/admin/skus` | GET | 获取所有 SKUs |
+| `/api/admin/blogs` | GET | 获取所有博客文章 |
+| `/api/admin/ai-generate` | POST | AI 生成内容 |
+| `/api/admin/settings` | GET/POST | 站点设置 |
 
 ## 数据库表
 
@@ -199,8 +241,8 @@ pnpm build
 | users | 用户 |
 | sessions | 会话 |
 | accounts | OAuth 账户 |
-| business_pages | 商家页面 |
-| products | 产品 |
+| business_pages | 商家页面（含 entityType: business/government/nonprofit） |
+| products | 产品/SKU（含 serviceType: product/service/rental/food/accommodation/project） |
 | reviews | 评论 |
 | categories | 分类 |
 | orders | 订单 |
@@ -217,10 +259,10 @@ pnpm build
 
 ---
 
-**文档版本**: 13.0
-**最后更新**: 2026-04-26
+**文档版本**: 15.0
+**最后更新**: 2026-04-27
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ /listing目录页 | /products-services商品页 | 3实体首页Featured | /business/govs/ngos详情页 | Business详情增强 | Gallery Lightbox | 12 Featured Businesses | 12 Featured Products
+**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | UI/UX 优化
 
 ## Homepage Featured Sections
 
@@ -253,3 +295,37 @@ pnpm build
 - 点击图片 → 全屏弹窗
 - ← → 箭头/键盘切换
 - ESC/点击空白关闭
+
+## UI/UX 设计规范
+
+### 交互设计
+
+| 规范 | 描述 |
+|------|------|
+| `cursor-pointer` | 所有可点击卡片、按钮添加 |
+| `focus-visible` | 所有键盘可聚焦元素添加 `focus-visible:ring-2 focus-visible:ring-ring` |
+| `transition-colors` | 按钮/链接 hover 效果 |
+| `transition-all duration-200` | 卡片 hover 效果 |
+
+### 无障碍
+
+| 规范 | 描述 |
+|------|------|
+| `prefers-reduced-motion` | 全局 CSS 媒体查询禁用动画 |
+| 颜色对比 | 文本 ≥ 4.5:1 对比度 |
+| Focus 可见 | 键盘导航时显示 focus ring |
+
+### Icons
+
+| 类型 | 来源 | 用途 |
+|------|------|------|
+| Lucide SVG | 内联 SVG paths | Category icons, Toast icons, Stars |
+| Lucide SVG | `@lucide/astro` | Header, Footer, Components |
+
+### 骨架屏
+
+| 组件 | 文件 |
+|------|------|
+| BusinessCardSkeleton | `src/components/ui/Skeleton.astro` |
+| ProductCardSkeleton | `src/components/ui/Skeleton.astro` |
+| CategorySkeleton | `src/components/ui/Skeleton.astro` |

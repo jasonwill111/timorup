@@ -108,19 +108,19 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
     <div class="flex gap-4 mb-6 border-b">
       <a
         href="/listing?type=business"
-        class={`px-4 py-2 border-b-2 transition-colors ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
       >
         Businesses
       </a>
       <a
         href="/listing?type=govs"
-        class={`px-4 py-2 border-b-2 transition-colors ${type === 'govs' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'govs' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
       >
         Government
       </a>
       <a
         href="/listing?type=ngos"
-        class={`px-4 py-2 border-b-2 transition-colors ${type === 'ngos' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'ngos' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
       >
         NGOs & Non-Profits
       </a>
@@ -180,7 +180,7 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
       {listings.map(listing => (
         <a
           href={type === 'business' ? `/business/${listing.slug}` : `/${type}/${listing.slug}`}
-          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group"
+          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer"
         >
           <div class="aspect-[4/3] bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative">
             {listing.profileImageId ? (
@@ -191,8 +191,11 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
               </div>
             )}
             {listing.ratingAverage && listing.ratingAverage > 0 && (
-              <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded-full">
-                ★ {listing.ratingAverage.toFixed(1)}
+              <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                <svg class="w-3 h-3 text-amber-400 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                {listing.ratingAverage.toFixed(1)}
               </div>
             )}
           </div>

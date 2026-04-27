@@ -2,6 +2,78 @@
 
 > 每次项目开发前检查并更新此文件
 
+## 2026-04-27
+
+### UI/UX 优化
+
+| 项目 | 变更 | 状态 |
+|------|------|------|
+| Global CSS | 添加 `prefers-reduced-motion` 媒体查询 | ✅ |
+| Focus States | 添加 `focus-visible:ring-2` 到所有交互元素 | ✅ |
+| cursor-pointer | 添加到所有可点击卡片和按钮 | ✅ |
+| Emoji → Lucide SVG | 替换所有 emoji 图标为 Lucide SVG | ✅ |
+| Toast Icons | 替换 ✓✕ℹ⚠ 为 SVG icons | ✅ |
+| Star Ratings | 替换 ★ emoji 为 SVG star | ✅ |
+| Category Icons | 每个分类渲染正确的 Lucide icon | ✅ |
+| Skeleton Loaders | 添加 BusinessCardSkeleton, ProductCardSkeleton | ✅ |
+| Hero Button | 修复 outline 按钮在 amber 背景不可见问题 | ✅ |
+
+### 优化的文件
+
+| 文件 | 变更 |
+|------|------|
+| `src/styles/globals.css` | prefers-reduced-motion, focus-visible, scroll-behavior |
+| `src/lib/icons.ts` | Lucide SVG paths 映射表 |
+| `src/components/ui/ToastContainer.astro` | SVG icons |
+| `src/components/ui/Skeleton.astro` | 骨架屏变体 |
+| `src/components/ui/Accordion.astro` | focus-visible |
+| `src/components/Header.astro` | focus-visible, cursor-pointer |
+| `src/components/Footer.astro` | focus-visible |
+| `src/components/business/BusinessCard.astro` | cursor-pointer, SVG stars |
+| `src/components/business/ProductCard.astro` | cursor-pointer |
+| `src/pages/index.astro` | cursor-pointer, focus-visible, Lucide icons, button fix |
+| `src/pages/listing/index.astro` | cursor-pointer, focus-visible, SVG stars |
+| `src/pages/categories/index.astro` | cursor-pointer, focus-visible |
+| `src/pages/businesses/index.astro` | cursor-pointer, SVG stars |
+| `src/pages/products-services/index.astro` | cursor-pointer |
+
+### 验证结果
+
+| 验证项 | 结果 |
+|--------|------|
+| `pnpm build` | ✅ Exit 0 |
+| `cursor-pointer` | ✅ 35 处 |
+| `focus-visible` | ✅ 31 处 |
+| Emoji in HTML | ✅ 0 个 |
+| Unique category icons | ✅ 不同 SVG paths |
+
+---
+
+## 2026-04-26
+
+### 重大更新
+
+| 项目 | 变更 | 状态 |
+|------|------|------|
+| Admin API 重构 | `/api/admin/skus`, `/api/admin/blogs` 端点 | ✅ |
+| Admin Listing 管理 | `/admin/listing` 统一管理 business/gov/nonprofit | ✅ |
+| AI Tools | `/admin/ai-tools` 4个Tab（Listing/SKU/Blog/Landing） | ✅ |
+| Organization 支持 | 政府/NGO/Nonprofit 实体类型 | ✅ |
+| Admin Settings | 站点设置保存功能修复 | ✅ |
+| SKUs 页面修复 | 修复 `<script define:vars>` 与 module import 冲突 | ✅ |
+
+### 测试结果
+
+| 页面 | 工具 | 结果 |
+|------|------|------|
+| `/admin/skus` | agent-browser | ✅ 128产品正常加载 |
+| `/admin/blogs` | agent-browser | ✅ 正常显示 |
+| `/admin/ai-tools` | agent-browser | ✅ 4个Tab正常 |
+| `/admin/listing` | agent-browser | ✅ 统计显示30 Total |
+| `/admin/settings` | agent-browser | ✅ 表单正常 |
+
+---
+
 ## 2026-04-25
 
 ### 重大更新

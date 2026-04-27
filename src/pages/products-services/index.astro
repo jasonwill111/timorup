@@ -161,7 +161,7 @@ const formatPrice = (product: typeof productsList[0]) => {
       {productsList.map(product => (
         <a
           href={product.businessType === 'business' ? `/business/${product.businessSlug}/product/${product.id}` : `/${product.businessType}/${product.businessSlug}`}
-          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group"
+          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer"
         >
           <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
             <span class="text-4xl font-bold text-amber-500/40">{product.title.charAt(0)}</span>
