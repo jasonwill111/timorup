@@ -39,12 +39,14 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  import { toast } from '../../stores/toast';
+
   // Load settings
   async function loadSettings() {
     try {
       const res = await fetch('/api/admin/settings');
       const data = await res.json();
-      
+
       if (data.success) {
         const settings = data.data;
         (document.getElementById('site-name') as HTMLInputElement).value = settings.site_name?.value || '';
@@ -56,41 +58,40 @@ import Button from '@components/ui/Button.astro';
       console.error('Error loading settings:', err);
     }
   }
-  
+
   // Save settings
   document.getElementById('settings-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    
+
     const settings = {
       site_name: { value: String(formData.get('site-name') || '') },
       contact_email: { value: String(formData.get('contact-email') || '') },
       contact_phone: { value: String(formData.get('contact-phone') || '') },
       payment_info: { qrCode: String(formData.get('payment-info') || '') },
     };
-    
+
     try {
       const res = await fetch('/api/admin/settings/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings }),
       });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        window.showToast?.('Settings saved successfully!', 'success');
-        // Reload settings to confirm
+
+      const result = await res.json();
+
+      if (result.success) {
+        toast.success('Settings saved successfully!');
         loadSettings();
       } else {
-        window.showToast?.(data.error?.message || 'Failed to save settings', 'error');
+        toast.error(result.error?.message || 'Failed to save settings');
       }
     } catch (err) {
       console.error('Error saving settings:', err);
-      window.showToast?.('Error saving settings', 'error');
+      toast.error('Error saving settings');
     }
   });
-  
+
   // Initialize
   loadSettings();
 </script>

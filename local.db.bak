@@ -1,0 +1,213 @@
+PRAGMA defer_foreign_keys=TRUE;
+CREATE TABLE `accounts` (
+	`id` text PRIMARY KEY NOT NULL,
+	`userId` text NOT NULL,
+	`accountId` text NOT NULL,
+	`providerId` text NOT NULL,
+	`refreshToken` text,
+	`accessToken` text,
+	`accessTokenExpires` integer,
+	`scope` text,
+	`password` text,
+	`createdAt` integer,
+	`updatedAt` integer
+);
+CREATE TABLE `sessions` (
+	`id` text PRIMARY KEY NOT NULL,
+	`sessionToken` text NOT NULL,
+	`userId` text NOT NULL,
+	`expiresAt` integer NOT NULL,
+	`createdAt` integer,
+	`updatedAt` integer
+);
+CREATE TABLE `users` (
+	`id` text PRIMARY KEY NOT NULL,
+	`email` text NOT NULL,
+	`phone` text,
+	`name` text NOT NULL,
+	`image` text,
+	`role` text DEFAULT 'user',
+	`createdAt` integer DEFAULT (strftime('%s', 'now')),
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+INSERT INTO "users" ("id","email","phone","name","image","role","createdAt","updatedAt") VALUES('user-1','john@example.com',NULL,'John Smith',NULL,'user',1776906423,1776906423);
+INSERT INTO "users" ("id","email","phone","name","image","role","createdAt","updatedAt") VALUES('user-2','maria@example.com',NULL,'Maria Santos',NULL,'user',1776906423,1776906423);
+INSERT INTO "users" ("id","email","phone","name","image","role","createdAt","updatedAt") VALUES('user-3','carlos@example.com',NULL,'Carlos Oliveira',NULL,'user',1776906423,1776906423);
+CREATE TABLE `verifications` (
+	`id` text PRIMARY KEY NOT NULL,
+	`identifier` text NOT NULL,
+	`value` text NOT NULL,
+	`expiresAt` integer NOT NULL,
+	`createdAt` integer,
+	`updatedAt` integer
+);
+CREATE TABLE `blog_posts` (
+	`id` text PRIMARY KEY NOT NULL,
+	`title` text NOT NULL,
+	`slug` text NOT NULL,
+	`excerpt` text,
+	`content` text,
+	`cover_image_id` text,
+	`author_id` text NOT NULL,
+	`status` text DEFAULT 'draft',
+	`tags` text,
+	`published_at` integer,
+	`created_at` integer DEFAULT (strftime('%s', 'now')),
+	`updated_at` integer DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE `categories` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`slug` text NOT NULL,
+	`description` text,
+	`icon` text DEFAULT '',
+	`parentId` text,
+	`created_at` integer DEFAULT (strftime('%s', 'now')),
+	`updated_at` integer DEFAULT (strftime('%s', 'now'))
+);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-1','Restaurants & Cafes','restaurants-cafes','Food and beverage establishments','emoji:🍽️',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-2','Hotels & Accommodation','hotels-accommodation','Hotels, hostels, and lodging','emoji:🏨',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-3','Shopping','shopping','Retail stores and shops','emoji:🛍️',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-4','Health & Beauty','health-beauty','Healthcare and beauty services','emoji:💆',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-5','Automotive','automotive','Car dealers, repair shops','emoji:🚗',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-6','Professional Services','professional-services','Legal, accounting, consulting','emoji:💼',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-7','Education','education','Schools, tutoring, training','emoji:📚',NULL,1776906423,1776906423);
+INSERT INTO "categories" ("id","name","slug","description","icon","parentId","created_at","updated_at") VALUES('cat-8','Entertainment','entertainment','Bars, clubs, venues','emoji:🎭',NULL,1776906423,1776906423);
+CREATE TABLE `media` (
+	`id` text PRIMARY KEY NOT NULL,
+	`url` text NOT NULL,
+	`filename` text NOT NULL,
+	`mimeType` text NOT NULL,
+	`size` integer NOT NULL,
+	`width` integer,
+	`height` integer,
+	`alt` text,
+	`type` text,
+	`businessId` text,
+	`createdById` text,
+	`created_at` integer DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE `business_pages` (
+	`id` text PRIMARY KEY NOT NULL,
+	`title` text NOT NULL,
+	`slug` text NOT NULL,
+	`ownerId` text NOT NULL,
+	`categoryId` text,
+	`status` text DEFAULT 'draft',
+	`bannerImageId` text,
+	`profileImageId` text,
+	`contactName` text,
+	`contactNumber` text,
+	`countryCode` text DEFAULT '+670',
+	`yearOfEstablishment` integer,
+	`email` text,
+	`address` text,
+	`locationLat` real,
+	`locationLng` real,
+	`openingHours` text,
+	`aboutUs` text,
+	`latestUpdates` text,
+	`tags` text,
+	`likes` integer DEFAULT 0,
+	`saves` integer DEFAULT 0,
+	`ratingAverage` real DEFAULT 0,
+	`ratingCount` integer DEFAULT 0,
+	`views` integer DEFAULT 0,
+	`planType` text,
+	`publishDate` integer,
+	`expiryDate` integer,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')),
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+INSERT INTO "business_pages" ("id","title","slug","ownerId","categoryId","status","bannerImageId","profileImageId","contactName","contactNumber","countryCode","yearOfEstablishment","email","address","locationLat","locationLng","openingHours","aboutUs","latestUpdates","tags","likes","saves","ratingAverage","ratingCount","views","planType","publishDate","expiryDate","createdAt","updatedAt") VALUES('biz-1','Café Timor','cafe-timor','user-1','cat-1','live',NULL,NULL,'João Silva','77001234','+670',NULL,'info@cafetimor.tl','Avenida de绍兴, Dili',-8.5569,125.5603,'{"monday":{"open":"07:00","close":"22:00"},"tuesday":{"open":"07:00","close":"22:00"},"wednesday":{"open":"07:00","close":"22:00"},"thursday":{"open":"07:00","close":"22:00"},"friday":{"open":"07:00","close":"23:00"},"saturday":{"open":"08:00","close":"23:00"},"sunday":{"open":"08:00","close":"20:00"}}','Café Timor is the premier coffee destination in Dili, serving the finest Timor-Leste coffee beans since 2010.',NULL,'["coffee","cafe","wifi","meeting place"]',156,42,4.5,28,1250,'pro',NULL,NULL,1776906423,1776906423);
+INSERT INTO "business_pages" ("id","title","slug","ownerId","categoryId","status","bannerImageId","profileImageId","contactName","contactNumber","countryCode","yearOfEstablishment","email","address","locationLat","locationLng","openingHours","aboutUs","latestUpdates","tags","likes","saves","ratingAverage","ratingCount","views","planType","publishDate","expiryDate","createdAt","updatedAt") VALUES('biz-2','Hotel Timor','hotel-timor','user-2','cat-2','live',NULL,NULL,'Maria Reis','77005678','+670',NULL,'reservations@hoteltimor.tl','Beach Road, Dili',-8.4833,125.5856,'{"monday":{"open":"00:00","close":"00:00"},"tuesday":{"open":"00:00","close":"00:00"},"wednesday":{"open":"00:00","close":"00:00"},"thursday":{"open":"00:00","close":"00:00"},"friday":{"open":"00:00","close":"00:00"},"saturday":{"open":"00:00","close":"00:00"},"sunday":{"open":"00:00","close":"00:00"}}','Hotel Timor offers luxury accommodation with stunning ocean views.',NULL,'["hotel","luxury","pool","wifi","restaurant"]',289,78,4.8,52,3420,'max',NULL,NULL,1776906423,1776906423);
+INSERT INTO "business_pages" ("id","title","slug","ownerId","categoryId","status","bannerImageId","profileImageId","contactName","contactNumber","countryCode","yearOfEstablishment","email","address","locationLat","locationLng","openingHours","aboutUs","latestUpdates","tags","likes","saves","ratingAverage","ratingCount","views","planType","publishDate","expiryDate","createdAt","updatedAt") VALUES('biz-3','Timor Tech Solutions','timor-tech-solutions','user-3','cat-6','live',NULL,NULL,'Carlos Almeida','77009999','+670',NULL,'carlos@timortech.tl','Building Trade, Dili',-8.5569,125.5603,'{"monday":{"open":"08:00","close":"17:00"},"tuesday":{"open":"08:00","close":"17:00"},"wednesday":{"open":"08:00","close":"17:00"},"thursday":{"open":"08:00","close":"17:00"},"friday":{"open":"08:00","close":"17:00"},"saturday":{"open":"09:00","close":"13:00"},"sunday":{"open":"closed","close":"closed"}}','Timor Tech Solutions provides IT consulting and web development services.',NULL,'["it","consulting","web development","software"]',87,23,4.2,15,890,'pro',NULL,NULL,1776906423,1776906423);
+INSERT INTO "business_pages" ("id","title","slug","ownerId","categoryId","status","bannerImageId","profileImageId","contactName","contactNumber","countryCode","yearOfEstablishment","email","address","locationLat","locationLng","openingHours","aboutUs","latestUpdates","tags","likes","saves","ratingAverage","ratingCount","views","planType","publishDate","expiryDate","createdAt","updatedAt") VALUES('biz-4','Beach Shop Dili','beach-shop-dili','user-1','cat-3','live',NULL,NULL,'Ana Pereira','77005555','+670',NULL,'ana@beachshop.tl','Coastal Road, Dili',-8.4833,125.5856,'{"monday":{"open":"09:00","close":"18:00"},"tuesday":{"open":"09:00","close":"18:00"},"wednesday":{"open":"09:00","close":"18:00"},"thursday":{"open":"09:00","close":"18:00"},"friday":{"open":"09:00","close":"18:00"},"saturday":{"open":"09:00","close":"17:00"},"sunday":{"open":"10:00","close":"14:00"}}','Your one-stop shop for beachwear, surfboards, and vacation essentials.',NULL,'["beachwear","surf","swimwear","souvenirs"]',45,12,4,8,456,'basic',NULL,NULL,1776906423,1776906423);
+INSERT INTO "business_pages" ("id","title","slug","ownerId","categoryId","status","bannerImageId","profileImageId","contactName","contactNumber","countryCode","yearOfEstablishment","email","address","locationLat","locationLng","openingHours","aboutUs","latestUpdates","tags","likes","saves","ratingAverage","ratingCount","views","planType","publishDate","expiryDate","createdAt","updatedAt") VALUES('biz-5','Timor Dental Clinic','timor-dental-clinic','user-2','cat-4','live',NULL,NULL,'Dr. Sofia Belo','77003333','+670',NULL,'dr.belo@timordental.tl','Medical Center, Dili',-8.5569,125.5603,'{"monday":{"open":"08:00","close":"17:00"},"tuesday":{"open":"08:00","close":"17:00"},"wednesday":{"open":"08:00","close":"17:00"},"thursday":{"open":"08:00","close":"17:00"},"friday":{"open":"08:00","close":"15:00"},"saturday":{"open":"closed","close":"closed"},"sunday":{"open":"closed","close":"closed"}}','Professional dental care for the whole family.',NULL,'["dentist","dental","health","medical"]',123,34,4.9,41,2100,'pro',NULL,NULL,1776906423,1776906423);
+CREATE TABLE `products` (
+	`id` text PRIMARY KEY NOT NULL,
+	`title` text NOT NULL,
+	`price` text NOT NULL,
+	`description` text,
+	`businessPageId` text NOT NULL,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')),
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-1','Timor Gold Coffee','$15.00','Premium roasted coffee beans, 500g','biz-1',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-2','Espresso Special','$4.00','Double shot espresso with Timor beans','biz-1',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-3','Deluxe Suite','$150/night','Ocean view suite with breakfast included','biz-2',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-4','Standard Room','$80/night','Comfortable room with city view','biz-2',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-5','Website Development','$500+','Custom website with responsive design','biz-3',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-6','IT Consultation','$50/hour','Expert IT advice for your business','biz-3',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-7','Surfboard Rental','$20/day','Quality surfboards for all levels','biz-4',1776906423,1776906423);
+INSERT INTO "products" ("id","title","price","description","businessPageId","createdAt","updatedAt") VALUES('prod-8','Dental Checkup','$30','Complete dental examination and cleaning','biz-5',1776906423,1776906423);
+CREATE TABLE `product_images` (
+	`id` text PRIMARY KEY NOT NULL,
+	`productId` text NOT NULL,
+	`mediaId` text NOT NULL,
+	`position` integer DEFAULT 0
+);
+CREATE TABLE `reviews` (
+	`id` text PRIMARY KEY NOT NULL,
+	`businessPageId` text NOT NULL,
+	`userId` text NOT NULL,
+	`rating` integer NOT NULL,
+	`comment` text,
+	`isEdited` integer DEFAULT false,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')),
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+INSERT INTO "reviews" ("id","businessPageId","userId","rating","comment","isEdited","createdAt","updatedAt") VALUES('rev-1','biz-1','user-2',5,'Best coffee in Dili! Love the atmosphere.',0,1776906423,1776906423);
+INSERT INTO "reviews" ("id","businessPageId","userId","rating","comment","isEdited","createdAt","updatedAt") VALUES('rev-2','biz-1','user-3',4,'Great coffee, but can get crowded on weekends.',0,1776906423,1776906423);
+INSERT INTO "reviews" ("id","businessPageId","userId","rating","comment","isEdited","createdAt","updatedAt") VALUES('rev-3','biz-2','user-1',5,'Amazing views and excellent service!',0,1776906423,1776906423);
+INSERT INTO "reviews" ("id","businessPageId","userId","rating","comment","isEdited","createdAt","updatedAt") VALUES('rev-4','biz-2','user-3',5,'Best hotel in Timor. Will definitely return.',0,1776906423,1776906423);
+INSERT INTO "reviews" ("id","businessPageId","userId","rating","comment","isEdited","createdAt","updatedAt") VALUES('rev-5','biz-3','user-1',4,'Very professional team. Helped us modernize our business.',0,1776906423,1776906423);
+INSERT INTO "reviews" ("id","businessPageId","userId","rating","comment","isEdited","createdAt","updatedAt") VALUES('rev-6','biz-5','user-1',5,'Dr. Belo is fantastic! Painless procedure.',0,1776906423,1776906423);
+CREATE TABLE `orders` (
+	`id` text PRIMARY KEY NOT NULL,
+	`businessPageId` text NOT NULL,
+	`userId` text NOT NULL,
+	`planType` text NOT NULL,
+	`amount` integer NOT NULL,
+	`status` text DEFAULT 'unpaid',
+	`expiryDate` integer,
+	`paymentMethod` text,
+	`paidDate` integer,
+	`adminNotes` text,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')),
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE `ad_banners` (
+	`id` text PRIMARY KEY NOT NULL,
+	`title` text NOT NULL,
+	`description` text,
+	`imageId` text,
+	`linkedBusinessPageId` text,
+	`externalUrl` text,
+	`isActive` integer DEFAULT true,
+	`startDate` integer,
+	`endDate` integer,
+	`createdAt` integer DEFAULT (strftime('%s', 'now')),
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE `site_settings` (
+	`id` text PRIMARY KEY NOT NULL,
+	`key` text NOT NULL,
+	`value` text,
+	`updatedAt` integer DEFAULT (strftime('%s', 'now'))
+);
+CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);
+CREATE INDEX `users_email_idx` ON `users` (`email`);
+CREATE UNIQUE INDEX `blog_posts_slug_unique` ON `blog_posts` (`slug`);
+CREATE INDEX `blog_posts_author_idx` ON `blog_posts` (`author_id`);
+CREATE INDEX `blog_posts_status_idx` ON `blog_posts` (`status`);
+CREATE UNIQUE INDEX `categories_slug_unique` ON `categories` (`slug`);
+CREATE UNIQUE INDEX `business_pages_slug_unique` ON `business_pages` (`slug`);
+CREATE INDEX `business_owner_idx` ON `business_pages` (`ownerId`);
+CREATE INDEX `business_status_idx` ON `business_pages` (`status`);
+CREATE INDEX `products_business_idx` ON `products` (`businessPageId`);
+CREATE INDEX `reviews_business_idx` ON `reviews` (`businessPageId`);
+CREATE INDEX `reviews_user_idx` ON `reviews` (`userId`);
+CREATE INDEX `orders_business_idx` ON `orders` (`businessPageId`);
+CREATE INDEX `orders_user_idx` ON `orders` (`userId`);
+CREATE UNIQUE INDEX `site_settings_key_unique` ON `site_settings` (`key`);

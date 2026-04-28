@@ -2,12 +2,11 @@
 // Admin listing management page - API driven
 export const prerender = false;
 
-import Layout from '../../../layouts/Layout.astro';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
 import Button from '../../../components/ui/Button.astro';
-import { ENTITY_TYPES } from '@/lib/constants';
 ---
 
-<Layout title="Listing Management - Admin" requireAuth adminOnly>
+<AdminLayout title="Listing Management">
   <div class="container py-8">
     <div class="flex items-center justify-between mb-6">
       <div>
@@ -95,7 +94,7 @@ import { ENTITY_TYPES } from '@/lib/constants';
       </div>
     </div>
   </div>
-</Layout>
+</AdminLayout>
 
 <script>
   interface Listing {

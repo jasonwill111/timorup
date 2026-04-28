@@ -17,9 +17,14 @@ const businessOptions = businesses.map(b => ({
   label: b.title,
   type: b.entityType,
 }));
+
+const businessOptionsJson = JSON.stringify(businessOptions);
 ---
 
 <AdminLayout title="SKUs / Products">
+  <!-- Hidden data for client script -->
+  <script id="business-data" type="application/json" set:html={businessOptionsJson}></script>
+
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
     <div class="mb-4 md:mb-6">
@@ -78,7 +83,7 @@ const businessOptions = businesses.map(b => ({
         </div>
 
         <!-- Price Fields -->
-        <div id="price-fields-container">
+        <div id="price-fields-container" data-field-count="1">
           <label class="block text-sm font-medium mb-2">Pricing Options</label>
           <div id="price-fields" class="space-y-2">
             <!-- Price fields will be added dynamically -->
@@ -104,10 +109,13 @@ const businessOptions = businesses.map(b => ({
   </div>
 </AdminLayout>
 
-<script define:vars={{ businessOptions }}>
-  import { SKU_SERVICE_TYPES, PRICE_UNITS, getPriceUnitsForServiceType } from '../../lib/constants';
+<script>
+  import { getPriceUnitsForServiceType } from '../../lib/constants';
 
-  let businesses = [];
+  // Read business options from hidden JSON element
+  const businessDataEl = document.getElementById('business-data');
+  const businessOptions = businessDataEl ? JSON.parse(businessDataEl.textContent || '[]') : [];
+
   let editingId = null;
 
   // Populate business dropdown
