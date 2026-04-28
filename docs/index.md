@@ -259,10 +259,10 @@ pnpm build
 
 ---
 
-**文档版本**: 15.0
-**最后更新**: 2026-04-27
+**文档版本**: 16.0
+**最后更新**: 2026-04-28
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | UI/UX 优化
+**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | UI/UX 优化 | Polish
 
 ## Homepage Featured Sections
 

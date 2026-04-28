@@ -2,6 +2,25 @@
 
 > 每次项目开发前检查并更新此文件
 
+## 2026-04-28
+
+### Polish 修复
+
+| 项目 | 变更 | 状态 |
+|------|------|------|
+| Star Rating A11y | 添加 sr-only + aria-hidden 到所有星级评分 | ✅ |
+| Design Context | 添加 .impeccable.md 设计上下文文件 | ✅ |
+| 屏幕阅读器 | 评分图标对屏幕阅读器友好 | ✅ |
+
+### 设计系统
+
+- **品牌色**: Yellow #FFD150 on Cream #FDFBF7
+- **字体**: Inter (body) + Oswald (headings)
+- **Icons**: Lucide SVG (inline)
+- **无障碍**: WCAG AA, prefers-reduced-motion 支持
+
+---
+
 ## 2026-04-27
 
 ### UI/UX 优化
