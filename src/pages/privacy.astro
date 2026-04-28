@@ -1,7 +1,8 @@
 ---
-export const prerender = true;
-
+import { STATIC_CACHE } from '@/lib/cache-headers';
 import Layout from '../layouts/Layout.astro';
+
+Astro.response.headers.set('Cache-Control', STATIC_CACHE);
 ---
 
 <Layout title="Privacy Policy - TIMORLIST">
