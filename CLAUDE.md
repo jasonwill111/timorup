@@ -248,3 +248,19 @@ AI功能通过 Mastra + MiniMax API 实现：
 
 本地: `.dev.vars` 设置 `MINIMAX_API_KEY`
 生产: `wrangler secret put MINIMAX_API_KEY`
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues for `jasonwill111/timorlist`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+AI-driven workflow: `needs-triage` → `needs-info` / `ready-for-agent` → `in-progress` → closed. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context at `.specweave/docs/internal/`. See `docs/agents/domain.md`.
