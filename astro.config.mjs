@@ -11,17 +11,13 @@ const isWindows = process.platform === 'win32';
 const useCloudflare = process.env.USE_CLOUDFLARE === '1' || (!isWindows && process.env.USE_CLOUDFLARE !== '0');
 
 const adapter = useCloudflare
-  ? cloudflare({
-      // Workerd runtime for SSR in production
-      prerenderEnvironment: 'cloudflare',
-    })
+  ? cloudflare({})
   : node({
       mode: 'standalone',
-      // Ensure prerendered pages work correctly with Node adapter
-      prerenderEnvironment: undefined,
     });
 
 export default defineConfig({
+  // Default: SSR. Static pages add `export const prerender = true`
   output: 'server',
 
   site: 'https://timorlist.com',
