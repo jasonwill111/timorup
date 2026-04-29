@@ -7,17 +7,24 @@ on:
 
 jobs:
   deploy:
-    name: 部署到 Cloudflare Workers
+    name: deploy
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://timorbiz.com
+      url: https://timorlist.com
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
@@ -35,14 +42,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # wrangler.toml 已迁移到 wrangler.jsonc，但 wrangler-action 也支持 jsonc
-          # 显式指定配置文件
-          configuration: |
-            { "main": "@astrojs/cloudflare/entrypoints/server", "name": "timorbiz" }
-          environment: production
 
-      - name: 验证部署
+      - name: Verify deployment
         run: |
-          echo "✅ 部署完成"
-          echo "🌐 站点: https://timorbiz.com"
-          curl -s -o /dev/null -w "%{http_code}" https://timorbiz.com || echo "无法验证（域名未配置）"
+          echo "Deployment complete"
+          curl -s -o /dev/null -w "%{http_code}" https://timorlist.com || echo "Verification skipped"
