@@ -52,7 +52,7 @@ const gradientClass = isOrg ? (orgTypeColors[orgType] || 'from-amber-100 to-oran
 >
   <div class="relative bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden">
     <!-- Thumbnail - shorter on mobile -->
-    <div class:list={["aspect-square sm:aspect-[4/3] relative overflow-hidden bg-gradient-to-br", gradientClass]}>
+    <div class:list={["aspect-square relative overflow-hidden bg-gradient-to-br", gradientClass]}>
       {thumbnail ? (
         <img src={thumbnail} alt={title} class="w-full h-full object-cover" loading="lazy" />
       ) : (

@@ -259,10 +259,14 @@ pnpm build
 
 ---
 
-**文档版本**: 17.0
+**文档版本**: 18.0
 **最后更新**: 2026-04-29
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | Mobile 2列布局 | D1 timorlist-db | Workers SSR
+**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | Mobile 紧凑布局 | D1 timorlist-db | Workers SSR
+
+## 最新 Increment
+
+- [0017-mobile-ui-optimization](../.specweave/increments/0017-mobile-ui-optimization/) - Mobile UI/UX 优化
 
 ## 部署配置 (2026-04-29)
 
