@@ -40,14 +40,6 @@
     }
   ],
 
-  // KV namespace for sessions/cache
-  "kv_namespaces": [
-    {
-      "binding": "CACHE",
-      "id": "YOUR_KV_ID"
-    }
-  ],
-
   // Cron triggers for cleanup jobs
   "triggers": {
     "crons": [
