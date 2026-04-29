@@ -158,7 +158,7 @@ const formatPrice = (product: typeof productsList[0]) => {
     </div>
 
     <!-- Products Grid -->
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {productsList.map(product => (
         <a
           href={product.businessType === 'business' ? `/business/${product.businessSlug}/product/${product.id}` : `/${product.businessType}/${product.businessSlug}`}

@@ -120,7 +120,7 @@ const structuredData = {
     </div>
 
     <!-- Businesses Grid -->
-    <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="businesses-grid">
+    <div class="grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4" id="businesses-grid">
       {businesses.length > 0 ? businesses.map((business: any) => {
         const firstTag = business.tags?.[0] || '';
         const reviewCount = business.reviews || Math.floor(Math.random() * 50);
