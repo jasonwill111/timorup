@@ -104,27 +104,55 @@ import CardFooter from '../components/ui/CardFooter.astro'
 </Layout>
 
 <script>
+  // Validate and sanitize redirect URL immediately to prevent open redirect display
+  function sanitizeRedirect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get('redirect');
+
+    if (redirect) {
+      try {
+        const redirectUrl = new URL(redirect);
+        // Only allow relative redirects (same origin)
+        if (redirectUrl.origin === window.location.origin) {
+          sessionStorage.setItem('auth_redirect', redirectUrl.pathname + redirectUrl.search);
+        }
+        // Remove the redirect param from URL immediately if it's external
+      } catch {
+        // Invalid URL, ignore redirect
+      }
+    }
+
+    // Always clean the URL of redirect params to prevent showing external domains
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+  }
+
+  // Run on page load
+  sanitizeRedirect();
+
   const form = document.getElementById('login-form') as HTMLFormElement;
-  
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData(form);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const rememberMe = formData.get('rememberMe') === 'on';
-    
+
     try {
       const res = await fetch('/api/auth/sign-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, rememberMe }),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.success) {
-        window.location.href = '/account';
+        const redirect = sessionStorage.getItem('auth_redirect');
+        sessionStorage.removeItem('auth_redirect');
+        window.location.href = redirect || '/account';
       } else {
         alert(data.error?.message || 'Login failed');
       }

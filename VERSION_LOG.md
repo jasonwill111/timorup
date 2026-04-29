@@ -2,6 +2,64 @@
 
 > 每次项目开发前检查并更新此文件
 
+## 2026-04-29
+
+### 完整测试套件
+
+| 测试类型 | 数量 | 状态 |
+|----------|------|------|
+| 单元测试 | 182 | ✅ |
+| E2E 用户流程 | 20 | ✅ |
+| E2E 页面渲染 | 43 | ✅ |
+| E2E 安全测试 | 40 | ✅ |
+| E2E SEO 验证 | 15 | ✅ |
+| E2E 并发测试 | 11 | ✅ |
+| E2E 错误页面 | 14 | ✅ |
+| E2E API 边界 | 45 | ✅ |
+| E2E 移动端 | 23 | ✅ |
+| E2E 性能测试 | 28 | ✅ |
+| E2E Auth 边界 | 22 | ✅ |
+| **总计** | **443+** | ✅ |
+
+### 安全修复
+
+| 问题 | 修复 | 状态 |
+|------|------|------|
+| XSS 防护 | search.astro 添加 escapeHtml() | ✅ |
+| Auth Bypass | 5个 Admin API 添加鉴权 | ✅ |
+| Open Redirect | login.astro 添加 URL 验证 | ✅ |
+
+### 新增测试文件
+
+| 文件 | 测试数 |
+|------|--------|
+| e2e/security.spec.ts | 40 |
+| e2e/seo.spec.ts | 15 |
+| e2e/concurrent.spec.ts | 11 |
+| e2e/error-pages.spec.ts | 14 |
+| e2e/api-boundary.spec.ts | 45 |
+| e2e/mobile.spec.ts | 23 |
+| e2e/performance.spec.ts | 28 |
+| e2e/auth-edge.spec.ts | 22 |
+| e2e/user-flows.spec.ts | 20 |
+| e2e/homepage.spec.ts | 14 |
+| e2e/listing.spec.ts | 15 |
+| e2e/business-detail.spec.ts | 14 |
+
+### Agent Skills 配置
+
+| 配置 | 值 |
+|------|-----|
+| Issue Tracker | GitHub Issues |
+| Triage Labels | needs-triage, needs-info, ready-for-agent, in-progress, wontfix |
+| Domain Docs | .specweave/docs/internal/ |
+
+### Husky Hooks 修复
+
+修复 .husky/_/ 目录下的 executable 权限。
+
+---
+
 ## 2026-04-28
 
 ### Polish 修复

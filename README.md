@@ -55,6 +55,18 @@
 | Validation | Zod 4.x |
 | Media | Cloudflare R2 |
 
+## Testing
+
+| Type | Command | Tests |
+|------|---------|-------|
+| Unit | `pnpm test` | 182 |
+| E2E | `npx playwright test e2e/` | 443+ |
+| Security | `npx playwright test e2e/security.spec.ts` | 40 |
+| Mobile | `npx playwright test e2e/mobile.spec.ts` | 23 |
+| Performance | `npx playwright test e2e/performance.spec.ts` | 28 |
+
+**Full test suite**: `pnpm test && npx playwright test e2e/`
+
 ## Quick Start
 
 Your project is initialized! Now describe what you want to build.

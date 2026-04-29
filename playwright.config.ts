@@ -12,13 +12,13 @@ export default defineConfig({
     ['json', { outputFile: 'playwright-report/results.json' }]
   ],
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: process.env.BASE_URL || 'http://localhost:4323',
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'export USE_CLOUDFLARE=0 && pnpm dev',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
+    command: 'export USE_CLOUDFLARE=0 && pnpm dev --port 4323',
+    url: 'http://localhost:4323',
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
   projects: [

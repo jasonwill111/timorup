@@ -6,6 +6,7 @@ import { businessPages, categories } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
 import { z } from 'zod';
+import { auth } from '@/lib/auth';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -18,11 +19,44 @@ function getClientIP(request: Request): string {
          'unknown';
 }
 
+async function requireAuth(request: Request) {
+  const cookieHeader = request.headers.get('cookie') || '';
+  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+  if (!tokenMatch) {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  }
+  try {
+    const authApi = (auth as unknown as { api: typeof auth.api }).api;
+    const { user } = await authApi.getSession({
+      headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
+    });
+    if (!user) {
+      return { authorized: false, error: new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+    }
+    return { authorized: true, user };
+  } catch {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  }
+}
+
 const ParamsSchema = z.object({
   uid: z.string().min(1),
 });
 
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
+  // Auth check
+  const authResult = await requireAuth(request);
+  if (!authResult.authorized) return authResult.error;
+
   // Rate limiting
   const clientIP = getClientIP(request);
   const rateLimit = checkRateLimit(`biz:${clientIP}`);

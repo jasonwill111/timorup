@@ -277,9 +277,17 @@ export const test = base.extend<TestFixtures>({
  * Clean up test data after tests
  */
 export async function cleanupTestData(page: Page) {
-  // Clear cookies and local storage
+  // Clear cookies - safely ignore localStorage errors
   await page.context().clearCookies();
-  await page.evaluate(() => localStorage.clear());
+  try {
+    // Only clear localStorage if the page allows it (not about:blank or cross-origin)
+    const url = page.url();
+    if (url && !url.startsWith('about:') && url.startsWith('http')) {
+      await page.evaluate(() => localStorage.clear());
+    }
+  } catch {
+    // Ignore localStorage errors - page might be restricted
+  }
 }
 
 /**

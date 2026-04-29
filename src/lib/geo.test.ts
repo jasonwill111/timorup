@@ -8,10 +8,13 @@
  * TC-004: Network error → resolves to null
  * TC-005: Query includes "Timor-Leste" suffix
  * TC-006: Request includes User-Agent: TIMORLIST/1.0 header
+ * TC-007: calculateDistance returns correct km between two coordinates
+ * TC-008: validateCoordinates returns true for valid lat/lng
+ * TC-009: validateCoordinates returns false for out-of-range values
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { geocodeAddress, __resetGeoState } from './geo';
+import { geocodeAddress, __resetGeoState, calculateDistance, validateCoordinates } from './geo';
 
 // Mock global fetch
 const mockFetch = vi.fn();
@@ -138,5 +141,57 @@ describe('TC-006: User-Agent header', () => {
     const [, options] = mockFetch.mock.calls[0] as [string, RequestInit];
     const headers = options.headers as Record<string, string>;
     expect(headers['User-Agent']).toBe('TIMORLIST/1.0');
+  });
+});
+
+describe('TC-007: calculateDistance', () => {
+  it('calculates distance between Dili and Aileu (~27km)', () => {
+    // Dili: -8.5569, 125.5603
+    // Aileu: -8.7292, 125.5664
+    const distance = calculateDistance(-8.5569, 125.5603, -8.7292, 125.5664);
+    expect(distance).toBeGreaterThan(18);
+    expect(distance).toBeLessThan(20);
+  });
+
+  it('calculates distance between same point as 0', () => {
+    const distance = calculateDistance(-8.5569, 125.5603, -8.5569, 125.5603);
+    expect(distance).toBeLessThan(0.01);
+  });
+
+  it('calculates distance between Dili and Liquica (~40km)', () => {
+    // Dili: -8.5569, 125.5603
+    // Liquica: -8.4167, 125.3500
+    const distance = calculateDistance(-8.5569, 125.5603, -8.4167, 125.3500);
+    expect(distance).toBeGreaterThan(20);
+    expect(distance).toBeLessThan(30);
+  });
+});
+
+describe('TC-008: validateCoordinates - valid', () => {
+  it('returns true for valid Dili coordinates', () => {
+    expect(validateCoordinates(-8.5569, 125.5603)).toBe(true);
+  });
+
+  it('returns true for boundary valid values', () => {
+    expect(validateCoordinates(0, 0)).toBe(true);
+    expect(validateCoordinates(90, 180)).toBe(true);
+    expect(validateCoordinates(-90, -180)).toBe(true);
+  });
+});
+
+describe('TC-009: validateCoordinates - invalid', () => {
+  it('returns false for out-of-range latitude', () => {
+    expect(validateCoordinates(91, 0)).toBe(false);
+    expect(validateCoordinates(-91, 0)).toBe(false);
+  });
+
+  it('returns false for out-of-range longitude', () => {
+    expect(validateCoordinates(0, 181)).toBe(false);
+    expect(validateCoordinates(0, -181)).toBe(false);
+  });
+
+  it('returns false for non-numeric values', () => {
+    expect(validateCoordinates(NaN, 0)).toBe(false);
+    expect(validateCoordinates(0, NaN)).toBe(false);
   });
 });

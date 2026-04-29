@@ -38,6 +38,8 @@ import CardContent from '../components/ui/CardContent.astro';
 </Layout>
 
 <script>
+  import { escapeHtml } from '../lib/utils';
+
   const searchForm = document.getElementById('search-form') as HTMLFormElement;
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const resultsContainer = document.getElementById('search-results');
@@ -72,18 +74,18 @@ import CardContent from '../components/ui/CardContent.astro';
         const html = `
           <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             ${data.data.map((business: any) => `
-              <a href="/business/${business.slug}" class="block group">
+              <a href="/business/${escapeHtml(business.slug)}" class="block group">
                 <Card class="overflow-hidden transition-shadow hover:shadow-lg">
                   <div class="aspect-[3/2] bg-muted relative">
-                    ${business.bannerImageId ? 
-                      `<img src="/api/media/${business.bannerImageId}" alt="${business.title}" class="w-full h-full object-cover" />` :
-                      `<div class="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">${business.title?.charAt(0) || 'B'}</div>`
+                    ${business.bannerImageId ?
+                      `<img src="/api/media/${business.bannerImageId}" alt="${escapeHtml(business.title)}" class="w-full h-full object-cover" />` :
+                      `<div class="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">${escapeHtml(business.title?.charAt(0) || 'B')}</div>`
                     }
                   </div>
                   <CardContent class="p-4">
-                    <h3 class="font-semibold group-hover:text-primary transition-colors">${business.title}</h3>
-                    ${business.categoryId ? `<p class="text-sm text-muted-foreground">${business.categoryId}</p>` : ''}
-                    ${business.address ? `<p class="text-sm text-muted-foreground mt-1">${business.address}</p>` : ''}
+                    <h3 class="font-semibold group-hover:text-primary transition-colors">${escapeHtml(business.title)}</h3>
+                    ${business.categoryId ? `<p class="text-sm text-muted-foreground">${escapeHtml(business.categoryId)}</p>` : ''}
+                    ${business.address ? `<p class="text-sm text-muted-foreground mt-1">${escapeHtml(business.address)}</p>` : ''}
                   </CardContent>
                 </Card>
               </a>
@@ -95,7 +97,7 @@ import CardContent from '../components/ui/CardContent.astro';
       } else {
         resultsContainer.innerHTML = `
           <div class="text-center py-8">
-            <p class="text-lg text-muted-foreground">No businesses found for "${query}"</p>
+            <p class="text-lg text-muted-foreground">No businesses found for "${escapeHtml(query)}"</p>
             <p class="text-sm text-muted-foreground mt-2">Try different keywords or browse our directory</p>
             <a href="/businesses" class="inline-block mt-4">
               <Button variant="outline">Browse All Businesses</Button>

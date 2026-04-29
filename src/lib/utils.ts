@@ -32,3 +32,42 @@ export function escapeHtmlServer(str: string | null | undefined): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
 }
+
+/**
+ * Format a number as USD currency
+ */
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount);
+}
+
+/**
+ * Format a date string for display
+ */
+export function formatDate(dateStr: string | Date): string {
+  const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
+}
+
+/**
+ * Convert a string to a URL-safe slug
+ */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // Remove diacritics
+    .replace(/[^a-z0-9\s-]/g, '')    // Remove special chars
+    .trim()
+    .replace(/\s+/g, '-')             // Replace spaces with hyphens
+    .replace(/-+/g, '-');             // Collapse multiple hyphens
+}

@@ -4,9 +4,42 @@ export const prerender = false;
 import { db } from '@/lib/db';
 import { orders, businessPages, users } from '@/db/schema';
 import { eq, desc, sql, like, or, and } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+
+async function requireAdminAuth(request: Request) {
+  const cookieHeader = request.headers.get('cookie') || '';
+  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+  if (!tokenMatch) {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  }
+  try {
+    const authApi = (auth as unknown as { api: typeof auth.api }).api;
+    const { user } = await authApi.getSession({
+      headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
+    });
+    if (!user || user.role !== 'admin') {
+      return { authorized: false, error: new Response(JSON.stringify({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Admin access required' }
+      }), { status: 403, headers: { 'Content-Type': 'application/json' } }) };
+    }
+    return { authorized: true, user };
+  } catch {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  }
+}
 
 // GET - List all orders
-export async function GET({ url }: { url: URL }) {
+export async function GET({ url, request }: { url: URL; request: Request }) {
+  const authResult = await requireAdminAuth(request);
+  if (!authResult.authorized) return authResult.error;
+
   try {
     const status = url.searchParams.get('status') || '';
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -62,6 +95,9 @@ export async function GET({ url }: { url: URL }) {
 
 // POST - Create order
 export async function POST({ request }: { request: Request }) {
+  const authResult = await requireAdminAuth(request);
+  if (!authResult.authorized) return authResult.error;
+
   try {
     const body = await request.json();
     const { businessPageId, userId, planType, amount, paymentMethod } = body;

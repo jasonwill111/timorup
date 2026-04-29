@@ -1,0 +1,76 @@
+---
+// Dashboard page - requires authentication
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/ui/Button.astro';
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardDescription from '../components/ui/CardDescription.astro';
+import CardContent from '../components/ui/CardContent.astro';
+
+// Check auth via session cookie
+const cookieHeader = Astro.request.headers.get('cookie') || '';
+let user: { id: string; name: string; email: string } | null = null;
+
+try {
+  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+
+  if (tokenMatch) {
+    const { db } = await import('@/lib/db');
+    const { sessions, users } = await import('@/db/schema');
+    const { eq } = await import('drizzle-orm');
+
+    const session = await db.select()
+      .from(sessions)
+      .where(eq(sessions.token, tokenMatch[1]))
+      .limit(1)
+      .get();
+
+    if (session && session.expiresAt && new Date(session.expiresAt) > new Date()) {
+      const userRecord = await db.select()
+        .from(users)
+        .where(eq(users.id, session.userId))
+        .limit(1)
+        .get();
+
+      if (userRecord) {
+        user = { id: userRecord.id, name: userRecord.name || '', email: userRecord.email };
+      }
+    }
+  }
+} catch (e) {
+  console.error('Auth check failed:', e);
+}
+
+// Redirect if not logged in
+if (!user) {
+  return Astro.redirect('/login?redirect=/dashboard');
+}
+---
+
+<Layout title="Dashboard - TIMORLIST">
+  <div class="container py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">Dashboard</h1>
+      <p class="text-muted-foreground">Welcome back, {user.name}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <Card>
+        <CardHeader class="pb-2">
+          <CardTitle class="text-sm text-muted-foreground">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-2">
+          <a href="/account">
+            <Button variant="outline" class="w-full justify-start">My Account</Button>
+          </a>
+          <a href="/business/create">
+            <Button variant="outline" class="w-full justify-start">Add Business</Button>
+          </a>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</Layout>
