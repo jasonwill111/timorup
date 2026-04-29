@@ -102,11 +102,11 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
 ---
 
 <Layout title="Local Directory - TIMORLIST" description="Browse businesses, government agencies, and nonprofits in Timor-Leste">
-  <div class="container py-8">
-    <h1 class="text-3xl font-bold mb-6">Local Directory</h1>
+  <div class="container py-4 sm:py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Local Directory</h1>
 
-    <!-- Type Tabs -->
-    <div class="flex gap-4 mb-6 border-b">
+    <!-- Type Tabs - compact on mobile -->
+    <div class="flex gap-1 sm:gap-4 mb-4 sm:mb-6 border-b -mx-2 px-2 sm:mx-0 sm:px-0 overflow-x-auto">
       <a
         href="/listing?type=business"
         class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
@@ -127,18 +127,18 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
       </a>
     </div>
 
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-4 mb-6">
+    <!-- Filters - compact on mobile -->
+    <div class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
       <Input
         id="search"
         type="search"
-        placeholder="Search by name..."
+        placeholder="Search..."
         value={search}
-        class="w-64"
+        class="w-full sm:w-48 md:w-64"
       />
 
       {type === 'business' && (
-        <select id="industry-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+        <select id="industry-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
           <option value="">All Industries</option>
           {Object.entries(INDUSTRIES).map(([key, group]) => (
             <optgroup label={group.label}>
@@ -153,7 +153,7 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
       )}
 
       {(type === 'govs' || type === 'ngos') && (
-        <select id="category-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+        <select id="category-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
           <option value="">All Categories</option>
           {allCategories.map(cat => (
             <option value={cat.id} selected={category === cat.id}>
@@ -163,11 +163,11 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
         </select>
       )}
 
-      <select id="sort-filter" class="h-10 px-3 rounded-md border border-input bg-background">
-        <option value="recent" selected={sort === 'recent'}>Most Recent</option>
-        <option value="name" selected={sort === 'name'}>Name (A-Z)</option>
-        <option value="rating" selected={sort === 'rating'}>Highest Rated</option>
-        <option value="popular" selected={sort === 'popular'}>Most Popular</option>
+      <select id="sort-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+        <option value="recent" selected={sort === 'recent'}>Recent</option>
+        <option value="name" selected={sort === 'name'}>Name A-Z</option>
+        <option value="rating" selected={sort === 'rating'}>Top Rated</option>
+        <option value="popular" selected={sort === 'popular'}>Popular</option>
       </select>
     </div>
 
@@ -177,7 +177,7 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
     </div>
 
     <!-- Listings Grid -->
-    <div class="grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {listings.map(listing => (
         <a
           href={type === 'business' ? `/business/${listing.slug}` : `/${type}/${listing.slug}`}

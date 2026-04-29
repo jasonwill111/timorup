@@ -116,26 +116,26 @@ const formatPrice = (product: typeof productsList[0]) => {
 ---
 
 <Layout title="Products & Services - TIMORLIST" description="Browse all products and services from businesses in Timor-Leste">
-  <div class="container py-8">
-    <div class="flex items-center justify-between mb-6">
+  <div class="container py-4 sm:py-8">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 sm:mb-6">
       <div>
-        <h1 class="text-3xl font-bold">Products & Services</h1>
-        <p class="text-sm text-muted-foreground">Browse all products and services from businesses</p>
+        <h1 class="text-2xl sm:text-3xl font-bold">Products & Services</h1>
+        <p class="text-xs sm:text-sm text-muted-foreground">Browse all products and services</p>
       </div>
-      <a href="/listing" class="text-sm text-primary hover:underline">← Back to Directory</a>
+      <a href="/listing" class="text-xs sm:text-sm text-primary hover:underline">← Directory</a>
     </div>
 
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-4 mb-6">
+    <!-- Filters - compact on mobile -->
+    <div class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
       <Input
         id="search"
         type="search"
-        placeholder="Search products..."
+        placeholder="Search..."
         value={search}
-        class="w-64"
+        class="w-full sm:w-48 md:w-64"
       />
 
-      <select id="business-filter" class="h-10 px-3 rounded-md border border-input bg-background">
+      <select id="business-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
         <option value="">All Businesses</option>
         {allBusinesses.map(b => (
           <option value={b.id} selected={businessId === b.id}>
@@ -144,38 +144,38 @@ const formatPrice = (product: typeof productsList[0]) => {
         ))}
       </select>
 
-      <select id="sort-filter" class="h-10 px-3 rounded-md border border-input bg-background">
-        <option value="recent" selected={sort === 'recent'}>Most Recent</option>
-        <option value="name" selected={sort === 'name'}>Name (A-Z)</option>
-        <option value="price-low" selected={sort === 'price-low'}>Price (Low to High)</option>
-        <option value="price-high" selected={sort === 'price-high'}>Price (High to Low)</option>
+      <select id="sort-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+        <option value="recent" selected={sort === 'recent'}>Recent</option>
+        <option value="name" selected={sort === 'name'}>Name A-Z</option>
+        <option value="price-low" selected={sort === 'price-low'}>Price ↑</option>
+        <option value="price-high" selected={sort === 'price-high'}>Price ↓</option>
       </select>
     </div>
 
     <!-- Results Count -->
-    <div class="mb-4 text-sm text-muted-foreground">
+    <div class="mb-3 sm:mb-4 text-xs sm:text-sm text-muted-foreground">
       Showing {productsList.length} of {total} products
     </div>
 
-    <!-- Products Grid -->
-    <div class="grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <!-- Products Grid - gap-2 on mobile -->
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
       {productsList.map(product => (
         <a
           href={product.businessType === 'business' ? `/business/${product.businessSlug}/product/${product.id}` : `/${product.businessType}/${product.businessSlug}`}
-          class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer"
+          class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer"
         >
           <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
             <span class="text-4xl font-bold text-amber-500/40">{product.title.charAt(0)}</span>
             {product.serviceType && (
-              <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] bg-white/90 dark:bg-black/70 rounded-full capitalize">
+              <span class="absolute top-1.5 left-1.5 sm:top-2 px-1.5 py-0.5 text-[9px] sm:text-[10px] bg-white/90 dark:bg-black/70 rounded-full capitalize">
                 {product.serviceType}
               </span>
             )}
           </div>
-          <div class="p-3">
-            <h3 class="font-semibold text-sm truncate group-hover:text-primary transition-colors">{product.title}</h3>
-            <p class="text-xs text-muted-foreground truncate">{product.businessTitle}</p>
-            <p class="text-sm font-bold text-primary mt-1">{formatPrice(product)}</p>
+          <div class="p-2 sm:p-3">
+            <h3 class="font-medium sm:font-semibold text-xs sm:text-sm truncate group-hover:text-primary transition-colors">{product.title}</h3>
+            <p class="text-[10px] sm:text-xs text-muted-foreground truncate">{product.businessTitle}</p>
+            <p class="text-xs sm:text-sm font-bold text-primary mt-0.5">{formatPrice(product)}</p>
           </div>
         </a>
       ))}

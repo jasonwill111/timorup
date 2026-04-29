@@ -259,10 +259,25 @@ pnpm build
 
 ---
 
-**文档版本**: 16.0
-**最后更新**: 2026-04-28
+**文档版本**: 17.0
+**最后更新**: 2026-04-29
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | UI/UX 优化 | Polish
+**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | Mobile 2列布局 | D1 timorlist-db | Workers SSR
+
+## 部署配置 (2026-04-29)
+
+| 服务 | 名称 | ID/绑定 |
+|------|------|---------|
+| D1 Database | timorlist-db | e7e1e025-7ba2-4106-a905-bbcd8038b3e4 |
+| KV Namespace | SESSION | 3e9ae14a105b4aa48316eaa029f5bc5f |
+| R2 Bucket | timorlist-media | MEDIA_BUCKET |
+| Workers | timorlist | https://timorlist.jasonwill.workers.dev |
+
+## Cloudflare Workers SSR
+
+- **输出模式**: `output: 'server'` (纯 SSR)
+- **数据库访问**: `await getDb()` (middleware 注入 D1 到 Astro.locals)
+- **缓存策略**: 静态页面 CDN 缓存，动态页面 no-cache
 
 ## Homepage Featured Sections
 
@@ -329,3 +344,23 @@ pnpm build
 | BusinessCardSkeleton | `src/components/ui/Skeleton.astro` |
 | ProductCardSkeleton | `src/components/ui/Skeleton.astro` |
 | CategorySkeleton | `src/components/ui/Skeleton.astro` |
+
+## Mobile UI 布局 (2026-04-29)
+
+### Grid 响应式断点
+
+| 页面 | Mobile (<640px) | Tablet (640px+) | Desktop (md+) | Large (lg+) |
+|------|-----------------|-----------------|---------------|-------------|
+| 首页 Business | **2列** | 2列 | 3列 | 4列 |
+| 首页 Products | **2列** | 2列 | 3列 | 4列 |
+| /listing | **2列** | 2列 | 3列 | 4列 |
+| /products-services | **2列** | 2列 | 3列 | 4列 |
+| /businesses | **2列** | 2列 | 2列 | 4列 |
+| Categories | 2列 | 3列 | 4列 | 8列 |
+
+### Mobile 优化原则
+
+1. **紧凑间距**: `gap-2` 或 `gap-3` (mobile), `gap-4` (desktop)
+2. **合理内边距**: `p-2` 或 `p-3` (mobile), `p-4` (desktop)
+3. **文字截断**: 卡片标题 `truncate`
+4. **图片比例**: `aspect-square` 或 `aspect-[4/3]`
