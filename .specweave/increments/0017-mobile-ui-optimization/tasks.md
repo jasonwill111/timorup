@@ -9,7 +9,8 @@
 - [x] Optimize homepage hero section
 - [x] Optimize listing page filters
 - [x] Optimize products-services page
-- [x] Adjust image aspect ratios (aspect-video on mobile)
+- [x] Unify image aspect ratios to aspect-square (1:1)
+- [x] Fix SKU product detail page (use await getDb())
 - [x] Deploy to Cloudflare Workers
 - [x] Verify mobile layout on deployed site
 
@@ -17,12 +18,13 @@
 
 | File | Changes |
 |------|---------|
-| `src/components/business/BusinessCard.astro` | Mobile padding, text sizes, aspect ratio |
-| `src/components/business/ProductCard.astro` | Mobile padding, text sizes, aspect ratio |
+| `src/components/business/BusinessCard.astro` | Mobile padding, text sizes, aspect-square |
+| `src/components/business/ProductCard.astro` | Mobile padding, text sizes, aspect-square |
 | `src/pages/index.astro` | Hero height, section margins, grid gaps |
 | `src/pages/listing/index.astro` | Filters, section spacing |
-| `src/pages/products-services/index.astro` | Inline card styling, filters |
+| `src/pages/products-services/index.astro` | Inline card styling, filters, aspect-square |
 | `src/pages/businesses/index.astro` | Grid class fix |
+| `src/pages/business/[slug]/product/[id]/index.astro` | Use await getDb() |
 
 ## Test Results
 
@@ -30,11 +32,12 @@
 ✅ Homepage: 200 OK, displays 2-column grid
 ✅ /listing: 2-column grid, compact filters
 ✅ /products-services: 2-column grid, compact cards
-✅ Mobile images: aspect-video (16:9)
+✅ Mobile images: aspect-square (1:1)
+✅ SKU detail: /business/cafe-timor/product/prod-1 - 200 OK
 ```
 
 ## Deployment
 
 - **Workers URL**: https://timorlist.jasonwill.workers.dev
-- **Version**: 2640c631-6bf1-453e-bf08-c65a6cf326aa
-- **Commit**: 8265b72
+- **Version**: a52856e6-e029-44bf-873d-9f80104d6748
+- **Commit**: d29aa09

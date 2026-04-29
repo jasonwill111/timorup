@@ -23,12 +23,10 @@ Optimize mobile layout for all listing pages to display content more compactly a
 ## Component Changes
 
 ### BusinessCard
-- Mobile: `p-2`, `text-xs`, `aspect-square`
-- Desktop: `p-3`, `text-sm`, `aspect-square`
+- All: `p-2` (mobile), `p-3` (desktop), `text-xs` (mobile), `text-sm` (desktop), `aspect-square`
 
 ### ProductCard
-- Mobile: `p-2`, `text-xs`, `aspect-square`
-- Desktop: `p-3`, `text-sm`, `aspect-square`
+- All: `p-2` (mobile), `p-3` (desktop), `text-xs` (mobile), `text-sm` (desktop), `aspect-square`
 
 ### Grid Gaps
 - Mobile: `gap-2`
@@ -49,7 +47,8 @@ Optimize mobile layout for all listing pages to display content more compactly a
 - [x] Listing pages display 2 columns on mobile
 - [x] Products page displays 2 columns on mobile
 - [x] Cards have compact padding on mobile
-- [x] Images use aspect-video on mobile
+- [x] Images use aspect-square (1:1) on all devices
 - [x] Section spacing reduced on mobile
 - [x] Filters are compact on mobile
 - [x] All pages render correctly on both mobile and desktop
+- [x] SKU product detail page works correctly
