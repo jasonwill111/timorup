@@ -27,7 +27,7 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "timorlist",
+      "database_name": "timorlist-db",
       "database_id": "32e09cf0-a09b-44a5-b46d-90049c4c5d1c"
     }
   ],
