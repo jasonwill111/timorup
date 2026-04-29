@@ -17,7 +17,7 @@
 # HTML PAGES - Smart Caching
 # ===========================================
 # Static pages (no user data) - cache heavily
-~/*.html
+/*.html
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 
 # Homepage - cache with background refresh
@@ -56,4 +56,4 @@
 # CONTENT NEGOTIATION
 # ===========================================
 /*
-  Vary: Accept-Encoding
+  X-Vary-Options: Accept-Encoding
