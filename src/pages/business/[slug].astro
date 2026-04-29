@@ -6,7 +6,8 @@ import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Card from '../../components/ui/Card.astro';
 import { Share2, Tag, Clock, MapPin, Star, Heart, Bookmark, Eye, Users, Globe } from '@lucide/astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+const db = await getDb();
 import { businessPages, categories, products, reviews, productImages, media } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 

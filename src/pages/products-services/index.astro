@@ -4,7 +4,8 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+const db = await getDb();
 import { products, businessPages } from '@/db/schema';
 import { desc, eq, like } from 'drizzle-orm';
 

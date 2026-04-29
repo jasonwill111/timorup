@@ -1,7 +1,7 @@
-// Better Auth Configuration
-import { betterAuth } from 'better-auth';
+// Better Auth Configuration - Environment Aware
+import { betterAuth, BetterAuthInstance } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from './db';
+import { getDb } from './db';
 import { users, sessions, accounts, verifications } from '@/db/schema';
 
 // Get OAuth credentials from environment
@@ -14,62 +14,85 @@ const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET || '';
 const isGoogleConfigured = !!googleClientId && !!googleClientSecret;
 const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
 
-export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:4321',
+// Factory function to create auth instance with given db
+export function createAuth(db: any) {
+  return betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:4321',
 
-  database: drizzleAdapter(db, {
-    provider: 'sqlite',
-    schema: {
-      user: users,
-      session: sessions,
-      account: accounts,
-      verification: verifications,
-    },
-  }),
+    database: drizzleAdapter(db, {
+      provider: 'sqlite',
+      schema: {
+        user: users,
+        session: sessions,
+        account: accounts,
+        verification: verifications,
+      },
+    }),
 
-  // Email and password authentication
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false, // Set to true in production
-  },
-  
-  // Social providers - only enable if credentials are configured
-  ...(isGoogleConfigured || isFacebookConfigured ? {
-    socialProviders: {
-      google: isGoogleConfigured ? {
-        clientId: googleClientId,
-        clientSecret: googleClientSecret,
-      } : undefined,
-      facebook: isFacebookConfigured ? {
-        clientId: facebookClientId,
-        clientSecret: facebookClientSecret,
-      } : undefined,
-    },
-  } : {}),
-  
-  // Session configuration
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
-    cookieCache: {
+    // Email and password authentication
+    emailAndPassword: {
       enabled: true,
-      maxAge: 60 * 5, // 5 minutes
+      requireEmailVerification: false,
     },
-  },
-   
-  // Trusted origins
-  trustedOrigins: [
-    'http://localhost:8788',
-    'http://localhost:4321',
-    process.env.APP_URL || '',
-  ].filter(Boolean),
-  
-  // Password configuration
-  password: {
-    minLength: 8,
-    maxLength: 100,
-  },
-});
+
+    // Social providers - only enable if credentials are configured
+    ...(isGoogleConfigured || isFacebookConfigured ? {
+      socialProviders: {
+        google: isGoogleConfigured ? {
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+        } : undefined,
+        facebook: isFacebookConfigured ? {
+          clientId: facebookClientId,
+          clientSecret: facebookClientSecret,
+        } : undefined,
+      },
+    } : {}),
+
+    // Session configuration
+    session: {
+      expiresIn: 60 * 60 * 24 * 7, // 7 days
+      updateAge: 60 * 60 * 24, // 1 day
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 5, // 5 minutes
+      },
+    },
+
+    // Trusted origins
+    trustedOrigins: [
+      'http://localhost:8788',
+      'http://localhost:4321',
+      process.env.APP_URL || '',
+    ].filter(Boolean),
+
+    // Password configuration
+    password: {
+      minLength: 8,
+      maxLength: 100,
+    },
+  });
+}
+
+// Default auth instance (uses local db for backwards compatibility)
+let _auth: BetterAuthInstance | null = null;
+
+export function getAuth() {
+  if (!_auth) {
+    // This will use local db - call initAuth() for Workers
+    _auth = createAuth(require('./db').db);
+  }
+  return _auth;
+}
+
+// Initialize auth for current environment
+export async function initAuth() {
+  const db = await getDb();
+  return createAuth(db);
+}
+
+// Legacy export (for backwards compatibility)
+export const auth = getAuth();
 
 // Export OAuth status for UI
 export const oauthStatus = {
@@ -78,5 +101,5 @@ export const oauthStatus = {
 };
 
 // Export types
-export type Session = typeof auth.$Infer.Session.session;
-export type User = typeof auth.$Infer.Session.user;
+export type Session = Awaited<ReturnType<typeof getAuth>>.$Infer.Session.session;
+export type User = Awaited<ReturnType<typeof getAuth>>.$Infer.Session.user;

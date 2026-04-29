@@ -5,6 +5,6 @@ export default defineConfig({
   schema: './src/db/schema/index.ts',
   out: './src/db/migrations',
   dbCredentials: {
-    url: 'file:local.db',
+    url: './.wrangler/state/v3/d1/timorlist-db.sqlite',
   },
 });

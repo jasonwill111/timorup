@@ -3,7 +3,8 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
 import Button from '../../components/ui/Button.astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+const db = await getDb();
 import { categories, businessPages } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 

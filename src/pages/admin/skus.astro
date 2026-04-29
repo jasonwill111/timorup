@@ -2,7 +2,8 @@
 export const prerender = false;
 import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+const db = await getDb();
 import { businessPages } from '@/db/schema';
 import { SKU_SERVICE_TYPES } from '@/lib/constants';
 

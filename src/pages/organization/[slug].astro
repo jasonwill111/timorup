@@ -5,7 +5,8 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Card from '../../components/ui/Card.astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
+const db = await getDb();
 import { businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 

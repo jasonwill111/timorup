@@ -28,7 +28,15 @@
     {
       "binding": "DB",
       "database_name": "timorlist-db",
-      "database_id": "32e09cf0-a09b-44a5-b46d-90049c4c5d1c"
+      "database_id": "e7e1e025-7ba2-4106-a905-bbcd8038b3e4"
+    }
+  ],
+
+  // KV namespace for sessions
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "3e9ae14a105b4aa48316eaa029f5bc5f"
     }
   ],
 

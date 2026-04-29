@@ -4,11 +4,12 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, desc, like } from 'drizzle-orm';
 import { INDUSTRIES } from '@/lib/constants';
 
+const db = await getDb();
 const PAGE_SIZE = 12;
 const type = Astro.url.searchParams.get('type') || 'business';
 const search = Astro.url.searchParams.get('search') || '';

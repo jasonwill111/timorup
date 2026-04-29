@@ -2,12 +2,14 @@
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
-import { db } from '../lib/db';
+import { getDb } from '../lib/db';
 import { businessPages, categories, products } from '../db/schema';
 import { eq, desc, and, inArray } from 'drizzle-orm';
 import { parseIcon, DEFAULT_CATEGORY_ICONS, getLucideIconPath } from '../lib/icons';
 import BusinessCard from '../components/business/BusinessCard.astro';
 import ProductCard from '../components/business/ProductCard.astro';
+
+const db = await getDb();
 
 let featuredBusinesses: any[] = [];
 let featuredGovs: any[] = [];
