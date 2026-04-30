@@ -91,10 +91,15 @@ export function getAuth() {
   return _auth;
 }
 
-// Initialize auth for current environment
+// Initialize auth for current environment (cached)
+let _initAuth: BetterAuthInstance | null = null;
+
 export async function initAuth() {
-  const db = await getDb();
-  return createAuth(db);
+  if (!_initAuth) {
+    const db = await getDb();
+    _initAuth = createAuth(db);
+  }
+  return _initAuth;
 }
 
 // Legacy export (for backwards compatibility)
