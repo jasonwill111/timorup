@@ -1,7 +1,7 @@
 // API endpoint to get all categories
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { categories } from '@/db/schema';
 
 function getErrorMessage(error: unknown): string {
@@ -11,6 +11,7 @@ function getErrorMessage(error: unknown): string {
 
 export async function GET() {
   try {
+    const db = await getDb();
     const allCategories = await db.select().from(categories).all();
     
     // Cache in production: stale-while-revalidate for 60 seconds

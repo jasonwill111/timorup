@@ -1,7 +1,7 @@
 // Banners API - GET all, POST create
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 

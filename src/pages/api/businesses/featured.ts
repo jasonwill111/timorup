@@ -1,11 +1,12 @@
 // API endpoint to get featured businesses
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export async function GET() {
+  const db = await getDb();
   const featuredBusinesses = await db.select({
       id: businessPages.id,
       title: businessPages.title,

@@ -1,7 +1,7 @@
 // API endpoint to get products for a business
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { products, businessPages } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { PLAN_LIMITS } from '@/lib/media';

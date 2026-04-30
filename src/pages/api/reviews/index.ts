@@ -1,7 +1,7 @@
 // Reviews API - CRUD operations
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { reviews, businessPages } from '@/db/schema';
 import { eq, desc, sql, and } from 'drizzle-orm';
 

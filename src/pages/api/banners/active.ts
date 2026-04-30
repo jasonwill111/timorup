@@ -1,12 +1,13 @@
 // Banners API - GET active banners
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function GET({ request }: { request: Request }) {
+export async function GET() {
   try {
+    const db = await getDb();
     const banners = await db.select({
       id: adBanners.id,
       title: adBanners.title,
@@ -33,7 +34,7 @@ export async function GET({ request }: { request: Request }) {
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'FETCH_ERROR', message: error.message }
+      error: { code: 'FETCH_ERROR', message: error instanceof Error ? error.message : 'Unknown error' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

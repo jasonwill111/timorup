@@ -1,7 +1,7 @@
 // API endpoint to get all businesses with filters
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, like, desc, sql, or, and, asc } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
@@ -47,6 +47,8 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
 }
 
 export async function GET({ url, request }: { url: URL; request: Request }) {
+  const db = await getDb();
+
   // Rate limiting
   const clientIP = getClientIP(request);
   const rateLimit = checkRateLimit(`list:${clientIP}`);
