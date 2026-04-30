@@ -115,18 +115,127 @@ export const products = sqliteTable('products', {
   description: text('description'),
   businessPageId: text('business_page_id').notNull(),
   // Flexible pricing: JSON array of { label, value, unit }
-  // Example: [{ "label": "Hourly Rate", "value": "25.00", "unit": "/hour" }, { "label": "Daily Rate", "value": "150.00", "unit": "/day" }]
+  // Example: [{ "label": "Hourly Rate", "value": "25.00", "unit": "/hour" }]
   priceFields: text('price_fields'),
-  // Service type for determining available price units
-  serviceType: text('service_type').default('product'), // 'product' | 'service' | 'rental' | 'food' | 'accommodation' | 'project'
+  // Service type for determining available price units and UI
+  serviceType: text('service_type').default('product'), // 'product' | 'service' | 'rental' | 'food' | 'accommodation' | 'automotive' | 'healthcare' | 'education' | 'beauty' | 'event'
   // Fallback single price (for simple products)
   price: text('price'),
   priceUnit: text('price_unit'),
+  // Industry-specific specifications (JSON)
+  // Structure depends on serviceType - see below
+  specifications: text('specifications'),
+  // Common fields
+  featured: integer('featured', { mode: 'boolean' }).default(false),
+  active: integer('active', { mode: 'boolean' }).default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (products) => ({
   businessIdx: index('products_business_idx').on(products.businessPageId),
+  activeIdx: index('products_active_idx').on(products.active),
 }));
+
+// Product specifications by serviceType:
+//
+// serviceType: 'automotive' (Vehicle Sales/Rental)
+// {
+//   vehicleType: 'sedan' | 'suv' | 'motorcycle' | 'truck' | 'van' | 'pickup'
+//   brand: string
+//   model: string
+//   year: number
+//   mileage: number (km)
+//   fuelType: 'petrol' | 'diesel' | 'electric' | 'hybrid'
+//   transmission: 'manual' | 'automatic'
+//   color: string
+//   condition: 'new' | 'used' | 'certified'
+//   doors: number
+//   seats: number
+// }
+//
+// serviceType: 'food' (Restaurant/Food Service)
+// {
+//   cuisine: string[] (e.g., ['Indonesian', 'Chinese'])
+//   dietaryOptions: string[] (e.g., ['Halal', 'Vegetarian'])
+//   mealType: 'breakfast' | 'lunch' | 'dinner' | 'all_day'
+//   priceRange: '$' | '$$' | '$$$' | '$$$$'
+//   parking: boolean
+//   delivery: boolean
+//   takeaway: boolean
+//   reservation: boolean
+//   avgWaitTime: number (minutes)
+// }
+//
+// serviceType: 'accommodation' (Hotel/Homestay/Rental)
+// {
+//   roomType: 'single' | 'double' | 'twin' | 'suite' | 'dorm' | 'villa'
+//   maxGuests: number
+//   bedType: 'single' | 'double' | 'queen' | 'king'
+//   numBeds: number
+//   checkInTime: string (e.g., '14:00')
+//   checkOutTime: string (e.g., '12:00')
+//   roomSize: number (sqm)
+//   floor: number
+//   amenities: string[] (e.g., ['wifi', 'ac', 'pool', 'parking', 'breakfast'])
+// }
+//
+// serviceType: 'healthcare' (Clinic/Pharmacy)
+// {
+//   specialization: string (e.g., 'General', 'Dental', 'Eye')
+//   consultationType: 'in_person' | 'telemedicine'
+//   consultationDuration: number (minutes)
+//   acceptedInsurance: string[]
+//   emergencyService: boolean
+//   homeVisit: boolean
+// }
+//
+// serviceType: 'education' (School/Training/Tutoring)
+// {
+//   courseType: 'language' | 'vocational' | 'tutoring' | 'training' | 'workshop'
+//   subject: string
+//   duration: string (e.g., '2 hours', '3 months')
+//   schedule: 'weekday' | 'weekend' | 'evening' | 'flexible'
+//   level: 'beginner' | 'intermediate' | 'advanced' | 'all_levels'
+//   certificate: boolean
+//   classSize: number
+//   language: string
+// }
+//
+// serviceType: 'beauty' (Salon/Spa/Massage)
+// {
+//   serviceCategory: 'hair' | 'nail' | 'spa' | 'massage' | 'makeup' | 'tattoo'
+//   genderPreference: 'male' | 'female' | 'unisex'
+//   duration: number (minutes)
+//   advanceBooking: boolean
+//   homeService: boolean
+// }
+//
+// serviceType: 'event' (Photography/Catering/Events)
+// {
+//   eventType: 'photography' | 'catering' | 'decoration' | 'entertainment' | 'transport'
+//   coverage: string (e.g., 'East Timor', 'Dili only')
+//   minBooking: string (e.g., '2 hours', '1 day')
+//   teamIncluded: number
+//   equipment: string[]
+// }
+//
+// serviceType: 'service' (General Services)
+// {
+//   serviceCategory: 'repair' | 'cleaning' | 'delivery' | 'moving' | 'installation'
+//   coverage: string
+//   responseTime: string (e.g., 'Same day', '24 hours')
+//   warranty: string
+//   insured: boolean
+// }
+//
+// serviceType: 'rental' (Equipment/Property)
+// {
+//   rentalType: 'equipment' | 'vehicle' | 'property' | 'furniture'
+//   minRental: string (e.g., '1 day', '1 week')
+//   maxRental: string
+//   deposit: string
+//   delivery: boolean
+//   deliveryFee: string
+// }
 
 // Product Images table
 export const productImages = sqliteTable('product_images', {

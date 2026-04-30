@@ -53,6 +53,29 @@ const canonicalUrl = `${siteUrl}/business/${slug}/product/${productId}`;
 // Title & description
 const pageTitle = `${product.title} - TIMORLIST`;
 const pageDesc = product.description?.substring(0, 160) || `${product.title} - ${business.title}`;
+
+// Parse specifications
+const specifications = product.specifications ? JSON.parse(product.specifications) : null;
+const priceFields = product.priceFields ? JSON.parse(product.priceFields) : null;
+
+// Service type display names
+const serviceTypeLabels: Record<string, string> = {
+  product: 'Product',
+  service: 'Service',
+  rental: 'Rental',
+  food: 'Food & Dining',
+  accommodation: 'Accommodation',
+  automotive: 'Vehicle',
+  healthcare: 'Healthcare',
+  education: 'Education',
+  beauty: 'Beauty & Wellness',
+  event: 'Event Service',
+};
+
+// Helper to format price fields
+function formatPriceField(pf: { label: string; value: string; unit: string }) {
+  return `${pf.label}: $${pf.value}${pf.unit}`;
+}
 ---
 
 <Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
@@ -169,6 +192,128 @@ const pageDesc = product.description?.substring(0, 160) || `${product.title} - $
             <CardContent class="p-6">
               <h2 class="text-lg font-semibold mb-3">Description</h2>
               <div class="prose dark:prose-invert max-w-none" set:html={product.description}></div>
+            </CardContent>
+          </Card>
+        )}
+
+        <!-- Industry Specifications -->
+        {(specifications || priceFields) && (
+          <Card class="mb-6">
+            <CardContent class="p-6">
+              <h2 class="text-lg font-semibold mb-3">
+                {serviceTypeLabels[product.serviceType || 'product'] || 'Details'}
+              </h2>
+
+              {/* Flexible Pricing */}
+              {priceFields && priceFields.length > 0 && (
+                <div class="mb-4">
+                  <h3 class="text-sm font-medium text-muted-foreground mb-2">Pricing Options</h3>
+                  <div class="space-y-2">
+                    {priceFields.map((pf: { label: string; value: string; unit: string }) => (
+                      <div class="flex justify-between items-center py-2 border-b border-border last:border-0">
+                        <span class="text-sm">{pf.label}</span>
+                        <span class="font-semibold text-primary">${pf.value}{pf.unit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Specifications Grid */}
+              {specifications && (
+                <div class="grid grid-cols-2 gap-4">
+                  {/* Automotive */}
+                  {specifications.vehicleType && (
+                    <>
+                      {specifications.brand && <div><span class="text-xs text-muted-foreground">Brand</span><p class="font-medium">{specifications.brand}</p></div>}
+                      {specifications.model && <div><span class="text-xs text-muted-foreground">Model</span><p class="font-medium">{specifications.model}</p></div>}
+                      {specifications.year && <div><span class="text-xs text-muted-foreground">Year</span><p class="font-medium">{specifications.year}</p></div>}
+                      {specifications.mileage && <div><span class="text-xs text-muted-foreground">Mileage</span><p class="font-medium">{specifications.mileage.toLocaleString()} km</p></div>}
+                      {specifications.fuelType && <div><span class="text-xs text-muted-foreground">Fuel</span><p class="font-medium capitalize">{specifications.fuelType}</p></div>}
+                      {specifications.transmission && <div><span class="text-xs text-muted-foreground">Transmission</span><p class="font-medium capitalize">{specifications.transmission}</p></div>}
+                      {specifications.color && <div><span class="text-xs text-muted-foreground">Color</span><p class="font-medium">{specifications.color}</p></div>}
+                      {specifications.condition && <div><span class="text-xs text-muted-foreground">Condition</span><p class="font-medium capitalize">{specifications.condition}</p></div>}
+                      {specifications.doors && <div><span class="text-xs text-muted-foreground">Doors</span><p class="font-medium">{specifications.doors}</p></div>}
+                      {specifications.seats && <div><span class="text-xs text-muted-foreground">Seats</span><p class="font-medium">{specifications.seats}</p></div>}
+                    </>
+                  )}
+
+                  {/* Food & Dining */}
+                  {specifications.cuisine && (
+                    <>
+                      <div><span class="text-xs text-muted-foreground">Cuisine</span><p class="font-medium">{Array.isArray(specifications.cuisine) ? specifications.cuisine.join(', ') : specifications.cuisine}</p></div>
+                      {specifications.priceRange && <div><span class="text-xs text-muted-foreground">Price Range</span><p class="font-medium">{specifications.priceRange}</p></div>}
+                      {specifications.mealType && <div><span class="text-xs text-muted-foreground">Meal Type</span><p class="font-medium capitalize">{specifications.mealType}</p></div>}
+                      {specifications.dietaryOptions && <div><span class="text-xs text-muted-foreground">Dietary</span><p class="font-medium">{Array.isArray(specifications.dietaryOptions) ? specifications.dietaryOptions.join(', ') : specifications.dietaryOptions}</p></div>}
+                    </>
+                  )}
+
+                  {/* Accommodation */}
+                  {specifications.roomType && (
+                    <>
+                      <div><span class="text-xs text-muted-foreground">Room Type</span><p class="font-medium capitalize">{specifications.roomType}</p></div>
+                      {specifications.maxGuests && <div><span class="text-xs text-muted-foreground">Max Guests</span><p class="font-medium">{specifications.maxGuests} persons</p></div>}
+                      {specifications.numBeds && <div><span class="text-xs text-muted-foreground">Beds</span><p class="font-medium">{specifications.numBeds} {specifications.bedType || ''}</p></div>}
+                      {specifications.checkInTime && <div><span class="text-xs text-muted-foreground">Check-in</span><p class="font-medium">{specifications.checkInTime}</p></div>}
+                      {specifications.checkOutTime && <div><span class="text-xs text-muted-foreground">Check-out</span><p class="font-medium">{specifications.checkOutTime}</p></div>}
+                      {specifications.roomSize && <div><span class="text-xs text-muted-foreground">Room Size</span><p class="font-medium">{specifications.roomSize} sqm</p></div>}
+                      {specifications.amenities && <div class="col-span-2"><span class="text-xs text-muted-foreground">Amenities</span><p class="font-medium">{Array.isArray(specifications.amenities) ? specifications.amenities.map((a: string) => a.charAt(0).toUpperCase() + a.slice(1)).join(', ') : specifications.amenities}</p></div>}
+                    </>
+                  )}
+
+                  {/* Healthcare */}
+                  {specifications.specialization && (
+                    <>
+                      <div><span class="text-xs text-muted-foreground">Specialization</span><p class="font-medium">{specifications.specialization}</p></div>
+                      {specifications.consultationType && <div><span class="text-xs text-muted-foreground">Consultation</span><p class="font-medium capitalize">{specifications.consultationType.replace('_', ' ')}</p></div>}
+                      {specifications.consultationDuration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium">{specifications.consultationDuration} min</p></div>}
+                      {specifications.emergencyService && <div><span class="text-xs text-muted-foreground">Emergency</span><p class="font-medium text-green-600">Available 24/7</p></div>}
+                    </>
+                  )}
+
+                  {/* Education */}
+                  {specifications.courseType && (
+                    <>
+                      <div><span class="text-xs text-muted-foreground">Course Type</span><p class="font-medium capitalize">{specifications.courseType}</p></div>
+                      {specifications.subject && <div><span class="text-xs text-muted-foreground">Subject</span><p class="font-medium">{specifications.subject}</p></div>}
+                      {specifications.duration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium">{specifications.duration}</p></div>}
+                      {specifications.level && <div><span class="text-xs text-muted-foreground">Level</span><p class="font-medium capitalize">{specifications.level.replace('_', ' ')}</p></div>}
+                      {specifications.schedule && <div><span class="text-xs text-muted-foreground">Schedule</span><p class="font-medium capitalize">{specifications.schedule}</p></div>}
+                      {specifications.certificate && <div><span class="text-xs text-muted-foreground">Certificate</span><p class="font-medium">{specifications.certificate ? 'Yes' : 'No'}</p></div>}
+                      {specifications.classSize && <div><span class="text-xs text-muted-foreground">Class Size</span><p class="font-medium">Max {specifications.classSize} students</p></div>}
+                    </>
+                  )}
+
+                  {/* Beauty */}
+                  {specifications.serviceCategory && (
+                    <>
+                      <div><span class="text-xs text-muted-foreground">Service</span><p class="font-medium capitalize">{specifications.serviceCategory}</p></div>
+                      {specifications.duration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium">{specifications.duration} min</p></div>}
+                      {specifications.genderPreference && <div><span class="text-xs text-muted-foreground">Gender</span><p class="font-medium capitalize">{specifications.genderPreference}</p></div>}
+                      {specifications.homeService && <div><span class="text-xs text-muted-foreground">Home Visit</span><p class="font-medium">{specifications.homeService ? 'Available' : 'Not available'}</p></div>}
+                    </>
+                  )}
+
+                  {/* Event */}
+                  {specifications.eventType && (
+                    <>
+                      <div><span class="text-xs text-muted-foreground">Event Type</span><p class="font-medium capitalize">{specifications.eventType}</p></div>
+                      {specifications.coverage && <div><span class="text-xs text-muted-foreground">Coverage</span><p class="font-medium">{specifications.coverage}</p></div>}
+                      {specifications.minBooking && <div><span class="text-xs text-muted-foreground">Min Booking</span><p class="font-medium">{specifications.minBooking}</p></div>}
+                      {specifications.teamIncluded && <div><span class="text-xs text-muted-foreground">Team</span><p class="font-medium">{specifications.teamIncluded} people</p></div>}
+                    </>
+                  )}
+
+                  {/* General Service */}
+                  {specifications.serviceCategory && !specifications.eventType && !specifications.serviceCategory && (
+                    <>
+                      {specifications.coverage && <div><span class="text-xs text-muted-foreground">Coverage</span><p class="font-medium">{specifications.coverage}</p></div>}
+                      {specifications.responseTime && <div><span class="text-xs text-muted-foreground">Response Time</span><p class="font-medium">{specifications.responseTime}</p></div>}
+                      {specifications.warranty && <div><span class="text-xs text-muted-foreground">Warranty</span><p class="font-medium">{specifications.warranty}</p></div>}
+                    </>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
