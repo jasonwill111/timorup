@@ -4,7 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { media } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;

@@ -1,7 +1,7 @@
 // Account API - Base endpoint requiring auth
 export const prerender = false;
 
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 async function requireAuth(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';

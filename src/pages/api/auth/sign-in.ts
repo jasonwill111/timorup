@@ -1,10 +1,7 @@
 // Auth API - Sign In
 export const prerender = false;
 
-import { auth } from '@/lib/auth';
-
-// Type helper for better-auth API access
-const authApi = (auth as unknown as { api: typeof auth.api }).api;
+import { initAuth } from '@/lib/auth';
 
 // Rate limiter
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
@@ -29,6 +26,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 export async function POST({ request }: { request: Request }) {
+  const authApi = (await initAuth()).api;
   const clientIP = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
 
   if (!checkRateLimit(`signin:${clientIP}`)) {

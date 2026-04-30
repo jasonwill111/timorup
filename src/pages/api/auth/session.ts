@@ -1,11 +1,12 @@
 // Auth API - Session (Get current user)
 export const prerender = false;
 
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 export async function GET({ request }: { request: Request }) {
   try {
-    const session = await auth.api.getSession({
+    const authApi = (await initAuth()).api;
+    const session = await authApi.getSession({
       headers: request.headers,
     });
 

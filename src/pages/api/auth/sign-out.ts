@@ -1,7 +1,7 @@
 // Auth API - Sign Out
 export const prerender = false;
 
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 // Type helper for better-auth API access
 const authApi = (auth as unknown as { api: typeof auth.api }).api;

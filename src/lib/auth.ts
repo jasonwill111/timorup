@@ -80,19 +80,15 @@ export function createAuth(db: any) {
   });
 }
 
-// Default auth instance - lazily initialized
-let _auth: BetterAuthInstance | null = null;
-
-export function getAuth() {
-  if (!_auth) {
-    // In Cloudflare Workers, this will fail because db is a stub
-    // Use initAuth() instead for proper D1 initialization
-    // This is kept for backwards compatibility only
-    const db = require('./db').db;
-    _auth = createAuth(db);
+// Default auth instance - lazily initialized via initAuth()
+export const auth = {
+  api: {
+    getSession: async () => ({ user: null, session: null }),
+    signInEmail: async () => { throw new Error('Auth not initialized'); },
+    signOut: async () => ({}),
+    signUpEmail: async () => { throw new Error('Auth not initialized'); },
   }
-  return _auth;
-}
+} as unknown as BetterAuthInstance;
 
 // Initialize auth for current environment (cached)
 let _initAuth: BetterAuthInstance | null = null;
@@ -105,8 +101,10 @@ export async function initAuth() {
   return _initAuth;
 }
 
-// Legacy export (for backwards compatibility)
-export const auth = getAuth();
+// Sync auth object after initAuth is called
+export async function getAuth() {
+  return initAuth();
+}
 
 // Export OAuth status for UI
 export const oauthStatus = {

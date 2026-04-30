@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 import { businessPages, categories, products, reviews } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
@@ -177,7 +177,8 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     const { slug } = params;
 
     const cookieHeader = request.headers.get('cookie') || '';
-    const session = await auth.api.getSession({
+    const authApi = (await initAuth()).api;
+    const session = await authApi.getSession({
       headers: { cookie: cookieHeader },
     });
 
