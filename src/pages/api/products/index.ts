@@ -13,6 +13,16 @@ const VALID_SERVICE_TYPES = [
   'education', 'beauty', 'event'
 ];
 
+// Helper to safely parse JSON string fields from database
+const parseJsonField = (val: string): unknown => {
+  if (!val) return null;
+  try {
+    return JSON.parse(val);
+  } catch {
+    return val;
+  }
+};
+
 export async function GET({ url }: { url: URL }) {
   try {
     const db = await getDb();
@@ -44,9 +54,16 @@ export async function GET({ url }: { url: URL }) {
 
     const allProducts = await query.all();
 
+    // Parse JSON fields for each product
+    const parsedProducts = allProducts.map((p: Record<string, unknown>) => ({
+      ...p,
+      priceFields: p.priceFields ? parseJsonField(p.priceFields as string) : null,
+      specifications: p.specifications ? parseJsonField(p.specifications as string) : null,
+    }));
+
     return new Response(JSON.stringify({
       success: true,
-      data: allProducts,
+      data: parsedProducts,
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -143,6 +160,20 @@ export async function POST({ request }: { request: Request }) {
 
     const id = `prod-${Date.now()}`;
 
+    // Helper to safely stringify JSON (handle both string and object)
+    const safeStringify = (val: unknown): string | null => {
+      if (!val) return null;
+      if (typeof val === 'string') {
+        try {
+          JSON.parse(val); // Valid JSON string
+          return val;
+        } catch {
+          return val; // Return as-is if not valid JSON
+        }
+      }
+      return JSON.stringify(val);
+    };
+
     await db.insert(products).values({
       id,
       title,
@@ -150,9 +181,9 @@ export async function POST({ request }: { request: Request }) {
       priceUnit: priceUnit || null,
       description: description || null,
       businessPageId,
-      priceFields: priceFields ? JSON.stringify(priceFields) : null,
+      priceFields: safeStringify(priceFields),
       serviceType: finalServiceType,
-      specifications: specifications ? JSON.stringify(specifications) : null,
+      specifications: safeStringify(specifications),
       featured: featured || false,
       active: true,
     }).run();
@@ -247,9 +278,15 @@ export async function PUT({ request }: { request: Request }) {
       .limit(1)
       .get();
 
+    const parsedUpdated = updated ? {
+      ...updated,
+      priceFields: updated.priceFields ? parseJsonField(updated.priceFields as string) : null,
+      specifications: updated.specifications ? parseJsonField(updated.specifications as string) : null,
+    } : null;
+
     return new Response(JSON.stringify({
       success: true,
-      data: updated,
+      data: parsedUpdated,
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
