@@ -4,9 +4,9 @@ export const prerender = false;
 import { initAuth } from '@/lib/auth';
 
 // Type helper for better-auth API access
-const authApi = (auth as unknown as { api: typeof auth.api }).api;
 
 export async function POST({ request }: { request: Request }) {
+  const authApi = (await initAuth()).api;
   const cookieHeader = request.headers.get('cookie') || '';
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 

@@ -28,7 +28,7 @@ async function getCurrentUser(request: Request) {
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
   if (!tokenMatch) return null;
   try {
-    const authApi = (auth as unknown as { api: typeof auth.api }).api;
+    const authApi = (await initAuth()).api;
     const { user } = await authApi.getSession({
       headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
     });

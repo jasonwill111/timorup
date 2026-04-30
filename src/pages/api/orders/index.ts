@@ -21,7 +21,7 @@ async function requireAuth(request: Request) {
     }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
   }
   try {
-    const authApi = (auth as unknown as { api: typeof auth.api }).api;
+    const authApi = (await initAuth()).api;
     const { user } = await authApi.getSession({
       headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
     });

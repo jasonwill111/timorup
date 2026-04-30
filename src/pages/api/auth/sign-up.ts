@@ -3,9 +3,6 @@ export const prerender = false;
 
 import { initAuth } from '@/lib/auth';
 
-// Type helper for better-auth API access
-const authApi = (auth as unknown as { api: typeof auth.api }).api;
-
 // Rate limiter
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -29,6 +26,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 export async function POST({ request }: { request: Request }) {
+  const authApi = (await initAuth()).api;
   const clientIP = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
 
   if (!checkRateLimit(`signup:${clientIP}`)) {
