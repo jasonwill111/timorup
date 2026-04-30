@@ -53,7 +53,7 @@ export async function POST({ request }: { request: Request }) {
       title, slug, categoryId, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
       latitude, longitude, entityType, registrationUrl,
-      publishNow
+      publishNow, industry, yearOfEstablishment
     } = body;
 
     // Validate entity type
@@ -115,6 +115,7 @@ export async function POST({ request }: { request: Request }) {
       ownerId: userId,
       categoryId: categoryId || null,
       entityType: finalEntityType,
+      industry: industry || null,
       contactName: contactName || null,
       contactNumber: contactNumber || null,
       countryCode: countryCode || '+670',
@@ -126,6 +127,7 @@ export async function POST({ request }: { request: Request }) {
       locationLat: latitude || null,
       locationLng: longitude || null,
       registrationUrl: registrationUrl || null,
+      yearOfEstablishment: yearOfEstablishment || null,
       status: pageStatus,
     }).run();
 

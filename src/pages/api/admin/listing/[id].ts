@@ -6,21 +6,26 @@ import { z } from 'zod';
 
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
-  categoryId: z.string().optional(),
+  slug: z.string().optional(),
+  categoryId: z.string().optional().nullable(),
   industry: z.string().optional().nullable(),
   contactName: z.string().optional().nullable(),
   countryCode: z.string().optional(),
   contactNumber: z.string().optional().nullable(),
   email: z.email().optional().nullable().or(z.literal('')),
-  registrationUrl: z.url().optional().nullable().or(z.literal('')),
+  registrationUrl: z.string().optional().nullable().or(z.literal('')),
   address: z.string().optional().nullable(),
   aboutUs: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),
   yearOfEstablishment: z.number().optional().nullable(),
+  openingHours: z.record(z.string(), z.string()).optional().nullable(),
+  locationLat: z.number().optional().nullable(),
+  locationLng: z.number().optional().nullable(),
   status: z.enum(['draft', 'live', 'suspended']).optional(),
 });
 
 export const GET: APIRoute = async ({ params }) => {
+  const db = await getDb();
   const listing = await db
     .select()
     .from(businessPages)
@@ -42,6 +47,7 @@ export const GET: APIRoute = async ({ params }) => {
 
 export const PUT: APIRoute = async ({ params, request }) => {
   try {
+    const db = await getDb();
     const body = await request.json();
     const data = updateSchema.parse(body);
 
@@ -60,6 +66,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
     const updateData: Record<string, unknown> = {};
     if (data.title !== undefined) updateData.title = data.title;
+    if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
     if (data.industry !== undefined) updateData.industry = data.industry;
     if (data.contactName !== undefined) updateData.contactName = data.contactName;
@@ -71,6 +78,9 @@ export const PUT: APIRoute = async ({ params, request }) => {
     if (data.aboutUs !== undefined) updateData.aboutUs = data.aboutUs;
     if (data.tags !== undefined) updateData.tags = data.tags ? JSON.stringify(data.tags) : null;
     if (data.yearOfEstablishment !== undefined) updateData.yearOfEstablishment = data.yearOfEstablishment;
+    if (data.openingHours !== undefined) updateData.openingHours = data.openingHours ? JSON.stringify(data.openingHours) : null;
+    if (data.locationLat !== undefined) updateData.locationLat = data.locationLat;
+    if (data.locationLng !== undefined) updateData.locationLng = data.locationLng;
     if (data.status !== undefined) updateData.status = data.status;
 
     await db
@@ -98,6 +108,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 };
 
 export const DELETE: APIRoute = async ({ params }) => {
+  const db = await getDb();
   await db
     .delete(businessPages)
     .where(eq(businessPages.id, params.id ?? ''));

@@ -8,18 +8,23 @@ import { z } from 'zod';
 const createSchema = z.object({
   entityType: z.enum(['business', 'government', 'nonprofit']),
   title: z.string().min(1),
+  slug: z.string().optional(), // Optional, auto-generated if not provided
   categoryId: z.string().optional(),
   industry: z.string().optional(),
   contactName: z.string().optional(),
   countryCode: z.string().default('+670'),
   contactNumber: z.string().optional(),
   email: z.email().optional().or(z.literal('')),
-  registrationUrl: z.url().optional().or(z.literal('')),
+  registrationUrl: z.string().optional().or(z.literal('')),
   address: z.string().optional(),
   aboutUs: z.string().optional(),
   tags: z.array(z.string()).optional(),
   yearOfEstablishment: z.number().optional(),
+  openingHours: z.record(z.string(), z.string()).optional(), // { day: hours }
+  locationLat: z.number().optional(),
+  locationLng: z.number().optional(),
   status: z.enum(['draft', 'live', 'suspended']).default('draft'),
+  ownerId: z.string().optional(), // For admin-created listings, link to user
 });
 
 // Generate slug from title
@@ -69,13 +74,13 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
     const data = createSchema.parse(body);
 
-    const slug = generateSlug(data.title);
+    const slug = data.slug || generateSlug(data.title);
 
     const newListing = {
       id: nanoid(),
       title: data.title,
       slug,
-      ownerId: 'admin', // TODO: Get from session
+      ownerId: data.ownerId || 'admin',
       entityType: data.entityType,
       categoryId: data.categoryId || null,
       industry: data.industry || null,
@@ -88,6 +93,9 @@ export const POST: APIRoute = async ({ request }) => {
       aboutUs: data.aboutUs || null,
       tags: data.tags ? JSON.stringify(data.tags) : null,
       yearOfEstablishment: data.yearOfEstablishment || null,
+      openingHours: data.openingHours ? JSON.stringify(data.openingHours) : null,
+      locationLat: data.locationLat || null,
+      locationLng: data.locationLng || null,
       status: data.status,
     };
 

@@ -213,15 +213,17 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
 
     const body = await request.json();
     const {
-      title, slug: newSlug, categoryId, contactName, contactNumber,
+      title, slug: newSlug, categoryId, industry, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
-      latitude, longitude, yearOfEstablishment, latestUpdates
+      latitude, longitude, yearOfEstablishment, latestUpdates,
+      registrationUrl
     } = body;
 
     const updateValues: Record<string, unknown> = {};
     if (title !== undefined) updateValues.title = title;
     if (newSlug !== undefined) updateValues.slug = newSlug;
     if (categoryId !== undefined) updateValues.categoryId = categoryId || null;
+    if (industry !== undefined) updateValues.industry = industry || null;
     if (contactName !== undefined) updateValues.contactName = contactName || null;
     if (contactNumber !== undefined) updateValues.contactNumber = contactNumber || null;
     if (countryCode !== undefined) updateValues.countryCode = countryCode || '+670';
@@ -234,6 +236,7 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     if (longitude !== undefined) updateValues.locationLng = longitude || null;
     if (yearOfEstablishment !== undefined) updateValues.yearOfEstablishment = yearOfEstablishment || null;
     if (latestUpdates !== undefined) updateValues.latestUpdates = latestUpdates || null;
+    if (registrationUrl !== undefined) updateValues.registrationUrl = registrationUrl || null;
 
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = Math.floor(Date.now() / 1000);
