@@ -1,54 +1,44 @@
 # components
 
-**Path**: `src\components`
+**Path**: `src/components`
 
 ## Purpose
 
-Provides components functionality for the application.
+Reusable UI components for Astro pages.
 
 ## Overview
 
-The components module contains 21 files with approximately 1,457 lines of code.
+The components module contains 25 files with approximately 1,600 lines of code.
 
-## Dependencies
+## Key Components
 
-This module imports from:
-- `..`
-
-## Dependents
-
-No dependencies detected.
-
-## Integration Points
-
-No external integration points detected.
+| Component | Purpose |
+|-----------|---------|
+| `ImageUploader` | R2 media upload with progress |
+| `LexicalEditor` | Rich text editor (TipTap) |
+| `OptimizedImage` | Cloudflare Image optimization |
+| `ReviewForm` | Review submission form |
+| `StarRating` | Rating display/input |
+| `ReviewsList` | Review list with pagination |
+| `ToastContainer` | Toast notifications |
 
 ## Patterns Used
 
-No specific patterns detected.
+- Preact Islands for interactive components
+- nanostores for state management
+- TailwindCSS v4 for styling
 
 ## Analysis Summary
 
-- **Files Analyzed**: 5
-- **Source Files**: 5
+- **Source Files**: 25
 - **Test Files**: 0
-- **Total Exports**: 8
+- **Total Exports**: 15+
 
-## Main Exports
+## Dependencies
 
-- `ImageUploader` (function)
-- `LexicalEditor` (function)
-- `getPlainText` (function)
-- `OptimizedImage` (function)
-- `ReviewForm` (function)
-- `StarRating` (function)
-- `ReviewsList` (function)
-- `ReviewsList` (default)
-
-## Documentation Status
-
-**Has README**: No
-**Has Tests**: No
+- `@lexical/react` (editor)
+- `nanostores` (state)
+- `@nanostores/react`
 
 ---
-*Analysis generated on 2026-03-22*
+*Updated 2026-04-30*

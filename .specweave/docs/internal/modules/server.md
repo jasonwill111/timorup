@@ -1,51 +1,50 @@
 # server
 
-**Path**: `src\server`
+**Path**: `src/server`
 
 ## Purpose
 
-Provides server functionality for the application.
+Cloudflare Workers entry points and routing configuration.
 
 ## Overview
 
-The server module contains 13 files with approximately 2,815 lines of code.
+The server module contains 15 files with approximately 3,000 lines of code.
 
-## Dependencies
+## Entry Points
 
-This module imports from:
-- `.`
+| File | Purpose |
+|------|---------|
+| `entry.mjs` | Main worker entry |
+| `admin.ts` | Admin panel routes |
+| `auth.ts` | Auth API routes |
+| `account.ts` | Account management |
 
-## Dependents
+## Architecture
 
-No dependencies detected.
-
-## Integration Points
-
-No external integration points detected.
+```
+Cloudflare Workers
+├── entry.mjs (main router)
+├── Hono apps (route handlers)
+└── bindings (DB, KV, R2)
+```
 
 ## Patterns Used
 
-No specific patterns detected.
+- Hono framework for routing
+- Service bindings for D1/KV/R2
+- Middleware for auth
 
 ## Analysis Summary
 
-- **Files Analyzed**: 5
-- **Source Files**: 5
+- **Source Files**: 15
 - **Test Files**: 0
-- **Total Exports**: 5
+- **Total Exports**: 10+
 
-## Main Exports
+## Dependencies
 
-- `app` (default)
-- `accountApp` (default)
-- `adminApp` (default)
-- `authApp` (default)
-- `bannersApp` (default)
-
-## Documentation Status
-
-**Has README**: No
-**Has Tests**: No
+- `hono` (HTTP framework)
+- `drizzle-orm/d1` (DB)
+- `@cloudflare/workerd` (runtime)
 
 ---
-*Analysis generated on 2026-03-22*
+*Updated 2026-04-30*
