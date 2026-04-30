@@ -4,36 +4,46 @@
 
 ## Codebase Overview
 
-- **Total Files**: 901
-- **Estimated LOC**: 6,770
+- **Total Files**: ~950
+- **Estimated LOC**: ~8,500
 - **Analysis Tier**: medium
 
 ### File Breakdown
 
 | Type | Count |
 |------|-------|
-| Code | 70 |
-| Tests | 32 |
-| Docs | 623 |
-| Config | 88 |
-| Assets | 88 |
+| Code | 75 |
+| Tests | 35 |
+| Docs | 620 |
+| Config | 90 |
+| Assets | 130 |
 
 ## Technology Stack
 
 **Languages**: TypeScript
-**Frameworks**: React
+**Frameworks**: Astro 6.1.10, React, Cloudflare Workers
 **Testing**: Vitest, Playwright
+**Database**: D1 (SQLite at Edge)
+**Auth**: better-auth 1.6.9
 
 ## Main Modules
 
-- **pages** - 55 files, ~1,373 LOC
-- **components** - 21 files, ~1,457 LOC
-- **server** - 13 files, ~2,815 LOC
-- **db** - 9 files, ~426 LOC
-- **lib** - 9 files, ~1,201 LOC
-- **layouts** - 2 files, ~0 LOC
-- **styles** - 1 files, ~0 LOC
-- **test** - 1 files, ~21 LOC
+- **pages** - 60 files, ~1,500 LOC (API routes, admin, business)
+- **components** - 25 files, ~1,600 LOC
+- **server** - 15 files, ~3,000 LOC
+- **db** - 12 files, ~500 LOC (Drizzle ORM schema)
+- **lib** - 15 files, ~1,400 LOC (constants, media, auth)
+- **layouts** - 3 files, ~200 LOC
+- **styles** - 2 files, ~100 LOC
+- **test** - 5 files, ~150 LOC
+
+## Core Features
+
+- Business/Gov/NGO listing management
+- SKU/Product system with industry-specific specifications
+- Multi-serviceType support: food, automotive, accommodation, healthcare, education, beauty, event
+- Admin and business-user SKU management
+- Cloudflare Workers + D1 edge database
 
 ## Existing Documentation
 

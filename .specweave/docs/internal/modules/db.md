@@ -1,58 +1,55 @@
 # db
 
-**Path**: `src\db`
+**Path**: `src/db`
 
 ## Purpose
 
-Provides db functionality for the application.
+Database schema and Drizzle ORM configuration for D1 SQLite.
 
 ## Overview
 
-The db module contains 9 files with approximately 426 lines of code.
+The db module contains 12 files with approximately 500 lines of code.
+
+## Tables
+
+| Table | Purpose |
+|-------|---------|
+| `users` | User accounts with email/phone |
+| `businessPages` | Business/Gov/NGO listings |
+| `products` | SKU/Product system |
+| `categories` | Listing categories |
+| `media` | Uploaded media files |
+| `reviews` | Business reviews |
+| `orders` | Subscription orders |
+| `sessions` | Auth sessions |
+| `accounts` | OAuth accounts |
+| `adBanners` | Advertisement banners |
+| `siteSettings` | Global settings |
+
+## Products Schema
+
+Products support industry-specific specifications:
+
+```typescript
+// Core fields
+id, title, description, businessPageId
+priceFields: JSON string (array of {label, value, unit})
+serviceType: 'product'|'service'|'rental'|'food'|'accommodation'|'automotive'|'healthcare'|'education'|'beauty'|'event'
+specifications: JSON string (industry-specific)
+featured: boolean
+active: boolean
+```
 
 ## Dependencies
 
-This module imports from:
-- `.`
-- `..`
-
-## Dependents
-
-No dependencies detected.
-
-## Integration Points
-
-No external integration points detected.
-
-## Patterns Used
-
-No specific patterns detected.
+- `drizzle-orm` (ORM)
+- `better-auth` (auth tables)
 
 ## Analysis Summary
 
-- **Files Analyzed**: 3
-- **Source Files**: 3
+- **Source Files**: 10
 - **Test Files**: 0
-- **Total Exports**: 29
-
-## Main Exports
-
-- `sessions` (const)
-- `accounts` (const)
-- `verifications` (const)
-- `Session` (type)
-- `Account` (type)
-- `Verification` (type)
-- `users` (const)
-- `categories` (const)
-- `media` (const)
-- `businessPages` (const)
-- ...and 19 more exports
-
-## Documentation Status
-
-**Has README**: No
-**Has Tests**: No
+- **Total Exports**: 40+
 
 ---
-*Analysis generated on 2026-03-22*
+*Updated 2026-04-30*

@@ -1,56 +1,76 @@
 # pages
 
-**Path**: `src\pages`
+**Path**: `src/pages`
 
 ## Purpose
 
-Provides pages functionality for the application.
+Astro pages and API routes for the application.
 
 ## Overview
 
-The pages module contains 55 files with approximately 1,373 lines of code.
+The pages module contains 60 files with approximately 1,500 lines of code.
 
-## Dependencies
+## Directory Structure
 
-No dependencies detected.
+```
+pages/
+├── api/                    # API endpoints (SSR)
+│   ├── products/          # Product CRUD operations
+│   ├── businesses/         # Business listing APIs
+│   ├── auth/              # Auth endpoints
+│   └── media/             # Media upload
+├── admin/                  # Admin dashboard
+│   ├── skus.astro         # SKU management
+│   ├── businesses.astro   # Business management
+│   └── dashboard.astro    # Admin home
+├── business/              # Business pages
+│   └── [slug]/
+│       └── product/
+│           └── [id]/      # Product detail page
+└── index.astro            # Homepage
+```
 
-## Dependents
+## API Routes
 
-No dependencies detected.
+### Products API (`/api/products`)
 
-## Integration Points
+| Method | Purpose |
+|--------|---------|
+| GET | List products by businessPageId |
+| POST | Create new product (admin only) |
+| PUT | Update product (by id param) |
 
-No external integration points detected.
+**Features**:
+- SKU limit enforcement per plan
+- JSON field parsing on response
+- ServiceType validation
+- Industry-specific specifications support
 
-## Patterns Used
+### Businesses API (`/api/businesses`)
 
-No specific patterns detected.
+| Method | Purpose |
+|--------|---------|
+| GET | List/create businesses |
+| PUT | Update business (admin) |
+
+## Admin Pages
+
+- `/admin/skus` - SKU management with dynamic specification fields
+- `/admin/businesses` - Business listing management
+- `/admin/orders` - Order/subscription management
+- `/admin/reviews` - Review management
+
+## Frontend Pages
+
+- `/` - Homepage with business listings
+- `/business/[slug]` - Business detail page
+- `/business/[slug]/product/[id]` - Product/SKU detail page
 
 ## Analysis Summary
 
-- **Files Analyzed**: 5
-- **Source Files**: 5
-- **Test Files**: 0
-- **Total Exports**: 15
-
-## Main Exports
-
-- `prerender` (const)
-- `GET` (function)
-- `POST` (function)
-- `prerender` (const)
-- `GET` (function)
-- `POST` (function)
-- `prerender` (const)
-- `GET` (function)
-- `POST` (function)
-- `prerender` (const)
-- ...and 5 more exports
-
-## Documentation Status
-
-**Has README**: No
-**Has Tests**: No
+- **Source Files**: 60
+- **API Files**: 8
+- **Total Exports**: 20+
 
 ---
-*Analysis generated on 2026-03-22*
+*Updated 2026-04-30*
