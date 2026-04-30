@@ -45,15 +45,17 @@
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Framework | Astro 6.x (SSR + Hybrid Mode) |
-| Database | D1 (SQLite) via Drizzle ORM |
-| Auth | better-auth 1.5.x |
-| Styling | TailwindCSS v4 |
-| Editor | TipTap 3.x |
-| Validation | Zod 4.x |
-| Media | Cloudflare R2 |
+| Component | Technology | Version |
+|-----------|------------|---------|
+| Framework | Astro | 6.1.10 |
+| Database | D1 (SQLite) via Drizzle ORM | 0.45.2 |
+| Auth | better-auth | 1.6.9 |
+| Styling | TailwindCSS v4 | 4.2.4 |
+| Editor | TipTap | 3.22.5 |
+| Validation | Zod | 4.4.1 |
+| Media | Cloudflare R2 | - |
+| AI | Mastra | 1.29.1 |
+| Deployment | Wrangler | 4.86.0 |
 
 ## Local Development
 

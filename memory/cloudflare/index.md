@@ -1,97 +1,68 @@
 # Cloudflare Workers (timorlist)
 
-> Wrangler v4.84.1 | compatibility_date: 2026-04-28
+> Wrangler v4.86.0 | compatibility_date: 2026-04-28
 
-## 核心服务
+## 基础设施
 
-| 服务 | 用途 |
-|------|------|
-| **Workers** | Edge Functions (SSR) |
-| **D1** | SQLite @ Edge |
-| **R2** | 对象存储 (图片) |
-| **KV** | Session 存储 |
+| 资源 | Binding | ID |
+|------|---------|-----|
+| D1 | `DB` | timorlist-db (e7e1e025-7ba2-4106-a905-bbcd8038b3e4) |
+| KV | `SESSION` | 3e9ae14a105b4aa48316eaa029f5bc5f |
+| R2 | `MEDIA_BUCKET` | timorlist-media |
+| Workers | - | https://timorlist.jasonwill.workers.dev |
 
 ## 开发命令
 
 ```bash
-pnpm dev:cf        # Cloudflare 开发模式
-pnpm preview:cf    # 本地预览
-wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+# 构建 + 启动 wrangler
+pnpm build
+npx wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+
+# 访问
+# http://localhost:8787/
+# http://localhost:8787/__wrangler_local_explorer__  # D1/KV/R2 GUI
 ```
 
 ## D1 操作
 
 ```bash
-wrangler d1 execute timorlist-db --local --file=./drizzle/*.sql
-wrangler d1 execute timorlist-db --remote --command="SELECT * FROM business_pages"
-wrangler d1 dump timorlist-db --output dump.sql
-```
+# 本地
+npx wrangler d1 execute timorlist-db --local --persist-to=.wrangler/state --command="SELECT * FROM users"
 
-## R2 操作
+# 远程
+npx wrangler d1 execute timorlist-db --remote --command="SELECT * FROM users"
 
-```bash
-wrangler r2 bucket list
-wrangler r2 object get timorlist-media/path/to/file
+# Push schema
+pnpm db:push
 ```
 
 ## 环境变量
 
 ```bash
-# .dev.vars (本地 secrets)
-JWT_SECRET=xxx
-S3_ACCESS_KEY=xxx
-S3_SECRET_KEY=xxx
+# wrangler.jsonc 或 .dev.vars
+BETTER_AUTH_SECRET=xxx
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+APP_URL=http://localhost:8787
+MINIMAX_API_KEY=xxx
 ```
 
-## wrangler.toml
-
-```toml
-name = "timorlist"
-main = "dist/server/entry.mjs"
-compatibility_date = "2026-04-28"
-
-[[d1_databases]]
-binding = "carsevs_db"
-database_name = "timorlist-db"
-database_id = "e7e1e025-7ba2-4106-a905-bbcd8038b3e4"
-
-[[kv_namespaces]]
-binding = "SESSION"
-id = "3e9ae14a105b4aa48316eaa029f5bc5f"
-
-[[r2_buckets]]
-binding = "MEDIA"
-bucket_name = "timorlist-media"
-```
-
-## Workers KV Session
+## R2 文件操作
 
 ```typescript
-import { env } from 'cloudflare:workers';
-
-// 获取 KV
-const kv = env.SESSION as KVNamespace;
-await kv.get('session-token');
-await kv.put('session-token', sessionData, { expirationTtl: 86400 });
-```
-
-## R2 文件上传
-
-```typescript
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/lib-storage';
+import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 
 const client = new S3Client({
   region: 'auto',
-  endpoint: `https://${env.ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: `https://${env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: env.S3_ACCESS_KEY,
-    secretAccessKey: env.S3_SECRET_KEY,
+    accessKeyId: env.R2_ACCESS_KEY_ID,
+    secretAccessKey: env.R2_SECRET_ACCESS_KEY,
   },
 });
 
-// 上传文件
+// 上传
 const upload = new Upload({
   client,
   params: {

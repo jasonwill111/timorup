@@ -27,13 +27,37 @@ pnpm test           # Vitest
 pnpm test:e2e       # Playwright
 ```
 
-## Tech Stack Summary
+## Tech Stack Summary (2026-04-30)
 
-- **Astro**: v6.1.9 (SSR + Cloudflare adapter)
-- **Cloudflare**: Workers, D1, R2, KV
-- **better-auth**: v1.5.3 (session-based auth)
-- **Drizzle**: v0.45.1 (ORM)
-- **TailwindCSS**: v4.2.1 (CSS config)
-- **Zod**: v4.3.6 (validation)
-- **Mastra**: v1.28.0 (AI agents)
-- **Playwright**: v1.58.2 (E2E)
+| Component | Version |
+|-----------|---------|
+| Astro | 6.1.10 |
+| better-auth | 1.6.9 |
+| drizzle-orm | 0.45.2 |
+| zod | 4.4.1 |
+| tailwindcss | 4.2.4 |
+| @mastra/core | 1.29.1 |
+| wrangler | 4.86.0 |
+| playwright | 1.59.1 |
+
+## 基础设施
+
+- **D1**: timorlist-db (e7e1e025-7ba2-4106-a905-bbcd8038b3e4)
+- **KV**: SESSION (3e9ae14a105b4aa48316eaa029f5bc5f)
+- **R2**: timorlist-media
+- **Workers**: https://timorlist.jasonwill.workers.dev
+
+## Admin API 端点
+
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `/api/admin/stats` | Required | 统计数据 |
+| `/api/admin/reviews` | Admin | 评论管理 |
+| `/api/admin/businesses` | Admin | 商家列表 |
+| `/api/admin/orders` | Admin | 订单列表 |
+| `/api/admin/users` | Admin | 用户列表 |
+| `/api/admin/categories` | Admin | 分类管理 |
+| `/api/admin/listing/*` | Admin | 列表管理 |
+| `/api/admin/skus` | Admin | SKU管理 |
+| `/api/admin/blogs` | Admin | 博客管理 |
+| `/api/admin/settings` | Admin | 设置管理 |

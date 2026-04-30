@@ -33,6 +33,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 | **AWS SDK** | @aws-sdk/* | 3.1039.0 | R2 operations |
 | **Package Manager** | pnpm | 9.15.0 | REQUIRED |
 | **Language** | TypeScript | 6.0.3 | .ts files only |
+| **Playwright** | Playwright | 1.59.1 | E2E testing |
 
 ---
 

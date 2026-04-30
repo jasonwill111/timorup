@@ -1,15 +1,15 @@
 # Astro Knowledge (timorlist)
 
-> v6.1.9 | Node 20+ | Cloudflare Workers | Drizzle ORM | TailwindCSS v4
+> v6.1.10 | Node 22+ | Cloudflare Workers | Drizzle ORM | TailwindCSS v4
 
 ## Quick Commands
 
 ```bash
-pnpm dev        # Static dev (no D1/R2)
-pnpm dev:cf     # Cloudflare dev (D1/R2 access)
+pnpm dev:cf     # Cloudflare dev (D1/R2 access) via wrangler
 pnpm build      # Build for production
-pnpm preview:cf # Preview with wrangler
 pnpm db:push    # Push schema to D1
+pnpm test       # Vitest tests
+pnpm test:e2e   # Playwright E2E
 ```
 
 ## SSR + Cloudflare Workers
