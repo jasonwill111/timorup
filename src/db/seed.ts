@@ -1193,40 +1193,40 @@ async function seed() {
   await db.delete(schema.users);
   await db.delete(schema.categories);
 
-  // Insert categories
+  // Batch insert categories (optimized - single query vs N queries)
   console.log('📂 Inserting categories...');
-  for (const cat of categories) {
-    await db.insert(schema.categories).values(cat);
+  if (categories.length > 0) {
+    await db.insert(schema.categories).values(categories);
   }
 
-  // Insert users
+  // Batch insert users
   console.log('👤 Inserting users...');
-  for (const user of users) {
-    await db.insert(schema.users).values(user);
+  if (users.length > 0) {
+    await db.insert(schema.users).values(users);
   }
 
-  // Insert businesses
+  // Batch insert businesses
   console.log('🏢 Inserting businesses...');
-  for (const biz of businesses) {
-    await db.insert(schema.businessPages).values(biz);
+  if (businesses.length > 0) {
+    await db.insert(schema.businessPages).values(businesses);
   }
 
-  // Insert organizations
+  // Batch insert organizations
   console.log('🏛️ Inserting organizations...');
-  for (const org of organizations) {
-    await db.insert(schema.businessPages).values(org);
+  if (organizations.length > 0) {
+    await db.insert(schema.businessPages).values(organizations);
   }
 
-  // Insert products
+  // Batch insert products
   console.log('📦 Inserting products...');
-  for (const prod of products) {
-    await db.insert(schema.products).values(prod);
+  if (products.length > 0) {
+    await db.insert(schema.products).values(products);
   }
 
-  // Insert reviews
+  // Batch insert reviews
   console.log('⭐ Inserting reviews...');
-  for (const rev of reviews) {
-    await db.insert(schema.reviews).values(rev);
+  if (reviews.length > 0) {
+    await db.insert(schema.reviews).values(reviews);
   }
 
   console.log('✅ Seed completed!');

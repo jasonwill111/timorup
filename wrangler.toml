@@ -1,8 +1,8 @@
 # Cloudflare Workers/Pages Configuration
-# Optimized for zero-cost hosting
+# Optimized for performance
 
 name = "timorbiz"
-compatibility_date = "2024-04-19"
+compatibility_date = "2026-04-28"
 pages_build_output_dir = "./dist/client"
 
 # Workers AI - disable if not used
@@ -25,16 +25,18 @@ database_id = "xxx-xxx-xxx"  # Replace with actual D1 ID
 binding = "CACHE"
 id = "xxx-xxx-xxx"  # Replace with actual KV ID for caching
 
-# Tail workers - disable for cost savings
-# tail_consumers = []
-
-# Observability - disable for cost savings
-# [observability]
-# enabled = false
-
 # Build settings
 build_command = "pnpm build"
 compatibility_flags = ["nodejs_compat"]
+
+# Performance optimization
+# https://developers.cloudflare.com/workers/configuration-memory-and-computation/
+[workers]
+# Memory limit: 128MB default, max 300MB
+memory_heap_size_division = 1  # Higher precision memory allocation
+
+# Keep idle v8 contexts alive for faster cold starts
+persist_across_deploys = true
 
 # Environment-specific settings
 [env.production]

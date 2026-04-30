@@ -49,14 +49,20 @@ export function createAuth(db: any) {
       },
     } : {}),
 
-    // Session configuration
+    // Session configuration - optimized for performance
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days
       updateAge: 60 * 60 * 24, // 1 day
       cookieCache: {
         enabled: true,
-        maxAge: 60 * 5, // 5 minutes
+        maxAge: 60 * 5, // 5 minutes cache for session reads
       },
+    },
+
+    // Cache configuration for better-auth 1.6+
+    cache: {
+      enabled: true,
+      maxAge: 60 * 10, // 10 minutes TTL for auth cache
     },
 
     // Trusted origins

@@ -267,3 +267,95 @@ describe('Zod v4 error handling', () => {
     }
   });
 });
+
+// File validation schemas
+import {
+  ImageFileSchema,
+  VideoFileSchema,
+  validateImageFile,
+  validateVideoFile,
+  MAX_IMAGE_SIZE,
+  MAX_VIDEO_SIZE,
+} from './validation';
+
+describe('ImageFileSchema (z.file)', () => {
+  it('accepts valid jpeg images', () => {
+    const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    expect(ImageFileSchema.safeParse(mockFile).success).toBe(true);
+  });
+
+  it('accepts png images', () => {
+    const mockFile = new File(['test'], 'test.png', { type: 'image/png' });
+    expect(ImageFileSchema.safeParse(mockFile).success).toBe(true);
+  });
+
+  it('accepts webp images', () => {
+    const mockFile = new File(['test'], 'test.webp', { type: 'image/webp' });
+    expect(ImageFileSchema.safeParse(mockFile).success).toBe(true);
+  });
+
+  it('rejects non-image files', () => {
+    const mockFile = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+    expect(ImageFileSchema.safeParse(mockFile).success).toBe(false);
+  });
+
+  it('rejects oversized files', () => {
+    // Create a file larger than MAX_IMAGE_SIZE
+    const largeData = new Uint8Array(MAX_IMAGE_SIZE + 1);
+    const mockFile = new File([largeData.buffer], 'large.jpg', { type: 'image/jpeg' });
+    // Verify the mock file actually has the expected size
+    expect(mockFile.size).toBeGreaterThan(MAX_IMAGE_SIZE);
+    // z.file() maxSize validation
+    const result = ImageFileSchema.safeParse(mockFile);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('VideoFileSchema (z.file)', () => {
+  it('accepts valid mp4 videos', () => {
+    const mockFile = new File(['test'], 'test.mp4', { type: 'video/mp4' });
+    expect(VideoFileSchema.safeParse(mockFile).success).toBe(true);
+  });
+
+  it('accepts webm videos', () => {
+    const mockFile = new File(['test'], 'test.webm', { type: 'video/webm' });
+    expect(VideoFileSchema.safeParse(mockFile).success).toBe(true);
+  });
+
+  it('rejects non-video files', () => {
+    const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    expect(VideoFileSchema.safeParse(mockFile).success).toBe(false);
+  });
+});
+
+describe('validateImageFile helper', () => {
+  it('returns valid for good images', () => {
+    const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    const result = validateImageFile(mockFile);
+    expect(result.valid).toBe(true);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns error for invalid images', () => {
+    const mockFile = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+    const result = validateImageFile(mockFile);
+    expect(result.valid).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+});
+
+describe('validateVideoFile helper', () => {
+  it('returns valid for good videos', () => {
+    const mockFile = new File(['test'], 'test.mp4', { type: 'video/mp4' });
+    const result = validateVideoFile(mockFile);
+    expect(result.valid).toBe(true);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns error for invalid videos', () => {
+    const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    const result = validateVideoFile(mockFile);
+    expect(result.valid).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+});
