@@ -24,6 +24,10 @@ Or sync a specific increment:
 sw:sync-docs 0001
 ```
 
+## Active Features
+
+- [FS-021: Admin SKUs TipTap Editor](FS-021/FEATURE.md)
+
 ---
 
 Last updated: 2026-03-22

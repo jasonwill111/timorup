@@ -95,10 +95,42 @@ const businessOptionsJson = JSON.stringify(businessOptions);
           </button>
         </div>
 
-        <!-- Description -->
+        <!-- Description - TipTap Editor -->
         <div>
-          <label for="sku-description" class="block text-sm font-medium mb-1">Description</label>
-          <textarea id="sku-description" name="description" rows="3" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Brief description..."></textarea>
+          <label class="block text-sm font-medium mb-1">Description</label>
+          <div id="editor-toolbar" class="flex flex-wrap gap-1 p-2 border border-b-0 rounded-t-md bg-muted/30">
+            <button type="button" data-command="toggleBold" class="toolbar-btn" title="Bold">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+            </button>
+            <button type="button" data-command="toggleItalic" class="toolbar-btn" title="Italic">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 4h-9 M14 20H5 M15 4L9 20"/></svg>
+            </button>
+            <button type="button" data-command="toggleUnderline" class="toolbar-btn" title="Underline">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4v6a6 6 0 0 0 12 0V4 M4 20h16"/></svg>
+            </button>
+            <div class="w-px bg-border mx-1"></div>
+            <button type="button" data-command="toggleHeading" data-level="1" class="toolbar-btn" title="Heading 1">H1</button>
+            <button type="button" data-command="toggleHeading" data-level="2" class="toolbar-btn" title="Heading 2">H2</button>
+            <div class="w-px bg-border mx-1"></div>
+            <button type="button" data-command="toggleBulletList" class="toolbar-btn" title="Bullet List">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01"/></svg>
+            </button>
+            <button type="button" data-command="toggleOrderedList" class="toolbar-btn" title="Ordered List">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11 M10 12h11 M10 18h11 M4 6h1v4 M4 10h2 M4 14h2l-2 4h2"/></svg>
+            </button>
+            <button type="button" data-command="toggleBlockquote" class="toolbar-btn" title="Quote">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+            </button>
+            <div class="w-px bg-border mx-1"></div>
+            <button type="button" data-command="undo" class="toolbar-btn" title="Undo">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5H3"/></svg>
+            </button>
+            <button type="button" data-command="redo" class="toolbar-btn" title="Redo">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h10"/></svg>
+            </button>
+          </div>
+          <div id="tiptap-editor" class="prose-editor border rounded-b-md" data-placeholder="Brief description..."></div>
+          <input type="hidden" id="sku-description" name="description" value="" />
         </div>
 
         <!-- Actions -->
@@ -113,12 +145,98 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
 <script>
   import { getPriceUnitsForServiceType } from '../../lib/constants';
+  import { Editor } from '@tiptap/core';
+  import StarterKit from '@tiptap/starter-kit';
+  import Underline from '@tiptap/extension-underline';
+  import Placeholder from '@tiptap/extension-placeholder';
 
   // Read business options from hidden JSON element
   const businessDataEl = document.getElementById('business-data');
   const businessOptions = businessDataEl ? JSON.parse(businessDataEl.textContent || '[]') : [];
 
   let editingId = null;
+  let editor = null;
+
+  // Initialize TipTap editor
+  function initEditor(initialContent = '') {
+    const element = document.querySelector('#tiptap-editor');
+    if (!element) return null;
+
+    // Destroy existing editor
+    if (editor) {
+      editor.destroy();
+    }
+
+    editor = new Editor({
+      element,
+      extensions: [
+        StarterKit,
+        Underline,
+        Placeholder.configure({
+          placeholder: element.dataset.placeholder || 'Start writing...',
+        }),
+      ],
+      content: initialContent,
+      immediatelyRender: false,
+      onUpdate: ({ editor }) => {
+        // Sync to hidden input
+        const hiddenInput = document.getElementById('sku-description');
+        if (hiddenInput) {
+          hiddenInput.value = editor.getHTML();
+        }
+      },
+    });
+
+    // Initial sync
+    const hiddenInput = document.getElementById('sku-description');
+    if (hiddenInput) {
+      hiddenInput.value = initialContent;
+    }
+
+    return editor;
+  }
+
+  // Toolbar button handler
+  function setupToolbar() {
+    document.querySelectorAll('[data-command]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!editor) return;
+        const command = btn.dataset.command;
+        const level = btn.dataset.level;
+
+        if (command === 'toggleHeading' && level) {
+          editor.chain().focus().toggleHeading({ level: parseInt(level) }).run();
+        } else if (command === 'undo') {
+          editor.chain().focus().undo().run();
+        } else if (command === 'redo') {
+          editor.chain().focus().redo().run();
+        } else if (command) {
+          const cmd = editor.chain().focus()[command];
+          if (typeof cmd.run === 'function') {
+            cmd.run();
+          }
+        }
+      });
+    });
+  }
+
+  // Update toolbar button active states
+  function updateToolbarState() {
+    if (!editor) return;
+    document.querySelectorAll('[data-command]').forEach(btn => {
+      const command = btn.dataset.command;
+      const level = btn.dataset.level;
+      let isActive = false;
+
+      if (command === 'toggleHeading' && level) {
+        isActive = editor.isActive('heading', { level: parseInt(level) });
+      } else if (['toggleBold', 'toggleItalic', 'toggleUnderline', 'toggleBulletList', 'toggleOrderedList', 'toggleBlockquote'].includes(command)) {
+        isActive = editor.isActive(command.replace('toggle', '').toLowerCase());
+      }
+
+      btn.classList.toggle('active', isActive);
+    });
+  }
 
   // Populate business dropdown
   function populateBusinesses(selectedId = '') {
@@ -274,7 +392,6 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       document.getElementById('sku-title').value = data.title || '';
       document.getElementById('sku-business').value = data.businessPageId || '';
       document.getElementById('sku-service-type').value = data.serviceType || 'product';
-      document.getElementById('sku-description').value = data.description || '';
 
       // Parse price fields
       let priceFields = [];
@@ -283,7 +400,11 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       } catch {}
       renderPriceFields(data.serviceType || 'product', priceFields);
 
+      // Initialize editor with existing content
+      initEditor(data.description || '');
+
       openModal();
+      setupToolbar();
     } catch (err) {
       console.error('Error loading SKU:', err);
       alert('Failed to load SKU');
@@ -311,6 +432,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     const modal = document.getElementById('sku-modal');
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
+    // Focus editor after modal opens
+    setTimeout(() => editor?.commands.focus(), 100);
   }
 
   function closeModal() {
@@ -321,6 +444,14 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     document.getElementById('sku-form').reset();
     document.getElementById('sku-id').value = '';
     document.getElementById('modal-title').textContent = 'Create SKU';
+    // Clear editor
+    if (editor) {
+      editor.commands.clearContent();
+    }
+    const hiddenInput = document.getElementById('sku-description');
+    if (hiddenInput) {
+      hiddenInput.value = '';
+    }
   }
 
   document.getElementById('add-sku-btn')?.addEventListener('click', () => {
@@ -328,6 +459,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     renderPriceFields('product');
     editingId = null;
     document.getElementById('modal-title').textContent = 'Create SKU';
+    initEditor('');
+    setupToolbar();
     openModal();
   });
 
@@ -355,12 +488,16 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       }
     }
 
+    // Get description from hidden input (synced from TipTap)
+    const descriptionInput = document.getElementById('sku-description');
+    const description = descriptionInput?.value || '';
+
     const skuData = {
       title: formData.get('title'),
       businessPageId: formData.get('businessPageId'),
       serviceType: formData.get('serviceType'),
       priceFields: priceFields.length > 0 ? JSON.stringify(priceFields) : null,
-      description: formData.get('description'),
+      description,
       isAdmin: true,
     };
 
@@ -400,4 +537,84 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   populateBusinesses();
   renderPriceFields('product');
   loadSKUs();
+  // Initialize editor for create mode (will be reset on modal open)
+  initEditor('');
+  setupToolbar();
 </script>
+
+<style>
+  /* TipTap Editor Styles */
+  .prose-editor {
+    min-height: 150px;
+    padding: 0.75rem;
+  }
+
+  .prose-editor :global(.ProseMirror) {
+    min-height: 120px;
+    outline: none;
+  }
+
+  .prose-editor :global(.ProseMirror p.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+
+  .prose-editor :global(.ProseMirror p) {
+    margin: 0.5em 0;
+  }
+
+  .prose-editor :global(.ProseMirror h1) {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 1em 0 0.5em;
+  }
+
+  .prose-editor :global(.ProseMirror h2) {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0.75em 0 0.5em;
+  }
+
+  .prose-editor :global(.ProseMirror ul),
+  .prose-editor :global(.ProseMirror ol) {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+  }
+
+  .prose-editor :global(.ProseMirror blockquote) {
+    border-left: 3px solid #d1d5db;
+    padding-left: 1em;
+    margin: 0.5em 0;
+    color: #6b7280;
+  }
+
+  /* Toolbar button styles */
+  .toolbar-btn {
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .toolbar-btn:hover {
+    background: #e5e7eb;
+  }
+
+  .toolbar-btn.active {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  :global(.dark) .toolbar-btn:hover {
+    background: #374151;
+  }
+
+  :global(.dark) .toolbar-btn.active {
+    background: #78350f;
+    color: #fef3c7;
+  }
+</style>
