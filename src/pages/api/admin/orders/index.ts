@@ -4,7 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { orders, businessPages, users } from '@/db/schema';
 import { eq, desc, sql, like, or, and } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 async function requireAdminAuth(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';
@@ -16,8 +16,8 @@ async function requireAdminAuth(request: Request) {
     }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
   }
   try {
-    const authApi = (auth as unknown as { api: typeof auth.api }).api;
-    const { user } = await authApi.getSession({
+    const authInstance = await initAuth();
+    const { user } = await authInstance.api.getSession({
       headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
     });
     if (!user || user.role !== 'admin') {

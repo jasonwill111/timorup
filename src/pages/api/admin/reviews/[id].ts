@@ -4,7 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { reviews, businessPages } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 // Helper to check admin
 async function isAdmin(request: Request): Promise<boolean> {
