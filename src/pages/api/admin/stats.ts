@@ -2,9 +2,8 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { users, businessPages, orders, categories } from '@/db/schema';
+import { users, businessPages, orders, categories, sessions } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { initAuth } from '@/lib/auth';
 
 async function requireAdminAuth(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';
@@ -15,24 +14,35 @@ async function requireAdminAuth(request: Request) {
       error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
     }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
   }
-  try {
-    const authInstance = await initAuth();
-    const { user } = await authInstance.api.getSession({
-      headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
-    });
-    if (!user || user.role !== 'admin') {
-      return { authorized: false, error: new Response(JSON.stringify({
-        success: false,
-        error: { code: 'FORBIDDEN', message: 'Admin access required' }
-      }), { status: 403, headers: { 'Content-Type': 'application/json' } }) };
-    }
-    return { authorized: true, user };
-  } catch {
+
+  // Direct session query instead of using auth API
+  const db = await getDb();
+  const session = await db.select()
+    .from(sessions)
+    .where(eq(sessions.token, tokenMatch[1]))
+    .limit(1)
+    .get();
+
+  if (!session || !session.expiresAt || new Date(session.expiresAt) < new Date()) {
     return { authorized: false, error: new Response(JSON.stringify({
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      error: { code: 'UNAUTHORIZED', message: 'Session expired' }
     }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
   }
+
+  const user = await db.select()
+    .from(users)
+    .where(eq(users.id, session.userId))
+    .limit(1)
+    .get();
+
+  if (!user || user.role !== 'admin') {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Admin access required' }
+    }), { status: 403, headers: { 'Content-Type': 'application/json' } }) };
+  }
+  return { authorized: true, user };
 }
 
 export async function GET({ request }: { request: Request }) {
