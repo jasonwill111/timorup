@@ -1,7 +1,7 @@
 // Reviews Reply API - CRUD for owner replies
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { reviews, businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -21,6 +21,7 @@ async function getUserFromSession(request: Request) {
 
 // POST - Create reply (one-time only)
 export async function POST({ request, params }: { request: Request; params: { id: string } }) {
+  const db = await getDb();
   try {
     const user = await getUserFromSession(request);
     if (!user) {
@@ -118,6 +119,7 @@ export async function POST({ request, params }: { request: Request; params: { id
 
 // PUT - Edit reply
 export async function PUT({ request, params }: { request: Request; params: { id: string } }) {
+  const db = await getDb();
   try {
     const user = await getUserFromSession(request);
     if (!user) {
@@ -194,6 +196,7 @@ export async function PUT({ request, params }: { request: Request; params: { id:
 
 // DELETE - Delete reply
 export async function DELETE({ request, params }: { request: Request; params: { id: string } }) {
+  const db = await getDb();
   try {
     const user = await getUserFromSession(request);
     if (!user) {

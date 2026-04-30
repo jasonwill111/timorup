@@ -1,7 +1,7 @@
 // Admin Reviews Delete API
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { reviews, businessPages } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -19,6 +19,7 @@ async function isAdmin(request: Request): Promise<boolean> {
 
 // DELETE - Delete review (admin only)
 export async function DELETE({ request, params }: { request: Request; params: { id: string } }) {
+  const db = await getDb();
   try {
     // Check admin
     const admin = await isAdmin(request);

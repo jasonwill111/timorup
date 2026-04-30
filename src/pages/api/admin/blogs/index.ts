@@ -1,11 +1,12 @@
 // Admin API - Blogs Management
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { blogPosts } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
+  const db = await getDb();
   try {
     const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).all();
 

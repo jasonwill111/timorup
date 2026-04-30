@@ -1,7 +1,7 @@
 // Admin API - Save Settings
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { siteSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -16,6 +16,7 @@ interface PaymentInfoValue {
 
 // POST - Save all settings at once
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { settings } = body;

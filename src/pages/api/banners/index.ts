@@ -3,13 +3,15 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
   const isActive = url.searchParams.get('active') === 'true';
 
   try {
+    const db = await getDb();
+
     if (isActive) {
       const banners = await db.select({
         id: adBanners.id,
@@ -46,13 +48,14 @@ export async function GET({ request }: { request: Request }) {
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'FETCH_ERROR', message: error.message }
+      error: { code: 'FETCH_ERROR', message: error instanceof Error ? error.message : 'Unknown error' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
 export async function POST({ request }: { request: Request }) {
   try {
+    const db = await getDb();
     const body = await request.json();
     const { title, description, imageId, linkedBusinessPageId, externalUrl, isActive, startDate, endDate } = body;
 
@@ -74,7 +77,7 @@ export async function POST({ request }: { request: Request }) {
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'CREATE_ERROR', message: error.message }
+      error: { code: 'CREATE_ERROR', message: error instanceof Error ? error.message : 'Unknown error' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

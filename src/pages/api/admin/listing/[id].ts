@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';

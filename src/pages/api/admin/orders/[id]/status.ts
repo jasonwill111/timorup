@@ -1,11 +1,12 @@
 // Admin API - Update order status (confirm payment)
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { orders, businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function PUT({ params, request }: { params: Record<string, string>; request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { status, expiryDate } = body;

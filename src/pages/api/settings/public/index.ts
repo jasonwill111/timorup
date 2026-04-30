@@ -7,11 +7,12 @@
 
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { siteSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET() {
+  const db = await getDb();
   try {
     const [result] = await db
       .select({ value: siteSettings.value })

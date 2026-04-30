@@ -1,11 +1,12 @@
 // Auth API - Forgot Password
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { email } = body;

@@ -1,11 +1,12 @@
 // Banners API - PUT update, DELETE
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function PUT({ request }: { request: Request }) {
+  const db = await getDb();
   const url = new URL(request.url);
   const pathParts = url.pathname.split('/');
   const id = pathParts[pathParts.length - 1];
@@ -50,6 +51,7 @@ export async function PUT({ request }: { request: Request }) {
 }
 
 export async function DELETE({ request }: { request: Request }) {
+  const db = await getDb();
   const url = new URL(request.url);
   const pathParts = url.pathname.split('/');
   const id = pathParts[pathParts.length - 1];

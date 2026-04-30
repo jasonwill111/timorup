@@ -3,11 +3,12 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { reviews, businessPages } from '@/db/schema';
-import { eq, desc, sql, and } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 
 // GET - List reviews
 export async function GET({ url }: { url: URL }) {
   try {
+    const db = await getDb();
     const businessPageId = url.searchParams.get('businessPageId');
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
@@ -24,7 +25,6 @@ export async function GET({ url }: { url: URL }) {
       comment: reviews.comment,
       isEdited: reviews.isEdited,
       createdAt: reviews.createdAt,
-      // Reply fields
       reply: reviews.reply,
       repliedAt: reviews.repliedAt,
       repliedBy: reviews.repliedBy,
@@ -63,7 +63,7 @@ export async function GET({ url }: { url: URL }) {
     console.error('Reviews error:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: { message: 'Failed to fetch reviews' }
+      error: { message: error instanceof Error ? error.message : 'Failed to fetch reviews' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
@@ -71,6 +71,7 @@ export async function GET({ url }: { url: URL }) {
 // POST - Create review
 export async function POST({ request }: { request: Request }) {
   try {
+    const db = await getDb();
     const body = await request.json();
     const { businessPageId, userId, rating, comment } = body;
 
@@ -107,9 +108,9 @@ export async function POST({ request }: { request: Request }) {
     const avgResult = await db.select({ avg: sql`AVG(${reviews.rating})`, count: sql`COUNT(*)` })
       .from(reviews)
       .where(eq(reviews.businessPageId, businessPageId));
-    
+
     await db.update(businessPages)
-      .set({ 
+      .set({
         ratingAverage: Number(avgResult[0]?.avg) || rating,
         ratingCount: Number(avgResult[0]?.count) || 1
       })
@@ -123,7 +124,7 @@ export async function POST({ request }: { request: Request }) {
     console.error('Create review error:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: { message: 'Failed to create review' }
+      error: { message: error instanceof Error ? error.message : 'Failed to create review' }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

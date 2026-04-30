@@ -1,7 +1,7 @@
 // API endpoint to get subscription/order info for a user
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { orders, businessPages } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
@@ -23,6 +23,7 @@ const ParamsSchema = z.object({
 });
 
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
+  const db = await getDb();
   // Rate limiting
   const clientIP = getClientIP(request);
   const rateLimit = checkRateLimit(`sub:${clientIP}`);

@@ -1,7 +1,7 @@
 // API endpoint to get single business by slug (GET) and update it (PUT)
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { businessPages, categories, products, reviews } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -59,6 +59,7 @@ async function purgeCache(cacheKey: string): Promise<void> {
 }
 
 export async function GET({ params, request }: { params: { slug: string }; request: Request }) {
+  const db = await getDb();
   const { slug } = params;
   const cacheKey = `/api/businesses/${slug}`;
 
@@ -171,6 +172,7 @@ export async function GET({ params, request }: { params: { slug: string }; reque
 }
 
 export async function PUT({ params, request }: { params: { slug: string }; request: Request }) {
+  const db = await getDb();
   try {
     const { slug } = params;
 

@@ -1,12 +1,13 @@
 // API endpoint to get SKU usage for a business page
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { products, businessPages } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { PLAN_LIMITS } from '@/lib/media';
 
 export async function GET({ params, url }: { params: Record<string, string>; url: URL }) {
+  const db = await getDb();
   try {
     const { businessPageId } = params;
 

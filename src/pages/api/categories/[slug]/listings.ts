@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { categories, businessPages } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export const GET: APIRoute = async ({ params, url }) => {
+  const db = await getDb();
   const slug = params.slug;
   const page = parseInt(url.searchParams.get('page') || '1');
   const limit = parseInt(url.searchParams.get('limit') || '6');

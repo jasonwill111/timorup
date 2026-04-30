@@ -1,7 +1,7 @@
 // Media API - Upload endpoint
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { media, businessPages } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -59,6 +59,7 @@ async function countBusinessMedia(businessId: string) {
 }
 
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   const url = new URL(request.url);
   const businessId = url.searchParams.get('businessId');
   const user = await getCurrentUser(request);

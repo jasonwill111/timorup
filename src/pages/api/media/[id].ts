@@ -25,11 +25,12 @@ async function getCurrentUser(request: Request) {
 }
 
 export async function GET({ request }: { request: Request }) {
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const id = pathParts[pathParts.length - 1];
-
   try {
+    const db = await getDb();
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+
     const item = await db.select().from(media).where(eq(media.id, id)).limit(1);
     if (item.length === 0) {
       return new Response(JSON.stringify({
@@ -50,19 +51,20 @@ export async function GET({ request }: { request: Request }) {
 }
 
 export async function DELETE({ request }: { request: Request }) {
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const id = pathParts[pathParts.length - 1];
-  const user = await getCurrentUser(request);
-
-  if (!user) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
-
   try {
+    const db = await getDb();
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const item = await db.select().from(media).where(eq(media.id, id)).limit(1);
     if (item.length === 0) {
       return new Response(JSON.stringify({

@@ -1,7 +1,7 @@
 // API endpoint to get businesses owned by a user
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
@@ -53,6 +53,7 @@ const ParamsSchema = z.object({
 });
 
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
+  const db = await getDb();
   // Auth check
   const authResult = await requireAuth(request);
   if (!authResult.authorized) return authResult.error;

@@ -1,7 +1,7 @@
 // Admin API - Users Management
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq, desc, sql, like } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -37,6 +37,7 @@ async function requireAdminAuth(request: Request) {
 
 // GET - List all users
 export async function GET({ url, request }: { url: URL; request: Request }) {
+  const db = await getDb();
   const authResult = await requireAdminAuth(request);
   if (!authResult.authorized) return authResult.error;
 

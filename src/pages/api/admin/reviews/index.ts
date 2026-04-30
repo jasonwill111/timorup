@@ -1,7 +1,7 @@
 // Admin Reviews API - List all reviews with search/filter
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { reviews, businessPages, users } from '@/db/schema';
 import { eq, desc, sql, like, and, or, gte, lte } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -22,6 +22,7 @@ async function isAdmin(request: Request): Promise<boolean> {
 
 // GET - List all reviews (admin only)
 export async function GET({ url }: { url: URL }) {
+  const db = await getDb();
   try {
     // Check admin
     const admin = await isAdmin(url as unknown as Request);

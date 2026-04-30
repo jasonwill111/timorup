@@ -1,7 +1,7 @@
 // Admin API - Dashboard Stats
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { users, businessPages, orders, categories } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -36,6 +36,7 @@ async function requireAdminAuth(request: Request) {
 }
 
 export async function GET({ request }: { request: Request }) {
+  const db = await getDb();
   const authResult = await requireAdminAuth(request);
   if (!authResult.authorized) return authResult.error;
 

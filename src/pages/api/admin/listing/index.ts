@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages } from '@/db/schema';
 import { eq, and, like, or } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
@@ -32,6 +32,7 @@ function generateSlug(title: string): string {
 }
 
 export const GET: APIRoute = async ({ url }) => {
+  const db = await getDb();
   const entityType = url.searchParams.get('entityType');
   const status = url.searchParams.get('status');
   const search = url.searchParams.get('search');
@@ -63,6 +64,7 @@ export const GET: APIRoute = async ({ url }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
+  const db = await getDb();
   try {
     const body = await request.json();
     const data = createSchema.parse(body);

@@ -1,11 +1,12 @@
 // Admin API - SKUs Management
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { products } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
+  const db = await getDb();
   try {
     const skus = await db.select().from(products).orderBy(desc(products.createdAt)).all();
 

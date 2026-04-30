@@ -1,11 +1,12 @@
 // Like/Save Business API
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST({ params, request }: { params: { slug: string }, request: Request }) {
+  const db = await getDb();
   try {
     const { slug } = params;
     const body = await request.json();

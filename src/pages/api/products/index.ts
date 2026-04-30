@@ -6,48 +6,9 @@ import { products, businessPages } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { PLAN_LIMITS } from '@/lib/media';
 
-// Helper to check SKU limit
-async function checkSkuLimit(businessPageId: string): Promise<{ allowed: boolean; limit: number; current: number; planName: string }> {
-  // Get business page with plan info
-  const business = await db.select({
-    planType: businessPages.planType,
-    expiryDate: businessPages.expiryDate,
-  })
-  .from(businessPages)
-  .where(eq(businessPages.id, businessPageId))
-  .limit(1)
-  .get();
-
-  if (!business) {
-    return { allowed: false, limit: 0, current: 0, planName: 'none' };
-  }
-
-  // Determine effective plan
-  let effectivePlan = business.planType || 'basic';
-  if (business.expiryDate && new Date(business.expiryDate) < new Date()) {
-    // Plan expired, limit to basic (10)
-    effectivePlan = 'basic';
-  }
-
-  const limit = PLAN_LIMITS[effectivePlan]?.maxProducts || PLAN_LIMITS.basic.maxProducts;
-
-  // Count current products
-  const countResult = await db.select({ count: sql<number>`count(*)` })
-    .from(products)
-    .where(eq(products.businessPageId, businessPageId));
-
-  const current = Number(countResult[0]?.count) || 0;
-
-  return {
-    allowed: current < limit,
-    limit,
-    current,
-    planName: effectivePlan,
-  };
-}
-
 export async function GET({ url }: { url: URL }) {
   try {
+    const db = await getDb();
     const businessPageId = url.searchParams.get('businessPageId');
     const isAdmin = url.searchParams.get('isAdmin') === 'true';
 
@@ -84,7 +45,7 @@ export async function GET({ url }: { url: URL }) {
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: error.message }
+      error: { message: error instanceof Error ? error.message : 'Unknown error' }
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -94,6 +55,7 @@ export async function GET({ url }: { url: URL }) {
 
 export async function POST({ request }: { request: Request }) {
   try {
+    const db = await getDb();
     const body = await request.json();
     const { title, price, priceUnit, description, businessPageId, priceFields, serviceType, isAdmin } = body;
 
@@ -118,16 +80,45 @@ export async function POST({ request }: { request: Request }) {
     }
 
     // Check SKU limit
-    const skuCheck = await checkSkuLimit(businessPageId);
-    if (!skuCheck.allowed) {
+    const business = await db.select({
+      planType: businessPages.planType,
+      expiryDate: businessPages.expiryDate,
+    })
+    .from(businessPages)
+    .where(eq(businessPages.id, businessPageId))
+    .limit(1)
+    .get();
+
+    if (!business) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: 'Business not found' }
+      }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    let effectivePlan = business.planType || 'basic';
+    if (business.expiryDate && new Date(business.expiryDate) < new Date()) {
+      effectivePlan = 'basic';
+    }
+
+    const limit = PLAN_LIMITS[effectivePlan]?.maxProducts || PLAN_LIMITS.basic.maxProducts;
+    const countResult = await db.select({ count: sql<number>`count(*)` })
+      .from(products)
+      .where(eq(products.businessPageId, businessPageId));
+    const current = Number(countResult[0]?.count) || 0;
+
+    if (current >= limit) {
       return new Response(JSON.stringify({
         success: false,
         error: {
           code: 'SKU_LIMIT_EXCEEDED',
-          message: `You have reached your SKU limit (${skuCheck.current}/${skuCheck.limit}). Please upgrade your plan to add more products.`,
-          plan: skuCheck.planName,
-          limit: skuCheck.limit,
-          current: skuCheck.current,
+          message: `You have reached your SKU limit (${current}/${limit}). Please upgrade your plan to add more products.`,
+          plan: effectivePlan,
+          limit,
+          current,
         }
       }), {
         status: 403,
@@ -158,7 +149,7 @@ export async function POST({ request }: { request: Request }) {
   } catch (error) {
     return new Response(JSON.stringify({
       success: false,
-      error: { message: error.message }
+      error: { message: error instanceof Error ? error.message : 'Unknown error' }
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

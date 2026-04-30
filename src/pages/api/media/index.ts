@@ -36,40 +36,19 @@ async function getCurrentUser(request: Request) {
   } catch { return null; }
 }
 
-async function getBusinessPlanLimits(businessId: string) {
-  const [business] = await db.select({ planType: businessPages.planType })
-    .from(businessPages)
-    .where(eq(businessPages.id, businessId))
-    .limit(1);
-  const plan = business?.planType || 'basic';
-  return PLAN_LIMITS[plan] || PLAN_LIMITS.basic;
-}
-
-async function countBusinessMedia(businessId: string) {
-  const imageCount = await db.select({ count: sql<number>`count(*)` })
-    .from(media)
-    .where(and(eq(media.businessId, businessId), eq(media.type, 'image')));
-  const videoCount = await db.select({ count: sql<number>`count(*)` })
-    .from(media)
-    .where(and(eq(media.businessId, businessId), eq(media.type, 'video')));
-  return {
-    images: imageCount[0]?.count || 0,
-    videos: videoCount[0]?.count || 0,
-  };
-}
-
 export async function GET({ request }: { request: Request }) {
-  const url = new URL(request.url);
-  const user = await getCurrentUser(request);
-
-  if (!user) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
-
   try {
+    const db = await getDb();
+    const url = new URL(request.url);
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const businessId = url.searchParams.get('businessId');
     const userId = url.searchParams.get('userId');
     const id = url.pathname.split('/').pop();
@@ -109,19 +88,20 @@ export async function GET({ request }: { request: Request }) {
 }
 
 export async function POST({ request }: { request: Request }) {
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const lastPart = pathParts[pathParts.length - 1];
-  const user = await getCurrentUser(request);
-
-  if (!user) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
-
   try {
+    const db = await getDb();
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const lastPart = pathParts[pathParts.length - 1];
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     if (lastPart === 'upload') {
       const businessId = url.searchParams.get('businessId');
       const body = await request.parseBody();
@@ -153,15 +133,27 @@ export async function POST({ request }: { request: Request }) {
       }
 
       if (businessId) {
-        const limits = await getBusinessPlanLimits(businessId);
-        const counts = await countBusinessMedia(businessId);
-        if (isImage && counts.images >= limits.maxImages) {
+        const [business] = await db.select({ planType: businessPages.planType })
+          .from(businessPages)
+          .where(eq(businessPages.id, businessId))
+          .limit(1);
+        const plan = business?.planType || 'basic';
+        const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.basic;
+
+        const imageCount = await db.select({ count: sql<number>`count(*)` })
+          .from(media)
+          .where(and(eq(media.businessId, businessId), eq(media.type, 'image')));
+        const videoCount = await db.select({ count: sql<number>`count(*)` })
+          .from(media)
+          .where(and(eq(media.businessId, businessId), eq(media.type, 'video')));
+
+        if (isImage && (imageCount[0]?.count || 0) >= limits.maxImages) {
           return new Response(JSON.stringify({
             success: false,
             error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxImages} images allowed` }
           }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
-        if (isVideo && counts.videos >= limits.maxVideos) {
+        if (isVideo && (videoCount[0]?.count || 0) >= limits.maxVideos) {
           return new Response(JSON.stringify({
             success: false,
             error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxVideos} video allowed` }
@@ -226,18 +218,19 @@ export async function POST({ request }: { request: Request }) {
 }
 
 export async function PUT({ request }: { request: Request }) {
-  const url = new URL(request.url);
-  const id = url.pathname.split('/').pop();
-  const user = await getCurrentUser(request);
-
-  if (!user) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
-
   try {
+    const db = await getDb();
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop();
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const body = await request.json();
     const { url: newUrl, width, height, alt, businessId } = body;
 
@@ -273,19 +266,20 @@ export async function PUT({ request }: { request: Request }) {
 }
 
 export async function DELETE({ request }: { request: Request }) {
-  const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const id = pathParts[pathParts.length - 1];
-  const user = await getCurrentUser(request);
-
-  if (!user) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
-
   try {
+    const db = await getDb();
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const id = pathParts[pathParts.length - 1];
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const item = await db.select().from(media).where(eq(media.id, id)).limit(1);
     if (item.length === 0) {
       return new Response(JSON.stringify({

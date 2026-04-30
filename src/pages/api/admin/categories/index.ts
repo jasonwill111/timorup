@@ -1,12 +1,13 @@
 // Admin API - Categories Management
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { categories } from '@/db/schema';
 import { eq, desc, sql, or, isNull } from 'drizzle-orm';
 
 // GET - List all categories (with optional entityType filter)
 export async function GET({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const url = new URL(request.url);
     const entityType = url.searchParams.get('entityType');
@@ -48,6 +49,7 @@ export async function GET({ request }: { request: Request }) {
 
 // POST - Create category
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { name, slug, description, icon, entityType, parentId } = body;
@@ -79,6 +81,7 @@ export async function POST({ request }: { request: Request }) {
 
 // PUT - Update category
 export async function PUT({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { id, name, slug, description, icon, entityType, parentId } = body;

@@ -1,7 +1,7 @@
 // API endpoint to get user profile by ID
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
@@ -23,6 +23,7 @@ const ParamsSchema = z.object({
 });
 
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
+  const db = await getDb();
   // Rate limiting
   const clientIP = getClientIP(request);
   const rateLimit = checkRateLimit(`profile:${clientIP}`);

@@ -1,11 +1,12 @@
 // Businesses API - Create new listing (business/government/nonprofit)
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { sessions, users, businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     // 1. Authenticate via session cookie
     const cookieHeader = request.headers.get('cookie') || '';

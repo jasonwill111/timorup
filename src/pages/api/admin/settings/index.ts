@@ -1,12 +1,13 @@
 // Admin API - Settings Management
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { siteSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // GET - Get all settings
 export async function GET() {
+  const db = await getDb();
   try {
     const settingsResult = await db.select().from(siteSettings).all();
 
@@ -37,6 +38,7 @@ export async function GET() {
 
 // PUT - Update a setting
 export async function PUT({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { key, value } = body;
@@ -75,6 +77,7 @@ export async function PUT({ request }: { request: Request }) {
 
 // POST - Save all settings at once
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { settings } = body;

@@ -1,7 +1,7 @@
 // Admin API - Businesses Management
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { businessPages, categories, users } from '@/db/schema';
 import { eq, desc, sql, like, and, or } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
@@ -37,6 +37,7 @@ async function requireAdminAuth(request: Request) {
 
 // GET - List all businesses
 export async function GET({ url, request }: { url: URL; request: Request }) {
+  const db = await getDb();
   const authResult = await requireAdminAuth(request);
   if (!authResult.authorized) return authResult.error;
 
@@ -103,6 +104,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
 // POST - Create a new business
 export async function POST({ request }: { request: Request }) {
+  const db = await getDb();
   const authResult = await requireAdminAuth(request);
   if (!authResult.authorized) return authResult.error;
 

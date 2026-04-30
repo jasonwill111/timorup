@@ -1,11 +1,12 @@
 // Admin API - Update order (full edit)
 export const prerender = false;
 
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { orders, businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET({ params }: { params: Record<string, string> }) {
+  const db = await getDb();
   try {
     const { id } = params;
 
@@ -39,6 +40,7 @@ export async function GET({ params }: { params: Record<string, string> }) {
 }
 
 export async function PUT({ params, request }: { params: Record<string, string>; request: Request }) {
+  const db = await getDb();
   try {
     const body = await request.json();
     const { planType, amount, status, expiryDate, adminNotes } = body;
@@ -133,6 +135,7 @@ export async function PUT({ params, request }: { params: Record<string, string>;
 }
 
 export async function DELETE({ params }: { params: Record<string, string> }) {
+  const db = await getDb();
   try {
     const { id } = params;
 
