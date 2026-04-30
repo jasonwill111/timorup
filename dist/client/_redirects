@@ -1,0 +1,10 @@
+# Cloudflare Pages Redirects
+# https://developers.cloudflare.com/pages/platform/redirects/
+
+# Remove trailing slashes for consistent URLs
+# */ -> *
+
+# SPA fallback for static pages
+# This ensures client-side routing works
+# /account/* /account/index.html 200
+# /admin/* /admin/index.html 200

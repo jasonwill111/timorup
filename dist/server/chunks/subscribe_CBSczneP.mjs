@@ -1,0 +1,159 @@
+globalThis.process ??= {};
+globalThis.process.env ??= {};
+import { c as createComponent } from "./astro-component_BzwIkOFc.mjs";
+import { b as renderTemplate, m as maybeRenderHead } from "./sequence_RDixOVvO.mjs";
+import { r as renderComponent } from "./worker-entry_D6lIot5H.mjs";
+import { $ as $$Layout } from "./Layout_BEjekyZM.mjs";
+import { $ as $$Button } from "./Button_DZTa0hZG.mjs";
+import { $ as $$Card } from "./Card_BQQgFSSe.mjs";
+import { $ as $$CardHeader, a as $$CardTitle } from "./CardTitle_DVNpBoWB.mjs";
+import { $ as $$CardDescription } from "./CardDescription_CrTHqvHg.mjs";
+import { $ as $$CardContent } from "./CardContent_BkLgdmcK.mjs";
+const prerender = false;
+const $$Subscribe = createComponent(async ($$result, $$props, $$slots) => {
+  const Astro = $$result.createAstro($$props, $$slots);
+  Astro.self = $$Subscribe;
+  const cookieHeader = Astro.request.headers.get("cookie") || "";
+  let user = null;
+  let userBusiness = null;
+  try {
+    const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+    if (tokenMatch) {
+      const { db } = await import("./db_DBymDTwI.mjs");
+      const { sessions, users, businessPages } = await import("./index_CI1oSuTR.mjs").then((n) => n.s);
+      const { eq } = await import("./index_BxPtajE1.mjs");
+      const session = await db.select().from(sessions).where(eq(sessions.token, tokenMatch[1])).limit(1).get();
+      if (session && session.expiresAt && new Date(session.expiresAt) > /* @__PURE__ */ new Date()) {
+        const userRecord = await db.select().from(users).where(eq(users.id, session.userId)).limit(1).get();
+        if (userRecord) {
+          user = { id: userRecord.id };
+          const business = await db.select({
+            id: businessPages.id,
+            title: businessPages.title
+          }).from(businessPages).where(eq(businessPages.ownerId, user.id)).limit(1).get();
+          userBusiness = business || null;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Auth check failed:", e);
+  }
+  if (!user) {
+    return Astro.redirect("/login?redirect=/subscribe");
+  }
+  const url = new URL(Astro.request.url);
+  const planParam = url.searchParams.get("plan") || "basic-monthly";
+  const PLAN_PRICES = {
+    "basic-monthly": {
+      name: "Basic",
+      amount: 29,
+      period: "monthly"
+    },
+    "basic-yearly": {
+      name: "Basic",
+      amount: 290,
+      period: "yearly"
+    },
+    "pro-monthly": {
+      name: "Pro",
+      amount: 59,
+      period: "monthly"
+    },
+    "pro-yearly": {
+      name: "Pro",
+      amount: 590,
+      period: "yearly"
+    },
+    "max-monthly": {
+      name: "Max",
+      amount: 89,
+      period: "monthly"
+    },
+    "max-yearly": {
+      name: "Max",
+      amount: 890,
+      period: "yearly"
+    }
+  };
+  const selectedPlan = PLAN_PRICES[planParam] || PLAN_PRICES["basic-monthly"];
+  let existingOrder = null;
+  try {
+    const { db } = await import("./db_DBymDTwI.mjs");
+    const { orders } = await import("./index_CI1oSuTR.mjs").then((n) => n.s);
+    const { eq, and } = await import("./index_BxPtajE1.mjs");
+    const order = await db.select({
+      id: orders.id,
+      status: orders.status
+    }).from(orders).where(and(eq(orders.userId, user.id), eq(orders.planType, planParam), eq(orders.status, "unpaid"))).limit(1).get();
+    existingOrder = order || null;
+  } catch (e) {
+    console.error("Order check failed:", e);
+  }
+  let orderId = existingOrder?.id || null;
+  if (!existingOrder && userBusiness) {
+    try {
+      const { db } = await import("./db_DBymDTwI.mjs");
+      const { orders } = await import("./index_CI1oSuTR.mjs").then((n) => n.s);
+      orderId = `order-${Date.now()}`;
+      await db.insert(orders).values({
+        id: orderId,
+        userId: user.id,
+        businessPageId: userBusiness.id,
+        planType: planParam,
+        amount: selectedPlan.amount,
+        status: "unpaid"
+      }).run();
+    } catch (e) {
+      console.error("Create order failed:", e);
+    }
+  }
+  return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "Subscribe - TIMORLIST" }, { "default": async ($$result2) => renderTemplate`
+  ${maybeRenderHead()}<div class="container py-12"> <div class="max-w-2xl mx-auto"> ${!userBusiness ? renderTemplate`<div class="text-center"> <h1 class="text-3xl font-bold mb-4">Create a Business First</h1> <p class="text-muted-foreground mb-6">You need to create a business listing before subscribing to a plan.</p> <a href="/listing/create?type=business"> ${renderComponent($$result2, "Button", $$Button, {}, { "default": async ($$result3) => renderTemplate`Create Business` })} </a> </div>` : orderId ? renderTemplate`<div> <div class="text-center mb-8"> <h1 class="text-3xl font-bold mb-2">Complete Your Subscription</h1> <p class="text-muted-foreground">
+Order ID: <code class="bg-muted px-2 py-1 rounded text-sm">${orderId.slice(0, 16)}...</code> </p> </div> <!-- Order Summary --> ${renderComponent($$result2, "Card", $$Card, { "class": "mb-6" }, { "default": async ($$result3) => renderTemplate`
+            ${renderComponent($$result3, "CardHeader", $$CardHeader, {}, { "default": async ($$result4) => renderTemplate`
+              ${renderComponent($$result4, "CardTitle", $$CardTitle, {}, { "default": async ($$result5) => renderTemplate`Order Summary` })}
+            ` })}
+            ${renderComponent($$result3, "CardContent", $$CardContent, {}, { "default": async ($$result4) => renderTemplate`
+              <div class="flex justify-between items-center py-2"> <span>Business</span> <span class="font-medium">${userBusiness.title}</span> </div>
+              <div class="flex justify-between items-center py-2 border-t"> <span>Plan</span> <span class="font-medium">${selectedPlan.name} (${selectedPlan.period})</span> </div>
+              <div class="flex justify-between items-center py-2 border-t"> <span>Amount</span> <span class="font-bold text-xl text-primary">$${selectedPlan.amount}</span> </div>
+              <div class="flex justify-between items-center py-2 border-t"> <span>Status</span> <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800">Unpaid</span> </div>
+            ` })}
+          ` })} <!-- Payment Instructions --> ${renderComponent($$result2, "Card", $$Card, { "class": "mb-6" }, { "default": async ($$result3) => renderTemplate`
+            ${renderComponent($$result3, "CardHeader", $$CardHeader, {}, { "default": async ($$result4) => renderTemplate`
+              ${renderComponent($$result4, "CardTitle", $$CardTitle, {}, { "default": async ($$result5) => renderTemplate`Payment Instructions` })}
+              ${renderComponent($$result4, "CardDescription", $$CardDescription, {}, { "default": async ($$result5) => renderTemplate`Choose your preferred payment method` })}
+            ` })}
+            ${renderComponent($$result3, "CardContent", $$CardContent, { "class": "space-y-4" }, { "default": async ($$result4) => renderTemplate`
+              <div class="text-center p-6 bg-muted/50 rounded-lg"> <p class="font-medium mb-2">Scan QR Code</p> <div id="qr-placeholder" class="text-muted-foreground text-sm">
+QR code not yet configured
+</div> </div>
+
+              <div class="border-t pt-4"> <p class="font-medium mb-3">Other Payment Methods:</p> <ul class="space-y-2 text-muted-foreground"> <li class="flex items-center gap-2"> <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path> </svg>
+Cash payment at our office
+</li> <li class="flex items-center gap-2"> <svg class="w-5 h-5 text-green-500" fill="none" stroke="current Color" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path> </svg>
+Bank transfer
+</li> </ul> </div>
+            ` })}
+          ` })} <!-- Confirmation Instructions --> ${renderComponent($$result2, "Card", $$Card, { "class": "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" }, { "default": async ($$result3) => renderTemplate`
+            ${renderComponent($$result3, "CardContent", $$CardContent, { "class": "pt-6" }, { "default": async ($$result4) => renderTemplate`
+              <div class="flex gap-4"> <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path> </svg> <div> <p class="font-medium text-green-800 dark:text-green-200">How to confirm your payment:</p> <ol class="mt-2 text-sm text-green-700 dark:text-green-300 space-y-1"> <li>1. Make your payment using any method above</li> <li>2. Contact us via WhatsApp with your payment proof and Order ID</li> <li>3. We'll confirm and activate your subscription within 24 hours</li> </ol> <a href="https://wa.me/67077000000?text=I%20just%20paid%20for%20TIMORLIST%20subscription.%20Order%20ID:%20" + orderId target="_blank" class="inline-flex items-center gap-2 mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path> </svg>
+Contact via WhatsApp
+</a> </div> </div>
+            ` })}
+          ` })} </div>` : renderTemplate`<div class="text-center"> <h1 class="text-3xl font-bold mb-4">Unable to Create Order</h1> <p class="text-muted-foreground mb-6">There was an issue creating your subscription order.</p> <a href="/account"> ${renderComponent($$result2, "Button", $$Button, {}, { "default": async ($$result3) => renderTemplate`Go to Account` })} </a> </div>`} </div> </div>
+` })}`;
+}, "/home/jasonwill/dev-projects/timorlist/src/pages/subscribe.astro", void 0);
+const $$file = "/home/jasonwill/dev-projects/timorlist/src/pages/subscribe.astro";
+const $$url = "/subscribe";
+const _page = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: $$Subscribe,
+  file: $$file,
+  prerender,
+  url: $$url
+}, Symbol.toStringTag, { value: "Module" }));
+const page = () => _page;
+export {
+  page
+};

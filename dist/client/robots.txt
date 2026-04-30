@@ -1,0 +1,16 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /api/
+Disallow: /api/admin/
+
+# Disallow auth pages
+Disallow: /login
+Disallow: /register
+Disallow: /account
+
+# Sitemap
+Sitemap: https://timorbiz.com/sitemap-index.xml
