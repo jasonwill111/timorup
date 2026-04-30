@@ -22,6 +22,25 @@ const updateSchema = z.object({
   locationLat: z.number().optional().nullable(),
   locationLng: z.number().optional().nullable(),
   status: z.enum(['draft', 'live', 'suspended']).optional(),
+  // Image fields
+  bannerImageId: z.string().optional().nullable(),
+  profileImageId: z.string().optional().nullable(),
+  // Organization fields
+  verifiedBadge: z.boolean().optional().nullable(),
+  socialLinks: z.object({
+    facebook: z.string().optional(),
+    instagram: z.string().optional(),
+    tiktok: z.string().optional(),
+  }).optional().nullable(),
+  // Gallery
+  photoGallery: z.array(z.string()).optional().nullable(),
+  // Latest update
+  latestUpdate: z.string().optional().nullable(),
+  latestUpdateImages: z.array(z.string()).optional().nullable(),
+  latestUpdateDate: z.number().optional().nullable(),
+  // Subscription
+  planType: z.string().optional().nullable(),
+  expiryDate: z.number().optional().nullable(),
 });
 
 export const GET: APIRoute = async ({ params }) => {
@@ -82,6 +101,21 @@ export const PUT: APIRoute = async ({ params, request }) => {
     if (data.locationLat !== undefined) updateData.locationLat = data.locationLat;
     if (data.locationLng !== undefined) updateData.locationLng = data.locationLng;
     if (data.status !== undefined) updateData.status = data.status;
+    // Image fields
+    if (data.bannerImageId !== undefined) updateData.bannerImageId = data.bannerImageId;
+    if (data.profileImageId !== undefined) updateData.profileImageId = data.profileImageId;
+    // Organization fields
+    if (data.verifiedBadge !== undefined) updateData.verifiedBadge = data.verifiedBadge;
+    if (data.socialLinks !== undefined) updateData.socialLinks = data.socialLinks ? JSON.stringify(data.socialLinks) : null;
+    // Gallery
+    if (data.photoGallery !== undefined) updateData.photoGallery = data.photoGallery ? JSON.stringify(data.photoGallery) : null;
+    // Latest update
+    if (data.latestUpdate !== undefined) updateData.latestUpdate = data.latestUpdate;
+    if (data.latestUpdateImages !== undefined) updateData.latestUpdateImages = data.latestUpdateImages ? JSON.stringify(data.latestUpdateImages) : null;
+    if (data.latestUpdateDate !== undefined) updateData.latestUpdateDate = data.latestUpdateDate ? new Date(data.latestUpdateDate) : null;
+    // Subscription
+    if (data.planType !== undefined) updateData.planType = data.planType;
+    if (data.expiryDate !== undefined) updateData.expiryDate = data.expiryDate ? new Date(data.expiryDate) : null;
 
     await db
       .update(businessPages)

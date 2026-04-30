@@ -216,7 +216,8 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
       title, slug: newSlug, categoryId, industry, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
       latitude, longitude, yearOfEstablishment, latestUpdates,
-      registrationUrl
+      registrationUrl, bannerImageId, profileImageId, socialLinks,
+      photoGallery
     } = body;
 
     const updateValues: Record<string, unknown> = {};
@@ -237,6 +238,11 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     if (yearOfEstablishment !== undefined) updateValues.yearOfEstablishment = yearOfEstablishment || null;
     if (latestUpdates !== undefined) updateValues.latestUpdates = latestUpdates || null;
     if (registrationUrl !== undefined) updateValues.registrationUrl = registrationUrl || null;
+    // Image fields
+    if (bannerImageId !== undefined) updateValues.bannerImageId = bannerImageId || null;
+    if (profileImageId !== undefined) updateValues.profileImageId = profileImageId || null;
+    if (socialLinks !== undefined) updateValues.socialLinks = socialLinks ? JSON.stringify(socialLinks) : null;
+    if (photoGallery !== undefined) updateValues.photoGallery = photoGallery ? JSON.stringify(photoGallery) : null;
 
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = Math.floor(Date.now() / 1000);

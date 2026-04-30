@@ -8,7 +8,7 @@ import { z } from 'zod';
 const createSchema = z.object({
   entityType: z.enum(['business', 'government', 'nonprofit']),
   title: z.string().min(1),
-  slug: z.string().optional(), // Optional, auto-generated if not provided
+  slug: z.string().optional(),
   categoryId: z.string().optional(),
   industry: z.string().optional(),
   contactName: z.string().optional(),
@@ -20,11 +20,26 @@ const createSchema = z.object({
   aboutUs: z.string().optional(),
   tags: z.array(z.string()).optional(),
   yearOfEstablishment: z.number().optional(),
-  openingHours: z.record(z.string(), z.string()).optional(), // { day: hours }
+  openingHours: z.record(z.string(), z.string()).optional(),
   locationLat: z.number().optional(),
   locationLng: z.number().optional(),
   status: z.enum(['draft', 'live', 'suspended']).default('draft'),
-  ownerId: z.string().optional(), // For admin-created listings, link to user
+  ownerId: z.string().optional(),
+  // Image fields
+  bannerImageId: z.string().optional(),
+  profileImageId: z.string().optional(),
+  // Organization fields
+  verifiedBadge: z.boolean().optional(),
+  socialLinks: z.object({
+    facebook: z.string().optional(),
+    instagram: z.string().optional(),
+    tiktok: z.string().optional(),
+  }).optional(),
+  // Gallery
+  photoGallery: z.array(z.string()).optional(),
+  // Subscription
+  planType: z.string().optional(),
+  expiryDate: z.number().optional(),
 });
 
 // Generate slug from title
@@ -97,6 +112,17 @@ export const POST: APIRoute = async ({ request }) => {
       locationLat: data.locationLat || null,
       locationLng: data.locationLng || null,
       status: data.status,
+      // Image fields
+      bannerImageId: data.bannerImageId || null,
+      profileImageId: data.profileImageId || null,
+      // Organization fields
+      verifiedBadge: data.verifiedBadge || false,
+      socialLinks: data.socialLinks ? JSON.stringify(data.socialLinks) : null,
+      // Gallery
+      photoGallery: data.photoGallery ? JSON.stringify(data.photoGallery) : null,
+      // Subscription
+      planType: data.planType || null,
+      expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
     };
 
     await db.insert(businessPages).values(newListing);
