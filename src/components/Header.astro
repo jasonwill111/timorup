@@ -52,6 +52,15 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
           Pricing
         </a>
         <a
+          href="/faq"
+          class:list={[
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
+            currentPath === '/faq' ? "text-primary" : "text-muted-foreground"
+          ]}
+        >
+          FAQ
+        </a>
+        <a
           href="/listing/create"
           class="text-sm font-medium bg-primary text-black px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
@@ -130,6 +139,15 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         ]}
       >
         Pricing
+      </a>
+      <a
+        href="/faq"
+        class:list={[
+          "block px-3 py-2 rounded-lg text-sm font-medium",
+          currentPath === '/faq' ? "bg-muted text-primary" : "text-muted-foreground"
+        ]}
+      >
+        FAQ
       </a>
       <div class="border-t pt-2 mt-2">
         {isLoggedIn ? (

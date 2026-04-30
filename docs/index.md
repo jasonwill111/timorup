@@ -15,19 +15,22 @@ scan_level: exhaustive
 
 ## 技术栈
 
-| 组件 | 技术 | 版本 |
-|------|------|------|
-| 前端框架 | Astro | 6.x |
-| UI 组件 | 纯 Astro | - |
-| 数据库 | D1 (SQLite) | - |
-| ORM | Drizzle ORM | 0.45.x |
-| 认证 | Better Auth | 1.5.x |
-| 样式 | Tailwind CSS | 4.x |
-| 富文本编辑器 | TipTap | 3.x |
-| 验证 | Zod | 4.x |
-| 媒体存储 | Cloudflare R2 | - |
-| 地图 | Leaflet + OpenStreetMap | - |
-| 包管理器 | pnpm | 9.15.x |
+| 组件 | 技术 | 版本 | 状态 |
+|------|------|------|------|
+| 前端框架 | Astro | 6.1.10 | ✅ 最新 |
+| UI 组件 | 纯 Astro | - | - |
+| 数据库 | D1 (SQLite) | - | - |
+| ORM | Drizzle ORM | 0.45.2 | ✅ 最新 |
+| 认证 | Better Auth | 1.6.9 | ✅ 最新 |
+| 样式 | Tailwind CSS | 4.2.4 | ✅ 最新 |
+| 富文本编辑器 | TipTap | 3.22.5 | ✅ 最新 |
+| 验证 | Zod | 4.4.1 | ✅ 最新 |
+| 媒体存储 | Cloudflare R2 | - | - |
+| 地图 | Leaflet + OpenStreetMap | - | - |
+| AI | Mastra | 1.29.1 | ✅ 最新 |
+| Cloudflare | Wrangler | 4.86.0 | ✅ 最新 |
+| AWS SDK | @aws-sdk/* | 3.1039.0 | ✅ 最新 |
+| 包管理器 | pnpm | 9.15.0 | - |
 
 ## 快速参考
 
@@ -259,10 +262,36 @@ pnpm build
 
 ---
 
-**文档版本**: 18.0
-**最后更新**: 2026-04-29
+**文档版本**: 19.0
+**最后更新**: 2026-04-30
 **扫描级别**: Exhaustive (全面扫描)
-**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | Mobile 紧凑布局 | D1 timorlist-db | Workers SSR
+**开发状态**: ✅ Admin 管理后台 | AI Tools | Organization 支持 | Admin API 重构 | SKUs 页面修复 | Mobile 紧凑布局 | D1 timorlist-db | Workers SSR | 性能优化
+
+## 性能优化 (2026-04-30)
+
+### 已实施的优化
+
+| 优化项 | 文件 | 预期收益 |
+|--------|------|----------|
+| better-auth 缓存 | `src/lib/auth.ts` | 认证API响应↓50% |
+| Drizzle 批量插入 | `src/db/seed.ts` | seed脚本执行↓90% |
+| wrangler Workers优化 | `wrangler.toml` | 冷启动时间↓ |
+| zod z.file()验证 | `src/lib/validation.ts` | 统一文件验证 |
+
+### Astro SSR + CDN 缓存策略
+
+| 页面类型 | prerender | 缓存策略 |
+|----------|-----------|----------|
+| 静态页面 | `true` | CDN 1h + stale-while-revalidate |
+| 动态页面 | `false` | no-cache (实时数据) |
+
+### 静态页面列表
+
+- `/pricing` - 定价页面
+- `/faq` - FAQ页面
+- `/privacy` - 隐私政策
+- `/terms` - 服务条款
+- `/404` - 404错误页
 
 ## 最新 Increment
 

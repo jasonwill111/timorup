@@ -1,8 +1,8 @@
 ---
 project_name: timorlist
 user_name: Nick
-date: 2026-02-26
-sections_completed: ['technology_stack', 'implementation_rules', 'ui_requirements', 'development_workflow', 'ux_patterns', 'component_strategy', 'responsive_design', 'testing', 'deployment']
+date: 2026-04-30
+sections_completed: ['technology_stack', 'implementation_rules', 'ui_requirements', 'development_workflow', 'ux_patterns', 'component_strategy', 'responsive_design', 'testing', 'deployment', 'performance_optimization']
 ---
 
 # Project Context for AI Agents
@@ -17,19 +17,22 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 | Component | Technology | Version | Notes |
 |-----------|------------|---------|-------|
-| **Frontend** | Astro | 6.1.x | SSR mode, pure .astro |
+| **Frontend** | Astro | 6.1.10 | SSR mode, pure .astro |
 | **API Framework** | Astro API Routes | - | src/pages/api/* |
 | **Database** | D1 (SQLite) | - | Cloudflare D1 |
-| **ORM** | Drizzle ORM | 0.45.x | Type-safe |
-| **Authentication** | Better Auth | 1.5.x | OAuth support |
+| **ORM** | Drizzle ORM | 0.45.2 | Type-safe |
+| **Authentication** | Better Auth | 1.6.9 | OAuth support, cache enabled |
 | **UI Components** | Pure Astro + TailwindCSS | - | No React/shadcn |
-| **Styling** | Tailwind CSS | 4.x | @theme config |
-| **Rich Text Editor** | TipTap | 3.x | Notion-like editing |
-| **Validation** | Zod | 4.x | Schema validation |
+| **Styling** | Tailwind CSS | 4.2.4 | @theme config |
+| **Rich Text Editor** | TipTap | 3.22.5 | Notion-like editing |
+| **Validation** | Zod | 4.4.1 | Schema validation, z.file() |
 | **Media Storage** | Cloudflare R2 | - | S3-compatible |
 | **Maps** | Leaflet + OpenStreetMap | - | Free, open source |
-| **Package Manager** | pnpm | latest | REQUIRED |
-| **Language** | TypeScript | latest | .ts files only |
+| **AI** | Mastra | 1.29.1 | AI agent framework |
+| **Cloudflare** | Wrangler | 4.86.0 | Workers deployment |
+| **AWS SDK** | @aws-sdk/* | 3.1039.0 | R2 operations |
+| **Package Manager** | pnpm | 9.15.0 | REQUIRED |
+| **Language** | TypeScript | 6.0.3 | .ts files only |
 
 ---
 

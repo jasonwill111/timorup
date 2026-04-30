@@ -557,9 +557,60 @@ NODE_ENV=development
 
 ---
 
-**文档版本**: 10.0
+**文档版本**: 11.0
 **最后更新**: 2026-04-30
-**开发状态**: ✅ SSR + Hybrid Mode | TipTap 编辑器 | AI Tools | entityType分离 | 本地 D1/R2 访问
+**开发状态**: ✅ SSR + Hybrid Mode | TipTap 编辑器 | AI Tools | entityType分离 | 本地 D1/R2 访问 | 性能优化
+
+## 15. 性能优化 (2026-04-30)
+
+### 15.1 better-auth 缓存配置
+
+```typescript
+// src/lib/auth.ts
+cache: {
+  enabled: true,
+  maxAge: 60 * 10, // 10分钟 TTL
+},
+session: {
+  cookieCache: {
+    enabled: true,
+    maxAge: 60 * 5, // 5分钟
+  },
+},
+```
+
+### 15.2 Drizzle 批量插入
+
+```typescript
+// src/db/seed.ts - 优化前
+for (const cat of categories) {
+  await db.insert(schema.categories).values(cat);
+}
+
+// 优化后
+await db.insert(schema.categories).values(categories);
+```
+
+### 15.3 wrangler.toml Workers优化
+
+```toml
+compatibility_date = "2026-04-28"
+
+[workers]
+memory_heap_size_division = 1  # 高精度内存分配
+persist_across_deploys = true  # 保持idle v8上下文
+```
+
+### 15.4 Zod 文件验证
+
+```typescript
+// src/lib/validation.ts
+import * as z from 'zod';
+
+export const ImageFileSchema = z.file()
+  .refine((file) => ALLOWED_IMAGE_TYPES.includes(file.type), ...)
+  .refine((file) => file.size <= MAX_IMAGE_SIZE, ...);
+```
 
 ## 14. Astro 6 Hybrid Mode (2026-04-30)
 
