@@ -80,13 +80,16 @@ export function createAuth(db: any) {
   });
 }
 
-// Default auth instance (uses local db for backwards compatibility)
+// Default auth instance - lazily initialized
 let _auth: BetterAuthInstance | null = null;
 
 export function getAuth() {
   if (!_auth) {
-    // This will use local db - call initAuth() for Workers
-    _auth = createAuth(require('./db').db);
+    // In Cloudflare Workers, this will fail because db is a stub
+    // Use initAuth() instead for proper D1 initialization
+    // This is kept for backwards compatibility only
+    const db = require('./db').db;
+    _auth = createAuth(db);
   }
   return _auth;
 }
