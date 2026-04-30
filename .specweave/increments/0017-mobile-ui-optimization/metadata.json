@@ -10,7 +10,7 @@
     "ux",
     "optimization"
   ],
-  "type": "enhancement",
+  "type": "feature",
   "priority": "high",
   "lastActivity": "2026-04-29",
   "testMode": "manual",

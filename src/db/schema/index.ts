@@ -144,6 +144,10 @@ export const reviews = sqliteTable('reviews', {
   rating: integer('rating').notNull(),
   comment: text('comment'),
   isEdited: integer('is_edited', { mode: 'boolean' }).default(false),
+  // Reply fields
+  reply: text('reply'),
+  repliedAt: integer('replied_at', { mode: 'timestamp' }),
+  repliedBy: text('replied_by'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (reviews) => ({

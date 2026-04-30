@@ -3,7 +3,8 @@ increment: 0001-one-business-per-user
 title: "一人一店限制 (BS-013)"
 type: feature
 priority: P1
-status: planned
+status: completed
+completed: 2026-04-30
 created: 2026-03-22
 structure: user-stories
 test_mode: TDD
@@ -166,3 +167,14 @@ business_pages table (src/db/schema/index.ts):
   ownerId: text('owner_id').notNull()      -- indexed: business_owner_idx
   ownerIdx: index on business_pages.owner_id  -- line 90
 ```
+
+## Edge Cases
+
+| Case | Handling |
+|------|----------|
+| **Race: fast consecutive creates** | Both may succeed if index check races — acceptable for MVP; admin can delete duplicate |
+| **Session expires during form submit** | Return 401, client redirects to login |
+| **User deletes business, recreates immediately** | Same as race condition — new business allowed |
+| **Slug already taken by another user** | Return 400 with `SLUG_EXISTS` error |
+| **Empty required fields** | Return 400 listing missing fields |
+| **Max title length exceeded** | Return 400 (title max: 100 chars) |

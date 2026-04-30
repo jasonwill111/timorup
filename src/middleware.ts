@@ -2,8 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '@/db/schema';
 
-// Check if running in Cloudflare Workers - use a more reliable method
-// cloudflare:workers module exists only in Workers runtime
+// Check if running in Cloudflare Workers
 let isCloudflareWorkersChecked = false;
 let isCloudflareWorkers: boolean | null = null;
 
@@ -22,7 +21,7 @@ async function checkCloudflareWorkers(): Promise<boolean> {
 export const onRequest = defineMiddleware(async (context, next) => {
   const isWorkers = await checkCloudflareWorkers();
 
-  // Inject db into locals
+  // Inject db into locals for SSR pages
   if (isWorkers) {
     try {
       const { env } = await import('cloudflare:workers');

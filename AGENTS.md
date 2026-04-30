@@ -29,11 +29,11 @@
 
 **验证流程**:
 ```bash
-1. pnpm build        # exit 0
-2. pnpm dev &        # 后台启动
-3. sleep 5
-4. curl localhost:4321/  # HTTP 200
-5. 关键页面 curl 测试
+1. pnpm build                                              # exit 0
+2. npx wrangler dev dist/server/entry.mjs --local &      # 后台启动
+3. sleep 15
+4. curl localhost:8787/                                   # HTTP 200
+5. curl localhost:8787/listing                            # HTTP 200
 ```
 
 **禁止**: 未完成验证声称"完成"
@@ -64,27 +64,26 @@
 ## Commands
 
 ```bash
-# Development
-pnpm dev                              # Start dev server
-pnpm dev:cf                          # Cloudflare/workerd
+# Local Development (D1/R2 访问)
+npx wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+
+# Local D1 Explorer
+http://localhost:8787/__wrangler_local_explorer__
 
 # Build
-pnpm build                            # Build (auto-detect)
-pnpm build:cf                         # Cloudflare Workers
+pnpm build                            # Build SSR + 静态页面
 
 # Testing
 pnpm test                             # Vitest unit tests
-pnpm test:ui                          # Vitest with UI
 pnpm test:e2e                         # Playwright E2E
 pnpm test:all                         # Full suite
 
 # Database
-pnpm db:generate                      # Drizzle generate
-pnpm db:push                          # Drizzle push
-pnpm db:studio                        # Drizzle Studio
+npx drizzle-kit push                  # Push schema to local D1
+npx drizzle-kit studio                # Drizzle Studio
 
-# Deployment
-pnpm deploy                           # Deploy to Cloudflare
+# CI/CD (自动部署)
+git push                              # GitHub Actions 自动部署到 Workers
 ```
 
 ---

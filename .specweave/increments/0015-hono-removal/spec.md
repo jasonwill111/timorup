@@ -3,7 +3,8 @@ increment: 0015-hono-removal
 title: "Remove Hono - Pure Astro API"
 type: refactor
 priority: P1
-status: in-progress
+status: completed
+completed: 2026-04-30
 created: 2026-04-23
 structure: user-stories
 test_mode: TDD
@@ -110,6 +111,31 @@ Remove all Hono server code and migrate all API routes to Astro API endpoints. T
 - Changing database schema
 - Modifying business logic
 - UI component changes
+
+## Edge Cases
+
+| Case | Handling |
+|------|----------|
+| **Session expired mid-request** | Return 401, client redirects to login |
+| **Duplicate slug** | Return 400 with `SLUG_EXISTS` error code |
+| **Database unavailable** | Return 500 with generic error (no details leaked) |
+| **Invalid JSON body** | Return 400 with parse error details |
+| **Missing required fields** | Return 400 listing missing fields |
+| **Malicious input (XSS)** | HTML-escape all user content before storage |
+| **Rate limiting** | Not implemented (future enhancement) |
+
+## Acceptance Test Scenarios
+
+| Scenario | Given | When | Then |
+|----------|-------|------|------|
+| AT-01 | Authenticated request | `GET /api/auth/session` | Returns session data with user info |
+| AT-02 | Authenticated request | `POST /api/auth/sign-in` | Returns 201 with session cookie |
+| AT-03 | Authenticated request | `POST /api/businesses` with valid data | Returns 201 with business data |
+| AT-04 | Authenticated request | `GET /api/businesses` | Returns paginated business list |
+| AT-05 | Admin request | `GET /api/admin/stats` | Returns dashboard statistics |
+| AT-06 | Unauthenticated request | Any auth-required endpoint | Returns 401 `UNAUTHORIZED` |
+| AT-07 | Invalid slug | `POST /api/businesses` with existing slug | Returns 400 `SLUG_EXISTS` |
+| AT-08 | Second business attempt | `POST /api/businesses` when user already has one | Returns 400 `LIMIT_REACHED` |
 
 ## Dependencies
 

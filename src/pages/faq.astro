@@ -1,8 +1,7 @@
 ---
-import { STATIC_CACHE } from '@/lib/cache-headers';
-import Layout from '../layouts/Layout.astro';
+export const prerender = true;
 
-Astro.response.headers.set('Cache-Control', STATIC_CACHE);
+import Layout from '../layouts/Layout.astro';
 
 // FAQ structured data
 const faqSchema = {

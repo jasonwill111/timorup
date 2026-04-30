@@ -557,9 +557,59 @@ NODE_ENV=development
 
 ---
 
-**文档版本**: 9.0
-**最后更新**: 2026-04-26
-**开发状态**: ✅ SSR | TipTap 编辑器 | AI Tools | entityType分离
+**文档版本**: 10.0
+**最后更新**: 2026-04-30
+**开发状态**: ✅ SSR + Hybrid Mode | TipTap 编辑器 | AI Tools | entityType分离 | 本地 D1/R2 访问
+
+## 14. Astro 6 Hybrid Mode (2026-04-30)
+
+### 14.1 配置
+
+```javascript
+// astro.config.mjs
+output: 'server'  // 默认 SSR
+
+// 静态页面添加
+export const prerender = true;
+```
+
+### 14.2 静态页面
+
+| 页面 | 文件 |
+|------|------|
+| Pricing | `/pricing` |
+| FAQ | `/faq` |
+| Privacy | `/privacy` |
+| Terms | `/terms` |
+| 404 | `/404` |
+
+### 14.3 本地开发
+
+```bash
+# 启动 workerd 开发服务器
+npx wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+
+# 访问 D1/KV/R2 GUI
+http://localhost:8787/__wrangler_local_explorer__
+```
+
+### 14.4 D1 访问模式
+
+```typescript
+// src/lib/db.ts
+import { drizzle } from 'drizzle-orm/d1';
+import * as schema from '@/db/schema';
+
+export async function getDb() {
+  const { env } = await import('cloudflare:workers');
+  return drizzle(env.DB, { schema });
+}
+```
+
+**wrangler.jsonc 绑定**:
+- `DB` → D1 timorlist-db
+- `SESSION` → KV Namespace
+- `MEDIA_BUCKET` → R2 timorlist-media
 
 ## 12. Business 详情页增强 (2026-04-26)
 

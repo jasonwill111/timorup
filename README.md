@@ -47,13 +47,32 @@
 
 | Component | Technology |
 |-----------|------------|
-| Framework | Astro 6.x (SSR) |
+| Framework | Astro 6.x (SSR + Hybrid Mode) |
 | Database | D1 (SQLite) via Drizzle ORM |
 | Auth | better-auth 1.5.x |
 | Styling | TailwindCSS v4 |
 | Editor | TipTap 3.x |
 | Validation | Zod 4.x |
 | Media | Cloudflare R2 |
+
+## Local Development
+
+```bash
+# 1. 初始化本地数据库（如首次）
+npx drizzle-kit push
+
+# 2. 启动开发服务器（D1/R2 访问）
+npx wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+
+# 3. 访问
+# http://localhost:8787/  → 页面正常渲染
+# http://localhost:8787/__wrangler_local_explorer__  → D1/KV/R2 GUI
+
+# 静态页面构建（无需 D1）
+pnpm build
+```
+
+**注意**: 不能用 `pnpm dev`（Node adapter 不支持 `cloudflare:workers` 模块）。
 
 ## Testing
 

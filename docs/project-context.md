@@ -342,5 +342,40 @@ APP_URL=http://localhost:8788
 
 ---
 
-**Last Updated**: 2026-04-25
-**Development Status**: ✅ SSR 已实现 | TipTap 编辑器 | 产品详情页 | WhatsApp 品牌色 | 紧凑 UI 布局
+**Last Updated**: 2026-04-30
+**Development Status**: ✅ SSR + Hybrid Mode 已实现 | TipTap 编辑器 | 产品详情页 | WhatsApp 品牌色 | 紧凑 UI 布局 | 本地 D1/R2 访问
+
+---
+
+## 11. Local Development (2026-04-30)
+
+### 11.1 本地开发命令
+
+```bash
+# 1. 初始化本地数据库（如首次）
+npx drizzle-kit push
+
+# 2. 启动 workerd 开发服务器（支持 D1/R2）
+npx wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+
+# 3. 访问
+# http://localhost:8787/
+# http://localhost:8787/__wrangler_local_explorer__  # D1/KV/R2 GUI
+```
+
+### 11.2 为什么不用 `astro dev`
+
+- `astro dev` 使用 Node adapter
+- Node 不支持 `cloudflare:workers` 模块
+- 需要 `wrangler dev` + workerd 运行时
+
+### 11.3 构建
+
+```bash
+# 构建 SSR + 静态页面
+pnpm build
+
+# 构建产物
+# dist/client/  → 静态资源
+# dist/server/  → SSR entry + chunks
+```

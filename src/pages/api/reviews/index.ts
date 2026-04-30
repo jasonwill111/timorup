@@ -24,6 +24,10 @@ export async function GET({ url }: { url: URL }) {
       comment: reviews.comment,
       isEdited: reviews.isEdited,
       createdAt: reviews.createdAt,
+      // Reply fields
+      reply: reviews.reply,
+      repliedAt: reviews.repliedAt,
+      repliedBy: reviews.repliedBy,
     })
     .from(reviews)
     .where(conditions.length > 0 ? conditions[0] : undefined)

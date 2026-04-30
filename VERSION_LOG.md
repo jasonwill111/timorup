@@ -2,6 +2,43 @@
 
 > 每次项目开发前检查并更新此文件
 
+## 2026-04-30
+
+### Astro 6 Hybrid Mode
+
+| 变更 | 说明 |
+|------|------|
+| `output: 'server'` | 默认 SSR 模式 |
+| `prerender = true` | 静态页面在构建时预渲染 |
+| 静态页面 | pricing, faq, privacy, terms, 404 |
+
+### 本地开发 D1/R2 访问
+
+| 变更 | 说明 |
+|------|------|
+| wrangler dev | 使用 workerd 运行时 |
+| `--persist-to` | 持久化本地数据 |
+| `cloudflare:workers` | 直接访问 D1/R2 绑定 |
+
+**命令**:
+```bash
+npx wrangler dev dist/server/entry.mjs --local --persist-to=.wrangler/state
+```
+
+### 更新的文档
+
+| 文件 | 更新内容 |
+|------|----------|
+| `CLAUDE.md` | 添加本地开发 section |
+| `AGENTS.md` | 更新验证流程和命令 |
+| `README.md` | 添加本地开发命令 |
+| `docs/ARCHITECTURE.md` | 添加 Hybrid Mode 章节 |
+| `docs/project-context.md` | 添加本地开发章节 |
+| `@memory/cloudflare/d1.md` | 添加 wrangler dev 说明 |
+| `@memory/astro/index.md` | 添加 D1/R2 访问说明 |
+
+---
+
 ## 2026-04-29
 
 ### 完整测试套件
