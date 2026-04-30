@@ -2,30 +2,59 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { reviews, businessPages, users } from '@/db/schema';
+import { reviews, businessPages, users, sessions } from '@/db/schema';
 import { eq, desc, sql, like, and, or, gte, lte } from 'drizzle-orm';
-import { initAuth } from '@/lib/auth';
 
-// Helper to check admin
+async function requireAdminAuth(request: Request) {
+  const cookieHeader = request.headers.get('cookie') || '';
+  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+  if (!tokenMatch) {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  }
+
+  const db = await getDb();
+  const session = await db.select()
+    .from(sessions)
+    .where(eq(sessions.token, tokenMatch[1]))
+    .limit(1)
+    .get();
+
+  if (!session || !session.expiresAt || new Date(session.expiresAt) < new Date()) {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Session expired' }
+    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  }
+
+  const user = await db.select()
+    .from(users)
+    .where(eq(users.id, session.userId))
+    .limit(1)
+    .get();
+
+  if (!user || user.role !== 'admin') {
+    return { authorized: false, error: new Response(JSON.stringify({
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Admin access required' }
+    }), { status: 403, headers: { 'Content-Type': 'application/json' } }) };
+  }
+  return { authorized: true, user };
+}
+
 async function isAdmin(request: Request): Promise<boolean> {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-  if (!session?.user) return false;
-
-  // Check if user has admin role
-  // For now, check if user owns any business that's marked as admin
-  // In production, you'd check a roles table or user.role field
-  const adminEmails = ['admin@timorlist.com'];
-  return adminEmails.includes(session.user.email || '') || session.user.email?.endsWith('@admin.timorlist') === true;
+  const result = await requireAdminAuth(request);
+  return result.authorized;
 }
 
 // GET - List all reviews (admin only)
-export async function GET({ url }: { url: URL }) {
+export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
   try {
     // Check admin
-    const admin = await isAdmin(url as unknown as Request);
+    const admin = await isAdmin(request);
     if (!admin) {
       return new Response(JSON.stringify({
         success: false,
