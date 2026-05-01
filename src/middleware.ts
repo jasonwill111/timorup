@@ -34,11 +34,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  // Static-like pages: cache at CDN for 1 hour
-  const staticPaths = ['/about', '/contact', '/faqs', '/privacy', '/terms', '/pricing'];
-  if (staticPaths.some(p => context.url.pathname.startsWith(p))) {
+  // Static pages with server islands: cache HTML, islands refresh independently
+  const staticPaths = ['/about', '/contact', '/faqs', '/privacy', '/terms', '/pricing', '/'];
+  if (staticPaths.some(p => context.url.pathname === p || context.url.pathname === p + '/')) {
     const response = await next();
-    response.headers.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    // Homepage: 5min cache (matches server island refresh)
+    // Static pages: 1 hour cache
+    const maxAge = context.url.pathname === '/' || context.url.pathname === '' ? 300 : 3600;
+    response.headers.set('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=3600`);
     return response;
   }
 

@@ -1,152 +1,10 @@
 ---
-export const prerender = false;
+// Static page with Server Island for dynamic content
+export const prerender = true;
+
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
-import { getDb } from '../lib/db';
-import { businessPages, categories, products } from '../db/schema';
-import { eq, desc, and, inArray } from 'drizzle-orm';
-import { parseIcon, DEFAULT_CATEGORY_ICONS, getLucideIconPath } from '../lib/icons';
-import BusinessCard from '../components/business/BusinessCard.astro';
-import ProductCard from '../components/business/ProductCard.astro';
-
-const db = await getDb();
-
-let featuredBusinesses: any[] = [];
-let featuredGovs: any[] = [];
-let featuredNgos: any[] = [];
-let featuredProducts: any[] = [];
-let categoriesData: any[] = [];
-
-try {
-  const categoriesResult = await db.select({
-    id: categories.id,
-    name: categories.name,
-    slug: categories.slug,
-    description: categories.description,
-    icon: categories.icon,
-  })
-  .from(categories)
-  .limit(20);
-
-  const categoryMap: Record<string, { name: string; icon: string }> = {};
-  categoriesResult.forEach((c: any) => {
-    categoryMap[c.id] = { name: c.name, icon: c.icon || '' };
-  });
-
-  const businessesResult = await db.select({
-    id: businessPages.id,
-    title: businessPages.title,
-    slug: businessPages.slug,
-    tags: businessPages.tags,
-    likes: businessPages.likes,
-    status: businessPages.status,
-    categoryId: businessPages.categoryId,
-    entityType: businessPages.entityType,
-    profileImageId: businessPages.profileImageId,
-  })
-  .from(businessPages)
-  .where(eq(businessPages.status, 'live'))
-  .orderBy(desc(businessPages.likes))
-  .limit(20);
-
-  const allListings = businessesResult.map(b => {
-    const tags = b.tags ? JSON.parse(b.tags) : [];
-    return {
-      id: b.id,
-      title: b.title,
-      slug: b.slug,
-      category: categoryMap[b.categoryId || '']?.name || 'Business',
-      rating: 0,
-      reviews: 0,
-      likes: b.likes || 0,
-      location: 'Dili',
-      tag: tags[0] || '',
-      tags,
-      profileImageId: b.profileImageId,
-      entityType: b.entityType,
-    };
-  });
-
-  featuredBusinesses = allListings
-    .filter(b => b.entityType === 'business')
-    .slice(0, 12);
-
-  featuredGovs = allListings
-    .filter(b => b.entityType === 'government')
-    .slice(0, 3);
-
-  featuredNgos = allListings
-    .filter(b => b.entityType === 'nonprofit')
-    .slice(0, 3);
-
-  categoriesData = categoriesResult.map(c => {
-    const icon = c.icon || '';
-    const parsed = parseIcon(icon);
-    const defaultIcon = DEFAULT_CATEGORY_ICONS[c.slug];
-    return {
-      id: c.id,
-      name: c.name,
-      slug: c.slug,
-      description: c.description,
-      count: 0,
-      icon: parsed?.value || defaultIcon?.value || 'building',
-      iconType: parsed?.type || defaultIcon?.type || 'lucide'
-    };
-  });
-
-  // Fetch featured products
-  const productsResult = await db.select({
-    id: products.id,
-    title: products.title,
-    price: products.price,
-    priceUnit: products.priceUnit,
-    priceFields: products.priceFields,
-    serviceType: products.serviceType,
-    businessPageId: products.businessPageId,
-  })
-  .from(products)
-  .innerJoin(businessPages, eq(products.businessPageId, businessPages.id))
-  .where(eq(businessPages.status, 'live'))
-  .orderBy(desc(products.createdAt))
-  .limit(12);
-
-  // Get business info for products
-  const businessIds = [...new Set(productsResult.map(p => p.businessPageId))];
-  const businessesForProducts = businessIds.length > 0
-    ? await db.select({
-        id: businessPages.id,
-        title: businessPages.title,
-        slug: businessPages.slug,
-      })
-      .from(businessPages)
-      .where(inArray(businessPages.id, businessIds))
-    : [];
-
-  const businessMap: Record<string, { title: string; slug: string }> = {};
-  businessesForProducts.forEach(b => {
-    businessMap[b.id] = { title: b.title, slug: b.slug };
-  });
-
-  featuredProducts = productsResult.map(p => {
-    const business = businessMap[p.businessPageId] || {};
-    const priceFields = p.priceFields ? JSON.parse(p.priceFields) : [];
-    return {
-      id: p.id,
-      title: p.title,
-      price: p.price || '',
-      priceUnit: p.priceUnit || '',
-      priceFields,
-      serviceType: p.serviceType || 'product',
-      businessTitle: business.title || '',
-      businessSlug: business.slug || '',
-    };
-  });
-
-} catch (e) {
-  console.error('Failed to fetch database data:', e);
-}
-
-const mappedCategories = categoriesData;
+import HomepageContent from '../components/islands/HomepageContent.astro';
 ---
 
 <Layout title="TimorList - Business Directory for Timor-Leste">
@@ -164,7 +22,7 @@ const mappedCategories = categoriesData;
           <a href="/listing">
             <Button size="md" class="sm:size-lg bg-white text-amber-600 hover:bg-amber-50 font-semibold shadow-lg text-sm sm:text-base px-4 sm:px-6">Browse Directory</Button>
           </a>
-          <a href="/business/create">
+          <a href="/listing/create">
             <Button size="md" variant="ghost" class="sm:size-lg text-white border border-white/50 hover:bg-white/10 hover:border-white font-semibold text-sm sm:text-base px-4 sm:px-6">List Your Business</Button>
           </a>
         </div>
@@ -178,144 +36,14 @@ const mappedCategories = categoriesData;
   </div>
 
   <div class="container py-6 sm:py-12">
-    <!-- Featured Businesses -->
-    <section class="mb-6 sm:mb-12">
-      <div class="flex items-center justify-between mb-4 sm:mb-6">
-        <h2 class="text-lg sm:text-2xl font-bold">Featured Businesses</h2>
-        <a href="/listing?type=business" class="text-xs sm:text-sm text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-        {featuredBusinesses.length > 0 ? featuredBusinesses.map((business: any) => (
-          <BusinessCard
-            title={business.title}
-            slug={business.slug}
-            category={business.category}
-            thumbnail={null}
-            rating={business.rating}
-            likes={business.likes}
-            reviews={business.reviews}
-            location={business.location}
-            tag={business.tag}
-            type="business"
-          />
-        )) : (
-          <div class="col-span-full text-center py-8 text-muted-foreground">
-            <p>No featured businesses yet.</p>
-            <a href="/business/create" class="text-amber-600 hover:underline">Add your business!</a>
-          </div>
-        )}
-      </div>
-    </section>
-
-    <!-- Featured Government -->
-    {featuredGovs.length > 0 && (
-      <section class="mb-6 sm:mb-12">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg sm:text-2xl font-bold">Government</h2>
-          <a href="/listing?type=govs" class="text-purple-600 hover:text-purple-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {featuredGovs.map((gov: any) => (
-            <a href={`/govs/${gov.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
-              <div class="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 relative flex items-center justify-center">
-                {gov.profileImageId ? (
-                  <img src={`/api/media/${gov.profileImageId}`} alt={gov.title} class="w-full h-full object-cover" />
-                ) : (
-                  <span class="text-5xl font-bold text-purple-400">{gov.title.charAt(0)}</span>
-                )}
-              </div>
-              <div class="p-3">
-                <h3 class="font-semibold truncate group-hover:text-purple-600 transition-colors">{gov.title}</h3>
-                <p class="text-xs text-muted-foreground truncate">{gov.category}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Featured NGOs -->
-    {featuredNgos.length > 0 && (
-      <section class="mb-6 sm:mb-12">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg sm:text-2xl font-bold">NGOs & Non-Profits</h2>
-          <a href="/listing?type=ngos" class="text-orange-600 hover:text-orange-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {featuredNgos.map((ngo: any) => (
-            <a href={`/ngos/${ngo.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
-              <div class="aspect-[4/3] bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 relative flex items-center justify-center">
-                {ngo.profileImageId ? (
-                  <img src={`/api/media/${ngo.profileImageId}`} alt={ngo.title} class="w-full h-full object-cover" />
-                ) : (
-                  <span class="text-5xl font-bold text-orange-400">{ngo.title.charAt(0)}</span>
-                )}
-              </div>
-              <div class="p-3">
-                <h3 class="font-semibold truncate group-hover:text-orange-600 transition-colors">{ngo.title}</h3>
-                <p class="text-xs text-muted-foreground truncate">{ngo.category}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Featured Products & Services -->
-    <section class="mb-6 sm:mb-12">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg sm:text-2xl font-bold">Featured Products & Services</h2>
-        <a href="/products-services" class="text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-      </div>
-      {featuredProducts.length > 0 ? (
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-          {featuredProducts.map((product: any) => (
-            <ProductCard
-              title={product.title}
-              businessTitle={product.businessTitle}
-              businessSlug={product.businessSlug}
-              price={product.price}
-              priceUnit={product.priceUnit}
-              priceFields={product.priceFields}
-              serviceType={product.serviceType}
-              slug={product.id}
-            />
-          ))}
-        </div>
-      ) : (
-        <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-8 text-center">
-          <p class="text-muted-foreground mb-4">No products available yet. Be the first to add one!</p>
-          <a href="/business/create">
-            <Button>List Your Business</Button>
-          </a>
-        </div>
-      )}
-    </section>
-
-    <!-- Categories -->
-    <section class="mb-6 sm:mb-12">
-      <h2 class="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Browse by Category</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        {mappedCategories.map((cat: any) => (
-          <a href={`/listing?type=business&industry=${cat.slug}`} class="block cursor-pointer">
-            <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-              <div class="w-8 h-8 mx-auto mb-2 text-amber-500 flex items-center justify-center">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d={getLucideIconPath(cat.icon)} />
-                </svg>
-              </div>
-              <p class="font-medium text-sm">{cat.name}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
+    <!-- Server Island: Dynamic content with 5min cache -->
+    <HomepageContent server:defer="5min" />
 
     <!-- CTA -->
     <section class="text-center py-12 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl">
       <h2 class="text-2xl font-bold mb-4">Ready to Grow Your Business?</h2>
       <p class="text-muted-foreground mb-6 max-w-xl mx-auto">Join thousands of businesses in Timor-Leste and reach more customers today.</p>
-      <a href="/business/create">
+      <a href="/listing/create">
         <Button size="lg" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">Create Your Business Page</Button>
       </a>
     </section>
