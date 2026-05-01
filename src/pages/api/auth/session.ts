@@ -12,9 +12,13 @@ export async function GET({ request }: { request: Request }) {
   try {
     // Get session the same way the sign-in does - check token directly from DB
     const tokenMatch = cookieHeader?.match(/better-auth\.session_token=([^;]+)/);
+    console.log('[Session] Token match:', !!tokenMatch);
+
     if (tokenMatch) {
       const token = tokenMatch[1];
+      console.log('[Session] Token:', token?.substring(0, 20));
       const db = await getDb();
+      console.log('[Session] DB type:', typeof db.select);
 
       // Direct query matching what better-auth creates
       const session = await db.select()
@@ -22,6 +26,10 @@ export async function GET({ request }: { request: Request }) {
         .where(eq(sessions.token, token))
         .limit(1)
         .get();
+
+      console.log('[Session] Query result:', session ? 'found' : 'null');
+      console.log('[Session] Session id:', session?.id);
+      console.log('[Session] Session token:', session?.token?.substring(0, 10));
 
       if (session) {
         // Session exists, now get user
