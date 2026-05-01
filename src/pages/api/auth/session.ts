@@ -41,6 +41,7 @@ export async function GET({ request }: { request: Request }) {
           .get();
 
         if (user) {
+          console.log('[Session] User found:', user.email);
           return new Response(JSON.stringify({
             user: {
               id: user.id,
@@ -69,13 +70,9 @@ export async function GET({ request }: { request: Request }) {
       }
     }
 
-    // Fallback to better-auth's getSession
-    const authApi = (await initAuth()).api;
-    const session = await authApi.getSession({
-      headers: request.headers,
-    });
-
-    return new Response(JSON.stringify(session), {
+    // No valid session found
+    console.log('[Session] No valid session found');
+    return new Response(JSON.stringify({ user: null, session: null }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });

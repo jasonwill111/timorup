@@ -26,7 +26,6 @@ try {
     const db = await getDb();
     const { sessions, users, businessPages, orders, reviews } = await import('@/db/schema');
     const { eq, and, desc, sql } = await import('drizzle-orm');
-    const { eq, and, desc, sql } = await import('drizzle-orm');
 
     const session = await db.select()
       .from(sessions)
