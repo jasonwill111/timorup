@@ -27,11 +27,12 @@ export async function GET({ request }: { request: Request }) {
         .limit(1)
         .get();
 
-      console.log('[Session] Query result:', session ? 'found' : 'null');
-      console.log('[Session] Session id:', session?.id);
-      console.log('[Session] Session token:', session?.token?.substring(0, 10));
+      console.log('[Session] Query result type:', typeof session);
+      console.log('[Session] Session keys:', session ? Object.keys(session) : 'none');
+      console.log('[Session] Session value:', JSON.stringify(session)?.substring(0, 100));
 
-      if (session) {
+      if (session && session.id) {
+        console.log('[Session] Session found with id:', session.id);
         // Session exists, now get user
         const user = await db.select()
           .from(users)
