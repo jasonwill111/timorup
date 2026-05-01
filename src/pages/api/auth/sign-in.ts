@@ -47,12 +47,23 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
+    console.log('[SignIn] Attempting sign in for:', email);
     const result = await authApi.signInEmail({
       body: { email, password },
     });
 
     const user = result.user;
     const token = result.token;
+
+    console.log('[SignIn] Sign in successful, token:', token?.substring(0, 20) + '...');
+
+    // Immediately verify the session
+    if (token) {
+      const session = await authApi.getSession({
+        headers: new Headers({ cookie: `better-auth.session_token=${token}` }),
+      });
+      console.log('[SignIn] Session verification:', session ? 'OK' : 'NULL');
+    }
 
     const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7;
 
@@ -71,6 +82,7 @@ export async function POST({ request }: { request: Request }) {
 
     return response;
   } catch (error) {
+    console.error('[SignIn] Error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'SIGN_IN_ERROR', message: getErrorMessage(error) || 'Invalid credentials' }

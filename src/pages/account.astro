@@ -22,7 +22,7 @@ try {
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 
   if (tokenMatch) {
-    const { db } = await import('@/lib/db');
+    const db = await getDb();
     const { sessions, users, businessPages, orders, reviews } = await import('@/db/schema');
     const { eq, and, desc, sql } = await import('drizzle-orm');
 
