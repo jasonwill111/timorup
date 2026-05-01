@@ -25,9 +25,17 @@ const {
   class: className = '',
 } = Astro.props;
 
+// Clean price value - remove existing $ and parse
+const cleanPrice = price?.replace(/[^0-9.]/g, '') || '';
+const numericPrice = parseFloat(cleanPrice) || 0;
+
 const displayPrice = priceFields.length > 0
-  ? priceFields.map(p => `$${p.value}${p.unit}`).join(' / ')
-  : (price ? `$${price}${priceUnit ? '/' + priceUnit : ''}` : 'Price on request');
+  ? priceFields.map(p => {
+      const cleanVal = (p.value || '').replace(/[^0-9.]/g, '');
+      const val = parseFloat(cleanVal) || 0;
+      return val > 0 ? `$${cleanVal}${p.unit}` : 'Ask for price';
+    }).join(' / ')
+  : (numericPrice > 0 ? `$${cleanPrice}${priceUnit ? '/' + priceUnit : ''}` : 'Ask for price');
 
 const href = businessSlug ? `/business/${businessSlug}${slug ? `/product/${slug}` : ''}` : '#';
 
