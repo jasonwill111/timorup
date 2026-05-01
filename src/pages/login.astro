@@ -22,14 +22,15 @@ import CardFooter from '../components/ui/CardFooter.astro'
         </CardHeader>
         <CardContent>
           <form id="login-form" class="space-y-4">
+            <div id="error-message" class="hidden p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-lg"></div>
             <div>
               <label for="email" class="block text-sm font-medium mb-1">Email</label>
-              <Input 
-                id="email" 
-                name="email" 
-                type="email" 
-                placeholder="your@email.com" 
-                required 
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="your@email.com"
+                required
               />
             </div>
             <div class="relative">
@@ -72,7 +73,16 @@ import CardFooter from '../components/ui/CardFooter.astro'
                 Forgot password?
               </a>
             </div>
-            <Button type="submit" class="w-full">Sign In</Button>
+            <Button type="submit" id="submit-btn" class="w-full">
+              <span id="btn-text">Sign In</span>
+              <span id="btn-loading" class="hidden">
+                <svg class="animate-spin inline w-4 h-4 mr-2" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </span>
+            </Button>
           </form>
           
           <div class="relative my-6">
@@ -158,9 +168,21 @@ import CardFooter from '../components/ui/CardFooter.astro'
   sanitizeRedirect();
 
   const form = document.getElementById('login-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const btnText = document.getElementById('btn-text');
+  const btnLoading = document.getElementById('btn-loading');
+  const errorMsg = document.getElementById('error-message');
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Clear previous error
+    errorMsg?.classList.add('hidden');
+
+    // Show loading state
+    submitBtn.disabled = true;
+    btnText?.classList.add('hidden');
+    btnLoading?.classList.remove('hidden');
 
     const formData = new FormData(form);
     const email = formData.get('email') as string;
@@ -181,11 +203,27 @@ import CardFooter from '../components/ui/CardFooter.astro'
         sessionStorage.removeItem('auth_redirect');
         window.location.href = redirect || '/account';
       } else {
-        alert(data.error?.message || 'Login failed');
+        submitBtn.disabled = false;
+        btnText?.classList.remove('hidden');
+        btnLoading?.classList.add('hidden');
+        if (errorMsg) {
+          errorMsg.textContent = data.error?.message || 'Login failed. Please check your email and password.';
+          errorMsg.classList.remove('hidden');
+        } else {
+          alert(data.error?.message || 'Login failed');
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('An error occurred. Please try again.');
+      submitBtn.disabled = false;
+      btnText?.classList.remove('hidden');
+      btnLoading?.classList.add('hidden');
+      if (errorMsg) {
+        errorMsg.textContent = 'Network error. Please check your connection and try again.';
+        errorMsg.classList.remove('hidden');
+      } else {
+        alert('An error occurred. Please try again.');
+      }
     }
   });
 </script>
