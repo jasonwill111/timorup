@@ -306,6 +306,19 @@ export const siteSettings = sqliteTable('site_settings', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
+// Saved Items table (favorites/bookmarks for SKUs and Pages)
+export const savedItems = sqliteTable('saved_items', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  // itemType: 'sku' for products, 'page' for business pages
+  itemType: text('item_type').notNull(), // 'sku' | 'page'
+  itemId: text('item_id').notNull(), // product id or business_page id
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}, (savedItems) => ({
+  userIdx: index('saved_items_user_idx').on(savedItems.userId),
+  itemIdx: index('saved_items_item_idx').on(savedItems.itemId),
+}));
+
 // Export type definitions
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

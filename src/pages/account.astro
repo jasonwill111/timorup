@@ -14,9 +14,11 @@ import CardFooter from '../components/ui/CardFooter.astro';
 // Check auth via session cookie
 const cookieHeader = Astro.request.headers.get('cookie') || '';
 let user: { id: string; name: string; email: string } | null = null;
-let userBusiness: { id: string; title: string; slug: string; planType: string | null; expiryDate: Date | null } | null = null;
+let userPages: Array<{ id: string; title: string; slug: string; entityType: string; planType: string | null; expiryDate: Date | null }> = [];
 let subscription: { planType: string; amount: number; status: string; expiryDate: Date | null } | null = null;
 let businessReviews: Array<{ id: string; rating: number; comment: string | null; reviewerName: string; createdAt: Date | null; reply: string | null; repliedAt: Date | null }> = [];
+let savedSkus: Array<{ id: string; title: string; businessTitle: string; slug: string }> = [];
+let savedPages: Array<{ id: string; title: string; entityType: string; slug: string }> = [];
 
 try {
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
@@ -24,8 +26,8 @@ try {
   if (tokenMatch) {
     const { getDb } = await import('@/lib/db');
     const db = await getDb();
-    const { sessions, users, businessPages, orders, reviews } = await import('@/db/schema');
-    const { eq, and, desc, sql } = await import('drizzle-orm');
+    const { sessions, users, businessPages, orders, reviews, products, savedItems } = await import('@/db/schema');
+    const { eq, and, desc, sql, inArray } = await import('drizzle-orm');
 
     const session = await db.select()
       .from(sessions)
@@ -43,26 +45,28 @@ try {
       if (userRecord) {
         user = { id: userRecord.id, name: userRecord.name || '', email: userRecord.email };
 
-        // Get user's business
-        const business = await db.select({
+        // Get user's all pages (business/government/nonprofit)
+        const pages = await db.select({
           id: businessPages.id,
           title: businessPages.title,
           slug: businessPages.slug,
+          entityType: businessPages.entityType,
           planType: businessPages.planType,
           expiryDate: businessPages.expiryDate,
         })
         .from(businessPages)
         .where(eq(businessPages.ownerId, user.id))
-        .limit(1)
-        .get();
+        .orderBy(desc(businessPages.createdAt));
 
-        if (business) {
-          userBusiness = business;
+        userPages = pages;
 
-          // Get reviews for this business
+        if (pages.length > 0) {
+          const firstPage = pages[0];
+
+          // Get reviews for the first page
           const reviewsList = await db.select()
             .from(reviews)
-            .where(eq(reviews.businessPageId, business.id))
+            .where(eq(reviews.businessPageId, firstPage.id))
             .orderBy(desc(reviews.createdAt))
             .limit(20);
 
@@ -75,17 +79,16 @@ try {
             : [];
           const reviewerMap = new Map(reviewerList.map(u => [u.id, u]));
 
-          // Attach reviewer names to reviews
           businessReviews = reviewsList.map(r => ({
             ...r,
             reviewerName: reviewerMap.get(r.userId)?.name || 'Anonymous',
           }));
 
-          // Get latest paid subscription
+          // Get latest paid subscription for first page
           const latestOrder = await db.select()
             .from(orders)
             .where(and(
-              eq(orders.businessPageId, business.id),
+              eq(orders.businessPageId, firstPage.id),
               eq(orders.status, 'paid')
             ))
             .orderBy(desc(orders.paidDate))
@@ -100,6 +103,64 @@ try {
               expiryDate: latestOrder.expiryDate,
             };
           }
+        }
+
+        // Get saved SKUs
+        const savedSkuRecords = await db.select()
+          .from(savedItems)
+          .where(and(
+            eq(savedItems.userId, user.id),
+            eq(savedItems.itemType, 'sku')
+          ))
+          .orderBy(desc(savedItems.createdAt));
+
+        if (savedSkuRecords.length > 0) {
+          const skuIds = savedSkuRecords.map(s => s.itemId);
+          const skuProducts = await db.select({
+            id: products.id,
+            title: products.title,
+            businessPageId: products.businessPageId,
+          })
+          .from(products)
+          .where(inArray(products.id, skuIds));
+
+          const businessIds = [...new Set(skuProducts.map(p => p.businessPageId))];
+          const businesses = businessIds.length > 0
+            ? await db.select({ id: businessPages.id, title: businessPages.title, slug: businessPages.slug })
+                .from(businessPages)
+                .where(inArray(businessPages.id, businessIds))
+            : [];
+          const businessMap = new Map(businesses.map(b => [b.id, b]));
+
+          savedSkus = skuProducts.map(p => ({
+            id: p.id,
+            title: p.title,
+            businessTitle: businessMap.get(p.businessPageId)?.title || '',
+            slug: businessMap.get(p.businessPageId)?.slug || '',
+          }));
+        }
+
+        // Get saved Pages
+        const savedPageRecords = await db.select()
+          .from(savedItems)
+          .where(and(
+            eq(savedItems.userId, user.id),
+            eq(savedItems.itemType, 'page')
+          ))
+          .orderBy(desc(savedItems.createdAt));
+
+        if (savedPageRecords.length > 0) {
+          const pageIds = savedPageRecords.map(s => s.itemId);
+          const savedPageList = await db.select({
+            id: businessPages.id,
+            title: businessPages.title,
+            entityType: businessPages.entityType,
+            slug: businessPages.slug,
+          })
+          .from(businessPages)
+          .where(inArray(businessPages.id, pageIds));
+
+          savedPages = savedPageList;
         }
       }
     }
@@ -118,6 +179,13 @@ const isSubscriptionExpired = subscription?.expiryDate ? new Date(subscription.e
 
 // Check if subscription is active (paid and not expired)
 const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionExpired;
+
+// Entity type labels
+const entityLabels: Record<string, string> = {
+  business: 'Business',
+  government: 'Government',
+  nonprofit: 'Non-Profit',
+};
 ---
 
 <Layout title="My Account - TimorList">
@@ -148,110 +216,150 @@ const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionE
           </CardContent>
         </Card>
 
-        <!-- My Business -->
-        {userBusiness ? (
-          <Card>
-            <CardHeader class="flex flex-row items-center justify-between">
+        <!-- My Pages Section -->
+        {userPages.length > 0 && (
+          <div>
+            {userPages.map(page => (
               <div>
-                <CardTitle>My Business</CardTitle>
-                <CardDescription>{userBusiness.title}</CardDescription>
-              </div>
-              <div class="flex gap-2">
-                <a href={`/business/${userBusiness.slug}`}>
-                  <Button variant="outline" size="sm">View</Button>
-                </a>
-                <a href={`/business/${userBusiness.slug}/edit`}>
-                  <Button size="sm">Edit</Button>
-                </a>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div class="flex items-center gap-4">
-                <span class={`px-3 py-1 text-sm rounded-full ${isSubscriptionActive ? 'bg-green-100 text-green-800' : isSubscriptionExpired ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                  {isSubscriptionActive ? 'Active' : isSubscriptionExpired ? 'Expired' : 'Inactive'}
-                </span>
-                <span class="text-sm text-muted-foreground">
-                  {subscription ? `${subscription.planType.replace('-', ' ').toUpperCase()} Plan` : 'Free Plan'}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <!-- Business Reviews -->
-          <Card class="mt-6">
-            <CardHeader>
-              <CardTitle>Customer Reviews</CardTitle>
-              <CardDescription>View and reply to customer reviews</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {businessReviews.length > 0 ? (
-                <div class="space-y-4">
-                  {businessReviews.map(review => (
-                    <div class="border rounded-lg p-4">
-                      <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                          <span class="font-medium">{review.reviewerName}</span>
-                          <div class="flex">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <span key={i} class={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>★</span>
-                            ))}
-                          </div>
-                        </div>
-                        <span class="text-sm text-muted-foreground">
-                          {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}
-                        </span>
-                      </div>
-                      <p class="text-gray-700 mb-3">{review.comment || 'No comment'}</p>
-
-                      {review.reply ? (
-                        <div class="bg-gray-50 rounded-lg p-3 ml-4 border-l-4 border-primary">
-                          <p class="text-sm font-medium mb-1">Your Reply:</p>
-                          <p class="text-sm">{review.reply}</p>
-                          <p class="text-xs text-muted-foreground mt-1">
-                            {review.repliedAt ? `Replied on ${new Date(review.repliedAt).toLocaleDateString()}` : ''}
-                          </p>
-                          <div class="flex gap-2 mt-2">
-                            <button
-                              class="text-sm text-blue-600 hover:text-blue-800 edit-reply-btn"
-                              data-review-id={review.id}
-                              data-reply={review.reply}
-                            >
-                              Edit Reply
-                            </button>
-                            <button
-                              class="text-sm text-red-600 hover:text-red-800 delete-reply-btn"
-                              data-review-id={review.id}
-                            >
-                              Delete Reply
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          class="text-sm text-primary hover:text-primary/80 reply-btn"
-                          data-review-id={review.id}
-                        >
-                          Reply to Review
-                        </button>
-                      )}
+                <Card class="mb-6">
+                  <CardHeader class="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>{entityLabels[page.entityType] || 'Page'}: {page.title}</CardTitle>
+                      <CardDescription>Created on {page.createdAt ? new Date(page.createdAt).toLocaleDateString() : ''}</CardDescription>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p class="text-muted-foreground text-center py-4">No reviews yet</p>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
+                    <div class="flex gap-2">
+                      <a href={`/business/${page.slug}`}>
+                        <Button variant="outline" size="sm">View</Button>
+                      </a>
+                      <a href={`/business/${page.slug}/edit`}>
+                        <Button size="sm">Edit</Button>
+                      </a>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div class="flex items-center gap-4">
+                      <span class={`px-3 py-1 text-sm rounded-full ${isSubscriptionActive ? 'bg-green-100 text-green-800' : isSubscriptionExpired ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        {isSubscriptionActive ? 'Active' : isSubscriptionExpired ? 'Expired' : 'Inactive'}
+                      </span>
+                      <span class="text-sm text-muted-foreground">
+                        {subscription ? `${subscription.planType.replace('-', ' ').toUpperCase()} Plan` : 'Free Plan'}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {page.id === userPages[0].id && businessReviews.length > 0 && (
+                  <Card class="mb-6">
+                    <CardHeader>
+                      <CardTitle>Customer Reviews</CardTitle>
+                      <CardDescription>View and reply to customer reviews</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div class="space-y-4">
+                        {businessReviews.map(review => (
+                          <div class="border rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                              <div class="flex items-center gap-2">
+                                <span class="font-medium">{review.reviewerName}</span>
+                                <div class="flex">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <span key={i} class={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>★</span>
+                                  ))}
+                                </div>
+                              </div>
+                              <span class="text-sm text-muted-foreground">
+                                {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}
+                              </span>
+                            </div>
+                            <p class="text-gray-700 mb-3">{review.comment || 'No comment'}</p>
+                            <button
+                              class="text-sm text-primary hover:text-primary/80 reply-btn"
+                              data-review-id={review.id}
+                            >
+                              Reply to Review
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {userPages.length === 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Create Your Business</CardTitle>
-              <CardDescription>Get started with your first business listing</CardDescription>
+              <CardTitle>Create Your Page</CardTitle>
+              <CardDescription>You haven't created any pages yet</CardDescription>
             </CardHeader>
             <CardContent>
-              <a href="/listing/create?type=business">
-                <Button>Create Business</Button>
-              </a>
+              <p class="text-muted-foreground mb-4">
+                Create a Business, Government, or Non-Profit page to get started.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <a href="/listing/create?type=business">
+                  <Button>Create Business</Button>
+                </a>
+                <a href="/listing/create?type=government">
+                  <Button variant="outline">Add Government</Button>
+                </a>
+                <a href="/listing/create?type=nonprofit">
+                  <Button variant="outline">Add Non-Profit</Button>
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <!-- Saved SKUs Section -->
+        {savedSkus.length > 0 && (
+          <Card class="mb-6">
+            <CardHeader>
+              <CardTitle>Saved Products/SKUs</CardTitle>
+              <CardDescription>Items you've saved from other businesses</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div class="space-y-3">
+                {savedSkus.map(sku => (
+                  <div class="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
+                    <div>
+                      <p class="font-medium">{sku.title}</p>
+                      <p class="text-sm text-muted-foreground">from {sku.businessTitle}</p>
+                    </div>
+                    <a href={`/business/${sku.slug}`}>
+                      <Button variant="ghost" size="sm">View</Button>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <!-- Saved Pages Section -->
+        {savedPages.length > 0 && (
+          <Card class="mb-6">
+            <CardHeader>
+              <CardTitle>Saved Pages</CardTitle>
+              <CardDescription>Businesses and organizations you've saved</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div class="space-y-3">
+                {savedPages.map(page => (
+                  <div class="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
+                    <div>
+                      <p class="font-medium">{page.title}</p>
+                      <p class="text-sm text-muted-foreground">{entityLabels[page.entityType] || 'Page'}</p>
+                    </div>
+                    <a href={`/business/${page.slug}`}>
+                      <Button variant="ghost" size="sm">View</Button>
+                    </a>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}
@@ -285,11 +393,8 @@ const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionE
                     <p class="text-sm text-muted-foreground mt-1">
                       Your subscription has expired
                     </p>
-                    <p class="text-xs text-muted-foreground mt-2">
-                      Renew to continue enjoying premium features
-                    </p>
                   </>
-                ) : userBusiness ? (
+                ) : userPages.length > 0 ? (
                   <>
                     <p class="text-2xl font-bold text-yellow-600">Inactive</p>
                     <p class="text-sm text-muted-foreground mt-1">
@@ -298,9 +403,9 @@ const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionE
                   </>
                 ) : (
                   <>
-                    <p class="text-2xl font-bold text-gray-500">Free</p>
+                    <p class="text-lg font-semibold text-muted-foreground">No Page Yet</p>
                     <p class="text-sm text-muted-foreground mt-1">
-                      Create a business to get started
+                      Create a page to subscribe to a plan
                     </p>
                   </>
                 )}
@@ -313,8 +418,8 @@ const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionE
                 {isSubscriptionExpired ? 'Renew Subscription' : isSubscriptionActive ? 'Change Plan' : 'View Plans'}
               </Button>
             </a>
-            {!isSubscriptionActive && userBusiness && (
-              <a href={`/subscribe?plan=basic-monthly`} class="w-full">
+            {!isSubscriptionActive && userPages.length > 0 && (
+              <a href={`/subscribe?plan=basic-monthly&page=${userPages[0].id}`} class="w-full">
                 <Button class="w-full">Subscribe Now</Button>
               </a>
             )}
@@ -372,34 +477,6 @@ const isSubscriptionActive = subscription?.status === 'paid' && !isSubscriptionE
         document.getElementById('reply-text').value = '';
         document.getElementById('reply-modal').classList.remove('hidden');
         document.getElementById('reply-modal').classList.add('flex');
-      });
-    });
-
-    // Edit reply button handlers
-    document.querySelectorAll('.edit-reply-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const reviewId = btn.getAttribute('data-review-id');
-        const reply = btn.getAttribute('data-reply');
-        document.getElementById('reply-review-id').value = reviewId;
-        document.getElementById('reply-action').value = 'edit';
-        document.getElementById('reply-modal-title').textContent = 'Edit Reply';
-        document.getElementById('reply-text').value = reply || '';
-        document.getElementById('reply-modal').classList.remove('hidden');
-        document.getElementById('reply-modal').classList.add('flex');
-      });
-    });
-
-    // Delete reply button handlers
-    document.querySelectorAll('.delete-reply-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Are you sure you want to delete this reply?')) return;
-        const reviewId = btn.getAttribute('data-review-id');
-        const res = await fetch(`/api/reviews/${reviewId}/reply`, { method: 'DELETE' });
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          alert('Failed to delete reply');
-        }
       });
     });
 
