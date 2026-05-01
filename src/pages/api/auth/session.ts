@@ -18,19 +18,42 @@ export async function GET({ request }: { request: Request }) {
       const token = tokenMatch[1];
       console.log('[Session] Extracted token:', token?.substring(0, 20));
 
-      const now = Math.floor(Date.now() / 1000);
-      console.log('[Session] Current timestamp:', now);
+      const now = new Date();
+      console.log('[Session] Current Date:', now.toISOString());
+      console.log('[Session] Current timestamp (ms):', now.getTime());
+      console.log('[Session] Current timestamp (s):', Math.floor(now.getTime() / 1000));
 
-      const result = await db.select()
+      // Try simple token query
+      const simpleResult = await db.select()
         .from(sessions)
         .where(eq(sessions.token, token))
         .limit(1)
         .get();
+      console.log('[Session] Simple query result:', JSON.stringify(simpleResult, (k, v) => {
+        if (k === 'expiresAt' || k === 'createdAt' || k === 'updatedAt') {
+          return { type: 'Date', value: v?.toISOString?.() || v, getTime: v?.getTime?.() };
+        }
+        return v;
+      }));
+      console.log('[Session] expiresAt.getTime():', simpleResult?.expiresAt?.getTime?.());
 
-      console.log('[Session] Direct DB query result:', JSON.stringify(result)?.substring(0, 200));
-      console.log('[Session] Expires at:', result?.expiresAt);
-      console.log('[Session] Expires at > now:', result?.expiresAt && result.expiresAt > new Date(now * 1000));
-    }
+      // Compare expiresAt with now directly
+      const expiresTime = simpleResult?.expiresAt?.getTime?.();
+      const nowTime = now.getTime();
+      console.log('[Session] expiresAt.getTime():', expiresTime);
+      console.log('[Session] now.getTime():', nowTime);
+      console.log('[Session] expiresAt > now:', expiresTime > nowTime);
+
+      // Try explicit comparison with getTime()
+      const result = await db.select()
+        .from(sessions)
+        .where(and(
+          eq(sessions.token, token),
+          gt(sessions.expiresAt, new Date(nowTime + 1000 * 60 * 60 * 24)) // Check if expires in future (>24h)
+        ))
+        .limit(1)
+        .get();
+      console.log('[Session] Query with future check result:', result ? 'found' : 'null');
 
     const authApi = (await initAuth()).api;
     console.log('[Session] Auth API initialized');
