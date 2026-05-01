@@ -48,9 +48,9 @@
     }
   ],
 
-  // Cron triggers - weekly cleanup for expired businesses
-  // Cloudflare Workers requires 6-field cron format: "sec min hour day month weekday"
-  "triggers": {
-    "crons": ["0 0 2 * * 0"]
-  },
+  // Cron triggers - disabled temporarily due to API issues
+  // TODO: Re-enable after resolving "invalid cron string" error
+  // "triggers": {
+  //   "crons": ["0 0 2 * * 0"]
+  // },
 }
