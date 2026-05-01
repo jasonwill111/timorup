@@ -48,10 +48,9 @@
     }
   ],
 
-  // Cron triggers - weekly cleanup for expired businesses (60+ days after expiry)
+  // Cron triggers - weekly cleanup for expired businesses
+  // Cloudflare Workers uses simplified cron format: "0 2 * * 0" (5 fields, standard cron)
   "triggers": {
-    "crons": [
-      "0 2 * * 0"           // Every Sunday at 2:00 AM UTC - cleanup expired businesses
-    ]
+    "crons": ["0 2 * * 0"]
   },
 }
