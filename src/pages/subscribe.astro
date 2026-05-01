@@ -20,7 +20,7 @@ try {
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 
   if (tokenMatch) {
-    const { db } = await import('@/lib/db');
+    const db = await getDb();
     const { sessions, users, businessPages } = await import('@/db/schema');
     const { eq } = await import('drizzle-orm');
 
@@ -84,7 +84,7 @@ const selectedPlan = PLAN_PRICES[planParam] || PLAN_PRICES['basic-monthly'];
 let existingOrder: { id: string; status: string } | null = null;
 
 try {
-  const { db } = await import('@/lib/db');
+  const db = await getDb();
   const { orders } = await import('@/db/schema');
   const { eq, and } = await import('drizzle-orm');
 
@@ -108,7 +108,7 @@ let orderId = existingOrder?.id || null;
 
 if (!existingOrder && userBusiness) {
   try {
-    const { db } = await import('@/lib/db');
+    const db = await getDb();
     const { orders } = await import('@/db/schema');
 
     orderId = `order-${Date.now()}`;
