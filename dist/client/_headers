@@ -20,9 +20,9 @@
 /*.html
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 
-# Homepage - cache with background refresh
+# Homepage - cache with background refresh (matches server island 5min cache)
 /
-  Cache-Control: public, max-age=600, stale-while-revalidate=3600
+  Cache-Control: public, max-age=300, stale-while-revalidate=3600
 
 # ===========================================
 # SSR PAGES - No Cache (user-specific)
@@ -34,7 +34,16 @@
   Cache-Control: no-cache, no-store, must-revalidate
 
 /business/*
-  Cache-Control: public, max-age=60, stale-while-revalidate=300
+  Cache-Control: public, max-age=300, stale-while-revalidate=3600
+
+/organization/*
+  Cache-Control: public, max-age=300, stale-while-revalidate=3600
+
+/products-services
+  Cache-Control: public, max-age=120, stale-while-revalidate=600
+
+/listing
+  Cache-Control: public, max-age=120, stale-while-revalidate=600
 
 # ===========================================
 # API ENDPOINTS - No Cache

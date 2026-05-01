@@ -115,3 +115,4 @@ plugins/
 !.specweave/
 !.specweave/config.json
 !.specweave/docs/
+.gstack/

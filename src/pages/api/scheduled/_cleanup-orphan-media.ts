@@ -39,29 +39,29 @@ export const onRequest: ScheduledHandler = async (context) => {
       }), { status: 200 });
     }
 
-    // Note: We don't verify R2 existence because:
-    // 1. Head request to R2 costs money
-    // 2. If R2 file was deleted but D1 record exists, the D1 record is orphaned anyway
-    // 3. It's safer to keep orphan metadata than to accidentally delete valid records
-    //
-    // Instead, we log the orphans for manual review
-    console.log(`[Cleanup-Orphan-Media] Orphan records (for review):`);
-    orphans.forEach(o => {
-      console.log(`  - ${o.id}: ${o.url}`);
-    });
+    // Note: We delete orphan R2 files to reduce storage costs
+    // D1 records are kept for audit trail (no cost impact)
+    console.log(`[Cleanup-Orphan-Media] Found ${orphans.length} orphan records, deleting R2 files...`);
 
-    // Alternative: If you want to auto-delete, uncomment below:
-    // const orphanIds = orphans.map(o => o.id);
-    // await db.delete(media).where(inArray(media.id, orphanIds));
-    // console.log(`[Cleanup-Orphan-Media] Deleted ${orphanIds.length} orphan records`);
+    let deletedCount = 0;
+    for (const o of orphans) {
+      try {
+        const { deleteFromR2 } = await import('@/lib/media');
+        await deleteFromR2(o.url);
+        console.log(`[Cleanup-Orphan-Media] Deleted R2: ${o.url}`);
+        deletedCount++;
+      } catch (error) {
+        console.error(`[Cleanup-Orphan-Media] Failed to delete ${o.url}:`, error);
+      }
+    }
+
+    console.log(`[Cleanup-Orphan-Media] Deleted ${deletedCount} orphan R2 files`);
 
     return new Response(JSON.stringify({
       success: true,
       message: 'Orphan media cleanup completed',
       orphansFound: orphans.length,
-      orphans: orphans.map(o => ({ id: o.id, url: o.url })),
-      note: 'Records logged for review, not deleted. Set DELETE_MODE=true to auto-delete.',
-      deletedCount: 0,
+      deletedR2Count: deletedCount,
     }), { status: 200 });
 
   } catch (error) {

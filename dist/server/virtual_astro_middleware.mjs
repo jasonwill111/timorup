@@ -1,8 +1,9 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { k as defineMiddleware, l as sequence } from "./chunks/sequence_B5OHTG58.mjs";
+import { d as defineMiddleware, s as sequence } from "./chunks/sequence_zsj5ZTeW.mjs";
+import "./chunks/transition_a9bk79PN.mjs";
 import { s as schema } from "./chunks/index_k-9RrFxP.mjs";
-import { d as drizzle } from "./chunks/driver_D-p9Lb6U.mjs";
+import { d as drizzle } from "./chunks/driver_CUcFZcSr.mjs";
 let isCloudflareWorkersChecked = false;
 let isCloudflareWorkers = null;
 async function checkCloudflareWorkers() {
@@ -29,10 +30,31 @@ const onRequest$1 = defineMiddleware(async (context, next) => {
       console.error("[Middleware] Error loading cloudflare:workers:", e);
     }
   }
-  const staticPaths = ["/about", "/contact", "/faqs", "/privacy", "/terms", "/pricing"];
-  if (staticPaths.some((p) => context.url.pathname.startsWith(p))) {
+  const staticPaths = ["/about", "/contact", "/faqs", "/privacy", "/terms", "/pricing", "/"];
+  if (staticPaths.some((p) => context.url.pathname === p || context.url.pathname === p + "/")) {
     const response = await next();
-    response.headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+    const maxAge = context.url.pathname === "/" || context.url.pathname === "" ? 300 : 3600;
+    response.headers.set("Cache-Control", `public, max-age=${maxAge}, stale-while-revalidate=3600`);
+    return response;
+  }
+  if (context.url.pathname.startsWith("/business/") && !context.url.pathname.includes("/edit")) {
+    const response = await next();
+    response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=3600");
+    return response;
+  }
+  if (context.url.pathname.startsWith("/organization/") && !context.url.pathname.includes("/edit")) {
+    const response = await next();
+    response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=3600");
+    return response;
+  }
+  if (context.url.pathname === "/products-services" || context.url.pathname === "/products-services/") {
+    const response = await next();
+    response.headers.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
+    return response;
+  }
+  if (context.url.pathname === "/listing" || context.url.pathname === "/listing/") {
+    const response = await next();
+    response.headers.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
     return response;
   }
   return next();
