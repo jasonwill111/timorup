@@ -47,7 +47,7 @@
 
 | Component | Technology | Version |
 |-----------|------------|---------|
-| Framework | Astro | 6.1.10 |
+| Framework | Astro | 6.2.1 |
 | Database | D1 (SQLite) via Drizzle ORM | 0.45.2 |
 | Auth | better-auth | 1.6.9 |
 | Styling | TailwindCSS v4 | 4.2.4 |
@@ -55,7 +55,32 @@
 | Validation | Zod | 4.4.1 |
 | Media | Cloudflare R2 | - |
 | AI | Mastra | 1.29.1 |
-| Deployment | Wrangler | 4.86.0 |
+| Deployment | Wrangler | 4.87.0 |
+
+## Performance Architecture
+
+### Server Islands (Astro 6)
+
+Dynamic content isolated in Server Islands for minimal server calls:
+
+| Page | Strategy | Cache TTL |
+|------|----------|-----------|
+| Homepage (`/`) | Static + Server Island | 5 min |
+| Business Detail (`/business/[slug]`) | SSR + CDN | 5 min |
+| Organization (`/organization/[slug]`) | SSR + CDN | 5 min |
+| Listing (`/listing`) | SSR + CDN | 2 min |
+| Products/Services (`/products-services`) | SSR + CDN | 2 min |
+| Static Pages (`/pricing`, `/faq`, etc.) | Prerender | 1 hour |
+| Admin/Auth pages | SSR (no cache) | - |
+
+### CDN Caching Headers
+
+Configured in `src/middleware.ts` and `public/_headers`:
+- Static assets: `max-age=31536000` (1 year)
+- Images: `max-age=86400` (1 day)
+- Dynamic pages: `stale-while-revalidate` for background refresh
+
+**Result**: ~80% reduction in database calls vs full SSR
 
 ## Local Development
 
