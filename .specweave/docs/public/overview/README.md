@@ -40,13 +40,13 @@ git push  # CI/CD handles deployment
 
 | Component | Technology |
 |-----------|------------|
-| Framework | Astro 6.1.10 |
+| Framework | Astro 6.2.1 (Server Islands) |
 | Runtime | Cloudflare Workers |
 | Database | D1 (SQLite at edge) |
 | Auth | better-auth 1.6.9 |
 | ORM | Drizzle 0.45.2 |
 | Styling | TailwindCSS v4 |
-| Editor | TipTap (Lexical) |
+| Editor | TipTap 3.x |
 
 ## Key Features
 
@@ -55,6 +55,8 @@ git push  # CI/CD handles deployment
 - Admin panel with full CRUD
 - OAuth authentication (Google, Facebook)
 - R2 media storage with Cloudflare Images
+- Server Islands for minimal server costs
+- Weekly auto-cleanup for expired data
 
 ## Deployment
 
