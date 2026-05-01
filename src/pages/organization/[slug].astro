@@ -37,7 +37,7 @@ const typeLabels: Record<string, string> = {
 const openingHours = org.openingHours ? JSON.parse(org.openingHours) : null;
 
 // Title & description
-const pageTitle = `${org.title} - TIMORLIST`;
+const pageTitle = `${org.title} - TimorList`;
 const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - ${typeLabels[org.organizationType || ''] || 'Organization'} in Timor-Leste`;
 ---
 
@@ -281,7 +281,7 @@ const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - ${typeLabels[
           <Card class="mt-6 bg-primary/5 border-primary/20">
             <div class="p-6 text-center">
               <h3 class="font-semibold mb-2">Is your organization missing?</h3>
-              <p class="text-sm text-muted-foreground mb-4">Register your government agency, NGO, or nonprofit on TIMORLIST.</p>
+              <p class="text-sm text-muted-foreground mb-4">Register your government agency, NGO, or nonprofit on TimorList.</p>
               <a href="/register?type=organization">
                 <Button>Add Your Organization</Button>
               </a>

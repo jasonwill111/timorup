@@ -110,7 +110,7 @@ export const emailTemplates = {
     subject: 'Verify your email address',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1>Welcome to TIMORLIST!</h1>
+        <h1>Welcome to TimorList!</h1>
         <p>Hi ${name},</p>
         <p>Thank you for signing up. Please verify your email address by clicking the button below:</p>
         <a href="${verifyUrl}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Verify Email</a>
@@ -150,7 +150,7 @@ export const emailTemplates = {
         <p>To continue enjoying all features, please renew your subscription.</p>
         <a href="https://timorlist.com/subscribe" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Renew Now</a>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-        <p style="color: #999; font-size: 12px;">Thank you for using TIMORLIST!</p>
+        <p style="color: #999; font-size: 12px;">Thank you for using TimorList!</p>
       </div>
     `,
   }),
@@ -168,7 +168,7 @@ export const emailTemplates = {
         </ul>
         <a href="https://timorlist.com/business/${businessName.toLowerCase().replace(/\s+/g, '-')}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">View Your Business Page</a>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-        <p style="color: #999; font-size: 12px;">Thank you for using TIMORLIST!</p>
+        <p style="color: #999; font-size: 12px;">Thank you for using TimorList!</p>
       </div>
     `,
   }),
