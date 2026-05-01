@@ -1,0 +1,19 @@
+{
+  "id": "0022-admin-media-upload",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-01T07:21:03.449Z",
+  "lastActivity": "2026-05-01T08:05:48.665Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-01T08:05:48.590Z",
+  "approvedAt": "2026-05-01T08:05:48.665Z"
+}

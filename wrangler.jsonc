@@ -48,11 +48,10 @@
     }
   ],
 
-  // Cron triggers for cleanup jobs
+  // Cron triggers - weekly cleanup for expired businesses (60+ days after expiry)
   "triggers": {
     "crons": [
-      "0 0 * * *",           // cleanup/expired - daily at midnight
-      "0 9 * * *"           // cleanup/reminders - daily at 9am
+      "0 2 * * 0"           // Every Sunday at 2:00 AM UTC - cleanup expired businesses
     ]
   },
 }

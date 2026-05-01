@@ -2,10 +2,10 @@
 id: US-003
 feature: FS-020
 title: "Reply API endpoints"
-status: not_started
+status: completed
 priority: P2
 created: 2026-04-30
-tldr: "**As a** developer **I want** reply endpoints **So that** the frontend can use them."
+tldr: "**As a** developer **I want** CRUD endpoints **So that** the frontend can use them."
 project: timorlist
 ---
 
@@ -13,15 +13,18 @@ project: timorlist
 
 **Feature**: [FS-020](./FEATURE.md)
 
-**As a** developer **I want** reply endpoints **So that** the frontend can use them
+**As a** developer **I want** CRUD endpoints **So that** the frontend can use them
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: `POST /api/reviews/:id/reply` accepts `{ comment: string }`
-- [ ] **AC-US3-02**: `GET /api/reviews?businessPageId=X` returns reviews with reply data
-- [ ] **AC-US3-03**: `DELETE /api/admin/reviews/:id` deletes review and updates rating
+- [x] **AC-US3-01**: `POST /api/reviews/:id/reply` accepts `{ comment: string }`
+- [x] **AC-US3-02**: `PUT /api/reviews/:id/reply` updates existing reply
+- [x] **AC-US3-03**: `DELETE /api/reviews/:id/reply` deletes user's reply
+- [x] **AC-US3-04**: `GET /api/reviews?businessPageId=X` returns reviews with reply data
+- [x] **AC-US3-05**: `GET /api/admin/reviews` returns all reviews with search/filter
+- [x] **AC-US3-06**: `DELETE /api/admin/reviews/:id` deletes review and updates rating
 
 ---
 

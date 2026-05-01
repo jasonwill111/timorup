@@ -124,8 +124,18 @@ import Button from '@components/ui/Button.astro';
             <input type="text" id="cat-icon" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="e.g. 🍽️" maxlength="4" />
           </div>
           <div class="col-span-2">
-            <label for="cat-image" class="block text-sm font-medium mb-1">Image URL</label>
-            <input type="url" id="cat-image" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="https://example.com/image.jpg" />
+            <label class="block text-sm font-medium mb-1">Image</label>
+            <div id="cat-image-upload" class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-3 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
+              <p class="text-xs text-muted-foreground">Click or drag to upload image</p>
+            </div>
+            <input type="file" id="cat-image-file" accept="image/*" class="hidden" />
+            <div id="cat-image-preview" class="mt-2 hidden">
+              <div class="relative inline-block">
+                <img id="cat-preview-img" class="w-full max-h-32 rounded-lg object-cover" />
+                <button type="button" id="remove-cat-image" class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs">×</button>
+              </div>
+            </div>
+            <input type="hidden" id="cat-image-id" name="image" value="" />
           </div>
         </div>
         <div>
@@ -153,6 +163,38 @@ import Button from '@components/ui/Button.astro';
   let categories: any[] = [];
   let parentCategories: any[] = [];
   let editingId: string | null = null;
+  let catImageId: string | null = null;
+
+  // Image upload handler
+  document.getElementById('cat-image-upload')?.addEventListener('click', () => {
+    document.getElementById('cat-image-file')?.click();
+  });
+  document.getElementById('cat-image-file')?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'category');
+
+    const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.success && data.data?.id) {
+      catImageId = data.data.id;
+      (document.getElementById('cat-image-id') as HTMLInputElement).value = data.data.id;
+      (document.getElementById('cat-preview-img') as HTMLImageElement).src = data.data.url;
+      document.getElementById('cat-image-preview')?.classList.remove('hidden');
+      document.getElementById('cat-image-upload')?.classList.add('hidden');
+    }
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('remove-cat-image')?.addEventListener('click', () => {
+    catImageId = null;
+    (document.getElementById('cat-image-id') as HTMLInputElement).value = '';
+    document.getElementById('cat-image-preview')?.classList.add('hidden');
+    document.getElementById('cat-image-upload')?.classList.remove('hidden');
+  });
 
   // Load categories
   async function loadCategories() {
@@ -307,12 +349,15 @@ import Button from '@components/ui/Button.astro';
 
   function openModal() {
     editingId = null;
+    catImageId = null;
     document.getElementById('category-form')?.reset();
     (document.getElementById('cat-slug') as HTMLInputElement).dataset.userModified = '';
     (document.getElementById('cat-id') as HTMLInputElement).value = '';
     (document.getElementById('cat-sort') as HTMLInputElement).value = '0';
     (document.getElementById('cat-active') as HTMLInputElement).checked = true;
-    (document.getElementById('cat-image') as HTMLInputElement).value = '';
+    (document.getElementById('cat-image-id') as HTMLInputElement).value = '';
+    document.getElementById('cat-image-preview')?.classList.add('hidden');
+    document.getElementById('cat-image-upload')?.classList.remove('hidden');
     updateParentDropdown();
     if (formTitle) formTitle.textContent = 'Create Category';
     if (submitBtn) submitBtn.textContent = 'Create';
@@ -345,11 +390,23 @@ import Button from '@components/ui/Button.astro';
     (document.getElementById('cat-entity-type') as HTMLSelectElement).value = cat.entityType || 'business';
     (document.getElementById('cat-parent') as HTMLSelectElement).value = cat.parentId || '';
     (document.getElementById('cat-icon') as HTMLInputElement).value = cat.icon || '';
-    (document.getElementById('cat-image') as HTMLInputElement).value = cat.image || '';
     (document.getElementById('cat-sort') as HTMLInputElement).value = String(cat.sortOrder || 0);
     (document.getElementById('cat-desc') as HTMLTextAreaElement).value = cat.description || '';
     (document.getElementById('cat-active') as HTMLInputElement).checked = cat.isActive !== false;
     (document.getElementById('cat-slug') as HTMLInputElement).dataset.userModified = 'true';
+
+    // Load existing image
+    catImageId = cat.image || null;
+    if (cat.image) {
+      (document.getElementById('cat-image-id') as HTMLInputElement).value = cat.image;
+      (document.getElementById('cat-preview-img') as HTMLImageElement).src = `/api/media/${cat.image}`;
+      document.getElementById('cat-image-preview')?.classList.remove('hidden');
+      document.getElementById('cat-image-upload')?.classList.add('hidden');
+    } else {
+      (document.getElementById('cat-image-id') as HTMLInputElement).value = '';
+      document.getElementById('cat-image-preview')?.classList.add('hidden');
+      document.getElementById('cat-image-upload')?.classList.remove('hidden');
+    }
 
     if (formTitle) formTitle.textContent = 'Edit Category';
     if (submitBtn) submitBtn.textContent = 'Save Changes';
@@ -367,7 +424,7 @@ import Button from '@components/ui/Button.astro';
       entityType: (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value,
       parentId: (document.getElementById('cat-parent') as HTMLSelectElement)?.value || null,
       icon: (document.getElementById('cat-icon') as HTMLInputElement)?.value || '',
-      image: (document.getElementById('cat-image') as HTMLInputElement)?.value || '',
+      image: (document.getElementById('cat-image-id') as HTMLInputElement)?.value || '',
       sortOrder: parseInt((document.getElementById('cat-sort') as HTMLInputElement)?.value || '0'),
       description: (document.getElementById('cat-desc') as HTMLTextAreaElement)?.value || '',
       isActive: (document.getElementById('cat-active') as HTMLInputElement)?.checked ?? true,

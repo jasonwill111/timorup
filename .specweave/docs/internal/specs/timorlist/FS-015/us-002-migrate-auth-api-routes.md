@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-015
 title: "Migrate Auth API Routes"
-status: not_started
+status: completed
 priority: P1
 created: 2026-04-23
 tldr: "**As a** developer **I want** auth endpoints in Astro API **So that** authentication works via Astro."
@@ -19,9 +19,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: `/api/auth/*` routes work via Astro API
-- [ ] **AC-US2-02**: Session management via better-auth
-- [ ] **AC-US2-03**: All auth flows (login, register, logout) functional
+- [x] **AC-US2-01**: `/api/auth/*` routes work via Astro API
+- [x] **AC-US2-02**: Session management via better-auth
+- [x] **AC-US2-03**: All auth flows (login, register, logout) functional
 
 ---
 

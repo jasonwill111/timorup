@@ -30,11 +30,13 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.2.2",
+    "@astrojs/cloudflare": "^13.3.0",
     "@astrojs/sitemap": "^3.7.2",
     "@aws-sdk/client-s3": "^3.1039.0",
     "@aws-sdk/lib-storage": "^3.1039.0",
     "@better-auth/drizzle-adapter": "^1.6.9",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/oswald": "^5.2.8",
     "@libsql/client": "^0.17.3",
@@ -48,7 +50,7 @@
     "@tiptap/pm": "^3.22.5",
     "@tiptap/starter-kit": "^3.22.5",
     "@types/leaflet": "^1.9.21",
-    "astro": "^6.1.10",
+    "astro": "^6.2.1",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.9",
     "clsx": "^2.1.1",
@@ -78,7 +80,7 @@
     "miniflare": "^4.20260426.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.5",
-    "wrangler": "^4.86.0"
+    "wrangler": "^4.87.0"
   },
   "engines": {
     "node": ">=20"

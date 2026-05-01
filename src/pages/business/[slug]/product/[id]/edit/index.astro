@@ -103,7 +103,7 @@ import CardContent from '@/components/ui/CardContent.astro'
                   <p class="text-sm text-muted-foreground">Click to upload images</p>
                   <p class="text-xs text-muted-foreground mt-1">JPG, PNG, WebP - Max 5MB each</p>
                 </div>
-                <input type="file" id="file-input" accept="image/*" multiple class="hidden" />
+                <input type="file" id="file-input" accept="image/*,video/mp4,video/webm,video/quicktime" multiple class="hidden" />
               </div>
               
               <!-- Image Preview -->
@@ -414,7 +414,16 @@ import CardContent from '@/components/ui/CardContent.astro'
   // File upload handling
   const uploadTrigger = document.getElementById('upload-trigger');
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
-  
+  const uploadArea = document.getElementById('upload-area');
+
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+  const MAX_VIDEO_SIZE = 8 * 1024 * 1024;
+  const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+
+  // Preload video processor
+  import('@/lib/video-compress').then(({ preloadFFmpeg }) => preloadFFmpeg());
+
   uploadTrigger?.addEventListener('click', () => {
     fileInput?.click();
   });
@@ -432,23 +441,66 @@ import CardContent from '@/components/ui/CardContent.astro'
     // Upload each file
     for (const file of files) {
       if (uploadedImages.length >= 4) break;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        showError('Image must be less than 5MB');
+
+      const isImage = IMAGE_TYPES.includes(file.type);
+      const isVideo = VIDEO_TYPES.includes(file.type);
+
+      if (!isImage && !isVideo) {
+        showError('Unsupported file type');
         continue;
       }
 
+      if (isImage && file.size > MAX_IMAGE_SIZE) {
+        showError(`Image too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 2MB`);
+        continue;
+      }
+      if (isVideo && file.size > MAX_VIDEO_SIZE) {
+        showError(`Video too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 8MB`);
+        continue;
+      }
+
+      let fileToUpload: File = file;
+
+      // Compress video
+      if (isVideo) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs rounded-lg';
+        statusDiv.textContent = 'Processing...';
+        uploadArea?.appendChild(statusDiv);
+
+        try {
+          const { compressVideo } = await import('@/lib/video-compress');
+          const result = await compressVideo(file, {
+            maxSize: MAX_VIDEO_SIZE,
+            onProgress: (p) => { statusDiv.textContent = p.message; }
+          });
+
+          if (!result.withinLimit) {
+            showError(`Video still too large after compression`);
+            statusDiv.remove();
+            continue;
+          }
+          fileToUpload = result.file;
+          statusDiv.textContent = 'Uploading...';
+        } catch (err) {
+          console.error('Video compression error:', err);
+          statusDiv.remove();
+          showError('Video processing failed');
+          continue;
+        }
+      }
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToUpload);
 
       try {
         const res = await fetch('/api/media/upload', {
           method: 'POST',
           body: formData,
         });
-        
+
         const data = await res.json();
-        
+
         if (data.success) {
           uploadedImages.push(data.data.id);
           renderImagePreview(data.data.id, file);

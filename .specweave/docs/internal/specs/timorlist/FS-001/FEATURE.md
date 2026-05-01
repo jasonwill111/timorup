@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-03-22
-lastUpdated: 2026-04-23
+lastUpdated: 2026-05-01
 tldr: "Enforce that each authenticated user can create at most one business page."
 complexity: high
 stakeholder_relevant: true

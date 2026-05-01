@@ -28,9 +28,10 @@ export default defineConfig({
     defaultBundler: 'astro',
   },
 
-  // Enable Rust compiler for faster builds (requires @astrojs/compiler-rs)
-  experimental: {
-    rustCompiler: true,
+  compressHTML: 'jsx',
+
+  server: {
+    allowedHosts: ['timorlist.com', 'www.timorlist.com', 'localhost', '127.0.0.1'],
   },
 
   adapter,

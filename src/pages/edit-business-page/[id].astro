@@ -54,7 +54,7 @@ import CardContent from '../../components/ui/CardContent.astro'
                 </svg>
                 <p class="text-sm text-muted-foreground">Click to upload</p>
               </div>
-              <input type="file" id="profileImage" name="profileImage" accept="image/jpeg,image/png,image/webp" class="hidden" />
+              <input type="file" id="profileImage" name="profileImage" accept="image/*,video/mp4,video/webm,video/quicktime" class="hidden" />
             </div>
           </div>
           
@@ -70,7 +70,7 @@ import CardContent from '../../components/ui/CardContent.astro'
                 </svg>
                 <p class="text-sm text-muted-foreground">Click to upload</p>
               </div>
-              <input type="file" id="bannerImage" name="bannerImage" accept="image/jpeg,image/png,image/webp" class="hidden" />
+              <input type="file" id="bannerImage" name="bannerImage" accept="image/*,video/mp4,video/webm,video/quicktime" class="hidden" />
             </div>
           </div>
         </CardContent>
@@ -226,7 +226,97 @@ import CardContent from '../../components/ui/CardContent.astro'
 </Layout>
 
 <script>
-  import { toast } from '../../stores/toast';
+  (async () => {
+    // Image/Video upload handling
+    const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+    const MAX_VIDEO_SIZE = 8 * 1024 * 1024;
+    const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+
+    // Preload video processor
+    const { preloadFFmpeg } = await import('@/lib/video-compress');
+    preloadFFmpeg();
+
+    async function handleImageUpload(inputId: string, previewId: string, placeholderId: string) {
+    const input = document.getElementById(inputId) as HTMLInputElement;
+    if (!input?.files?.length) return;
+
+    const file = input.files[0];
+    const isImage = IMAGE_TYPES.includes(file.type);
+    const isVideo = VIDEO_TYPES.includes(file.type);
+
+    if (!isImage && !isVideo) {
+      alert('Unsupported file type');
+      return;
+    }
+
+    if (isImage && file.size > MAX_IMAGE_SIZE) {
+      alert(`Image too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 2MB`);
+      return;
+    }
+    if (isVideo && file.size > MAX_VIDEO_SIZE) {
+      alert(`Video too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 8MB`);
+      return;
+    }
+
+    let fileToUpload = file;
+    const uploadArea = document.getElementById(inputId.replace('Image', '-image-upload'));
+
+    if (isVideo) {
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs rounded-lg';
+      statusDiv.textContent = 'Processing...';
+      uploadArea?.appendChild(statusDiv);
+
+      try {
+        const { compressVideo } = await import('@/lib/video-compress');
+        const result = await compressVideo(file, {
+          maxSize: MAX_VIDEO_SIZE,
+          onProgress: (p) => { statusDiv.textContent = p.message; }
+        });
+
+        if (!result.withinLimit) {
+          alert('Video still too large after compression');
+          statusDiv.remove();
+          return;
+        }
+        fileToUpload = result.file;
+        statusDiv.textContent = 'Uploading...';
+      } catch (err) {
+        console.error('Video compression error:', err);
+        statusDiv.remove();
+        alert('Video processing failed');
+        return;
+      }
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+
+    try {
+      const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (data.success && data.data?.id) {
+        const preview = document.getElementById(previewId) as HTMLImageElement;
+        const placeholder = document.getElementById(placeholderId);
+        preview.src = data.data.url;
+        preview.classList.remove('hidden');
+        placeholder?.classList.add('hidden');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+    }
+  }
+
+  document.getElementById('profileImage')?.addEventListener('change', (e) => {
+    handleImageUpload('profileImage', 'profile-preview', 'profile-placeholder');
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('bannerImage')?.addEventListener('change', (e) => {
+    handleImageUpload('bannerImage', 'banner-preview', 'banner-placeholder');
+    (e.target as HTMLInputElement).value = '';
+  });
 
   // Get business ID from URL
   const pathParts = window.location.pathname.split('/');
@@ -369,7 +459,17 @@ import CardContent from '../../components/ui/CardContent.astro'
     slugInput.dataset.userEdited = 'true';
   });
 
+  document.getElementById('profileImage')?.addEventListener('change', (e) => {
+    handleImageUpload('profileImage', 'profile-preview', 'profile-placeholder');
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('bannerImage')?.addEventListener('change', (e) => {
+    handleImageUpload('bannerImage', 'banner-preview', 'banner-placeholder');
+    (e.target as HTMLInputElement).value = '';
+  });
+
   // Initialize
   loadBusinessData();
   loadCategories();
+  })();
 </script>

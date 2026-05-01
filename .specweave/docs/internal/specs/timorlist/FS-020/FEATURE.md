@@ -5,8 +5,8 @@ type: feature
 status: planned
 priority: P2
 created: 2026-04-30
-lastUpdated: 2026-04-30
-tldr: "Enable business owners to reply to reviews on their `/account` page."
+lastUpdated: 2026-05-01
+tldr: "Business owners can reply to reviews (edit/delete their reply)."
 complexity: medium
 stakeholder_relevant: true
 ---
@@ -15,7 +15,7 @@ stakeholder_relevant: true
 
 ## TL;DR
 
-**What**: Enable business owners to reply to reviews on their `/account` page.
+**What**: Business owners can reply to reviews (edit/delete their reply).
 **Status**: planned | **Priority**: P2
 **User Stories**: 3
 
@@ -23,7 +23,7 @@ stakeholder_relevant: true
 
 ## Overview
 
-Enable business owners to reply to reviews on their `/account` page. Admins can manage and delete reviews from `/admin/reviews`.
+Business owners can reply to reviews (edit/delete their reply). Admins can manage and delete reviews from `/admin/reviews` with search/filter.
 
 ## Implementation History
 
@@ -34,5 +34,5 @@ Enable business owners to reply to reviews on their `/account` page. Admins can 
 ## User Stories
 
 - [US-001: User replies to reviews](./us-001-user-replies-to-reviews.md)
-- [US-002: Admin deletes reviews](./us-002-admin-deletes-reviews.md)
+- [US-002: Admin manages reviews](./us-002-admin-manages-reviews.md)
 - [US-003: Reply API endpoints](./us-003-reply-api-endpoints.md)

@@ -46,8 +46,18 @@ import Button from '@components/ui/Button.astro';
           <textarea id="hero-desc" name="description" rows="2" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Hero description..."></textarea>
         </div>
         <div>
-          <label for="hero-image" class="block text-sm font-medium mb-1">Image URL</label>
-          <input type="text" id="hero-image" name="imageId" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="/images/banner.jpg" />
+          <label class="block text-sm font-medium mb-1">Image</label>
+          <div id="hero-image-upload" class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-3 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
+            <p class="text-xs text-muted-foreground">Click or drag to upload</p>
+          </div>
+          <input type="file" id="hero-image-file" accept="image/*" class="hidden" />
+          <div id="hero-image-preview" class="mt-2 hidden">
+            <div class="relative inline-block">
+              <img id="hero-preview-img" class="w-full max-h-40 rounded-lg object-cover" />
+              <button type="button" id="remove-hero-image" class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs">×</button>
+            </div>
+          </div>
+          <input type="hidden" id="hero-image" name="imageId" value="" />
         </div>
         <div>
           <label for="hero-ext-url" class="block text-sm font-medium mb-1">External URL</label>
@@ -76,6 +86,38 @@ import Button from '@components/ui/Button.astro';
   import { toast } from '../../stores/toast';
   
   let isEditMode = false;
+  let heroImageId: string | null = null;
+
+  // Image upload handler
+  document.getElementById('hero-image-upload')?.addEventListener('click', () => {
+    document.getElementById('hero-image-file')?.click();
+  });
+  document.getElementById('hero-image-file')?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'hero');
+
+    const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.success && data.data?.id) {
+      heroImageId = data.data.id;
+      (document.getElementById('hero-image') as HTMLInputElement).value = data.data.id;
+      (document.getElementById('hero-preview-img') as HTMLImageElement).src = data.data.url;
+      document.getElementById('hero-image-preview')?.classList.remove('hidden');
+      document.getElementById('hero-image-upload')?.classList.add('hidden');
+    }
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('remove-hero-image')?.addEventListener('click', () => {
+    heroImageId = null;
+    (document.getElementById('hero-image') as HTMLInputElement).value = '';
+    document.getElementById('hero-image-preview')?.classList.add('hidden');
+    document.getElementById('hero-image-upload')?.classList.remove('hidden');
+  });
   
   // Load heroes
   async function loadHeroes() {
@@ -155,10 +197,22 @@ import Button from '@components/ui/Button.astro';
       (document.getElementById('hero-id') as HTMLInputElement).value = hero.id;
       (document.getElementById('hero-title') as HTMLInputElement).value = hero.title || '';
       (document.getElementById('hero-desc') as HTMLTextAreaElement).value = hero.description || '';
-      (document.getElementById('hero-image') as HTMLInputElement).value = hero.imageId || '';
       (document.getElementById('hero-ext-url') as HTMLInputElement).value = hero.externalUrl || '';
       (document.getElementById('hero-business') as HTMLSelectElement).value = hero.linkedBusinessPageId || '';
       (document.getElementById('hero-active') as HTMLInputElement).checked = hero.isActive !== false;
+
+      // Load existing image
+      heroImageId = hero.imageId || null;
+      if (hero.imageId) {
+        (document.getElementById('hero-image') as HTMLInputElement).value = hero.imageId;
+        (document.getElementById('hero-preview-img') as HTMLImageElement).src = `/api/media/${hero.imageId}`;
+        document.getElementById('hero-image-preview')?.classList.remove('hidden');
+        document.getElementById('hero-image-upload')?.classList.add('hidden');
+      } else {
+        (document.getElementById('hero-image') as HTMLInputElement).value = '';
+        document.getElementById('hero-image-preview')?.classList.add('hidden');
+        document.getElementById('hero-image-upload')?.classList.remove('hidden');
+      }
       
       const modal = document.getElementById('hero-modal');
       modal?.classList.remove('hidden');
@@ -197,9 +251,13 @@ import Button from '@components/ui/Button.astro';
   
   addBtn?.addEventListener('click', () => {
     isEditMode = false;
+    heroImageId = null;
     document.getElementById('modal-title')!.textContent = 'Add Hero';
     (document.getElementById('hero-form') as HTMLFormElement).reset();
     (document.getElementById('hero-id') as HTMLInputElement).value = '';
+    (document.getElementById('hero-image') as HTMLInputElement).value = '';
+    document.getElementById('hero-image-preview')?.classList.add('hidden');
+    document.getElementById('hero-image-upload')?.classList.remove('hidden');
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
   });

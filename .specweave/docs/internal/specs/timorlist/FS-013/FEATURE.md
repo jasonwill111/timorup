@@ -4,8 +4,8 @@ title: "Business Detail Page Enhancement - Specification"
 type: feature
 status: completed
 priority: P1
-created: 2026-04-26
-lastUpdated: 2026-04-26
+created: 2026-05-01
+lastUpdated: 2026-05-01
 tldr: "Business Detail Page Enhancement - Specification"
 complexity: medium
 stakeholder_relevant: true
@@ -25,7 +25,7 @@ stakeholder_relevant: true
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0013-business-detail-enhancement](../../../../../increments/0013-business-detail-enhancement/spec.md) | ✅ completed | 2026-04-26 |
+| [0013-business-detail-enhancement](../../../../../increments/0013-business-detail-enhancement/spec.md) | ✅ completed | 2026-05-01 |
 
 ## User Stories
 

@@ -4,7 +4,7 @@ feature: FS-013
 title: "Gallery Lightbox"
 status: not_started
 priority: P1
-created: 2026-04-26
+created: 2026-05-01
 tldr: "As a visitor, I want to view business photos in fullscreen with navigation so I can examine details closely."
 project: timorlist
 ---

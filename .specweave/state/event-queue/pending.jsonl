@@ -25,3 +25,5 @@
 {"incrementId":"0012-admin-sidebar-unified","eventType":"increment.done","timestamp":"2026-04-23T00:49:44.055Z"}
 {"incrementId":"0021-admin-skus-tiptap","eventType":"status.changed","metadata":{"newStatus":"ready_for_review"},"timestamp":"2026-04-30T05:11:02.038Z"}
 {"incrementId":"0021-admin-skus-tiptap","eventType":"status.changed","metadata":{"newStatus":"completed"},"timestamp":"2026-04-30T05:13:25.613Z"}
+{"incrementId":"0022-admin-media-upload","eventType":"status.changed","metadata":{"newStatus":"ready_for_review"},"timestamp":"2026-05-01T08:05:48.649Z"}
+{"incrementId":"0022-admin-media-upload","eventType":"status.changed","metadata":{"newStatus":"completed"},"timestamp":"2026-05-01T08:05:48.679Z"}

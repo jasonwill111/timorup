@@ -1,4 +1,4 @@
-// API endpoint to get/create products for a business
+// API endpoint to get/create/update products
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
@@ -6,6 +6,7 @@ import { products, businessPages } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { PLAN_LIMITS } from '@/lib/media';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 const VALID_SERVICE_TYPES = [
   'product', 'service', 'rental', 'food',
@@ -13,7 +14,6 @@ const VALID_SERVICE_TYPES = [
   'education', 'beauty', 'event'
 ];
 
-// Helper to safely parse JSON string fields from database
 const parseJsonField = (val: string): unknown => {
   if (!val) return null;
   try {
@@ -23,26 +23,15 @@ const parseJsonField = (val: string): unknown => {
   }
 };
 
-export async function GET({ url }: { url: URL }) {
-  try {
-    const db = await getDb();
+export async function GET({ url, request }: { url: URL; request: Request }) {
+  const user = await getAdminUser(request);
+  // Admin APIs require auth, regular product APIs don't
+  const isAdmin = user && url.searchParams.get('isAdmin') === 'true';
+
+  if (!isAdmin) {
+    // Non-admin: require businessPageId
     const businessPageId = url.searchParams.get('businessPageId');
-    const isAdmin = url.searchParams.get('isAdmin') === 'true';
-    const activeOnly = url.searchParams.get('active') !== 'false'; // Default true
-
-    let query = db.select().from(products);
-
-    if (isAdmin && !businessPageId) {
-      // Admin view all products
-      query = query.orderBy(desc(products.createdAt));
-    } else if (businessPageId) {
-      // Get products for specific business
-      query = query.where(eq(products.businessPageId, businessPageId));
-      if (activeOnly && !isAdmin) {
-        query = query.where(eq(products.active, true));
-      }
-      query = query.orderBy(desc(products.featured), desc(products.createdAt));
-    } else {
+    if (!businessPageId) {
       return new Response(JSON.stringify({
         success: false,
         error: { message: 'businessPageId is required' }
@@ -52,40 +41,66 @@ export async function GET({ url }: { url: URL }) {
       });
     }
 
-    const allProducts = await query.all();
-
-    // Parse JSON fields for each product
-    const parsedProducts = allProducts.map((p: Record<string, unknown>) => ({
-      ...p,
-      priceFields: p.priceFields ? parseJsonField(p.priceFields as string) : null,
-      specifications: p.specifications ? parseJsonField(p.specifications as string) : null,
-    }));
+    const db = await getDb();
+    const activeOnly = url.searchParams.get('active') !== 'false';
+    let query = db.select().from(products).where(eq(products.businessPageId, businessPageId));
+    if (activeOnly) {
+      query = query.where(eq(products.active, true));
+    }
+    const allProducts = await query.orderBy(desc(products.featured), desc(products.createdAt)).all();
 
     return new Response(JSON.stringify({
       success: true,
-      data: parsedProducts,
+      data: allProducts.map((p: Record<string, unknown>) => ({
+        ...p,
+        priceFields: p.priceFields ? parseJsonField(p.priceFields as string) : null,
+        specifications: p.specifications ? parseJsonField(p.specifications as string) : null,
+      })),
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { message: error instanceof Error ? error.message : 'Unknown error' }
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
   }
+
+  // Admin path
+  const db = await getDb();
+  const businessPageId = url.searchParams.get('businessPageId');
+  const activeOnly = url.searchParams.get('active') !== 'false';
+
+  let query = db.select().from(products).orderBy(desc(products.createdAt));
+
+  if (businessPageId) {
+    query = query.where(eq(products.businessPageId, businessPageId));
+    if (activeOnly) {
+      query = query.where(eq(products.active, true));
+    }
+  }
+
+  const allProducts = await query.all();
+
+  return new Response(JSON.stringify({
+    success: true,
+    data: allProducts.map((p: Record<string, unknown>) => ({
+      ...p,
+      priceFields: p.priceFields ? parseJsonField(p.priceFields as string) : null,
+      specifications: p.specifications ? parseJsonField(p.specifications as string) : null,
+    })),
+  }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 export async function POST({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
+  const db = await getDb();
   try {
-    const db = await getDb();
     const body = await request.json();
     const {
       title, price, priceUnit, description, businessPageId,
-      priceFields, serviceType, specifications, featured, isAdmin
+      priceFields, serviceType, specifications, featured
     } = body;
 
     if (!businessPageId || !title) {
@@ -94,16 +109,6 @@ export async function POST({ request }: { request: Request }) {
         error: { message: 'businessPageId and title are required' }
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (!isAdmin) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: { message: 'Please use the business account to create products' }
-      }), {
-        status: 403,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -147,7 +152,7 @@ export async function POST({ request }: { request: Request }) {
         success: false,
         error: {
           code: 'SKU_LIMIT_EXCEEDED',
-          message: `You have reached your SKU limit (${current}/${limit}). Please upgrade your plan to add more products.`,
+          message: `SKU limit reached (${current}/${limit}). Upgrade to add more.`,
           plan: effectivePlan,
           limit,
           current,
@@ -160,16 +165,10 @@ export async function POST({ request }: { request: Request }) {
 
     const id = `prod-${Date.now()}`;
 
-    // Helper to safely stringify JSON (handle both string and object)
     const safeStringify = (val: unknown): string | null => {
       if (!val) return null;
       if (typeof val === 'string') {
-        try {
-          JSON.parse(val); // Valid JSON string
-          return val;
-        } catch {
-          return val; // Return as-is if not valid JSON
-        }
+        try { JSON.parse(val); return val; } catch { return val; }
       }
       return JSON.stringify(val);
     };
@@ -190,10 +189,7 @@ export async function POST({ request }: { request: Request }) {
 
     return new Response(JSON.stringify({
       success: true,
-      data: {
-        id, title, price, priceFields, serviceType,
-        specifications, featured, description
-      },
+      data: { id, title, price, priceFields, serviceType, specifications, featured, description },
     }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
@@ -209,95 +205,90 @@ export async function POST({ request }: { request: Request }) {
   }
 }
 
-// Product update handler
 export async function PUT({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
+  const db = await getDb();
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+
+  if (!id) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: { message: 'Product ID is required' }
+    }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
-    const db = await getDb();
-    const url = new URL(request.url);
-    const id = url.searchParams.get('id');
-
-    if (!id) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: { message: 'Product ID is required' }
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     const body = await request.json();
-    const {
-      title, price, priceUnit, description,
-      priceFields, serviceType, specifications, featured, active
-    } = body;
+    const { title, price, priceUnit, description, priceFields, serviceType, specifications, featured, active } = body;
 
-    // Check product exists
-    const existing = await db.select()
-      .from(products)
-      .where(eq(products.id, id))
-      .limit(1)
-      .get();
-
+    const existing = await db.select().from(products).where(eq(products.id, id)).limit(1).get();
     if (!existing) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: { message: 'Product not found' }
-      }), {
+      return new Response(JSON.stringify({ success: false, error: { message: 'Product not found' } }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // Build update object
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
     if (price !== undefined) updateData.price = price || null;
     if (priceUnit !== undefined) updateData.priceUnit = priceUnit || null;
     if (description !== undefined) updateData.description = description || null;
     if (priceFields !== undefined) updateData.priceFields = priceFields ? JSON.stringify(priceFields) : null;
-    if (serviceType !== undefined) {
-      updateData.serviceType = VALID_SERVICE_TYPES.includes(serviceType) ? serviceType : 'product';
-    }
+    if (serviceType !== undefined) updateData.serviceType = VALID_SERVICE_TYPES.includes(serviceType) ? serviceType : 'product';
     if (specifications !== undefined) updateData.specifications = specifications ? JSON.stringify(specifications) : null;
     if (featured !== undefined) updateData.featured = featured;
     if (active !== undefined) updateData.active = active;
 
     if (Object.keys(updateData).length > 0) {
       updateData.updatedAt = Math.floor(Date.now() / 1000);
-      await db.update(products)
-        .set(updateData)
-        .where(eq(products.id, id))
-        .run();
+      await db.update(products).set(updateData).where(eq(products.id, id)).run();
     }
 
-    // Get updated product
-    const updated = await db.select()
-      .from(products)
-      .where(eq(products.id, id))
-      .limit(1)
-      .get();
-
+    const updated = await db.select().from(products).where(eq(products.id, id)).limit(1).get();
     const parsedUpdated = updated ? {
       ...updated,
       priceFields: updated.priceFields ? parseJsonField(updated.priceFields as string) : null,
       specifications: updated.specifications ? parseJsonField(updated.specifications as string) : null,
     } : null;
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: parsedUpdated,
-    }), {
+    return new Response(JSON.stringify({ success: true, data: parsedUpdated }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: { message: error instanceof Error ? error.message : 'Unknown error' }
-    }), {
+    return new Response(JSON.stringify({ success: false, error: { message: error instanceof Error ? error.message : 'Unknown error' } }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
   }
+}
+
+export async function DELETE({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+
+  if (!id) {
+    return new Response(JSON.stringify({ success: false, error: { message: 'ID required' } }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const db = await getDb();
+  await db.delete(products).where(eq(products.id, id)).run();
+
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

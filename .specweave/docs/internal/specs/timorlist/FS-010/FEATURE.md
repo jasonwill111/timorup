@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-04-19T00:00:00.000Z
-lastUpdated: 2026-04-23
+lastUpdated: 2026-05-01
 tldr: "Replace emoji icons with descriptive images for industry categories."
 complexity: medium
 stakeholder_relevant: true

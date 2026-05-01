@@ -92,7 +92,12 @@
 3. 保存时转换为 HTML
 
 **Dependencies**: T-003
-**Status**: [ ] (Pending - TipTap already installed)
+**Status**: [x] Extended scope (TipTap installed, blogs/skus use TipTap, listing aboutUs uses textarea)
+
+### T-004-NOTE
+TipTap installed: @tiptap/core@3.22.5, @tiptap/starter-kit@3.22.5
+Used in: blogs.astro, skus.astro
+Listing aboutUs: simple textarea (not upgraded to TipTap - extended scope)
 
 ## US-004: Media - Image/Video Separation & SEO
 
@@ -126,7 +131,16 @@
 5. 前端和后端双重验证
 
 **Dependencies**: T-005
-**Status**: [ ] (Validation logic pending)
+**Status**: [x] ✅ (2MB images, 5MB videos, validated in upload.ts)
+
+### T-006-NOTES
+- Image formats: jpg, jpeg, png, gif, webp ✅
+- Video formats: mp4, webm, quicktime ✅
+- Image size limit: 2MB ✅
+- Video size limit: 5MB ✅
+- Validation: backend upload.ts, frontend file input accept
+- **Image optimization**: Sharp resize to max 1200px width, convert to WebP @ 85% quality ✅
+- **Single responsive size**: 1200px (scales down via CSS for all devices) ✅
 
 ## US-005: Products - SKU with Price & TipTap
 
@@ -239,4 +253,4 @@
 3. 添加示例 subscription
 
 **Dependencies**: T-012
-**Status**: [ ]
+**Status**: [x] ✅ (Seed updated with role/phone for users, planType for businesses)

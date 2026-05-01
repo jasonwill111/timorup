@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { media, businessPages } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
+import sharp from 'sharp';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -12,7 +13,9 @@ function getErrorMessage(error: unknown): string {
 }
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
-const MAX_VIDEO_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 8 * 1024 * 1024;
+const MAX_IMAGE_WIDTH = 1200;
+const IMAGE_QUALITY = 85;
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
@@ -22,6 +25,28 @@ const PLAN_LIMITS: Record<string, { maxImages: number; maxVideos: number }> = {
   pro: { maxImages: 10, maxVideos: 1 },
   max: { maxImages: 10, maxVideos: 1 },
 };
+
+// Folder structure: business/{id}/, gov/{id}/, ngo/{id}/, blog/{id}/, hero/, category/, page/{name}/, system/, files/
+function getFolderPath(params: {
+  entityType?: string;
+  businessId?: string;
+  category?: string;
+  pageName?: string;
+}): string {
+  const { entityType, businessId, category, pageName } = params;
+
+  if (category === 'hero') return 'hero';
+  if (category === 'category') return 'category';
+  if (category === 'system') return 'system';
+  if (category === 'files') return 'files';
+  if (pageName) return `page/${pageName}`;
+
+  if (entityType && businessId) {
+    return `${entityType}/${businessId}`;
+  }
+
+  return 'general';
+}
 
 async function getCurrentUser(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';
@@ -37,6 +62,7 @@ async function getCurrentUser(request: Request) {
 }
 
 async function getBusinessPlanLimits(businessId: string) {
+  const db = await getDb();
   const [business] = await db.select({ planType: businessPages.planType })
     .from(businessPages)
     .where(eq(businessPages.id, businessId))
@@ -46,6 +72,7 @@ async function getBusinessPlanLimits(businessId: string) {
 }
 
 async function countBusinessMedia(businessId: string) {
+  const db = await getDb();
   const imageCount = await db.select({ count: sql<number>`count(*)` })
     .from(media)
     .where(and(eq(media.businessId, businessId), eq(media.type, 'image')));
@@ -62,6 +89,11 @@ export async function POST({ request }: { request: Request }) {
   const db = await getDb();
   const url = new URL(request.url);
   const businessId = url.searchParams.get('businessId');
+  const entityType = url.searchParams.get('entityType') || 'business';
+  const category = url.searchParams.get('category'); // hero, category, system, files
+  const pageName = url.searchParams.get('pageName');
+  const skuId = url.searchParams.get('skuId');
+
   const user = await getCurrentUser(request);
 
   if (!user) {
@@ -118,31 +150,64 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const id = crypto.randomUUID();
-    const ext = file.name.split('.').pop() || 'bin';
     const timestamp = Date.now();
-    const key = `uploads/${user.id}/${businessId || 'general'}/${timestamp}-${id}.${ext}`;
-
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const ext = file.name.split('.').pop() || 'bin';
 
     let finalUrl: string;
+    let finalSize = file.size;
+    let finalMimeType = file.type;
+    let finalWidth: number | undefined;
+    let finalHeight: number | undefined;
     const hasR2Credentials = process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID;
 
-    if (hasR2Credentials) {
+    // Build folder path
+    const folder = getFolderPath({ entityType, businessId, category, pageName });
+    const subFolder = skuId ? `${skuId}/` : '';
+
+    if (isImage && hasR2Credentials) {
+      // Optimize image with sharp
+      const inputBuffer = Buffer.from(await file.arrayBuffer());
+      const processed = await sharp(inputBuffer)
+        .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
+        .webp({ quality: IMAGE_QUALITY })
+        .toBuffer({ resolveWithObject: true });
+
+      const key = `${folder}/${subFolder}${timestamp}-${id}.webp`;
+
+      const { uploadToR2 } = await import('@/lib/media');
+      const result = await uploadToR2(processed.data, key, 'image/webp', processed.data.length);
+      finalUrl = result.url;
+      finalSize = processed.data.length;
+      finalMimeType = 'image/webp';
+      finalWidth = processed.info.width;
+      finalHeight = processed.info.height;
+    } else if (hasR2Credentials) {
+      // Video - store as-is
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const key = `${folder}/${subFolder}${timestamp}-${id}.${ext}`;
       const { uploadToR2 } = await import('@/lib/media');
       const result = await uploadToR2(buffer, key, file.type, file.size);
       finalUrl = result.url;
     } else {
+      // Local dev - base64
+      const buffer = Buffer.from(await file.arrayBuffer());
       const base64 = buffer.toString('base64');
       finalUrl = `data:${file.type};base64,${base64}`;
     }
 
+    // Build stored path for DB
+    const storedPath = hasR2Credentials
+      ? `${folder}/${subFolder}${timestamp}-${id}.${isImage ? 'webp' : ext}`
+      : finalUrl;
+
     const [created] = await db.insert(media).values({
       id,
-      url: hasR2Credentials ? key : finalUrl,
+      url: storedPath,
       filename: file.name,
-      mimeType: file.type,
-      size: file.size,
+      mimeType: finalMimeType,
+      size: finalSize,
+      width: finalWidth,
+      height: finalHeight,
       type: isImage ? 'image' : 'video',
       businessId: businessId || null,
       createdById: user.id,
@@ -154,9 +219,11 @@ export async function POST({ request }: { request: Request }) {
         id: created.id,
         url: finalUrl,
         filename: file.name,
-        mimeType: file.type,
-        size: file.size,
+        mimeType: finalMimeType,
+        size: finalSize,
         type: isImage ? 'image' : 'video',
+        width: finalWidth,
+        height: finalHeight,
       }
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {

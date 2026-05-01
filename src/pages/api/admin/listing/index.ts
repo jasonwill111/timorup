@@ -1,9 +1,11 @@
+// Admin API - Listings Management
 import type { APIRoute } from 'astro';
 import { getDb } from '@/lib/db';
 import { businessPages } from '@/db/schema';
-import { eq, and, like, or } from 'drizzle-orm';
+import { eq, and, like, or, inArray } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 const createSchema = z.object({
   entityType: z.enum(['business', 'government', 'nonprofit']),
@@ -25,24 +27,21 @@ const createSchema = z.object({
   locationLng: z.number().optional(),
   status: z.enum(['draft', 'live', 'suspended']).default('draft'),
   ownerId: z.string().optional(),
-  // Image fields
   bannerImageId: z.string().optional(),
   profileImageId: z.string().optional(),
-  // Organization fields
   verifiedBadge: z.boolean().optional(),
   socialLinks: z.object({
     facebook: z.string().optional(),
     instagram: z.string().optional(),
     tiktok: z.string().optional(),
   }).optional(),
-  // Gallery
   photoGallery: z.array(z.string()).optional(),
-  // Subscription
   planType: z.string().optional(),
   expiryDate: z.number().optional(),
 });
 
-// Generate slug from title
+const updateSchema = createSchema.partial();
+
 function generateSlug(title: string): string {
   const base = title
     .toLowerCase()
@@ -51,24 +50,24 @@ function generateSlug(title: string): string {
   return `${base}-${nanoid(6)}`;
 }
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   const entityType = url.searchParams.get('entityType');
   const status = url.searchParams.get('status');
   const search = url.searchParams.get('search');
 
   let query = db.select().from(businessPages);
-
   const conditions = [];
 
   if (entityType) {
     conditions.push(eq(businessPages.entityType, entityType));
   }
-
   if (status) {
     conditions.push(eq(businessPages.status, status));
   }
-
   if (search) {
     conditions.push(like(businessPages.title, `%${search}%`));
   }
@@ -84,6 +83,9 @@ export const GET: APIRoute = async ({ url }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const body = await request.json();
@@ -95,7 +97,7 @@ export const POST: APIRoute = async ({ request }) => {
       id: nanoid(),
       title: data.title,
       slug,
-      ownerId: data.ownerId || 'admin',
+      ownerId: data.ownerId || user.id,
       entityType: data.entityType,
       categoryId: data.categoryId || null,
       industry: data.industry || null,
@@ -112,15 +114,11 @@ export const POST: APIRoute = async ({ request }) => {
       locationLat: data.locationLat || null,
       locationLng: data.locationLng || null,
       status: data.status,
-      // Image fields
       bannerImageId: data.bannerImageId || null,
       profileImageId: data.profileImageId || null,
-      // Organization fields
       verifiedBadge: data.verifiedBadge || false,
       socialLinks: data.socialLinks ? JSON.stringify(data.socialLinks) : null,
-      // Gallery
       photoGallery: data.photoGallery ? JSON.stringify(data.photoGallery) : null,
-      // Subscription
       planType: data.planType || null,
       expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
     };
@@ -144,4 +142,82 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+};
+
+export const PUT: APIRoute = async ({ request }) => {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
+  const db = await getDb();
+  try {
+    const body = await request.json();
+    const { id, ...data } = body;
+    const validated = updateSchema.parse(data);
+
+    const updateData: Record<string, unknown> = {};
+    if (validated.entityType !== undefined) updateData.entityType = validated.entityType;
+    if (validated.title !== undefined) updateData.title = validated.title;
+    if (validated.slug !== undefined) updateData.slug = validated.slug;
+    if (validated.categoryId !== undefined) updateData.categoryId = validated.categoryId;
+    if (validated.industry !== undefined) updateData.industry = validated.industry;
+    if (validated.contactName !== undefined) updateData.contactName = validated.contactName;
+    if (validated.countryCode !== undefined) updateData.countryCode = validated.countryCode;
+    if (validated.contactNumber !== undefined) updateData.contactNumber = validated.contactNumber;
+    if (validated.email !== undefined) updateData.email = validated.email;
+    if (validated.registrationUrl !== undefined) updateData.registrationUrl = validated.registrationUrl;
+    if (validated.address !== undefined) updateData.address = validated.address;
+    if (validated.aboutUs !== undefined) updateData.aboutUs = validated.aboutUs;
+    if (validated.tags !== undefined) updateData.tags = JSON.stringify(validated.tags);
+    if (validated.yearOfEstablishment !== undefined) updateData.yearOfEstablishment = validated.yearOfEstablishment;
+    if (validated.openingHours !== undefined) updateData.openingHours = JSON.stringify(validated.openingHours);
+    if (validated.locationLat !== undefined) updateData.locationLat = validated.locationLat;
+    if (validated.locationLng !== undefined) updateData.locationLng = validated.locationLng;
+    if (validated.status !== undefined) updateData.status = validated.status;
+    if (validated.bannerImageId !== undefined) updateData.bannerImageId = validated.bannerImageId;
+    if (validated.profileImageId !== undefined) updateData.profileImageId = validated.profileImageId;
+    if (validated.verifiedBadge !== undefined) updateData.verifiedBadge = validated.verifiedBadge;
+    if (validated.socialLinks !== undefined) updateData.socialLinks = JSON.stringify(validated.socialLinks);
+    if (validated.photoGallery !== undefined) updateData.photoGallery = JSON.stringify(validated.photoGallery);
+    if (validated.planType !== undefined) updateData.planType = validated.planType;
+    if (validated.expiryDate !== undefined) updateData.expiryDate = new Date(validated.expiryDate);
+
+    await db.update(businessPages)
+      .set(updateData)
+      .where(eq(businessPages.id, id))
+      .run();
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error updating listing:', error);
+    return new Response(JSON.stringify({ error: 'Failed to update listing' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+};
+
+export const DELETE: APIRoute = async ({ request }) => {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+
+  if (!id) {
+    return new Response(JSON.stringify({ error: 'ID required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const db = await getDb();
+  await db.delete(businessPages).where(eq(businessPages.id, id)).run();
+
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 };

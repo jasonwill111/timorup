@@ -2,7 +2,7 @@
 id: US-001
 feature: FS-015
 title: "Remove Hono Server"
-status: not_started
+status: completed
 priority: P1
 created: 2026-04-23
 tldr: "**As a** developer **I want** to remove Hono server code **So that** the codebase uses only Astro API routes."
@@ -19,9 +19,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: Delete `src/server/` directory completely
-- [ ] **AC-US1-02**: Remove Hono imports from `astro.config.mjs`
-- [ ] **AC-US1-03**: No `src/server/` references in any file
+- [x] **AC-US1-01**: Delete `src/server/` directory completely
+- [x] **AC-US1-02**: Remove Hono imports from `astro.config.mjs`
+- [x] **AC-US1-03**: No `src/server/` references in any file
 
 ---
 

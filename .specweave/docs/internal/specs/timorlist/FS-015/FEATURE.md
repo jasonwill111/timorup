@@ -5,7 +5,7 @@ type: feature
 status: planned
 priority: P1
 created: 2026-04-23
-lastUpdated: 2026-04-23
+lastUpdated: 2026-05-01
 tldr: "Remove all Hono server code and migrate all API routes to Astro API endpoints."
 complexity: high
 stakeholder_relevant: true

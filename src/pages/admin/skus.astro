@@ -104,6 +104,17 @@ const businessOptionsJson = JSON.stringify(businessOptions);
           </div>
         </div>
 
+        <!-- Image/Video Upload -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Product Images</label>
+          <div id="sku-image-upload" class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
+            <p class="text-sm text-muted-foreground">Click or drag to upload images/videos</p>
+            <input type="file" id="sku-image-file" accept="image/*,video/mp4,video/webm,video/quicktime" multiple class="hidden" />
+          </div>
+          <div id="sku-image-preview" class="mt-2 grid grid-cols-4 gap-2 hidden"></div>
+          <input type="hidden" id="sku-media-ids" name="mediaIds" value="" />
+        </div>
+
         <!-- Description - TipTap Editor -->
         <div>
           <label class="block text-sm font-medium mb-1">Description</label>
@@ -165,8 +176,113 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
   let editingId = null;
   let editor = null;
+  let skuMediaIds: string[] = [];
 
-  // Initialize TipTap editor
+  // Image/video upload
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+  const MAX_VIDEO_SIZE = 8 * 1024 * 1024;
+  const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+
+  // Preload video processor
+  import('@/lib/video-compress').then(({ preloadFFmpeg }) => preloadFFmpeg());
+
+  async function handleSkuImageUpload(files: FileList) {
+    const preview = document.getElementById('sku-image-preview')!;
+    const uploadArea = document.getElementById('sku-image-upload')!;
+
+    for (const file of files) {
+      if (skuMediaIds.length >= 4) break;
+
+      const isImage = IMAGE_TYPES.includes(file.type);
+      const isVideo = VIDEO_TYPES.includes(file.type);
+
+      if (!isImage && !isVideo) continue;
+
+      if (isImage && file.size > MAX_IMAGE_SIZE) {
+        alert(`Image too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 2MB`);
+        continue;
+      }
+      if (isVideo && file.size > MAX_VIDEO_SIZE) {
+        alert(`Video too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 8MB`);
+        continue;
+      }
+
+      let fileToUpload = file;
+
+      // Compress video
+      if (isVideo) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs rounded-lg z-10';
+        statusDiv.textContent = 'Processing...';
+        uploadArea.style.position = 'relative';
+        uploadArea.appendChild(statusDiv);
+
+        try {
+          const { compressVideo } = await import('@/lib/video-compress');
+          const result = await compressVideo(file, {
+            maxSize: MAX_VIDEO_SIZE,
+            onProgress: (p) => { statusDiv.textContent = p.message; }
+          });
+
+          if (!result.withinLimit) {
+            alert('Video still too large after compression');
+            statusDiv.remove();
+            continue;
+          }
+          fileToUpload = result.file;
+          statusDiv.textContent = 'Uploading...';
+        } catch (err) {
+          console.error('Video compression error:', err);
+          statusDiv.remove();
+          alert('Video processing failed');
+          continue;
+        }
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileToUpload);
+
+      try {
+        const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success && data.data?.id) {
+          skuMediaIds.push(data.data.id);
+          const mediaId = data.data.id;
+          const mediaUrl = data.data.url;
+          const mediaType = isVideo ? 'video' : 'image';
+
+          const div = document.createElement('div');
+          div.className = 'relative aspect-square rounded-lg overflow-hidden bg-muted';
+          div.innerHTML = mediaType === 'video'
+            ? `<video src="${mediaUrl}" class="w-full h-full object-cover" muted /><div class="absolute inset-0 flex items-center justify-center"><svg class="w-6 h-6 text-white" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`
+            : `<img src="${mediaUrl}" class="w-full h-full object-cover" />`;
+          div.innerHTML += `<button type="button" data-remove="${mediaId}" class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs">×</button>`;
+          div.querySelector('[data-remove]')?.addEventListener('click', () => {
+            skuMediaIds = skuMediaIds.filter(id => id !== mediaId);
+            div.remove();
+            document.getElementById('sku-media-ids')!.value = skuMediaIds.join(',');
+          });
+          preview.appendChild(div);
+          preview.classList.remove('hidden');
+          document.getElementById('sku-media-ids')!.value = skuMediaIds.join(',');
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+      }
+    }
+  }
+
+  // Setup upload handlers
+  document.getElementById('sku-image-upload')?.addEventListener('click', () => {
+    document.getElementById('sku-image-file')?.click();
+  });
+  document.getElementById('sku-image-file')?.addEventListener('change', (e) => {
+    const files = (e.target as HTMLInputElement).files;
+    if (files) handleSkuImageUpload(files);
+    (e.target as HTMLInputElement).value = '';
+  });
   function initEditor(initialContent = '') {
     const element = document.querySelector('#tiptap-editor');
     if (!element) return null;
