@@ -48,8 +48,8 @@
     }
   ],
 
-  // Cron triggers - weekly Sunday at 3 AM UTC
-  "triggers": {
-    "crons": ["0 3 * * 0"]
-  },
+  // Cron triggers - disabled due to wrangler cron format issue
+  // "triggers": {
+  //   "crons": ["0 3 * * 0"]
+  // },
 }
