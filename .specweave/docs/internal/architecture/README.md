@@ -37,7 +37,7 @@ TimorList is a multi-tenant business listing platform built on Cloudflare Worker
 | ADR | Decision | Status |
 |-----|----------|--------|
 | ADR-0001 | Cloudflare Workers runtime | ✅ Implemented |
-| ADR-0010 | SSR only (hybrid mode deferred) | ✅ Implemented |
+| ADR-0010 | Server Islands (hybrid mode) | ✅ Implemented |
 | ADR-0011 | Industry-specific product specs | ✅ Implemented |
 
 ## Module Structure
