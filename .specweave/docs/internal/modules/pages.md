@@ -65,6 +65,19 @@ pages/
 - `/` - Homepage with business listings
 - `/business/[slug]` - Business detail page
 - `/business/[slug]/product/[id]` - Product/SKU detail page
+- `/listing/create` - Create listing (supports gov/ngo free type)
+- `/subscribe` - Subscription plan selection
+- `/account` - User account with saved SKUs
+
+## Subscription Flow (Gov/NGO Free)
+
+| Entity Type | Subscription Required | Flow |
+|-------------|-------------------|------|
+| business | Yes | Create listing → Select plan → Pay → Publish |
+| government | No | Create listing → Publish (Free) |
+| nonprofit | No | Create listing → Publish (Free) |
+
+**E2E Test**: `e2e/gov-ngo-subscription-flow.spec.ts`
 
 ## Analysis Summary
 

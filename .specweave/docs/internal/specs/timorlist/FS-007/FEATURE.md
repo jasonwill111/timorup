@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-04-18T00:00:00.000Z
-lastUpdated: 2026-05-01
+lastUpdated: 2026-05-02
 tldr: "重构数据库结构，优化用户角色体系，新增订阅系统，扩展媒体和商品支持。."
 complexity: high
 stakeholder_relevant: true
@@ -41,3 +41,23 @@ stakeholder_relevant: true
 - [US-006: Subscriptions - New Table](./us-006-subscriptions-new-table.md)
 - [US-007: Reviews - Disabled](./us-007-reviews-disabled.md)
 - [US-008: Orders - Disabled](./us-008-orders-disabled.md)
+
+## E2E Test Coverage
+
+**Test File**: [e2e/gov-ngo-subscription-flow.spec.ts](../../../../../../e2e/gov-ngo-subscription-flow.spec.ts)
+
+| Test ID | Coverage |
+|---------|----------|
+| GOV-001 to GOV-005 | Government/Nonprofit free listing creation |
+| PLAN-001 to PLAN-002 | Subscription plan selection |
+| ADMIN-001 to ADMIN-002 | Admin subscription confirmation |
+| SKU-001 to SKU-003 | SKU generation in account |
+| FLOW-001 | Complete gov → plan → admin → SKU flow |
+
+**Status**: ✅ 14/14 tests passing
+
+## Related Documentation
+
+- [Testing Module](../modules/testing.md) - E2E test setup and troubleshooting
+- [Pages Module](../modules/pages.md) - Subscription flow pages
+- [DB Module](../modules/db.md) - Local SQLite support for tests

@@ -44,6 +44,18 @@ active: boolean
 
 - `drizzle-orm` (ORM)
 - `better-auth` (auth tables)
+- `better-sqlite3` (local development)
+
+## Local Development
+
+`src/lib/db.ts` provides `getDb()` for multi-environment support:
+
+| Environment | Driver | Adapter |
+|-------------|--------|---------|
+| Cloudflare Workers | `cloudflare:workers` D1 binding | `drizzle-orm/d1` |
+| Local Development | Local SQLite file | `drizzle-orm/better-sqlite3` |
+
+**Local DB Path**: `./.wrangler/state/v3/d1/timorlist-db.sqlite`
 
 ## Analysis Summary
 
@@ -52,4 +64,4 @@ active: boolean
 - **Total Exports**: 40+
 
 ---
-*Updated 2026-04-30*
+*Updated 2026-05-02*

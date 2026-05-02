@@ -96,5 +96,26 @@ const parseJsonField = (val: string): unknown => {
 - `src/pages/admin/skus.astro` - Admin UI
 - `src/pages/business/[slug]/product/[id]/index.astro` - Product detail
 
+## E2E Tests
+
+**Test File**: `e2e/gov-ngo-subscription-flow.spec.ts`
+
+| Test ID | Description |
+|---------|-------------|
+| SKU-001 | Should show SKU section in account |
+| SKU-002 | Should create SKU via admin panel |
+| SKU-003 | Should display created SKUs in account |
+| FLOW-001 | Complete gov page → plan → admin confirm → SKU flow |
+
+**Test Setup**:
+- Local SQLite DB via `better-sqlite3`
+- Rate limiter disabled in `NODE_ENV=test`
+- Auth via API with session token in cookie
+
+**Run Tests**:
+```bash
+NODE_ENV=test pnpm exec playwright test e2e/gov-ngo-subscription-flow.spec.ts
+```
+
 ---
-*Updated 2026-04-30*
+*Updated 2026-05-02*
