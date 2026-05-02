@@ -74,7 +74,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <ThemeToggle />
 
         <!-- Desktop Auth Buttons -->
-        <div class="hidden md:flex items-center gap-2">
+        <div id="desktop-auth" class="hidden md:flex items-center gap-2">
           {isLoggedIn ? (
             <>
               <a href="/account" class="text-sm font-medium text-muted-foreground hover:text-primary">
@@ -149,7 +149,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       >
         FAQ
       </a>
-      <div class="border-t pt-2 mt-2">
+      <div id="mobile-auth" class="border-t pt-2 mt-2">
         {isLoggedIn ? (
           <>
             <a
@@ -219,4 +219,42 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       window.location.href = '/';
     }
   });
+
+  // Update auth state on page load based on localStorage
+  function updateAuthState() {
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    const desktopAuth = document.getElementById('desktop-auth');
+    const mobileAuth = document.getElementById('mobile-auth');
+
+    if (userId) {
+      // User is logged in - show account link, hide login/signup
+      if (desktopAuth) {
+        desktopAuth.innerHTML = `
+          <a href="/account" class="text-sm font-medium text-muted-foreground hover:text-primary">My Account</a>
+          <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">Admin</a>
+        `;
+      }
+      if (mobileAuth) {
+        mobileAuth.innerHTML = `
+          <a href="/account" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">My Account</a>
+          <a href="/admin" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">Admin</a>
+          <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">Log Out</button>
+        `;
+        // Re-attach logout handler
+        document.getElementById('mobile-logout')?.addEventListener('click', async () => {
+          try {
+            await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
+          } catch (e) { console.error('Logout error:', e); }
+          finally {
+            sessionStorage.removeItem('userId');
+            localStorage.removeItem('userId');
+            window.location.href = '/';
+          }
+        });
+      }
+    }
+  }
+
+  // Run on page load
+  updateAuthState();
 </script>

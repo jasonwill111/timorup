@@ -214,9 +214,41 @@ const isFreeType = selectedType === 'government' || selectedType === 'nonprofit'
                   <label for="contactName" class="block text-sm font-medium mb-1">Contact Person</label>
                   <input type="text" id="contactName" name="contactName" class="w-full px-3 py-2 border rounded-lg bg-background" />
                 </div>
-                <div>
-                  <label for="contactNumber" class="block text-sm font-medium mb-1">Phone</label>
-                  <input type="tel" id="contactNumber" name="contactNumber" class="w-full px-3 py-2 border rounded-lg bg-background" placeholder="+670 7x xxx xxx" />
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="countryCode" class="block text-sm font-medium mb-1">Country Code</label>
+                    <select id="countryCode" name="countryCode" class="w-full px-3 py-2 border rounded-lg bg-background">
+                      <option value="+670">+670 Timor-Leste</option>
+                      <option value="+62">+62 Indonesia</option>
+                      <option value="+63">+63 Philippines</option>
+                      <option value="+60">+60 Malaysia</option>
+                      <option value="+65">+65 Singapore</option>
+                      <option value="+61">+61 Australia</option>
+                      <option value="+62">+62 Indonesia</option>
+                      <option value="+351">+351 Portugal</option>
+                      <option value="+1">+1 USA/Canada</option>
+                      <option value="+86">+86 China</option>
+                      <option value="+852">+852 Hong Kong</option>
+                      <option value="+886">+886 Taiwan</option>
+                      <option value="+81">+81 Japan</option>
+                      <option value="+82">+82 South Korea</option>
+                      <option value="+66">+66 Thailand</option>
+                      <option value="+84">+84 Vietnam</option>
+                      <option value="+855">+855 Cambodia</option>
+                      <option value="+95">+95 Myanmar</option>
+                      <option value="+856">+856 Laos</option>
+                      <option value="+673">+673 Brunei</option>
+                      <option value="+225">+225 Ivory Coast</option>
+                      <option value="+228">+228 Togo</option>
+                      <option value="+229">+229 Benin</option>
+                      <option value="+244">+244 Angola</option>
+                      <option value="+245">+245 Guinea-Bissau</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="contactNumber" class="block text-sm font-medium mb-1">Phone Number</label>
+                    <input type="tel" id="contactNumber" name="contactNumber" class="w-full px-3 py-2 border rounded-lg bg-background" placeholder="7x xxx xxx" />
+                  </div>
                 </div>
               </div>
               <div>
@@ -276,12 +308,16 @@ const isFreeType = selectedType === 'government' || selectedType === 'nonprofit'
     if (!form || !entityTypeInput) return;
 
     const formData = new FormData(form);
+    const countryCode = (document.getElementById('countryCode') as HTMLSelectElement)?.value || '+670';
+    const phoneNumber = formData.get('contactNumber') as string;
+    const fullContactNumber = phoneNumber ? `${countryCode} ${phoneNumber}` : '';
+
     const data = {
       entityType: entityTypeInput.value,
       title: formData.get('title'),
       slug: formData.get('slug'),
       contactName: formData.get('contactName'),
-      contactNumber: formData.get('contactNumber'),
+      contactNumber: fullContactNumber,
       email: formData.get('email'),
       address: formData.get('address'),
       publishNow: publish,
