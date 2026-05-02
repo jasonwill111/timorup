@@ -76,14 +76,17 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <!-- Desktop Auth Buttons -->
         <div id="desktop-auth" class="hidden md:flex items-center gap-2">
           {isLoggedIn ? (
-            <>
-              <a href="/account" class="text-sm font-medium text-muted-foreground hover:text-primary">
-                My Account
+            <div class="flex items-center gap-3">
+              <!-- User Avatar with Initial -->
+              <a href="/account" id="user-avatar-link" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div id="user-avatar" class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
+                  <span class="text-white text-sm font-medium">?</span>
+                </div>
               </a>
               <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">
                 Admin
               </a>
-            </>
+            </div>
           ) : (
             <>
               <a href="/login" class="text-sm font-medium text-muted-foreground hover:text-primary">
@@ -223,14 +226,22 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
   // Update auth state on page load based on localStorage
   function updateAuthState() {
     const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
     const desktopAuth = document.getElementById('desktop-auth');
     const mobileAuth = document.getElementById('mobile-auth');
 
+    // Get initial from userName or default to '?'
+    const initial = userName ? userName.charAt(0).toUpperCase() : '?';
+
     if (userId) {
-      // User is logged in - show account link, hide login/signup
+      // User is logged in - show avatar with initial
       if (desktopAuth) {
         desktopAuth.innerHTML = `
-          <a href="/account" class="text-sm font-medium text-muted-foreground hover:text-primary">My Account</a>
+          <a href="/account" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
+              <span class="text-white text-sm font-medium">${initial}</span>
+            </div>
+          </a>
           <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">Admin</a>
         `;
       }

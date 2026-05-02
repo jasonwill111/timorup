@@ -199,9 +199,10 @@ import CardFooter from '../components/ui/CardFooter.astro'
       const data = await res.json();
 
       if (data.success) {
-        // Store userId for Header auth state
+        // Store userId and userName for Header auth state
         if (data.user?.id) {
           localStorage.setItem('userId', data.user.id);
+          localStorage.setItem('userName', data.user.name || '');
         }
         const redirect = sessionStorage.getItem('auth_redirect');
         sessionStorage.removeItem('auth_redirect');

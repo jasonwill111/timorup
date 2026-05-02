@@ -156,6 +156,11 @@ import CardTitle from '../components/ui/CardTitle.astro'
       const data = await res.json();
       
       if (data.success) {
+        // Store userId and userName for Header auth state
+        if (data.user?.id) {
+          localStorage.setItem('userId', data.user.id);
+          localStorage.setItem('userName', data.user.name || '');
+        }
         window.location.href = '/account';
       } else {
         alert(data.error?.message || 'Registration failed');
