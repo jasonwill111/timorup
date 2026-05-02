@@ -77,12 +77,24 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <div id="desktop-auth" class="hidden md:flex items-center gap-2">
           {isLoggedIn ? (
             <div class="flex items-center gap-3">
-              <!-- User Avatar with Initial -->
-              <a href="/account" id="user-avatar-link" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <div id="user-avatar" class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
-                  <span class="text-white text-sm font-medium">?</span>
+              <!-- User Avatar Dropdown -->
+              <div class="relative">
+                <button id="avatar-dropdown-btn" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
+                    <span class="text-white text-sm font-medium">?</span>
+                  </div>
+                </button>
+                <!-- Dropdown Menu -->
+                <div id="avatar-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-background border rounded-lg shadow-lg py-1 z-50">
+                  <a href="/account" class="block px-4 py-2 text-sm hover:bg-muted">
+                    My Account
+                  </a>
+                  <hr class="my-1 border-muted" />
+                  <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-muted">
+                    Log Out
+                  </button>
                 </div>
-              </a>
+              </div>
               <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">
                 Admin
               </a>
@@ -234,16 +246,46 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
     const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
     if (userId) {
-      // User is logged in - show avatar with initial
+      // User is logged in - show avatar dropdown
       if (desktopAuth) {
         desktopAuth.innerHTML = `
-          <a href="/account" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
-              <span class="text-white text-sm font-medium">${initial}</span>
+          <div class="relative">
+            <button id="avatar-dropdown-btn" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
+                <span class="text-white text-sm font-medium">${initial}</span>
+              </div>
+            </button>
+            <div id="avatar-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-background border rounded-lg shadow-lg py-1 z-50">
+              <a href="/account" class="block px-4 py-2 text-sm hover:bg-muted">My Account</a>
+              <hr class="my-1 border-muted" />
+              <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-muted">Log Out</button>
             </div>
-          </a>
+          </div>
           <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">Admin</a>
         `;
+        // Attach dropdown toggle
+        setTimeout(() => {
+          const dropdownBtn = document.getElementById('avatar-dropdown-btn');
+          const dropdown = document.getElementById('avatar-dropdown');
+          dropdownBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown?.classList.toggle('hidden');
+          });
+          // Attach logout handler
+          document.getElementById('logout-btn')?.addEventListener('click', async () => {
+            try { await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' }); }
+            catch (e) { console.error('Logout error:', e); }
+            finally {
+              localStorage.removeItem('userId');
+              localStorage.removeItem('userName');
+              sessionStorage.removeItem('userId');
+              sessionStorage.removeItem('userName');
+              window.location.href = '/';
+            }
+          });
+          // Close on outside click
+          document.addEventListener('click', () => dropdown?.classList.add('hidden'));
+        }, 0);
       }
       if (mobileAuth) {
         mobileAuth.innerHTML = `
