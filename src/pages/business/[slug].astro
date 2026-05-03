@@ -1,14 +1,16 @@
 ---
-// Business detail page with SSR
+// Business detail page with SSR + Server Islands
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Card from '../../components/ui/Card.astro';
-import { Share2, Tag, Clock, MapPin, Star, Heart, Bookmark, Eye, Users, Globe } from '@lucide/astro';
+import ProductsSection from '../../components/islands/ProductsSection.astro';
+import BusinessSidebar from '../../components/islands/BusinessSidebar.astro';
+import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
 import { getDb } from '@/lib/db';
 const db = await getDb();
-import { businessPages, categories, products, reviews, productImages, media } from '@/db/schema';
+import { businessPages, categories, reviews, media } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const { slug } = Astro.params;
@@ -62,24 +64,6 @@ const showExpiredModal = isExpired && daysSinceExpiry < 60;
 const category = business.categoryId
   ? await db.select().from(categories).where(eq(categories.id, business.categoryId)).get()
   : null;
-
-const businessProducts = await db.select()
-  .from(products)
-  .where(eq(products.businessPageId, business.id))
-  .orderBy(desc(products.createdAt))
-  .all();
-
-const productIds = businessProducts.map(p => p.id);
-const imagesMap = new Map<string, string[]>();
-
-if (productIds.length > 0) {
-  const images = await db.select().from(productImages).all();
-  images.filter(img => productIds.includes(img.productId)).forEach(img => {
-    const arr = imagesMap.get(img.productId) || [];
-    arr.push(img.mediaId);
-    imagesMap.set(img.productId, arr);
-  });
-}
 
 const businessReviews = await db.select()
   .from(reviews)
@@ -280,51 +264,8 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
           </Card>
           )}
 
-          <!-- Products & Services -->
-          <Card>
-            <div class="p-3 border-b flex items-center justify-between">
-              <h2 class="text-lg font-semibold">Products & Services</h2>
-              <span class="text-xs text-muted-foreground">{businessProducts.length} items</span>
-            </div>
-
-            {businessProducts.length > 0 ? (
-              <div class="divide-y p-3">
-                {businessProducts.map(product => {
-                  const productImagesList = imagesMap.get(product.id) || [];
-                  const firstImage = productImagesList[0];
-                  return (
-                    <a href={`/business/${slug}/product/${product.id}`} class="group flex items-center gap-4 p-3 hover:bg-muted/30 transition-colors -mx-3">
-                      <div class="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                        {firstImage ? (
-                          <img src={`/api/media/${firstImage}`} alt={product.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        ) : (
-                          <div class="w-full h-full flex items-center justify-center text-xl font-bold text-muted-foreground bg-gradient-to-br from-amber-100 to-amber-200">
-                            {product.title.charAt(0)}
-                          </div>
-                        )}
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <h3 class="font-medium group-hover:text-primary transition-colors line-clamp-1">{product.title}</h3>
-                        {product.description && (
-                          <p class="text-xs text-muted-foreground line-clamp-2 mt-1">{product.description}</p>
-                        )}
-                        <div class="flex items-center gap-3 mt-2">
-                          {product.price && <span class="font-bold text-primary">{product.price}</span>}
-                          {productImagesList.length > 1 && (
-                            <span class="text-[10px] text-muted-foreground">+{productImagesList.length - 1} photos</span>
-                          )}
-                        </div>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            ) : (
-              <div class="p-8 text-center">
-                <p class="text-muted-foreground">No products or services listed yet.</p>
-              </div>
-            )}
-          </Card>
+          <!-- Products & Services - Server Island (dynamic content) -->
+          <ProductsSection server:defer="2min" businessId={business.id} slug={slug ?? ''} />
 
           {/* Reviews section disabled - will enable when data volume increases */}
           {/*

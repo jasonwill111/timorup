@@ -1,0 +1,106 @@
+---
+import Card from '../../components/ui/Card.astro';
+import { MapPin, Tag, Clock } from '@lucide/astro';
+import { getDb } from '@/lib/db';
+import { categories, media } from '@/db/schema';
+import { eq, inArray } from 'drizzle-orm';
+
+interface Props {
+  businessId: string;
+  categoryId: string | null;
+  locationLat: number | null;
+  locationLng: number | null;
+  address: string | null;
+  tags: string[];
+  openingHours: Record<string, any> | null;
+}
+
+const { businessId, categoryId, locationLat, locationLng, address, tags, openingHours } = Astro.props;
+const db = await getDb();
+
+const category = categoryId
+  ? await db.select().from(categories).where(eq(categories.id, categoryId)).get()
+  : null;
+---
+
+<!-- Category -->
+{category && (
+  <Card>
+    <div class="p-3">
+      <span class="text-xs text-muted-foreground">Category</span>
+      <p class="font-medium">{category.name}</p>
+    </div>
+  </Card>
+)}
+
+<!-- Location Map -->
+<Card>
+  <div class="p-3">
+    <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+      <MapPin class="w-4 h-4" />
+      Location
+    </h3>
+    {locationLat && locationLng ? (
+      <>
+        <div class="aspect-video rounded-lg overflow-hidden border mb-2">
+          <img
+            src={`https://static-maps.yandex.ru/1.x/?ll=${locationLng},${locationLat}&z=15&l=map&size=400,200&pt=${locationLng},${locationLat},pm2rdm`}
+            alt="Map"
+            class="w-full h-full object-cover"
+            onerror={`this.src='https://www.openstreetmap.org/export/embed.html?bbox=${(locationLng - 0.01).toFixed(4)},${(locationLat - 0.01).toFixed(4)},${(locationLng + 0.01).toFixed(4)},${(locationLat + 0.01).toFixed(4)}&layer=mapnik&marker=${locationLat},${locationLng}'`}
+          />
+        </div>
+        {address && <p class="text-xs text-muted-foreground mb-2">{address}</p>}
+        <a href={`https://www.openstreetmap.org/?mlat=${locationLat}&mlon=${locationLng}#map=15/${locationLat}/${locationLng}`} target="_blank" class="text-xs text-primary hover:underline">
+          Open in Maps →
+        </a>
+      </>
+    ) : (
+      <p class="text-xs text-muted-foreground italic">Location not available.</p>
+    )}
+  </div>
+</Card>
+
+<!-- Tags -->
+{tags.length > 0 && (
+  <Card>
+    <div class="p-3">
+      <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+        <Tag class="w-4 h-4" />
+        Tags
+      </h3>
+      <div class="flex flex-wrap gap-1.5">
+        {tags.map((tag: string) => (
+          <span class="px-2 py-0.5 text-xs bg-muted rounded-full">{tag}</span>
+        ))}
+      </div>
+    </div>
+  </Card>
+)}
+
+<!-- Hours -->
+<Card>
+  <div class="p-3">
+    <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+      <Clock class="w-4 h-4" />
+      Hours
+    </h3>
+    {openingHours ? (
+      <div class="space-y-1 text-xs">
+        {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
+          const dayData = openingHours[day];
+          const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+          if (dayData?.open === 'closed') {
+            return <div class="flex justify-between"><span>{dayName}</span><span class="text-red-500">Closed</span></div>;
+          }
+          if (dayData?.open && dayData?.close) {
+            return <div class="flex justify-between"><span>{dayName}</span><span>{dayData.open} - {dayData.close}</span></div>;
+          }
+          return null;
+        })}
+      </div>
+    ) : (
+      <p class="text-xs text-muted-foreground italic">Hours not available.</p>
+    )}
+  </div>
+</Card>

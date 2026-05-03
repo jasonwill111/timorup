@@ -12,13 +12,13 @@ binding = "AI"
 # D1 Database binding
 [[d1_databases]]
 binding = "DB"
-database_name = "timorbuy"
-database_id = "xxx-xxx-xxx"  # Replace with actual D1 ID
+database_name = "timorlist-db"
+database_id = "e7e1e025-7ba2-4106-a905-bbcd8038b3e4"
 
-# R2 bucket for media (if using)
-# [[r2_buckets]]
-# binding = "MEDIA_BUCKET"
-# bucket_name = "timorbuy-media"
+# R2 bucket for media
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "timorlist-media"
 
 # KV Namespaces
 [[kv_namespaces]]
