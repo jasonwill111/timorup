@@ -1,0 +1,41 @@
+---
+// Server Island: Static category filter dropdown
+// Categories rarely change - 1h cache
+import { getDb } from '@/lib/db';
+import { categories } from '@/db/schema';
+
+const db = await getDb();
+
+const categoriesData = await db.select({
+  id: categories.id,
+  name: categories.name,
+  slug: categories.slug,
+})
+.from(categories)
+.orderBy(categories.name)
+.limit(50);
+
+const categoryParam = Astro.url.searchParams.get('category') || '';
+---
+
+<div class="flex items-center gap-2">
+  <label for="category-filter" class="text-sm text-muted-foreground whitespace-nowrap">Category:</label>
+  <select
+    id="category-filter"
+    name="category"
+    class="h-10 px-3 rounded-md border border-input bg-background text-sm"
+  >
+    <option value="">All Categories</option>
+    {categoriesData.map((cat: any) => (
+      <option value={cat.slug} selected={cat.slug === categoryParam}>
+        {cat.name}
+      </option>
+    ))}
+  </select>
+</div>
+
+<style>
+  select {
+    min-width: 140px;
+  }
+</style>

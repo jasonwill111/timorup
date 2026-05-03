@@ -1,7 +1,7 @@
 ---
 interface Props {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: 'default' | 'sm' | 'md' | 'lg' | 'xl' | 'icon';
   class?: string;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
@@ -28,9 +28,11 @@ const variants = {
 };
 
 const sizes = {
-  default: 'h-10 px-4 py-2',
-  sm: 'h-9 rounded-md px-3',
-  lg: 'h-11 rounded-md px-8',
+  default: 'h-10 px-4 py-2 rounded-md text-sm font-medium',
+  sm: 'h-9 px-3 rounded-md text-sm',
+  md: 'h-10 px-5 py-2.5 rounded-md text-sm font-medium',
+  lg: 'h-12 px-8 py-3 rounded-md text-base font-semibold',
+  xl: 'h-14 px-10 py-4 rounded-lg text-lg font-semibold',
   icon: 'h-10 w-10',
 };
 ---

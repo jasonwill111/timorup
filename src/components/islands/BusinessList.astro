@@ -1,0 +1,169 @@
+---
+// Server Island: Paginated business list with server-side filtering
+// Cache: 2 minutes
+import { getDb } from '@/lib/db';
+import { businessPages, categories } from '@/db/schema';
+import { eq, desc, asc, sql } from 'drizzle-orm';
+import BusinessCard from '@/components/business/BusinessCard.astro';
+
+const db = await getDb();
+
+// URL params for filtering/pagination
+const searchParams = Astro.url.searchParams;
+const page = Math.max(1, Number(searchParams.get('page') || 1));
+const categorySlug = searchParams.get('category') || '';
+const sortBy = searchParams.get('sort') || 'popular';
+const search = searchParams.get('q') || '';
+const PAGE_SIZE = 24;
+const OFFSET = (page - 1) * PAGE_SIZE;
+
+// Build where conditions
+const conditions = [eq(businessPages.status, 'live')];
+
+// Exclude organizations from main listing
+conditions.push(sql`${businessPages.entityType} != 'organization'`);
+
+// Category filter
+let categoryId: string | null = null;
+if (categorySlug) {
+  const catResult = await db.select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.slug, categorySlug))
+    .limit(1);
+  if (catResult.length > 0) {
+    categoryId = catResult[0].id;
+    conditions.push(eq(businessPages.categoryId, categoryId));
+  }
+}
+
+// Search filter
+if (search) {
+  conditions.push(
+    sql`(${businessPages.title} LIKE ${'%' + search + '%'})`
+  );
+}
+
+// Fetch businesses with pagination
+let orderBy;
+switch (sortBy) {
+  case 'recent':
+    orderBy = desc(businessPages.createdAt);
+    break;
+  case 'name':
+    orderBy = asc(businessPages.title);
+    break;
+  default: // popular
+    orderBy = desc(businessPages.likes);
+}
+
+const businessesResult = await db.select({
+  id: businessPages.id,
+  title: businessPages.title,
+  slug: businessPages.slug,
+  tags: businessPages.tags,
+  likes: businessPages.likes,
+  saves: businessPages.saves,
+  address: businessPages.address,
+  categoryId: businessPages.categoryId,
+  entityType: businessPages.entityType,
+  profileImageId: businessPages.profileImageId,
+})
+.from(businessPages)
+.where(eq(businessPages.status, 'live'))
+.orderBy(orderBy)
+.limit(PAGE_SIZE)
+.offset(OFFSET);
+
+// Count total
+const countResult = await db.select({ count: sql`count(*)` })
+  .from(businessPages)
+  .where(eq(businessPages.status, 'live'));
+
+const totalCount = Number(countResult[0]?.count) || 0;
+const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+// Build category map for display
+const categoryIds = [...new Set(businessesResult.map(b => b.categoryId).filter(Boolean))];
+const cats = categoryIds.length > 0
+  ? await db.select({ id: categories.id, name: categories.name }).from(categories)
+  : [];
+const categoryMap: Record<string, string> = {};
+cats.forEach(c => { categoryMap[c.id] = c.name; });
+
+// Map businesses for display
+const businesses = businessesResult.map(b => ({
+  id: b.id,
+  title: b.title,
+  slug: b.slug,
+  category: categoryMap[b.categoryId || ''] || 'Business',
+  rating: 0,
+  reviews: 0,
+  likes: b.likes || 0,
+  location: b.address?.split(',')[0] || 'Dili',
+  tags: b.tags ? JSON.parse(b.tags) : [],
+  thumbnail: b.profileImageId ? `/api/media/${b.profileImageId}` : null,
+}));
+---
+
+<!-- Results count -->
+<div class="mb-4 text-sm text-muted-foreground">
+  Showing {businesses.length > 0 ? OFFSET + 1 : 0}-{Math.min(OFFSET + businesses.length, totalCount)} of {totalCount} businesses
+</div>
+
+<!-- Businesses Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4" id="businesses-grid">
+  {businesses.length > 0 ? businesses.map((business: any) => (
+    <BusinessCard
+      title={business.title}
+      slug={business.slug}
+      category={business.category}
+      thumbnail={business.thumbnail}
+      rating={business.rating}
+      likes={business.likes}
+      reviews={business.reviews}
+      location={business.location}
+      tag={business.tags?.[0]}
+      type={business.entityType}
+    />
+  )) : (
+    <div class="col-span-full text-center py-12">
+      <p class="text-lg text-muted-foreground">No businesses found</p>
+      <p class="text-sm text-muted-foreground mt-1">
+        {categorySlug ? 'Try a different category.' : 'Be the first to add your business!'}
+      </p>
+    </div>
+  )}
+</div>
+
+<!-- Pagination -->
+{totalPages > 1 && (
+  <nav class="flex justify-center gap-2 mt-8" aria-label="Pagination">
+    {page > 1 && (
+      <a
+        href={`/businesses?page=${page - 1}&category=${categorySlug}&sort=${sortBy}`}
+        class="px-3 py-2 rounded-md border hover:bg-muted transition-colors"
+      >
+        Previous
+      </a>
+    )}
+    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+      const pageNum = i + 1;
+      return (
+        <a
+          href={`/businesses?page=${pageNum}&category=${categorySlug}&sort=${sortBy}`}
+          class={`px-3 py-2 rounded-md border ${pageNum === page ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+        >
+          {pageNum}
+        </a>
+      );
+    })}
+    {page < totalPages && (
+      <a
+        href={`/businesses?page=${page + 1}&category=${categorySlug}&sort=${sortBy}`}
+        class="px-3 py-2 rounded-md border hover:bg-muted transition-colors"
+      >
+        Next
+      </a>
+    )}
+  </nav>
+)}

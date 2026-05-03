@@ -88,9 +88,18 @@ const websiteSchema = {
 <html lang="en" suppressHydrationWarning>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- Inline theme script - prevents flash of wrong theme -->
+    <!-- Preload critical fonts for LCP improvement -->
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Oswald-Bold.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Preconnect to external resources (reduce DNS/connection time) -->
+    <link rel="preconnect" href="https://timorlist-media.r2.cloudflarestorage.com" crossorigin />
+    <link rel="dns-prefetch" href="https://timorlist-media.r2.cloudflarestorage.com" />
+
+    <!-- Inline theme script - prevents flash of wrong theme (must be blocking for FOUC prevention) -->
     <script is:inline>
       const getThemePreference = () => {
         if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
@@ -151,6 +160,10 @@ const websiteSchema = {
     <!-- Theme Color -->
     <meta name="theme-color" content="#FFD150" />
 
+    <!-- Performance hints -->
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
+
+    <!-- Accessibility: lang attribute on html -->
     <!-- Language Variants for SEO -->
     <link rel="alternate" hreflang="en" href={canonicalUrl} />
     <link rel="alternate" hreflang="pt" href={`${canonicalUrl.replace(siteUrl, 'https://pt.timbiz.com')}`} />
