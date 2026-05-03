@@ -1,10 +1,11 @@
 {
   "id": "0023-server-islands-seo-optimization",
-  "status": "planned",
+  "status": "completed",
   "type": "feature",
   "priority": "P1",
   "created": "2026-05-03T04:09:54.140Z",
-  "lastActivity": "2026-05-03T04:09:54.140Z",
+  "completed": "2026-05-03T12:16:00.000Z",
+  "lastActivity": "2026-05-03T12:16:00.000Z",
   "testMode": "TDD",
   "coverageTarget": 80,
   "feature_id": null,
@@ -13,5 +14,11 @@
   "planning": {
     "parallel": false
   },
-  "project": "timorlist"
+  "project": "timorlist",
+  "score": 90,
+  "changes": [
+    "src/components/islands/ProductsSection.astro",
+    "src/components/islands/BusinessSidebar.astro",
+    "src/pages/business/[slug].astro"
+  ]
 }

@@ -1,70 +1,43 @@
 # Implementation Plan: Server Islands + SEO Optimization
 
-<!--
-====================================================================
-  TEMPLATE FILE - MUST BE COMPLETED VIA ARCHITECT SKILL
-====================================================================
-
-This is a TEMPLATE created by increment skill.
-DO NOT manually fill in the placeholders below.
-
-To complete this plan, run:
-  Tell Claude: "Design architecture for increment [ID]"
-
-This will activate the Architect skill which will:
-- Create system architecture diagrams
-- Define data models and API contracts
-- Document architecture decisions (ADRs)
-- Identify technical challenges
-
-====================================================================
--->
-
 ## Overview
 
-[Technical summary of implementation approach]
+Use Astro Server Islands to separate static/business content from dynamic product listings, enabling independent caching.
 
 ## Architecture
 
 ### Components
-- [Component 1]: [Purpose]
-- [Component 2]: [Purpose]
+- `ProductsSection.astro`: Server Island with 2min refresh for product list
+- `BusinessSidebar.astro`: Reusable sidebar (map, tags, hours)
+- `business/[slug].astro`: Main page using SSR + Server Islands
 
-### Data Model
-- [Entity 1]: [Fields, relationships]
-- [Entity 2]: [Fields, relationships]
+### Data Flow
+```
+Request → Cloudflare CDN (check cache)
+  ├── HIT → Return cached HTML
+  └── MISS → Render page
+              ├── Static parts → Cached 5min
+              └── Server Islands → Fetch fresh data → Cached 2min
+```
 
-### API Contracts
-- `POST /api/resource`: [Purpose, request/response]
-- `GET /api/resource/:id`: [Purpose, request/response]
+## CDN Cache Strategy
 
-## Technology Stack
-
-- **Language/Framework**: [Choice]
-- **Libraries**: [List]
-- **Tools**: [List]
-
-**Architecture Decisions**:
-- [Decision 1]: [Why this choice? Alternatives considered?]
-- [Decision 2]: [Rationale]
-
-## Implementation Phases
-
-### Phase 1: Foundation
-- [Setup, infrastructure, base components]
-
-### Phase 2: Core Functionality
-- [Primary features from P1 user stories]
-
-### Phase 3: Enhancement
-- [P2 features and optimizations]
+| Path | Cache-Control | Reason |
+|------|--------------|--------|
+| `/` | 5min + 1h stale | Matches server island refresh |
+| `/business/:slug` | 5min + 1h stale | Business data relatively stable |
+| `/listing` | 2min + 10min stale | Search results more dynamic |
+| `/faq`, `/pricing` | 1h + 1h stale | Static content |
 
 ## Testing Strategy
 
-[High-level testing approach - details in tasks.md]
+- Unit: Component rendering
+- Integration: API endpoints
+- E2E: Critical user flows
+- Build: `pnpm build` must pass
 
 ## Technical Challenges
 
-### Challenge 1: [Description]
-**Solution**: [Approach]
-**Risk**: [Mitigation]
+### Challenge 1: Server Island hydration
+**Solution**: Use `server:defer="2min"` directive
+**Risk**: Low — Astro 6 native feature
