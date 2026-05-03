@@ -1,5 +1,6 @@
 // Database schema for timorlist
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm/relations';
 import { sql } from 'drizzle-orm';
 
 // Re-export auth tables explicitly
@@ -317,6 +318,26 @@ export const savedItems = sqliteTable('saved_items', {
 }, (savedItems) => ({
   userIdx: index('saved_items_user_idx').on(savedItems.userId),
   itemIdx: index('saved_items_item_idx').on(savedItems.itemId),
+}));
+
+// Relations for better-auth (required for join queries)
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
 }));
 
 // Export type definitions

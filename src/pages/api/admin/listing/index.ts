@@ -9,7 +9,7 @@ import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 const createSchema = z.object({
   entityType: z.enum(['business', 'government', 'nonprofit']),
-  title: z.string().min(1),
+  title: z.string().min(1, { error: 'Title is required' }),
   slug: z.string().optional(),
   categoryId: z.string().optional(),
   industry: z.string().optional(),

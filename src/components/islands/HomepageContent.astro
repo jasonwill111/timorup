@@ -8,13 +8,40 @@ import { parseIcon, DEFAULT_CATEGORY_ICONS, getLucideIconPath } from '@/lib/icon
 import BusinessCard from '@/components/business/BusinessCard.astro';
 import ProductCard from '@/components/business/ProductCard.astro';
 
+// Define types for better TypeScript safety
+type CategoryData = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+};
+
+type BusinessListing = {
+  id: string;
+  title: string;
+  slug: string;
+  tags: string[];
+  likes: number;
+  status: string;
+  categoryId: string | null;
+  entityType: string;
+  profileImageId: string | null;
+  category: string;
+  rating: number;
+  reviews: number;
+  imageUrl: string;
+  entityTypeDisplay: string;
+  isNew: boolean;
+};
+
 const db = await getDb();
 
-let featuredBusinesses: any[] = [];
-let featuredGovs: any[] = [];
-let featuredNgos: any[] = [];
-let featuredProducts: any[] = [];
-let categoriesData: any[] = [];
+let featuredBusinesses: BusinessListing[] = [];
+let featuredGovs: BusinessListing[] = [];
+let featuredNgos: BusinessListing[] = [];
+let featuredProducts: unknown[] = [];
+let categoriesData: CategoryData[] = [];
 
 try {
   const categoriesResult = await db.select({

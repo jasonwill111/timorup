@@ -292,10 +292,11 @@ export async function cleanupTestData(page: Page) {
 
 /**
  * Login as test user
+ * Uses seeded user from seed.ts - password: TestPassword123!
  */
 export async function loginAsUser(page: Page, email?: string, password?: string) {
   await page.goto('/login');
-  await page.fill('input[name="email"]', email || 'test@example.com');
+  await page.fill('input[name="email"]', email || 'joao.silva@cafetimor.tl');
   await page.fill('input[name="password"]', password || 'TestPassword123!');
   await page.click('button[type="submit"]');
   await page.waitForURL('/dashboard');
@@ -303,11 +304,12 @@ export async function loginAsUser(page: Page, email?: string, password?: string)
 
 /**
  * Login as admin
+ * Uses seeded admin user from seed.ts - email: admin@timorlist.tl, password: TestPassword123!
  */
 export async function loginAsAdmin(page: Page) {
   await page.goto('/admin/login');
-  await page.fill('input[name="email"]', 'admin@example.com');
-  await page.fill('input[name="password"]', 'admin123');
+  await page.fill('input[name="email"]', 'admin@timorlist.tl');
+  await page.fill('input[name="password"]', 'TestPassword123!');
   await page.click('button[type="submit"]');
   
   // Wait for navigation to complete (the page will redirect to /admin on success)

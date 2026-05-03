@@ -582,7 +582,13 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
 
     currentIdx = (idx + total) % total;
     const img = imgs[currentIdx] as HTMLImageElement;
-    content.innerHTML = `<img src="${img.src}" alt="${img.alt}" class="max-w-full max-h-[85vh] object-contain rounded-lg" />`;
+    // Use DOM APIs instead of innerHTML to prevent XSS
+    content.textContent = '';
+    const imgEl = document.createElement('img');
+    imgEl.src = img.src;
+    imgEl.alt = img.alt || '';
+    imgEl.className = 'max-w-full max-h-[85vh] object-contain rounded-lg';
+    content.appendChild(imgEl);
     counter.textContent = `${currentIdx + 1} / ${total}`;
   }
 

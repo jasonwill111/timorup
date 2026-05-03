@@ -16,6 +16,9 @@ const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
 
 // Factory function to create auth instance with given db
 export function createAuth(db: any) {
+  console.log('[Auth] Creating auth instance with db:', !!db);
+  console.log('[Auth] Schema keys:', Object.keys({ user: users, session: sessions, account: accounts, verification: verifications }));
+
   return betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:4321',
 
@@ -27,6 +30,8 @@ export function createAuth(db: any) {
         account: accounts,
         verification: verifications,
       },
+    }, {
+      debug: process.env.NODE_ENV === 'development', // Enable debug only in development
     }),
 
     // Email and password authentication
@@ -68,7 +73,9 @@ export function createAuth(db: any) {
     // Trusted origins
     trustedOrigins: [
       'http://localhost:8788',
+      'http://localhost:8787',
       'http://localhost:4321',
+      'http://localhost:4322',
       process.env.APP_URL || '',
     ].filter(Boolean),
 
@@ -112,6 +119,6 @@ export const oauthStatus = {
   facebook: isFacebookConfigured,
 };
 
-// Export types
-export type Session = Awaited<ReturnType<typeof getAuth>>.$Infer.Session.session;
-export type User = Awaited<ReturnType<typeof getAuth>>.$Infer.Session.user;
+// Export types (using a different approach to avoid >> parsing issues)
+import type { BetterAuthInstance } from 'better-auth';
+export type { BetterAuthInstance as AuthInstance };

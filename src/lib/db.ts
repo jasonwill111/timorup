@@ -2,6 +2,8 @@
 // Supports both Workers runtime and local development
 
 import { drizzle } from 'drizzle-orm/d1';
+import { drizzle as drizzleLocal } from 'drizzle-orm/better-sqlite3';
+import SQLite from 'better-sqlite3';
 import * as schema from '@/db/schema';
 
 // Check if running in Cloudflare Workers runtime
@@ -30,9 +32,15 @@ export async function getDb() {
     }
   }
 
-  // 3. Local development: use middleware-injected binding
-  // The middleware sets context.locals.db in both Workers and local dev
-  throw new Error('D1 not available. Ensure middleware is properly configured.');
+  // 3. Local development: use local SQLite file
+  const localDbPath = process.env.LOCAL_DB_PATH || './.wrangler/state/v3/d1/timorlist-db.sqlite';
+  try {
+    const sqlite = new SQLite(localDbPath);
+    return drizzleLocal(sqlite, { schema });
+  } catch (e) {
+    console.error('[getDb] Local DB not available:', e);
+    throw new Error('D1 not available. Ensure middleware is properly configured.');
+  }
 }
 
 // Legacy sync export - DO NOT USE

@@ -28,7 +28,7 @@ export default defineConfig({
     defaultBundler: 'astro',
   },
 
-  compressHTML: 'jsx',
+  // compressHTML: 'jsx', // ⚠️暂禁用，CI环境schema验证问题
 
   server: {
     allowedHosts: ['timorlist.com', 'www.timorlist.com', 'localhost', '127.0.0.1'],

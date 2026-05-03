@@ -116,3 +116,4 @@ plugins/
 !.specweave/config.json
 !.specweave/docs/
 .gstack/
+.gitnexus

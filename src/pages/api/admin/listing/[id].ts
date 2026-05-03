@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 const updateSchema = z.object({
-  title: z.string().min(1).optional(),
+  title: z.string().min(1, { error: 'Title is required' }).optional(),
   slug: z.string().optional(),
   categoryId: z.string().optional().nullable(),
   industry: z.string().optional().nullable(),

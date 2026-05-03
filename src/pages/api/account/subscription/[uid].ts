@@ -19,7 +19,7 @@ function getClientIP(request: Request): string {
 }
 
 const ParamsSchema = z.object({
-  uid: z.string().min(1),
+  uid: z.string().min(1, { error: 'User ID is required' }),
 });
 
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {

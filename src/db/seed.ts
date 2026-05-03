@@ -1,13 +1,26 @@
 // Comprehensive seed script for TimorLIST
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+// Use better-sqlite3 directly (same as getDb() for local dev)
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import SQLite from 'better-sqlite3';
+import { scrypt, randomBytes } from 'node:crypto';
 import * as schema from './schema';
 
-const client = createClient({
-  url: 'file:local.db',
-});
+// better-auth uses scrypt with these exact parameters
+async function hashPassword(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const salt = randomBytes(16);  // 16 bytes -> 32 hex chars
+    // N=16384, r=16, p=1, dkLen=64 (matches @noble/hashes default)
+    scrypt(password.normalize('NFKC'), salt, 64, { N: 16384, r: 16, p: 1, maxmem: 128 * 1024 * 1024 }, (err, derivedKey) => {
+      if (err) reject(err);
+      else resolve(`${salt.toString('hex')}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
 
-const db = drizzle(client, { schema });
+// Use the same DB path as getDb() in src/lib/db.ts
+const localDbPath = process.env.LOCAL_DB_PATH || './.wrangler/state/v3/d1/timorlist-db.sqlite';
+const sqlite = new SQLite(localDbPath);
+const db = drizzle(sqlite, { schema });
 
 // ========================
 // CATEGORIES
@@ -40,6 +53,21 @@ const users = [
   { id: 'user-7', email: 'ana@phoneshop.tl', name: 'Ana Martins', role: 'user', phone: '+6707703333' },
   { id: 'user-8', email: 'jose@tourstimetor.tl', name: 'José Sousa', role: 'user', phone: '+6707704444' },
 ];
+
+// ========================
+// ACCOUNTS (for better-auth password login)
+// ========================
+// Password hash for all test users - scrypt (same as better-auth)
+const TEST_PASSWORD = 'TestPassword123!';
+let accountsData: Array<{
+  id: string;
+  accountId: string;
+  providerId: string;
+  userId: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}> = [];
 
 // ========================
 // BUSINESSES (Regular businesses)
@@ -1199,10 +1227,35 @@ async function seed() {
     await db.insert(schema.categories).values(categories);
   }
 
+  // Delete existing accounts first
+  await db.delete(schema.accounts);
+
   // Batch insert users
   console.log('👤 Inserting users...');
   if (users.length > 0) {
     await db.insert(schema.users).values(users);
+  }
+
+  // Hash password and create accounts (required for better-auth password login)
+  console.log('🔐 Creating account credentials (using scrypt)...');
+  const passwordHash = await hashPassword(TEST_PASSWORD);
+  console.log(`🔐 Password hash generated: ${passwordHash.substring(0, 40)}...`);
+  const now = new Date();  // Date object for drizzle timestamp mode
+
+  accountsData = users.map((user, i) => ({
+    id: `acc-${i + 1}`,
+    accountId: user.id,
+    providerId: 'credential',  // Email/password provider
+    userId: user.id,
+    password: passwordHash,
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  // Batch insert accounts
+  console.log('🔑 Inserting accounts...');
+  if (accountsData.length > 0) {
+    await db.insert(schema.accounts).values(accountsData);
   }
 
   // Batch insert businesses
@@ -1234,6 +1287,7 @@ async function seed() {
   console.log('📊 Summary:');
   console.log(`   - ${categories.length} categories`);
   console.log(`   - ${users.length} users`);
+  console.log(`   - ${accountsData.length} accounts (password: ${TEST_PASSWORD})`);
   console.log(`   - ${businesses.length} businesses`);
   console.log(`   - ${organizations.length} organizations`);
   console.log(`   - ${products.length} products/SKUs`);
