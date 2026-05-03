@@ -4,7 +4,7 @@ feature: FS-016
 title: "Featured Businesses Display"
 status: not_started
 priority: P1
-created: 2026-05-01
+created: 2026-05-02
 tldr: "As a visitor, I want to see featured businesses on the homepage so I can discover popular local businesses quickly."
 project: timorlist
 ---

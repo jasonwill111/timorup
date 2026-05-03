@@ -4,7 +4,7 @@ feature: FS-012
 title: "Consistent Admin Styling"
 status: completed
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As an** admin user **I want** all admin pages to have consistent visual styling **So that** the admin dashboard feels cohesive and professional."
 project: timorlist
 ---

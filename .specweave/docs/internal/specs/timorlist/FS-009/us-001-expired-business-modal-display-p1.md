@@ -4,7 +4,7 @@ feature: FS-009
 title: "Expired Business Modal Display (P1)"
 status: completed
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As a** a visitor viewing an expired business page."
 project: timorlist
 ---

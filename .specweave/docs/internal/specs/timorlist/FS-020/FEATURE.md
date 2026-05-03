@@ -5,7 +5,7 @@ type: feature
 status: planned
 priority: P2
 created: 2026-04-30
-lastUpdated: 2026-05-01
+lastUpdated: 2026-05-02
 tldr: "Business owners can reply to reviews (edit/delete their reply)."
 complexity: medium
 stakeholder_relevant: true

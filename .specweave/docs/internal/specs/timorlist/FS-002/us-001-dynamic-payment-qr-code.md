@@ -4,7 +4,7 @@ feature: FS-002
 title: "Dynamic Payment QR Code"
 status: completed
 priority: P1
-created: 2026-03-23T00:00:00.000Z
+created: "2026-03-23T00:00:00.000Z"
 tldr: "**As a** business owner visiting the subscribe page."
 project: timorlist
 ---

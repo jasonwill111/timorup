@@ -4,7 +4,7 @@ feature: FS-012
 title: "Mobile Sidebar UX"
 status: completed
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As an** admin user on mobile **I want** the sidebar menu to be easily accessible and dismissible **So that** I can navigate the admin panel comfortably on my phone."
 project: timorlist
 ---

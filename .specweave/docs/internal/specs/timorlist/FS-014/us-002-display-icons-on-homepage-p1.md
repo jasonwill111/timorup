@@ -4,7 +4,7 @@ feature: FS-014
 title: "Display Icons on Homepage (P1)"
 status: completed
 priority: P1
-created: 2026-04-22T00:00:00.000Z
+created: "2026-04-22T00:00:00.000Z"
 tldr: "**As a** visitor."
 project: timorlist
 ---

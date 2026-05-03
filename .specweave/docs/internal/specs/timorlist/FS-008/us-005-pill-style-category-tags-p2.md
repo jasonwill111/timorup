@@ -4,7 +4,7 @@ feature: FS-008
 title: "Pill-Style Category Tags (P2)"
 status: not_started
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As a** a user filtering businesses."
 project: timorlist
 ---

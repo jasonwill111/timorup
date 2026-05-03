@@ -4,7 +4,7 @@ title: "UI Components Migration - Pure Astro"
 type: feature
 status: completed
 priority: P1
-created: 2026-04-18T00:00:00.000Z
+created: "2026-04-18T00:00:00.000Z"
 lastUpdated: 2026-05-01
 tldr: "Migrate all React/shadcn UI components to pure Astro `.astro` files."
 complexity: high

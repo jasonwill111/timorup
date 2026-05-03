@@ -4,7 +4,7 @@ feature: FS-008
 title: "Unified Typography (P2)"
 status: not_started
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As a** user reading content."
 project: timorlist
 ---

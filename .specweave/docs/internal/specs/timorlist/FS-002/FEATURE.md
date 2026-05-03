@@ -4,7 +4,7 @@ title: "P0 合规修复：动态支付二维码 + Nominatim 地址解析"
 type: feature
 status: completed
 priority: P1
-created: 2026-03-23T00:00:00.000Z
+created: "2026-03-23T00:00:00.000Z"
 lastUpdated: 2026-04-23
 tldr: "修复 G-02 和 G-03 两个 P0 合规问题。两者都是面向用户的前端增强加后端 API 改动。."
 complexity: medium

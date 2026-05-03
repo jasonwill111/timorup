@@ -4,8 +4,8 @@ title: "Category Icons Sync"
 type: feature
 status: completed
 priority: P1
-created: 2026-04-22T00:00:00.000Z
-lastUpdated: 2026-05-01
+created: "2026-04-22T00:00:00.000Z"
+lastUpdated: 2026-05-02
 tldr: "为分类页面添加图标系统，支持 emoji 和 Lucide icons，管理后台可编辑。统一图标数据源，移除硬编码。."
 complexity: high
 stakeholder_relevant: true

@@ -20,6 +20,25 @@ The lib module contains 15 files with approximately 1,400 lines of code.
 | `constants.ts` | Service types, specs, price units |
 | `utils.ts` | Helper functions |
 
+## ⚠️ CRITICAL: better-auth Password Hashing
+
+**better-auth uses `@noble/hashes/scrypt`** — NOT Node.js `crypto.scrypt`.
+
+| 实现 | 输出 | 用途 |
+|------|------|------|
+| `@noble/hashes/scrypt` | 64字节 (128 hex) | better-auth 内部 |
+| `Node.js crypto.scrypt` | 128字节 (256 hex) | ❌ 不兼容 |
+
+### Seed 脚本正确示例
+
+```javascript
+// seed-wrangler.cjs — 使用 better-auth 密码模块
+const { hashPassword } = require('./node_modules/.pnpm/@better-auth+utils@0.4.0/node_modules/@better-auth/utils/dist/password.node.cjs');
+
+const hash = await hashPassword('TestPassword123!');
+db.prepare('INSERT INTO accounts ...').run(..., hash, now, now);
+```
+
 ## Core Constants
 
 ```typescript

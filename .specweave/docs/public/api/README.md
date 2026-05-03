@@ -11,6 +11,39 @@ Local:      http://localhost:8787
 
 Most endpoints require authentication via better-auth session cookie.
 
+### Auth Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/sign-in` | Credential login |
+| POST | `/api/auth/sign-out` | Logout |
+| GET | `/api/auth/session` | Get current session |
+
+### Request Example
+
+```bash
+curl -X POST http://localhost:8787/api/auth/sign-in \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@timorlist.test","password":"TestPassword123!"}'
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "user": { "id": "...", "email": "...", "name": "..." }
+}
+```
+
+### Error Response
+
+```json
+{
+  "error": { "code": "SIGN_IN_ERROR", "message": "Invalid email or password" }
+}
+```
+
 ## Key Endpoints
 
 ### Products

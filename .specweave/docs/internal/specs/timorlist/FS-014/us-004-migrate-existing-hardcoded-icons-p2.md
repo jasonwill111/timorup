@@ -4,7 +4,7 @@ feature: FS-014
 title: "Migrate Existing Hardcoded Icons (P2)"
 status: completed
 priority: P1
-created: 2026-04-22T00:00:00.000Z
+created: "2026-04-22T00:00:00.000Z"
 tldr: "**As a** system."
 project: timorlist
 ---

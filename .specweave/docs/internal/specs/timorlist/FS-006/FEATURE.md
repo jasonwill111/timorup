@@ -4,7 +4,7 @@ title: "API Endpoint Review & Best Practice Optimization"
 type: feature
 status: completed
 priority: P1
-created: 2026-04-18T00:00:00.000Z
+created: "2026-04-18T00:00:00.000Z"
 lastUpdated: 2026-05-01
 tldr: "Review all frontend/backend API endpoints across `src/pages/api/` and `src/server/routes/`, apply latest version best practices (Astro 6, Hono 4.12, better-auth 1.5.3, Dri."
 complexity: high

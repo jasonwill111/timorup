@@ -4,7 +4,7 @@ feature: FS-013
 title: "Business Profile Enhancement"
 status: not_started
 priority: P1
-created: 2026-05-01
+created: 2026-05-02
 tldr: "As a business owner, I want to display my establishment year, social media links, and photo gallery so customers can verify my credibility and see my business visually."
 project: timorlist
 ---

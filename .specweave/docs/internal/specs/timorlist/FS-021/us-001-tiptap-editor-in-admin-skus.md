@@ -4,7 +4,7 @@ feature: FS-021
 title: "TipTap Editor in Admin SKUs"
 status: completed
 priority: P2
-created: 2026-04-30T00:00:00.000Z
+created: "2026-04-30T00:00:00.000Z"
 tldr: "**As an** admin **I want** to use a rich text editor for SKU descriptions **So that** I can create better formatted product descriptions."
 project: timorlist
 ---

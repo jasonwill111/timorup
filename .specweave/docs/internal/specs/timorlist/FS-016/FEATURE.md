@@ -4,8 +4,8 @@ title: "Homepage Featured Sections - Specification"
 type: feature
 status: completed
 priority: P1
-created: 2026-05-01
-lastUpdated: 2026-05-01
+created: 2026-05-02
+lastUpdated: 2026-05-02
 tldr: "Homepage Featured Sections - Specification"
 complexity: medium
 stakeholder_relevant: true
@@ -25,7 +25,7 @@ stakeholder_relevant: true
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0016-homepage-featured-sections](../../../../../increments/0016-homepage-featured-sections/spec.md) | ✅ completed | 2026-05-01 |
+| [0016-homepage-featured-sections](../../../../../increments/0016-homepage-featured-sections/spec.md) | ✅ completed | 2026-05-02 |
 
 ## User Stories
 

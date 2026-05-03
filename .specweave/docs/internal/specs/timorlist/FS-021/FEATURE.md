@@ -4,8 +4,8 @@ title: "Admin SKUs TipTap Editor"
 type: feature
 status: completed
 priority: P2
-created: 2026-04-30T00:00:00.000Z
-lastUpdated: 2026-05-01
+created: "2026-04-30T00:00:00.000Z"
+lastUpdated: 2026-05-02
 tldr: "Admin SKUs description字段使用TipTap富文本编辑器替换plain textarea，支持加粗、斜体、列表等格式化."
 complexity: low
 stakeholder_relevant: true

@@ -5,7 +5,7 @@ type: feature
 status: planning
 priority: P2
 created: 2026-04-30
-lastUpdated: 2026-05-01
+lastUpdated: 2026-05-02
 tldr: "Fix QA CONCERNS flagged by quality gate on increments 0015 and 0001:."
 complexity: medium
 stakeholder_relevant: true

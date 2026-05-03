@@ -4,7 +4,7 @@ feature: FS-004
 title: "Migrate Display Components"
 status: not_started
 priority: P1
-created: 2026-04-18T00:00:00.000Z
+created: "2026-04-18T00:00:00.000Z"
 tldr: "**As a** developer."
 project: timorlist
 ---

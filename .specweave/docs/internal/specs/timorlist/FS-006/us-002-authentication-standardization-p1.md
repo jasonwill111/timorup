@@ -4,7 +4,7 @@ feature: FS-006
 title: "Authentication Standardization (P1)"
 status: completed
 priority: P1
-created: 2026-04-18T00:00:00.000Z
+created: "2026-04-18T00:00:00.000Z"
 tldr: "**As a** developer."
 project: timorlist
 ---

@@ -104,3 +104,20 @@ await page.context().addCookies([{
 
 ---
 *Updated 2026-05-02*
+
+## ⚠️ Seed Test Accounts (wrangler dev)
+
+**Problem**: better-auth uses `@noble/hashes/scrypt` (64-byte output), not Node.js `crypto.scrypt` (128-byte output).
+
+**Solution**: Use better-auth's password module in seed scripts:
+
+```javascript
+// seed-wrangler.cjs
+const { hashPassword } = require('./node_modules/.pnpm/@better-auth+utils@0.4.0/node_modules/@better-auth/utils/dist/password.node.cjs');
+const hash = await hashPassword('TestPassword123!');
+```
+
+**Run seed**:
+```bash
+cd /home/jasonwill/dev-projects/timorlist && node seed-wrangler.cjs
+```

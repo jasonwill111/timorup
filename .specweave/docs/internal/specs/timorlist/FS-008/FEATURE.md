@@ -4,7 +4,7 @@ title: "UI Color & Layout Refresh"
 type: feature
 status: completed
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 lastUpdated: 2026-05-01
 tldr: "Unified UI styling across frontend and backend based on design reference screenshots - dark theme, golden yellow primary (#FFD700), enhanced cards, improved search, pill-style tags, admin sidebar."
 complexity: high

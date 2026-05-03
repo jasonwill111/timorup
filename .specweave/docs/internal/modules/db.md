@@ -57,6 +57,16 @@ active: boolean
 
 **Local DB Path**: `./.wrangler/state/v3/d1/timorlist-db.sqlite`
 
+### ⚠️ wrangler dev 使用独立数据库
+
+`wrangler dev` 启动的 workerd 运行时使用不同的本地数据库：
+
+```
+./.wrangler/state/v3/d1/miniflare-D1DatabaseObject/{hash}.sqlite
+```
+
+**seed-wrangler.cjs** 脚本用于更新 wrangler dev 的数据库。
+
 ## Analysis Summary
 
 - **Source Files**: 10

@@ -4,7 +4,7 @@ feature: FS-010
 title: "Admin Image Upload (P1)"
 status: completed
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As an** admin managing categories."
 project: timorlist
 ---

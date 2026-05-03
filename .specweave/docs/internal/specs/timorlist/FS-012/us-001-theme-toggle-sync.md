@@ -4,7 +4,7 @@ feature: FS-012
 title: "Theme Toggle Sync"
 status: completed
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As an** admin user **I want** the theme to remain consistent between sidebar and content area **So that** I have a cohesive experience regardless of which toggle I use."
 project: timorlist
 ---

@@ -4,7 +4,7 @@ feature: FS-002
 title: "Nominatim Address Auto-Parse"
 status: completed
 priority: P1
-created: 2026-03-23T00:00:00.000Z
+created: "2026-03-23T00:00:00.000Z"
 tldr: "**As a** business owner creating or editing my business page."
 project: timorlist
 ---

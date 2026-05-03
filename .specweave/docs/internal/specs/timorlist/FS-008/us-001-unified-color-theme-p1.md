@@ -4,7 +4,7 @@ feature: FS-008
 title: "Unified Color Theme (P1)"
 status: not_started
 priority: P1
-created: 2026-04-19T00:00:00.000Z
+created: "2026-04-19T00:00:00.000Z"
 tldr: "**As a** a business owner or visitor."
 project: timorlist
 ---
