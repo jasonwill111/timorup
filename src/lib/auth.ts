@@ -1,5 +1,6 @@
 // Better Auth Configuration - Environment Aware
-import { betterAuth, BetterAuthInstance } from 'better-auth';
+import { betterAuth } from 'better-auth';
+import type { BetterAuthInstance } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { getDb } from './db';
 import { users, sessions, accounts, verifications } from '@/db/schema';
@@ -16,11 +17,12 @@ const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
 
 // Factory function to create auth instance with given db
 export function createAuth(db: any) {
-  console.log('[Auth] Creating auth instance with db:', !!db);
-  console.log('[Auth] Schema keys:', Object.keys({ user: users, session: sessions, account: accounts, verification: verifications }));
+  console.log('[Auth] Creating auth instance');
+  console.log('[Auth] DB type:', db?.constructor?.name || typeof db);
+  console.log('[Auth] Schema tables:', Object.keys({ user: users, session: sessions, account: accounts, verification: verifications }).join(', '));
 
   return betterAuth({
-    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:4321',
+    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:8787',
 
     database: drizzleAdapter(db, {
       provider: 'sqlite',
@@ -30,8 +32,6 @@ export function createAuth(db: any) {
         account: accounts,
         verification: verifications,
       },
-    }, {
-      debug: process.env.NODE_ENV === 'development', // Enable debug only in development
     }),
 
     // Email and password authentication
@@ -103,6 +103,12 @@ let _initAuth: BetterAuthInstance | null = null;
 export async function initAuth() {
   if (!_initAuth) {
     const db = await getDb();
+    console.log('[initAuth] Got DB:', typeof db);
+    console.log('[initAuth] DB has insert:', typeof db?.insert);
+    console.log('[initAuth] DB has select:', typeof db?.select);
+    console.log('[initAuth] DB has query:', typeof db?.query);
+    console.log('[initAuth] DB._ type:', typeof db?._);
+    console.log('[initAuth] DB.constructor:', db?.constructor?.name);
     _initAuth = createAuth(db);
   }
   return _initAuth;
@@ -118,7 +124,3 @@ export const oauthStatus = {
   google: isGoogleConfigured,
   facebook: isFacebookConfigured,
 };
-
-// Export types (using a different approach to avoid >> parsing issues)
-import type { BetterAuthInstance } from 'better-auth';
-export type { BetterAuthInstance as AuthInstance };

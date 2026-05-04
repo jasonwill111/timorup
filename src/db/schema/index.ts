@@ -15,16 +15,14 @@ export { blogPosts };
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
-  emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
+  emailVerified: integer('email_verified').default(0),  // 0=false, 1=true
   phone: text('phone'),
   name: text('name').notNull(),
   image: text('image'),
   role: text('role').default('user'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (users) => ({
-  emailIdx: index('users_email_idx').on(users.email),
-}));
+  createdAt: integer('created_at'),  // Unix timestamp
+  updatedAt: integer('updated_at'),  // Unix timestamp
+});
 
 // Categories table - use string reference to avoid circular
 // entityType: 'business' | 'government' | 'nonprofit' | null (null = all types)

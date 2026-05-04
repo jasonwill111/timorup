@@ -31,7 +31,12 @@ function getErrorMessage(error: unknown): string {
 }
 
 export async function POST({ request }: { request: Request }) {
-  const authApi = (await initAuth()).api;
+  console.log('[SignUp] Starting...');
+  const auth = await initAuth();
+  console.log('[SignUp] Got auth:', !!auth);
+  console.log('[SignUp] Auth api:', !!auth?.api);
+  const authApi = auth.api;
+  console.log('[SignUp] Auth API signUpEmail:', typeof authApi?.signUpEmail);
   const clientIP = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
 
   if (!checkRateLimit(`signup:${clientIP}`)) {
@@ -79,7 +84,26 @@ export async function POST({ request }: { request: Request }) {
     return response;
   } catch (error) {
     console.error('Sign-up error:', error);
+    console.error('Sign-up error type:', typeof error);
+    console.error('Sign-up error cause:', error instanceof Error ? error.cause : 'none');
+    console.error('Sign-up error constructor:', error?.constructor?.name);
+
+    // Try to get the full error chain
+    let errorChain = [];
+    let currentError = error;
+    while (currentError) {
+      errorChain.push({
+        message: currentError instanceof Error ? currentError.message : String(currentError),
+        stack: currentError instanceof Error ? currentError.stack : null,
+      });
+      currentError = currentError instanceof Error ? currentError.cause : null;
+    }
+    console.error('Error chain:', JSON.stringify(errorChain, null, 2));
+
     const errorMessage = getErrorMessage(error);
+    const errorStack = error instanceof Error ? error.stack : '';
+    const cause = error instanceof Error && error.cause ? String(error.cause) : '';
+    const innerError = error instanceof Error ? error.cause : null;
     if (errorMessage.toLowerCase().includes('email') &&
         (errorMessage.toLowerCase().includes('exists') ||
          errorMessage.toLowerCase().includes('already'))) {
@@ -89,9 +113,22 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
+    // Try to extract more error info
+    let details = errorStack;
+    if (innerError) {
+      details += '\n\nInner Error: ' + String(innerError);
+      if (innerError instanceof Error) {
+        details += '\nInner Stack: ' + innerError.stack;
+      }
+    }
+
     return new Response(JSON.stringify({
       success: false,
-      error: { code: 'SIGN_UP_ERROR', message: errorMessage || 'Failed to sign up' }
+      error: {
+        code: 'SIGN_UP_ERROR',
+        message: errorMessage || 'Failed to sign up',
+        details: JSON.stringify(errorChain, null, 2)
+      }
     }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 }

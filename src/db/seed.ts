@@ -57,8 +57,7 @@ const users = [
 // ========================
 // ACCOUNTS (for better-auth password login)
 // ========================
-// Password hash for all test users - scrypt (same as better-auth)
-const TEST_PASSWORD = 'TestPassword123!';
+const TEST_PASSWORD = 'timor123';
 let accountsData: Array<{
   id: string;
   accountId: string;

@@ -234,19 +234,5 @@ This project is indexed by GitNexus as **timorlist** (3177 symbols, 4178 relatio
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Reviews area (54 symbols) | `.claude/skills/generated/reviews/SKILL.md` |
-| Work in the Media area (23 symbols) | `.claude/skills/generated/media/SKILL.md` |
-| Work in the Scripts area (18 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
-| Work in the Businesses area (16 symbols) | `.claude/skills/generated/businesses/SKILL.md` |
-| Work in the Auth area (15 symbols) | `.claude/skills/generated/auth/SKILL.md` |
-| Work in the Products area (14 symbols) | `.claude/skills/generated/products/SKILL.md` |
-| Work in the Stores area (7 symbols) | `.claude/skills/generated/stores/SKILL.md` |
-| Work in the Cluster_38 area (5 symbols) | `.claude/skills/generated/cluster-38/SKILL.md` |
-| Work in the Send area (5 symbols) | `.claude/skills/generated/send/SKILL.md` |
-| Work in the Cluster_21 area (4 symbols) | `.claude/skills/generated/cluster-21/SKILL.md` |
-| Work in the Profile area (4 symbols) | `.claude/skills/generated/profile/SKILL.md` |
-| Work in the Subscription area (4 symbols) | `.claude/skills/generated/subscription/SKILL.md` |
-| Work in the [id] area (4 symbols) | `.claude/skills/generated/id/SKILL.md` |
-| Work in the Db area (3 symbols) | `.claude/skills/generated/db/SKILL.md` |
 
 <!-- gitnexus:end -->

@@ -5,10 +5,10 @@ import node from '@astrojs/node';
 import cloudflare from '@astrojs/cloudflare';
 
 // Platform detection:
-// - Windows local dev: USE_CLOUDFLARE=0 → Node adapter
 // - CI / production: USE_CLOUDFLARE=1 → Cloudflare Workers adapter
-const isWindows = process.platform === 'win32';
-const useCloudflare = process.env.USE_CLOUDFLARE === '1' || (!isWindows && process.env.USE_CLOUDFLARE !== '0');
+// - Local development (no CI, no explicit force): Node adapter
+const isCI = process.env.CI === 'true';
+const useCloudflare = process.env.USE_CLOUDFLARE === '1' || (isCI && process.env.USE_CLOUDFLARE !== '0');
 
 const adapter = useCloudflare
   ? cloudflare({})
@@ -41,7 +41,23 @@ export default defineConfig({
   ],
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      // Shim cloudflare:workers for non-Cloudflare builds
+      {
+        name: 'cloudflare-workers-shim',
+        resolveId(id) {
+          if (id === 'cloudflare:workers') {
+            return '\0cloudflare:workers-shim';
+          }
+        },
+        load(id) {
+          if (id === '\0cloudflare:workers-shim') {
+            return `export const env = { get DB() { throw new Error('cloudflare:workers only in Workers'); } };`;
+          }
+        }
+      }
+    ],
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,

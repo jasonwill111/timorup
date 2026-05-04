@@ -17,7 +17,9 @@ import CardContent from '../../components/ui/CardContent.astro'
   // Check authentication on page load
   async function checkAuth() {
     try {
-      const res = await fetch('/api/auth/session');
+      const res = await fetch('/api/auth/session', {
+        credentials: 'include'  // Send cookies with request
+      });
       const data = await res.json();
       if (!data.user) {
         window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
