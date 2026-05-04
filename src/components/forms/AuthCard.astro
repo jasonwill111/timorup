@@ -1,0 +1,44 @@
+---
+// AuthCard - Wrapper for auth pages (login, register, forgot-password, reset-password)
+import Card from '@/components/ui/Card.astro';
+import CardHeader from '@/components/ui/CardHeader.astro';
+import CardTitle from '@/components/ui/CardTitle.astro';
+import CardDescription from '@/components/ui/CardDescription.astro';
+import CardContent from '@/components/ui/CardContent.astro';
+import CardFooter from '@/components/ui/CardFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  footerText?: string;
+  footerLink?: { href: string; text: string };
+}
+
+const { title, description, footerText, footerLink } = Astro.props;
+---
+
+<div class="container py-12">
+  <div class="max-w-md mx-auto">
+    <Card>
+      <CardHeader class="text-center">
+        <CardTitle class="text-2xl">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <slot />
+      </CardContent>
+      {footerText && (
+        <CardFooter class="justify-center">
+          <p class="text-sm text-muted-foreground">
+            {footerText}
+            {footerLink && (
+              <a href={footerLink.href} class="text-primary hover:underline ml-1">
+                {footerLink.text}
+              </a>
+            )}
+          </p>
+        </CardFooter>
+      )}
+    </Card>
+  </div>
+</div>

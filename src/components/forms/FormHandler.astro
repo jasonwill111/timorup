@@ -1,0 +1,97 @@
+---
+// FormHandler - Common form submission handler for auth forms
+interface Props {
+  formId: string;
+  submitBtnId?: string;
+  messageId?: string;
+  redirectOnSuccess?: string;
+  successMessage?: string;
+}
+
+const {
+  formId,
+  submitBtnId = 'submit-btn',
+  messageId = 'form-message',
+  redirectOnSuccess,
+  successMessage
+} = Astro.props;
+---
+
+<script define:vars={{ formId, submitBtnId, messageId, redirectOnSuccess, successMessage }}>
+  const form = document.getElementById(formId);
+  const submitBtn = document.getElementById(submitBtnId);
+  const btnText = document.getElementById(submitBtnId + '-text');
+  const btnLoading = document.getElementById(submitBtnId + '-loading');
+  const messageEl = document.getElementById(messageId);
+
+  function setLoading(isLoading) {
+    if (!submitBtn) return;
+    submitBtn.disabled = isLoading;
+    if (btnText) btnText.classList.toggle('hidden', isLoading);
+    if (btnLoading) btnLoading.classList.toggle('hidden', !isLoading);
+  }
+
+  function showError(message) {
+    if (!messageEl) return;
+    messageEl.textContent = message;
+    messageEl.className = messageEl.className
+      .replace(/bg-green-\d+/g, 'bg-red-50')
+      .replace(/text-green-\d+/g, 'text-red-700')
+      .replace(/dark:bg-green-\d+/g, 'dark:bg-red-900/20')
+      .replace(/dark:text-green-\d+/g, 'dark:text-red-400');
+    messageEl.classList.remove('hidden');
+  }
+
+  function showSuccess(message) {
+    if (!messageEl) return;
+    messageEl.textContent = message;
+    messageEl.className = messageEl.className
+      .replace(/bg-red-\d+/g, 'bg-green-50')
+      .replace(/text-red-\d+/g, 'text-green-700')
+      .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
+      .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
+    messageEl.classList.remove('hidden');
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    messageEl?.classList.add('hidden');
+    setLoading(true);
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch(form.action || window.location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      setLoading(false);
+
+      if (result.success) {
+        showSuccess(result.message || successMessage || 'Success!');
+
+        if (result.user?.id) {
+          localStorage.setItem('userId', result.user.id);
+          localStorage.setItem('userName', result.user.name || '');
+        }
+
+        if (redirectOnSuccess || result.redirect) {
+          const redirect = result.redirect || redirectOnSuccess;
+          if (redirect.startsWith('/')) {
+            window.location.href = redirect;
+          }
+        }
+      } else {
+        showError(result.error?.message || result.message || 'An error occurred');
+      }
+    } catch (error) {
+      setLoading(false);
+      showError('Network error. Please check your connection.');
+    }
+  });
+</script>

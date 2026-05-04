@@ -20,8 +20,8 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   image: text('image'),
   role: text('role').default('user'),
-  createdAt: integer('created_at'),  // Unix timestamp
-  updatedAt: integer('updated_at'),  // Unix timestamp
+  createdAt: integer('created_at'),
+  updatedAt: integer('updated_at'),
 });
 
 // Categories table - use string reference to avoid circular

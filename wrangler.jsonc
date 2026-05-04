@@ -12,6 +12,9 @@
     "global_fetch_strictly_public"
   ],
 
+  // Migrations directory
+  "migrations_dir": "./src/db/migrations",
+
   // Static assets served from dist/client
   "assets": {
     "binding": "ASSETS",
@@ -23,7 +26,7 @@
     "enabled": false
   },
 
-  // D1 database binding - use remote for local dev (better-auth compatible)
+  // D1 database binding - use remote for local dev (workerd limitation)
   "d1_databases": [
     {
       "binding": "DB",
@@ -33,7 +36,7 @@
     }
   ],
 
-  // KV namespace for sessions - use remote for local dev
+  // KV namespace for sessions - use remote
   "kv_namespaces": [
     {
       "binding": "SESSION",
@@ -42,7 +45,7 @@
     }
   ],
 
-  // R2 bucket for media storage - use remote for local dev
+  // R2 bucket for media storage - use remote
   "r2_buckets": [
     {
       "binding": "MEDIA_BUCKET",

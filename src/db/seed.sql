@@ -1,4 +1,4 @@
--- Seed data for timorlist (D1 compatible - camelCase columns)
+-- Seed data for timorlist (D1 compatible - snake_case columns)
 
 -- Insert categories
 INSERT OR IGNORE INTO categories (id, name, slug, description, icon) VALUES
@@ -17,12 +17,12 @@ INSERT OR IGNORE INTO users (id, email, name, role) VALUES
 ('user-2', 'maria@example.com', 'Maria Santos', 'user'),
 ('user-3', 'carlos@example.com', 'Carlos Oliveira', 'user');
 
--- Insert business pages
+-- Insert business pages (snake_case columns)
 INSERT OR IGNORE INTO business_pages (
-  id, title, slug, ownerId, categoryId, status,
-  contactName, contactNumber, countryCode, email, address,
-  locationLat, locationLng, openingHours, aboutUs, tags,
-  likes, saves, ratingAverage, ratingCount, views, planType
+  id, title, slug, owner_id, category_id, status,
+  contact_name, contact_number, country_code, email, address,
+  location_lat, location_lng, opening_hours, about_us, tags,
+  likes, saves, rating_average, rating_count, views, plan_type
 ) VALUES
 (
   'biz-1', 'Café Timor', 'cafe-timor', 'user-1', 'cat-1', 'live',
@@ -70,8 +70,8 @@ INSERT OR IGNORE INTO business_pages (
   123, 34, 4.9, 41, 2100, 'pro'
 );
 
--- Insert products
-INSERT OR IGNORE INTO products (id, title, price, description, businessPageId) VALUES
+-- Insert products (snake_case columns)
+INSERT OR IGNORE INTO products (id, title, price, description, business_page_id) VALUES
 ('prod-1', 'Timor Gold Coffee', '$15.00', 'Premium roasted coffee beans, 500g', 'biz-1'),
 ('prod-2', 'Espresso Special', '$4.00', 'Double shot espresso with Timor beans', 'biz-1'),
 ('prod-3', 'Deluxe Suite', '$150/night', 'Ocean view suite with breakfast included', 'biz-2'),
@@ -81,8 +81,8 @@ INSERT OR IGNORE INTO products (id, title, price, description, businessPageId) V
 ('prod-7', 'Surfboard Rental', '$20/day', 'Quality surfboards for all levels', 'biz-4'),
 ('prod-8', 'Dental Checkup', '$30', 'Complete dental examination and cleaning', 'biz-5');
 
--- Insert reviews
-INSERT OR IGNORE INTO reviews (id, businessPageId, userId, rating, comment) VALUES
+-- Insert reviews (snake_case columns)
+INSERT OR IGNORE INTO reviews (id, business_page_id, user_id, rating, comment) VALUES
 ('rev-1', 'biz-1', 'user-2', 5, 'Best coffee in Dili! Love the atmosphere.'),
 ('rev-2', 'biz-1', 'user-3', 4, 'Great coffee, but can get crowded on weekends.'),
 ('rev-3', 'biz-2', 'user-1', 5, 'Amazing views and excellent service!'),

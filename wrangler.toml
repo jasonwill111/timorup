@@ -10,6 +10,9 @@ assets = { binding = "ASSETS", directory = "./dist/client" }
 [observability]
 enabled = false
 
+# Migrations
+migrations_dir = "./src/db/migrations"
+
 # D1
 [[d1_databases]]
 binding = "DB"

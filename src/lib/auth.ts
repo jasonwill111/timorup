@@ -1,7 +1,7 @@
 // Better Auth Configuration - Environment Aware
 import { betterAuth } from 'better-auth';
 import type { BetterAuthInstance } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { getDb } from './db';
 import { users, sessions, accounts, verifications } from '@/db/schema';
 
@@ -15,16 +15,56 @@ const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET || '';
 const isGoogleConfigured = !!googleClientId && !!googleClientSecret;
 const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
 
+// Convert Date objects to Unix timestamps for D1
+function convertToTimestamp(value: unknown): number | unknown {
+  if (value instanceof Date) {
+    return Math.floor(value.getTime() / 1000);
+  }
+  if (Array.isArray(value)) {
+    return value.map(convertToTimestamp);
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      result[k] = convertToTimestamp(v);
+    }
+    return result;
+  }
+  return value;
+}
+
+// Wrap db to convert Date objects to timestamps before insert
+function wrapDbForD1(db: any) {
+  if (!db || !db.insert) return db;
+
+  const originalInsert = db.insert.bind(db);
+  db.insert = (table: any) => {
+    const originalQueryBuilder = originalInsert(table);
+    const originalValues = originalQueryBuilder.values.bind(originalQueryBuilder);
+
+    originalQueryBuilder.values = (data: any) => {
+      return originalValues(convertToTimestamp(data));
+    };
+
+    return originalQueryBuilder;
+  };
+
+  return db;
+}
+
 // Factory function to create auth instance with given db
 export function createAuth(db: any) {
   console.log('[Auth] Creating auth instance');
   console.log('[Auth] DB type:', db?.constructor?.name || typeof db);
   console.log('[Auth] Schema tables:', Object.keys({ user: users, session: sessions, account: accounts, verification: verifications }).join(', '));
 
+  // Wrap db to convert Date objects to timestamps for D1
+  const wrappedDb = wrapDbForD1(db);
+
   return betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:8787',
 
-    database: drizzleAdapter(db, {
+    database: drizzleAdapter(wrappedDb, {
       provider: 'sqlite',
       schema: {
         user: users,

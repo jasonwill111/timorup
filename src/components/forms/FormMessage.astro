@@ -1,0 +1,48 @@
+---
+// FormMessage - Success/Error message display
+interface Props {
+  id?: string;
+  type?: 'success' | 'error';
+}
+
+const { id = 'form-message', type = 'error' } = Astro.props;
+
+const styles = type === 'success'
+  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
+  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800';
+---
+
+<div
+  id={id}
+  class:list={[
+    'hidden p-3 text-sm rounded-lg border',
+    styles
+  ]}
+  role="alert"
+>
+  <slot />
+</div>
+
+<script define:vars={{ id }}>
+  function showMessage(message, isSuccess = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (isSuccess) {
+      el.className = el.className.replace(/bg-red-\d+/g, 'bg-green-50');
+      el.className = el.className.replace(/text-red-\d+/g, 'text-green-700');
+      el.className = el.className.replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20');
+      el.className = el.className.replace(/dark:text-red-\d+/g, 'dark:text-green-400');
+    }
+
+    el.textContent = message;
+    el.classList.remove('hidden');
+  }
+
+  function hideMessage() {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  }
+
+  window.__formMessage = { show: showMessage, hide };
+</script>

@@ -1,14 +1,24 @@
 // Database schema for Better Auth
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+import { sqliteTable, text, integer, customType } from 'drizzle-orm/sqlite-core';
 
-// Sessions table - no mode: 'timestamp' since D1 stores as integers
+// Custom timestamp type that handles Date -> Unix timestamp conversion for D1
+const timestamp = () => customType<{ data: number; notNull: false; hasDefault: true }>({
+  dataType: () => 'integer',
+  toDriver: (value: Date | number | null) => {
+    if (value === null || value === undefined) return null;
+    if (value instanceof Date) return Math.floor(value.getTime() / 1000);
+    return typeof value === 'number' ? value : null;
+  },
+  fromDriver: (value: number | null) => value,
+});
+
+// Sessions table - D1 compatible with custom timestamp handling
 export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),
-  expiresAt: integer('expires_at').notNull(),  // Unix timestamp in seconds
+  expiresAt: integer('expires_at').notNull(),
   token: text('token').notNull().unique(),
-  createdAt: integer('created_at').notNull(),
-  updatedAt: integer('updated_at').notNull(),
+  createdAt: timestamp()(),
+  updatedAt: timestamp()(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
   userId: text('user_id').notNull(),
@@ -27,8 +37,8 @@ export const accounts = sqliteTable('accounts', {
   refreshTokenExpiresAt: integer('refresh_token_expires_at'),
   scope: text('scope'),
   password: text('password'),
-  createdAt: integer('created_at'),
-  updatedAt: integer('updated_at'),
+  createdAt: timestamp()(),
+  updatedAt: timestamp()(),
 });
 
 // Verifications table
@@ -37,7 +47,7 @@ export const verifications = sqliteTable('verifications', {
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
   expiresAt: integer('expires_at').notNull(),
-  createdAt: integer('created_at'),
+  createdAt: timestamp()(),
 });
 
 // Export types
