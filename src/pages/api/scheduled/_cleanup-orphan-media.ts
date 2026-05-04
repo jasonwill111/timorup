@@ -2,6 +2,32 @@
 // Runs every Sunday at 3:00 AM UTC
 // Orphan records: media entries in D1 where R2 file no longer exists
 
+export const prerender = false;
+
+import type { ScheduledHandler } from '@cloudflare/workers-types';
+import { getDb } from '@/lib/db';
+import { media } from '@/db/schema';
+import { env } from 'cloudflare:workers';
+
+function getR2Bucket(): R2Bucket | undefined {
+  return env.MEDIA_BUCKET as R2Bucket | undefined;
+}
+
+async function deleteFromR2(key: string): Promise<boolean> {
+  try {
+    const bucket = getR2Bucket();
+    if (!bucket) {
+      console.log('[Cleanup-Orphan-Media] R2 bucket not available');
+      return false;
+    }
+    await bucket.delete(key);
+    return true;
+  } catch (error) {
+    console.error('[Cleanup-Orphan-Media] Error deleting from R2:', error);
+    return false;
+  }
+}
+
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();
 
@@ -46,7 +72,6 @@ export const onRequest: ScheduledHandler = async (context) => {
     let deletedCount = 0;
     for (const o of orphans) {
       try {
-        const { deleteFromR2 } = await import('@/lib/media');
         await deleteFromR2(o.url);
         console.log(`[Cleanup-Orphan-Media] Deleted R2: ${o.url}`);
         deletedCount++;

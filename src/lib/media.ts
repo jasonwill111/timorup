@@ -1,21 +1,27 @@
 // Media handling utilities for Cloudflare R2 storage
+// Uses Workers R2 binding - no credentials needed!
 
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { env } from 'cloudflare:workers';
+import sharp from 'sharp';
 
-// Configuration
-const R2_ENDPOINT = process.env.R2_ENDPOINT || process.env.CF_R2_ENDPOINT;
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.CF_R2_ACCESS_KEY_ID;
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.CF_R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'timorlist-media';
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || `https://${R2_BUCKET_NAME}.r2.cloudflarestorage.com`;
+// Get R2 bucket from Workers binding
+export function getR2Bucket(): R2Bucket {
+  const bucket = env.MEDIA_BUCKET as R2Bucket | undefined;
+  if (!bucket) {
+    throw new Error('R2 bucket not configured (MEDIA_BUCKET binding missing)');
+  }
+  return bucket;
+}
+
+// Get R2 public URL
+export function getR2PublicUrl(): string {
+  return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
+}
 
 // File size limits (in bytes)
 export const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
-export const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
-export const MAX_TOTAL_IMAGES = 10;
-export const MAX_VIDEOS = 1;
+export const MAX_VIDEO_SIZE = 8 * 1024 * 1024; // 8MB
 
-// Plan limits
 export const PLAN_LIMITS = {
   basic: { maxProducts: 10, maxImages: 10, maxVideos: 1 },
   pro: { maxProducts: 30, maxImages: 10, maxVideos: 1 },
@@ -26,7 +32,7 @@ export const PLAN_LIMITS = {
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
-// R2 folder structure:
+// Folder structure:
 // /business/{id}/ - business images
 // /gov/{id}/ - government images
 // /ngo/{id}/ - NGO images
@@ -37,69 +43,86 @@ export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'
 // /system/ - logo, favicon (PROTECTED)
 // /files/ - PDFs, documents
 
-// Initialize S3 client for R2
-let s3Client: S3Client | null = null;
+export type MediaType = 'image' | 'video' | 'document';
 
-export function createS3Client(config?: { endpoint?: string; credentials?: { accessKeyId: string; secretAccessKey: string } }): S3Client {
-  return new S3Client({
-    region: 'auto',
-    endpoint: config?.endpoint || R2_ENDPOINT,
-    credentials: config?.credentials || {
-      accessKeyId: R2_ACCESS_KEY_ID || '',
-      secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-    },
-  });
-}
-
-export function getS3Client(): S3Client {
-  if (!s3Client) {
-    s3Client = createS3Client();
-  }
-  return s3Client;
-}
-
-export function resetS3Client(): void {
-  s3Client = null;
+export interface UploadResult {
+  url: string;
+  path: string;
+  size: number;
+  mimeType: string;
+  width?: number;
+  height?: number;
 }
 
 // Upload file to R2
 export async function uploadToR2(
-  file: Buffer | Uint8Array,
+  data: Buffer | ArrayBuffer,
   key: string,
-  mimeType: string,
-  originalSize: number
-): Promise<{ url: string; size: number; width?: number; height?: number }> {
-  const client = getS3Client();
+  mimeType: string
+): Promise<{ url: string; size: number }> {
+  const bucket = getR2Bucket();
+  const publicUrl = getR2PublicUrl();
 
-  const upload = new Upload({
-    client,
-    params: {
-      Bucket: R2_BUCKET_NAME,
-      Key: key,
-      Body: file,
-      ContentType: mimeType,
-      CacheControl: 'public, max-age=31536000',
+  await bucket.put(key, data, {
+    httpMetadata: {
+      contentType: mimeType,
+      cacheControl: 'public, max-age=31536000, immutable',
     },
   });
 
-  await upload.done();
+  return {
+    url: `${publicUrl}/${key}`,
+    size: data instanceof Buffer ? data.length : data.byteLength,
+  };
+}
 
-  const url = `${R2_PUBLIC_URL}/${key}`;
+// Process and upload image
+export async function uploadImageToR2(
+  file: File | Buffer,
+  key: string
+): Promise<UploadResult> {
+  let inputBuffer: Buffer;
+  let mimeType: string;
+
+  if (file instanceof File) {
+    inputBuffer = Buffer.from(await file.arrayBuffer());
+    mimeType = file.type;
+  } else {
+    inputBuffer = file;
+    mimeType = 'image/webp';
+  }
+
+  // Optimize image
+  const processed = await sharp(inputBuffer)
+    .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
+    .webp({ quality: IMAGE_QUALITY })
+    .toBuffer({ resolveWithObject: true });
+
+  const bucket = getR2Bucket();
+  const publicUrl = getR2PublicUrl();
+
+  await bucket.put(key, processed.data, {
+    httpMetadata: {
+      contentType: 'image/webp',
+      cacheControl: 'public, max-age=31536000, immutable',
+    },
+  });
 
   return {
-    url,
-    size: originalSize,
+    url: `${publicUrl}/${key}`,
+    path: key,
+    size: processed.data.length,
+    mimeType: 'image/webp',
+    width: processed.info.width,
+    height: processed.info.height,
   };
 }
 
 // Delete single file from R2
 export async function deleteFromR2(key: string): Promise<boolean> {
   try {
-    const client = getS3Client();
-    await client.send(new DeleteObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: key,
-    }));
+    const bucket = getR2Bucket();
+    await bucket.delete(key);
     return true;
   } catch (error) {
     console.error('Error deleting from R2:', error);
@@ -110,29 +133,18 @@ export async function deleteFromR2(key: string): Promise<boolean> {
 // Delete folder (all files with prefix) from R2
 export async function deleteFolderFromR2(prefix: string): Promise<boolean> {
   try {
-    const client = getS3Client();
-    let continuationToken: string | undefined;
+    const bucket = getR2Bucket();
+    let cursor: string | undefined;
 
     do {
-      const response = await client.send(new ListObjectsV2Command({
-        Bucket: R2_BUCKET_NAME,
-        Prefix: prefix,
-        ContinuationToken: continuationToken,
-      }));
-
-      if (response.Contents && response.Contents.length > 0) {
-        for (const object of response.Contents) {
-          if (object.Key) {
-            await client.send(new DeleteObjectCommand({
-              Bucket: R2_BUCKET_NAME,
-              Key: object.Key,
-            }));
-          }
+      const result = await bucket.list({ prefix, cursor, limit: 1000 });
+      for (const obj of result.objects ?? []) {
+        if (obj.key) {
+          await bucket.delete(obj.key);
         }
       }
-
-      continuationToken = response.NextContinuationToken;
-    } while (continuationToken);
+      cursor = result.truncated ? result.cursor : undefined;
+    } while (cursor);
 
     return true;
   } catch (error) {
@@ -146,7 +158,7 @@ export function getPublicMediaUrl(key: string): string {
   if (key.startsWith('http')) {
     return key;
   }
-  return `${R2_PUBLIC_URL}/${key}`;
+  return `${getR2PublicUrl()}/${key}`;
 }
 
 // Transform image URL for optimization (using Cloudflare's image transformations)
@@ -160,25 +172,73 @@ export function getOptimizedImageUrl(
   } = {}
 ): string {
   const { width, height, quality = 80, format = 'webp' } = options;
+  const r2PublicUrl = getR2PublicUrl();
 
-  if (!originalUrl.includes(R2_PUBLIC_URL)) {
+  if (!originalUrl.includes(r2PublicUrl) && !originalUrl.includes('r2.cloudflarestorage.com')) {
     return originalUrl;
   }
 
-  const key = originalUrl.replace(`${R2_PUBLIC_URL}/`, '');
-  const transforms = [];
+  // Extract key from URL
+  let key = originalUrl;
+  if (originalUrl.includes(r2PublicUrl)) {
+    key = originalUrl.replace(`${r2PublicUrl}/`, '');
+  } else if (originalUrl.includes('r2.cloudflarestorage.com')) {
+    const match = originalUrl.match(/timorlist-media\.r2\.cloudflarestorage\.com\/(.+)/);
+    if (match) key = match[1];
+  }
 
+  const transforms = [];
   if (width) transforms.push(`width=${width}`);
   if (height) transforms.push(`height=${height}`);
   transforms.push(`quality=${quality}`);
   transforms.push(`format=${format}`);
 
-  return `https://timorlist.com/cdn-cgi/image/${transforms.join(',')}/${R2_PUBLIC_URL}/${key}`;
+  return `https://timorlist.com/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
 }
 
 // Check if running in Cloudflare environment
 export function isCloudflareEnvironment(): boolean {
   return typeof process.env.CF_PAGES !== 'undefined' ||
-         typeof process.env.CF_FUNCTION !== 'undefined' ||
-         process.env.NODE_ENV === 'cloudflare';
+         typeof process.env.CF_FUNCTION !== 'undefined';
+}
+
+// Validate file type
+export function isAllowedImageType(mimeType: string): boolean {
+  return ALLOWED_IMAGE_TYPES.includes(mimeType);
+}
+
+export function isAllowedVideoType(mimeType: string): boolean {
+  return ALLOWED_VIDEO_TYPES.includes(mimeType);
+}
+
+// Get folder path based on entity type
+export function getMediaFolder(params: {
+  entityType?: string;
+  businessId?: string;
+  category?: string;
+  pageName?: string;
+}): string {
+  const { entityType, businessId, category, pageName } = params;
+
+  if (category === 'hero') return 'hero';
+  if (category === 'category') return 'category';
+  if (category === 'system') return 'system';
+  if (category === 'files') return 'files';
+  if (pageName) return `page/${pageName}`;
+
+  if (entityType && businessId) {
+    return `${entityType}/${businessId}`;
+  }
+
+  return 'general';
+}
+
+// Check if R2 is available
+export function isR2Available(): boolean {
+  try {
+    getR2Bucket();
+    return true;
+  } catch {
+    return false;
+  }
 }

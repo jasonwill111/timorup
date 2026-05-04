@@ -5,10 +5,21 @@ import { getDb } from '@/lib/db';
 import { media, businessPages } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
+import { env } from 'cloudflare:workers';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
+}
+
+// Get R2 bucket from Workers binding
+function getR2Bucket(): R2Bucket | undefined {
+  return env.MEDIA_BUCKET as R2Bucket | undefined;
+}
+
+// Get R2 public URL
+function getR2PublicUrl(): string {
+  return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
 }
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
@@ -167,23 +178,30 @@ export async function POST({ request }: { request: Request }) {
       const key = `uploads/${user.id}/${businessId || 'general'}/${timestamp}-${id}.${ext}`;
 
       const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
+      const r2PublicUrl = getR2PublicUrl();
       let finalUrl: string;
-      const hasR2Credentials = process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID;
+      let storedPath: string;
 
-      if (hasR2Credentials) {
-        const { uploadToR2 } = await import('@/lib/media');
-        const result = await uploadToR2(buffer, key, file.type, file.size);
-        finalUrl = result.url;
+      const bucket = getR2Bucket();
+      if (bucket) {
+        await bucket.put(key, arrayBuffer, {
+          httpMetadata: {
+            contentType: file.type,
+            cacheControl: 'public, max-age=31536000, immutable',
+          },
+        });
+        finalUrl = `${r2PublicUrl}/${key}`;
+        storedPath = key;
       } else {
+        const buffer = Buffer.from(arrayBuffer);
         const base64 = buffer.toString('base64');
         finalUrl = `data:${file.type};base64,${base64}`;
+        storedPath = finalUrl;
       }
 
       const [created] = await db.insert(media).values({
         id,
-        url: hasR2Credentials ? key : finalUrl,
+        url: storedPath,
         filename: file.name,
         mimeType: file.type,
         size: file.size,
@@ -296,9 +314,16 @@ export async function DELETE({ request }: { request: Request }) {
       }), { status: 403, headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (mediaItem.url && !mediaItem.url.startsWith('data:')) {
-      const { deleteFromR2 } = await import('@/lib/media');
-      await deleteFromR2(mediaItem.url);
+    // Delete from R2 if URL is R2 path (not data: URL)
+    if (mediaItem.url && !mediaItem.url.startsWith('data:') && !mediaItem.url.startsWith('http')) {
+      const bucket = getR2Bucket();
+      if (bucket) {
+        try {
+          await bucket.delete(mediaItem.url);
+        } catch (e) {
+          console.error('Failed to delete from R2:', e);
+        }
+      }
     }
 
     await db.delete(media).where(eq(media.id, id));

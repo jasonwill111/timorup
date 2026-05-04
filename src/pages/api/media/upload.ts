@@ -6,10 +6,25 @@ import { media, businessPages } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import sharp from 'sharp';
+import { env } from 'cloudflare:workers';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
+}
+
+// Get R2 bucket from Workers binding
+function getR2Bucket(): R2Bucket {
+  const bucket = env.MEDIA_BUCKET as R2Bucket | undefined;
+  if (!bucket) {
+    throw new Error('R2 bucket not configured (MEDIA_BUCKET binding missing)');
+  }
+  return bucket;
+}
+
+// Get R2 public URL
+function getR2PublicUrl(): string {
+  return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
 }
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
@@ -151,54 +166,75 @@ export async function POST({ request }: { request: Request }) {
 
     const id = crypto.randomUUID();
     const timestamp = Date.now();
-    const ext = file.name.split('.').pop() || 'bin';
+
+    // Build folder path
+    const folder = getFolderPath({ entityType, businessId, category, pageName });
+    const subFolder = skuId ? `${skuId}/` : '';
 
     let finalUrl: string;
     let finalSize = file.size;
     let finalMimeType = file.type;
     let finalWidth: number | undefined;
     let finalHeight: number | undefined;
-    const hasR2Credentials = process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID;
+    let storedPath: string;
 
-    // Build folder path
-    const folder = getFolderPath({ entityType, businessId, category, pageName });
-    const subFolder = skuId ? `${skuId}/` : '';
+    // Check if R2 bucket is available
+    let bucket: R2Bucket | undefined;
+    try {
+      bucket = getR2Bucket();
+    } catch {
+      bucket = undefined;
+    }
 
-    if (isImage && hasR2Credentials) {
-      // Optimize image with sharp
-      const inputBuffer = Buffer.from(await file.arrayBuffer());
-      const processed = await sharp(inputBuffer)
-        .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
-        .webp({ quality: IMAGE_QUALITY })
-        .toBuffer({ resolveWithObject: true });
+    if (bucket) {
+      if (isImage) {
+        // Optimize image with sharp
+        const inputBuffer = Buffer.from(await file.arrayBuffer());
+        const processed = await sharp(inputBuffer)
+          .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
+          .webp({ quality: IMAGE_QUALITY })
+          .toBuffer({ resolveWithObject: true });
 
-      const key = `${folder}/${subFolder}${timestamp}-${id}.webp`;
+        const key = `${folder}/${subFolder}${timestamp}-${id}.webp`;
+        const r2PublicUrl = getR2PublicUrl();
 
-      const { uploadToR2 } = await import('@/lib/media');
-      const result = await uploadToR2(processed.data, key, 'image/webp', processed.data.length);
-      finalUrl = result.url;
-      finalSize = processed.data.length;
-      finalMimeType = 'image/webp';
-      finalWidth = processed.info.width;
-      finalHeight = processed.info.height;
-    } else if (hasR2Credentials) {
-      // Video - store as-is
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const key = `${folder}/${subFolder}${timestamp}-${id}.${ext}`;
-      const { uploadToR2 } = await import('@/lib/media');
-      const result = await uploadToR2(buffer, key, file.type, file.size);
-      finalUrl = result.url;
+        await bucket.put(key, processed.data, {
+          httpMetadata: {
+            contentType: 'image/webp',
+            cacheControl: 'public, max-age=31536000, immutable',
+          },
+        });
+
+        finalUrl = `${r2PublicUrl}/${key}`;
+        storedPath = key;
+        finalSize = processed.data.length;
+        finalMimeType = 'image/webp';
+        finalWidth = processed.info.width;
+        finalHeight = processed.info.height;
+      } else {
+        // Video - store as-is
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const ext = file.name.split('.').pop() || 'mp4';
+        const key = `${folder}/${subFolder}${timestamp}-${id}.${ext}`;
+        const r2PublicUrl = getR2PublicUrl();
+
+        await bucket.put(key, buffer, {
+          httpMetadata: {
+            contentType: file.type,
+            cacheControl: 'public, max-age=31536000, immutable',
+          },
+        });
+
+        finalUrl = `${r2PublicUrl}/${key}`;
+        storedPath = key;
+      }
     } else {
-      // Local dev - base64
+      // Local dev without R2 - base64 inline
       const buffer = Buffer.from(await file.arrayBuffer());
       const base64 = buffer.toString('base64');
       finalUrl = `data:${file.type};base64,${base64}`;
+      storedPath = finalUrl;
     }
-
-    // Build stored path for DB
-    const storedPath = hasR2Credentials
-      ? `${folder}/${subFolder}${timestamp}-${id}.${isImage ? 'webp' : ext}`
-      : finalUrl;
 
     const [created] = await db.insert(media).values({
       id,

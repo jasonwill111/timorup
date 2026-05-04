@@ -5,10 +5,40 @@ import type { ScheduledHandler } from '@cloudflare/workers-types';
 import { getDb } from '@/lib/db';
 import { businessPages, media, products } from '@/db/schema';
 import { lt, isNull, or, inArray } from 'drizzle-orm';
-import { deleteFolderFromR2 } from '@/lib/media';
+import { env } from 'cloudflare:workers';
 
 // 60 days in milliseconds
 const EXPIRY_GRACE_PERIOD_MS = 60 * 24 * 60 * 60 * 1000;
+
+function getR2Bucket(): R2Bucket | undefined {
+  return env.MEDIA_BUCKET as R2Bucket | undefined;
+}
+
+async function deleteFolderFromR2(prefix: string): Promise<boolean> {
+  try {
+    const bucket = getR2Bucket();
+    if (!bucket) {
+      console.log('[Cleanup] R2 bucket not available, skipping folder delete');
+      return false;
+    }
+
+    let cursor: string | undefined;
+    do {
+      const result = await bucket.list({ prefix, cursor, limit: 1000 });
+      for (const obj of result.objects ?? []) {
+        if (obj.key) {
+          await bucket.delete(obj.key);
+        }
+      }
+      cursor = result.truncated ? result.cursor : undefined;
+    } while (cursor);
+
+    return true;
+  } catch (error) {
+    console.error('[Cleanup] Error deleting folder from R2:', error);
+    return false;
+  }
+}
 
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();

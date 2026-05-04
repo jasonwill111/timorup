@@ -5,10 +5,15 @@ import { getDb } from '@/lib/db';
 import { media } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
+import { env } from 'cloudflare:workers';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
+}
+
+function getR2Bucket(): R2Bucket | undefined {
+  return env.MEDIA_BUCKET as R2Bucket | undefined;
 }
 
 async function getCurrentUser(request: Request) {
@@ -81,9 +86,16 @@ export async function DELETE({ request }: { request: Request }) {
       }), { status: 403, headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (mediaItem.url && !mediaItem.url.startsWith('data:')) {
-      const { deleteFromR2 } = await import('@/lib/media');
-      await deleteFromR2(mediaItem.url);
+    // Delete from R2 if URL is R2 path (not data: URL or http)
+    if (mediaItem.url && !mediaItem.url.startsWith('data:') && !mediaItem.url.startsWith('http')) {
+      const bucket = getR2Bucket();
+      if (bucket) {
+        try {
+          await bucket.delete(mediaItem.url);
+        } catch (e) {
+          console.error('Failed to delete from R2:', e);
+        }
+      }
     }
 
     await db.delete(media).where(eq(media.id, id));
