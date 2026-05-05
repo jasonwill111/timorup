@@ -295,7 +295,7 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
 
         try {
           const typeParam = filter !== 'all' ? `&type=${filter}` : '';
-          const res = await fetch(`/api/categories/${catSlug}/listings?page=${nextPage}&limit=${PAGE_SIZE}${typeParam}`);
+          const res = await fetch(`/api/categories/${catSlug}/listingss?page=${nextPage}&limit=${PAGE_SIZE}${typeParam}`);
           const data = await res.json();
 
           const section = document.querySelector(`[data-category="${catSlug}"] .grid`);

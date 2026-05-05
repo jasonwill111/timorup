@@ -25,10 +25,10 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex items-center gap-6">
         <a
-          href="/listing"
+          href="/listings"
           class:list={[
             "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
-            currentPath.startsWith('/listing') ? "text-primary" : "text-muted-foreground"
+            currentPath.startsWith('/listings') ? "text-primary" : "text-muted-foreground"
           ]}
         >
           Directory
@@ -61,7 +61,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
           FAQ
         </a>
         <a
-          href="/listing/create"
+          href="/listings/create"
           class="text-sm font-medium bg-primary text-black px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           + Create
@@ -95,9 +95,6 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
                   </button>
                 </div>
               </div>
-              <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">
-                Admin
-              </a>
             </div>
           ) : (
             <>
@@ -176,16 +173,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
             >
               My Account
             </a>
-            <a
-              href="/admin"
-              class:list={[
-                "block px-3 py-2 rounded-lg text-sm font-medium",
-                currentPath.startsWith('/admin') ? "bg-muted text-primary" : "text-muted-foreground"
-              ]}
-            >
-              Admin
-            </a>
-            <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">
+            <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-foreground">
               Log Out
             </button>
           </>
@@ -261,7 +249,6 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
               <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-muted">Log Out</button>
             </div>
           </div>
-          <a href="/admin" class="text-sm font-medium text-muted-foreground hover:text-primary">Admin</a>
         `;
         // Attach dropdown toggle
         setTimeout(() => {
@@ -290,7 +277,6 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       if (mobileAuth) {
         mobileAuth.innerHTML = `
           <a href="/account" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">My Account</a>
-          <a href="/admin" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">Admin</a>
           <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">Log Out</button>
         `;
         // Re-attach logout handler

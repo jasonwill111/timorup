@@ -177,7 +177,7 @@ const mappedCategories = categoriesData;
 <section class="mb-6 sm:mb-12">
   <div class="flex items-center justify-between mb-4 sm:mb-6">
     <h2 class="text-lg sm:text-2xl font-bold">Featured Businesses</h2>
-    <a href="/listing?type=business" class="text-xs sm:text-sm text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
+    <a href="/listings?type=business" class="text-xs sm:text-sm text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
   </div>
   <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
     {featuredBusinesses.length > 0 ? featuredBusinesses.map((business: any) => (
@@ -196,7 +196,7 @@ const mappedCategories = categoriesData;
     )) : (
       <div class="col-span-full text-center py-8 text-muted-foreground">
         <p>No featured businesses yet.</p>
-        <a href="/listing/create" class="text-amber-600 hover:underline">Add your business!</a>
+        <a href="/listings/create" class="text-amber-600 hover:underline">Add your business!</a>
       </div>
     )}
   </div>
@@ -207,7 +207,7 @@ const mappedCategories = categoriesData;
   <section class="mb-6 sm:mb-12">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-lg sm:text-2xl font-bold">Government</h2>
-      <a href="/listing?type=govs" class="text-purple-600 hover:text-purple-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
+      <a href="/listings?type=govs" class="text-purple-600 hover:text-purple-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {featuredGovs.map((gov: any) => (
@@ -234,7 +234,7 @@ const mappedCategories = categoriesData;
   <section class="mb-6 sm:mb-12">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-lg sm:text-2xl font-bold">NGOs & Non-Profits</h2>
-      <a href="/listing?type=ngos" class="text-orange-600 hover:text-orange-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
+      <a href="/listings?type=ngos" class="text-orange-600 hover:text-orange-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {featuredNgos.map((ngo: any) => (
@@ -280,7 +280,7 @@ const mappedCategories = categoriesData;
   ) : (
     <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-8 text-center">
       <p class="text-muted-foreground mb-4">No products available yet. Be the first to add one!</p>
-      <a href="/listing/create">
+      <a href="/listings/create">
         <button class="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">List Your Business</button>
       </a>
     </div>
@@ -292,7 +292,7 @@ const mappedCategories = categoriesData;
   <h2 class="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Browse by Category</h2>
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
     {mappedCategories.map((cat: any) => (
-      <a href={`/listing?type=business&industry=${cat.slug}`} class="block cursor-pointer">
+      <a href={`/listings?type=business&industry=${cat.slug}`} class="block cursor-pointer">
         <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <div class="w-8 h-8 mx-auto mb-2 text-amber-500 flex items-center justify-center">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

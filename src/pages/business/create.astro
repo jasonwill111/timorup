@@ -1,6 +1,6 @@
 ---
 export const prerender = false;
-// Redirect to /listing/create
+// Redirect to /listings/create
 const url = Astro.request.url.split('/business/create')[1] || '';
-return Astro.redirect('/listing/create' + url);
+return Astro.redirect('/listings/create' + url);
 ---

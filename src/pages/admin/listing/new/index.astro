@@ -16,7 +16,7 @@ const allCategories = await db.select().from(categories).all();
 <Layout title="New Listing - Admin" requireAuth adminOnly>
   <div class="container py-8 max-w-4xl">
     <div class="mb-6">
-      <a href="/admin/listing" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
+      <a href="/admin/listings" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
         ← Back to Listings
       </a>
       <h1 class="text-2xl font-bold">Create New Listing</h1>
@@ -142,7 +142,7 @@ const allCategories = await db.select().from(categories).all();
 
       <!-- Submit -->
       <div class="flex items-center justify-end gap-4">
-        <a href="/admin/listing">
+        <a href="/admin/listings">
           <Button type="button" variant="outline">Cancel</Button>
         </a>
         <Button type="submit">Create Listing</Button>
@@ -205,7 +205,7 @@ const allCategories = await db.select().from(categories).all();
     }
 
     try {
-      const res = await fetch('/api/admin/listing', {
+      const res = await fetch('/api/admin/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -213,7 +213,7 @@ const allCategories = await db.select().from(categories).all();
 
       if (res.ok) {
         const result = await res.json();
-        window.location.href = `/admin/listing/${result.id}/edit`;
+        window.location.href = `/admin/listings/${result.id}/edit`;
       } else {
         const error = await res.json();
         alert('Failed to create listing: ' + (error.message || 'Unknown error'));

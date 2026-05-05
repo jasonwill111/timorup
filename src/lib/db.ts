@@ -7,14 +7,17 @@ import { drizzle as drizzleLibsql } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import * as schema from '@/db/schema';
 
-// Check if running in Cloudflare Workers runtime
+// Check if running in Cloudflare Workers runtime - cached
+let _isWorkersRuntime: boolean | null = null;
 async function isWorkersRuntime(): Promise<boolean> {
+  if (_isWorkersRuntime !== null) return _isWorkersRuntime;
   try {
     await import('cloudflare:workers');
-    return true;
+    _isWorkersRuntime = true;
   } catch {
-    return false;
+    _isWorkersRuntime = false;
   }
+  return _isWorkersRuntime;
 }
 
 // Get local SQLite path (from wrangler state)

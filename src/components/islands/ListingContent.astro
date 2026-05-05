@@ -90,7 +90,7 @@ const listings = filteredListings.slice(offset, offset + PAGE_SIZE);
 const totalPages = Math.ceil(total / PAGE_SIZE);
 
 // Get page base URL
-const pageBase = `/listing?type=${type}`;
+const pageBase = `/listings?type=${type}`;
 const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&industry=${industry}&category=${category}&sort=${sort}`;
 ---
 

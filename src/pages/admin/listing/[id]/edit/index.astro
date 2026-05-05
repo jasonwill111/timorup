@@ -20,7 +20,7 @@ const listing = await db
   .get();
 
 if (!listing) {
-  return Astro.redirect('/admin/listing');
+  return Astro.redirect('/admin/listings');
 }
 
 const allCategories = await db.select().from(categories).all();
@@ -30,7 +30,7 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
 <Layout title={`Edit ${listing.title} - Admin`} requireAuth adminOnly>
   <div class="container py-8 max-w-4xl">
     <div class="mb-6">
-      <a href="/admin/listing" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
+      <a href="/admin/listings" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
         ← Back to Listings
       </a>
       <div class="flex items-center justify-between">
@@ -181,7 +181,7 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
 
       <!-- Submit -->
       <div class="flex items-center justify-end gap-4">
-        <a href="/admin/listing">
+        <a href="/admin/listings">
           <Button type="button" variant="outline">Cancel</Button>
         </a>
         <Button type="submit">Save Changes</Button>

@@ -24,7 +24,7 @@ const structuredData = {
   "@type": "LocalBusiness",
   "name": "TimorList Local Directory",
   "description": `Browse ${type === 'business' ? 'businesses' : type === 'govs' ? 'government agencies' : 'NGOs'} in Timor-Leste.`,
-  "url": `https://timorlist.com/listing?type=${type}`,
+  "url": `https://timorlist.com/listings?type=${type}`,
 };
 ---
 
@@ -39,19 +39,19 @@ const structuredData = {
     <!-- Type Tabs - compact on mobile -->
     <div class="flex gap-1 sm:gap-4 mb-4 sm:mb-6 border-b -mx-2 px-2 sm:mx-0 sm:px-0 overflow-x-auto">
       <a
-        href="/listing?type=business"
+        href="/listings?type=business"
         class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
       >
         Businesses
       </a>
       <a
-        href="/listing?type=govs"
+        href="/listings?type=govs"
         class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'govs' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
       >
         Government
       </a>
       <a
-        href="/listing?type=ngos"
+        href="/listings?type=ngos"
         class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'ngos' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
       >
         NGOs & Non-Profits
@@ -143,7 +143,7 @@ const structuredData = {
       else params.delete(key);
     });
 
-    window.location.href = `/listing?${params.toString()}`;
+    window.location.href = `/listings?${params.toString()}`;
   };
 
   form?.addEventListener('change', handleChange);

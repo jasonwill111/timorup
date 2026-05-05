@@ -1,0 +1,29 @@
+{
+  "id": "0026-auth-form-componentization",
+  "status": "completed",
+  "type": "refactor",
+  "priority": "P2",
+  "created": "2026-05-04T10:41:09.456Z",
+  "completed": "2026-05-04T10:45:00.000Z",
+  "lastActivity": "2026-05-04T10:45:00.000Z",
+  "testMode": "none",
+  "coverageTarget": 80,
+  "project": "timorlist",
+  "board": "development",
+  "summary": "Componentize auth forms to reduce code duplication",
+  "filesModified": [
+    "src/components/forms/AuthCard.astro",
+    "src/components/forms/FormHandler.astro",
+    "src/components/forms/FormMessage.astro",
+    "src/components/forms/LoadingButton.astro",
+    "src/components/forms/PasswordInput.astro",
+    "src/components/forms/index.astro",
+    "src/pages/login.astro",
+    "src/pages/register.astro",
+    "src/pages/forgot-password.astro",
+    "src/pages/reset-password.astro",
+    "src/db/schema/auth.ts",
+    "src/db/seed.sql"
+  ],
+  "commitHash": "fcc3d5c"
+}

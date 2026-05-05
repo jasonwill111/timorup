@@ -504,7 +504,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (!generatedListing) return;
 
     try {
-      const res = await fetch('/api/admin/listing', {
+      const res = await fetch('/api/admin/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(generatedListing),
