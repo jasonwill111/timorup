@@ -7,7 +7,6 @@ interface Props {
 
 const { currentPath = '/' } = Astro.props;
 
-// Check if user is logged in (simplified - in production use proper auth)
 const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'));
 ---
 
@@ -16,18 +15,18 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
     <div class="flex h-16 items-center justify-between">
       <!-- Logo -->
       <a href="/" class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+        <div class="w-11 h-10 bg-brand-500 rounded-lg flex items-center justify-center">
           <span class="text-white font-bold text-lg">T</span>
         </div>
         <span class="font-bold text-xl hidden sm:inline-block">TimorList</span>
       </a>
 
-      <!-- Desktop Navigation -->
-      <nav class="hidden md:flex items-center gap-6">
+      <!-- Desktop Navigation - ALL buttons 44px height -->
+      <nav class="hidden md:flex items-center gap-1">
         <a
           href="/listings"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
             currentPath.startsWith('/listings') ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -36,7 +35,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/products-services"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
             currentPath.startsWith('/products-services') ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -45,7 +44,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/pricing"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
             currentPath === '/pricing' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -54,7 +53,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/faq"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-2 py-1",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
             currentPath === '/faq' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -62,46 +61,34 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         </a>
         <a
           href="/listings/create"
-          class="text-sm font-medium bg-primary text-black px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          class="text-sm font-medium bg-primary text-primary-foreground px-4 h-10 rounded-md hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center"
         >
           + Create
         </a>
       </nav>
 
-      <!-- Right Side -->
+      <!-- Right Side - ALL buttons 44px height -->
       <div class="flex items-center gap-2">
-        <!-- Theme Toggle (using shadcn theme component) -->
         <ThemeToggle />
 
-        <!-- Desktop Auth Buttons -->
         <div id="desktop-auth" class="hidden md:flex items-center gap-2">
           {isLoggedIn ? (
-            <div class="flex items-center gap-3">
-              <!-- User Avatar Dropdown -->
-              <div class="relative">
-                <button id="avatar-dropdown-btn" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
-                    <span class="text-white text-sm font-medium">?</span>
-                  </div>
-                </button>
-                <!-- Dropdown Menu -->
-                <div id="avatar-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-background border rounded-lg shadow-lg py-1 z-50">
-                  <a href="/account" class="block px-4 py-2 text-sm hover:bg-muted">
-                    My Account
-                  </a>
-                  <hr class="my-1 border-muted" />
-                  <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-muted">
-                    Log Out
-                  </button>
-                </div>
+            <div class="relative">
+              <button id="avatar-dropdown-btn" class="w-11 h-10 rounded-lg bg-brand-500 flex items-center justify-center hover:opacity-80 transition-opacity">
+                <span class="text-white text-sm font-medium">?</span>
+              </button>
+              <div id="avatar-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-background border rounded-lg shadow-lg py-1 z-50">
+                <a href="/account" class="block px-4 py-3 text-sm hover:bg-muted">My Account</a>
+                <hr class="my-1 border-muted" />
+                <button id="logout-btn" class="block w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-muted">Log Out</button>
               </div>
             </div>
           ) : (
             <>
-              <a href="/login" class="text-sm font-medium text-muted-foreground hover:text-primary">
+              <a href="/login" class="text-sm font-medium text-muted-foreground hover:text-primary px-3 h-10 rounded-md hover:bg-muted transition-colors flex items-center">
                 Log in
               </a>
-              <a href="/register" class="text-sm font-medium bg-brand-500 text-white px-4 py-2 rounded-lg hover:bg-brand-600 transition-colors">
+              <a href="/register" class="text-sm font-medium bg-primary text-primary-foreground px-4 h-10 rounded-md hover:bg-primary/90 transition-colors flex items-center">
                 Sign Up
               </a>
             </>
@@ -111,7 +98,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <!-- Mobile Menu Button -->
         <button
           id="mobile-menu-btn"
-          class="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+          class="md:hidden w-11 h-10 rounded-md hover:bg-muted transition-colors flex items-center justify-center"
           aria-label="Open menu"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,72 +112,28 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden md:hidden border-t">
     <nav class="container max-w-6xl py-4 space-y-2">
-      <a
-        href="/businesses"
-        class:list={[
-          "block px-3 py-2 rounded-lg text-sm font-medium",
-          currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"
-        ]}
-      >
+      <a href="/businesses" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Businesses
       </a>
-      <a
-        href="/categories"
-        class:list={[
-          "block px-3 py-2 rounded-lg text-sm font-medium",
-          currentPath.startsWith('/categories') ? "bg-muted text-primary" : "text-muted-foreground"
-        ]}
-      >
+      <a href="/categories" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/categories') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Categories
       </a>
-      <a
-        href="/pricing"
-        class:list={[
-          "block px-3 py-2 rounded-lg text-sm font-medium",
-          currentPath === '/pricing' ? "bg-muted text-primary" : "text-muted-foreground"
-        ]}
-      >
+      <a href="/pricing" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath === '/pricing' ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Pricing
       </a>
-      <a
-        href="/faq"
-        class:list={[
-          "block px-3 py-2 rounded-lg text-sm font-medium",
-          currentPath === '/faq' ? "bg-muted text-primary" : "text-muted-foreground"
-        ]}
-      >
+      <a href="/faq" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath === '/faq' ? "bg-muted text-primary" : "text-muted-foreground"]}>
         FAQ
       </a>
       <div id="mobile-auth" class="border-t pt-2 mt-2">
         {isLoggedIn ? (
           <>
-            <a
-              href="/account"
-              class:list={[
-                "block px-3 py-2 rounded-lg text-sm font-medium",
-                currentPath === '/account' ? "bg-muted text-primary" : "text-muted-foreground"
-              ]}
-            >
-              My Account
-            </a>
-            <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-foreground">
-              Log Out
-            </button>
+            <a href="/account" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">My Account</a>
+            <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">Log Out</button>
           </>
         ) : (
           <>
-            <a
-              href="/login"
-              class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground"
-            >
-              Log in
-            </a>
-            <a
-              href="/register"
-              class="block px-3 py-2 rounded-lg text-sm font-medium bg-brand-500 text-white text-center"
-            >
-              Sign Up
-            </a>
+            <a href="/login" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">Log in</a>
+            <a href="/register" class="block px-3 py-2 rounded-lg text-sm font-medium bg-brand-500 text-white text-center">Sign Up</a>
           </>
         )}
       </div>
@@ -199,7 +142,6 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
 </header>
 
 <script>
-  // Mobile menu toggle
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
 
@@ -207,58 +149,42 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
     mobileMenu?.classList.toggle('hidden');
   });
 
-  // Mobile logout - call server-side API to invalidate session
   document.getElementById('mobile-logout')?.addEventListener('click', async () => {
-    try {
-      await fetch('/api/auth/sign-out', {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
+    try { await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' }); }
+    catch (e) { console.error('Logout error:', e); }
+    finally {
       sessionStorage.removeItem('userId');
       localStorage.removeItem('userId');
       window.location.href = '/';
     }
   });
 
-  // Update auth state on page load based on localStorage
   function updateAuthState() {
     const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
     const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
     const desktopAuth = document.getElementById('desktop-auth');
     const mobileAuth = document.getElementById('mobile-auth');
-
-    // Get initial from userName or default to '?'
     const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
     if (userId) {
-      // User is logged in - show avatar dropdown
       if (desktopAuth) {
         desktopAuth.innerHTML = `
           <div class="relative">
-            <button id="avatar-dropdown-btn" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center">
-                <span class="text-white text-sm font-medium">${initial}</span>
-              </div>
+            <button id="avatar-dropdown-btn" class="w-11 h-10 rounded-lg bg-brand-500 flex items-center justify-center hover:opacity-80 transition-opacity">
+              <span class="text-white text-sm font-medium">${initial}</span>
             </button>
             <div id="avatar-dropdown" class="hidden absolute right-0 mt-2 w-40 bg-background border rounded-lg shadow-lg py-1 z-50">
-              <a href="/account" class="block px-4 py-2 text-sm hover:bg-muted">My Account</a>
+              <a href="/account" class="block px-4 py-3 text-sm hover:bg-muted">My Account</a>
               <hr class="my-1 border-muted" />
-              <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-muted">Log Out</button>
+              <button id="logout-btn" class="block w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-muted">Log Out</button>
             </div>
           </div>
         `;
-        // Attach dropdown toggle
         setTimeout(() => {
-          const dropdownBtn = document.getElementById('avatar-dropdown-btn');
-          const dropdown = document.getElementById('avatar-dropdown');
-          dropdownBtn?.addEventListener('click', (e) => {
+          document.getElementById('avatar-dropdown-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
-            dropdown?.classList.toggle('hidden');
+            document.getElementById('avatar-dropdown')?.classList.toggle('hidden');
           });
-          // Attach logout handler
           document.getElementById('logout-btn')?.addEventListener('click', async () => {
             try { await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' }); }
             catch (e) { console.error('Logout error:', e); }
@@ -270,8 +196,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
               window.location.href = '/';
             }
           });
-          // Close on outside click
-          document.addEventListener('click', () => dropdown?.classList.add('hidden'));
+          document.addEventListener('click', () => document.getElementById('avatar-dropdown')?.classList.add('hidden'));
         }, 0);
       }
       if (mobileAuth) {
@@ -279,21 +204,9 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
           <a href="/account" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">My Account</a>
           <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">Log Out</button>
         `;
-        // Re-attach logout handler
-        document.getElementById('mobile-logout')?.addEventListener('click', async () => {
-          try {
-            await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
-          } catch (e) { console.error('Logout error:', e); }
-          finally {
-            sessionStorage.removeItem('userId');
-            localStorage.removeItem('userId');
-            window.location.href = '/';
-          }
-        });
       }
     }
   }
 
-  // Run on page load
   updateAuthState();
 </script>

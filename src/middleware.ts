@@ -31,8 +31,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return response;
   }
 
-  // Listing pages: cache 2 min
-  if (context.url.pathname === '/listing' || context.url.pathname === '/listing/') {
+  // Listings pages: cache 2 min
+  if (context.url.pathname === '/listings' || context.url.pathname === '/listings/') {
     const response = await next();
     response.headers.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
     return response;

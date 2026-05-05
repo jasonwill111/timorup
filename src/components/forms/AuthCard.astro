@@ -32,7 +32,7 @@ const { title, description, footerText, footerLink } = Astro.props;
           <p class="text-sm text-muted-foreground">
             {footerText}
             {footerLink && (
-              <a href={footerLink.href} class="text-primary hover:underline ml-1">
+              <a href={footerLink.href} class="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline ml-1">
                 {footerLink.text}
               </a>
             )}

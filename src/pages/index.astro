@@ -38,7 +38,8 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
   <div class="container py-6 sm:py-12">
     <!-- Server Island: Dynamic content with skeleton fallback -->
     <HomepageContent server:defer>
-      <div class="space-y-8">
+      <!-- Fallback -->
+      <div slot="fallback" class="space-y-8">
         <!-- Featured Businesses Skeleton -->
         <section class="mb-6 sm:mb-12">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
@@ -67,6 +68,18 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
                 <div class="aspect-square bg-muted rounded mb-3 animate-pulse"></div>
                 <div class="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse"></div>
                 <div class="h-3 bg-muted rounded w-1/3 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <!-- Categories Skeleton -->
+        <section class="mb-6 sm:mb-12">
+          <div class="h-6 sm:h-8 w-48 bg-muted rounded animate-pulse mb-4 sm:mb-6"></div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {[...Array(8)].map(() => (
+              <div class="p-4 text-center border rounded-xl">
+                <div class="h-8 w-8 mx-auto mb-2 bg-muted rounded animate-pulse"></div>
+                <div class="h-4 w-16 mx-auto bg-muted rounded animate-pulse"></div>
               </div>
             ))}
           </div>

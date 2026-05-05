@@ -1,6 +1,6 @@
 ---
-// Local Directory - SSG with Server Islands
-export const prerender = true;
+// Local Directory - SSR
+export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
@@ -107,16 +107,18 @@ const structuredData = {
     </form>
 
     <!-- Dynamic Content Island -->
-    <ListingContent server:defer>
-      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {[...Array(8)].map(() => (
-          <div class="bg-muted rounded-xl animate-pulse h-56"></div>
-        ))}
-      </div>
-      <div class="flex justify-center gap-2 mt-8">
-        <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
-        <div class="h-9 px-4 bg-muted rounded animate-pulse"></div>
-        <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
+    <ListingContent server:defer initialType={type}>
+      <div slot="fallback">
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map(() => (
+            <div class="bg-muted rounded-xl animate-pulse h-56"></div>
+          ))}
+        </div>
+        <div class="flex justify-center gap-2 mt-8">
+          <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
+          <div class="h-9 px-4 bg-muted rounded animate-pulse"></div>
+          <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
+        </div>
       </div>
     </ListingContent>
   </div>

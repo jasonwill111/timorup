@@ -2,12 +2,17 @@
 // Server Island: Listing content with filtering and pagination
 import { getDb } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { INDUSTRIES } from '@/lib/constants';
 
-const db = await getDb();
+interface Props {
+  initialType?: string;
+}
+
+const { initialType } = Astro.props;
 const PAGE_SIZE = 12;
-const type = Astro.url.searchParams.get('type') || 'business';
+// Read type from URL search params for filtering
+const type = Astro.url.searchParams.get('type') || initialType || 'business';
 const search = Astro.url.searchParams.get('search') || '';
 const industry = Astro.url.searchParams.get('industry') || '';
 const category = Astro.url.searchParams.get('category') || '';
@@ -15,7 +20,9 @@ const page = parseInt(Astro.url.searchParams.get('page') || '1');
 const sort = Astro.url.searchParams.get('sort') || 'recent';
 
 // Build entity type filter
-let entityFilter;
+const statusFilter = eq(businessPages.status, 'live');
+let entityFilter = null;
+
 if (type === 'business') {
   entityFilter = eq(businessPages.entityType, 'business');
 } else if (type === 'govs') {
@@ -24,13 +31,15 @@ if (type === 'business') {
   entityFilter = eq(businessPages.entityType, 'nonprofit');
 }
 
+// Combine filters
+const whereCondition = entityFilter ? and(statusFilter, entityFilter) : statusFilter;
+
 // Get categories for filter
+const db = await getDb();
 const allCategories = await db.select().from(categories).all();
 
-// Query listings
-const offset = (page - 1) * PAGE_SIZE;
-
-let query = db
+// Query listings with combined filter
+const allListings = await db
   .select({
     id: businessPages.id,
     title: businessPages.title,
@@ -45,14 +54,9 @@ let query = db
     createdAt: businessPages.createdAt,
   })
   .from(businessPages)
-  .where(eq(businessPages.status, 'live'));
-
-if (entityFilter) {
-  // @ts-ignore
-  query = query.where(entityFilter);
-}
-
-const allListings = await query.orderBy(desc(businessPages.createdAt)).all();
+  .where(whereCondition)
+  .orderBy(desc(businessPages.createdAt))
+  .all();
 
 // Apply search/filter in memory
 let filteredListings = allListings;
@@ -86,6 +90,7 @@ if (sort === 'name') {
 
 // Pagination
 const total = filteredListings.length;
+const offset = (page - 1) * PAGE_SIZE;
 const listings = filteredListings.slice(offset, offset + PAGE_SIZE);
 const totalPages = Math.ceil(total / PAGE_SIZE);
 

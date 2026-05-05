@@ -77,6 +77,9 @@ try {
 
   const allListings = businessesResult.map(b => {
     const tags = b.tags ? JSON.parse(b.tags) : [];
+    const entityTypeDisplay = b.entityType === 'business' ? 'Business'
+      : b.entityType === 'government' ? 'Government'
+      : b.entityType === 'nonprofit' ? 'Nonprofit' : 'Business';
     return {
       id: b.id,
       title: b.title,
@@ -90,6 +93,8 @@ try {
       tags,
       profileImageId: b.profileImageId,
       entityType: b.entityType,
+      entityTypeDisplay,
+      isNew: false,
     };
   });
 
@@ -191,7 +196,7 @@ const mappedCategories = categoriesData;
         reviews={business.reviews}
         location={business.location}
         tag={business.tag}
-        type="business"
+        type={business.entityType}
       />
     )) : (
       <div class="col-span-full text-center py-8 text-muted-foreground">

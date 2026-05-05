@@ -25,7 +25,7 @@ const onRequest$1 = defineMiddleware(async (context, next) => {
     response.headers.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
     return response;
   }
-  if (context.url.pathname === "/listing" || context.url.pathname === "/listing/") {
+  if (context.url.pathname === "/listings" || context.url.pathname === "/listings/") {
     const response = await next();
     response.headers.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
     return response;
