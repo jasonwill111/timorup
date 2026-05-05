@@ -217,7 +217,7 @@ const mappedCategories = categoriesData;
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {featuredGovs.map((gov: any) => (
         <a href={`/business/${gov.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
-          <div class="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 relative flex items-center justify-center">
+          <div class="aspect-square bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 relative flex items-center justify-center">
             {gov.profileImageId ? (
               <img src={`/api/media/${gov.profileImageId}`} alt={gov.title} class="w-full h-full object-cover" loading="lazy" />
             ) : (
@@ -244,7 +244,7 @@ const mappedCategories = categoriesData;
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {featuredNgos.map((ngo: any) => (
         <a href={`/business/${ngo.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
-          <div class="aspect-[4/3] bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 relative flex items-center justify-center">
+          <div class="aspect-square bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 relative flex items-center justify-center">
             {ngo.profileImageId ? (
               <img src={`/api/media/${ngo.profileImageId}`} alt={ngo.title} class="w-full h-full object-cover" loading="lazy" />
             ) : (
