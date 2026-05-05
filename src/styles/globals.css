@@ -72,24 +72,24 @@
   --font-oswald: 'Oswald', sans-serif;
 }
 
-/* Dark mode */
+/* Dark mode - improved contrast for readability */
 .dark {
-  --color-background: #0A0F1A;
-  --color-foreground: #f1f5f9;
-  --color-card: #1e293b;
-  --color-card-foreground: #f1f5f9;
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-card: #18181b;
+  --color-card-foreground: #fafafa;
   --color-primary: #FFD150;
-  --color-primary-foreground: #1a1a1a;
-  --color-secondary: #1e293b;
-  --color-secondary-foreground: #f1f5f9;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #1e293b;
-  --color-accent-foreground: #f1f5f9;
-  --color-destructive: #7f1d1d;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #334155;
-  --color-input: #334155;
+  --color-primary-foreground: #18181b;
+  --color-secondary: #27272a;
+  --color-secondary-foreground: #fafafa;
+  --color-muted: #27272a;
+  --color-muted-foreground: #a1a1aa;
+  --color-accent: #27272a;
+  --color-accent-foreground: #fafafa;
+  --color-destructive: #991b1b;
+  --color-destructive-foreground: #fafafa;
+  --color-border: #3f3f46;
+  --color-input: #3f3f46;
   --color-ring: #FFD150;
 }
 
@@ -102,6 +102,8 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-inter);
+    font-size: 16px; /* Mobile: minimum 16px for inputs */
+    -webkit-text-size-adjust: 100%; /* Prevent iOS zoom on input focus */
   }
 
   /* Smooth scrolling */
@@ -118,6 +120,18 @@
   /* Remove default focus outline, use :focus-visible instead */
   :focus:not(:focus-visible) {
     outline: none;
+  }
+
+  /* Improved touch targets for mobile */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better tap highlight for mobile */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: var(--color-primary);
+    tap-highlight-color: var(--color-primary);
   }
 }
 
