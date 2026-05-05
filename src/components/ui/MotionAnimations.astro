@@ -1,0 +1,84 @@
+---
+// Motion animations for TimorList
+---
+
+<script>
+import { animate } from 'motion';
+
+// Entrance animations with stagger
+export function fadeInUp(selector: string, delay = 0) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((el, i) => {
+    animate(
+      el,
+      { opacity: [0, 1], y: [20, 0] },
+      { duration: 0.4, delay: delay + i * 0.05, easing: [0.25, 0.1, 0.25, 1] }
+    );
+  });
+}
+
+// Text reveal animation
+export function textReveal(element: Element, duration = 0.8) {
+  const words = element.textContent?.split(' ') || [];
+  element.innerHTML = words
+    .map(word => `<span class="word-reveal" style="display: inline-block; opacity: 0; transform: translateY(100%)">${word}</span>`)
+    .join(' ');
+
+  element.querySelectorAll('.word-reveal').forEach((word, i) => {
+    animate(
+      word,
+      { opacity: [0, 1], y: [20, 0] },
+      { duration, delay: i * 0.05, easing: 'ease-out' }
+    );
+  });
+}
+
+// Scale in animation
+export function scaleIn(selector: string, delay = 0) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((el, i) => {
+    animate(
+      el,
+      { opacity: [0, 1], scale: [0.9, 1] },
+      { duration: 0.3, delay: delay + i * 0.03, easing: 'ease-out' }
+    );
+  });
+}
+
+// Hover lift effect
+export function addHoverLift(selector: string) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      animate(el, { y: -4, boxShadow: '0 12px 24px rgba(0,0,0,0.1)' }, { duration: 0.2 });
+    });
+    el.addEventListener('mouseleave', () => {
+      animate(el, { y: 0, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }, { duration: 0.2 });
+    });
+  });
+}
+
+// Auto-initialize common animations
+document.addEventListener('DOMContentLoaded', () => {
+  // Hero section text reveal
+  const heroTitle = document.querySelector('h1');
+  if (heroTitle) {
+    textReveal(heroTitle, 0.3);
+  }
+
+  // Card hover effects
+  addHoverLift('.listing-card, .product-card');
+
+  // Entrance animations
+  setTimeout(() => {
+    fadeInUp('.listing-card', 0.2);
+    scaleIn('.filter-select', 0.1);
+  }, 100);
+});
+</script>
+
+<style>
+.word-reveal {
+  will-change: transform, opacity;
+}
+</style>
