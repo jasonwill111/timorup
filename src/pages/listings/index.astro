@@ -1,0 +1,150 @@
+---
+// Local Directory - SSG with Server Islands
+export const prerender = true;
+
+import Layout from '../../layouts/Layout.astro';
+import Input from '../../components/ui/Input.astro';
+import { getDb } from '@/lib/db';
+import { categories } from '@/db/schema';
+import { INDUSTRIES } from '@/lib/constants';
+import ListingContent from '../../components/islands/ListingContent.astro';
+
+// Get categories for static filter options
+const db = await getDb();
+const allCategories = await db.select().from(categories).all();
+const categoryJson = JSON.stringify(allCategories);
+
+// Get current params for type tabs
+const type = Astro.url.searchParams.get('type') || 'business';
+const industry = Astro.url.searchParams.get('industry') || '';
+const category = Astro.url.searchParams.get('category') || '';
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "TimorList Local Directory",
+  "description": `Browse ${type === 'business' ? 'businesses' : type === 'govs' ? 'government agencies' : 'NGOs'} in Timor-Leste.`,
+  "url": `https://timorlist.com/listing?type=${type}`,
+};
+---
+
+<Layout
+  title="Local Directory - TimorList"
+  description="Browse businesses, government agencies, and nonprofits in Timor-Leste"
+  structuredData={structuredData}
+>
+  <div class="container py-4 sm:py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Local Directory</h1>
+
+    <!-- Type Tabs - compact on mobile -->
+    <div class="flex gap-1 sm:gap-4 mb-4 sm:mb-6 border-b -mx-2 px-2 sm:mx-0 sm:px-0 overflow-x-auto">
+      <a
+        href="/listing?type=business"
+        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+      >
+        Businesses
+      </a>
+      <a
+        href="/listing?type=govs"
+        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'govs' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+      >
+        Government
+      </a>
+      <a
+        href="/listing?type=ngos"
+        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'ngos' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+      >
+        NGOs & Non-Profits
+      </a>
+    </div>
+
+    <!-- Filters - compact on mobile -->
+    <form id="filter-form" class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
+      <Input
+        id="search"
+        name="search"
+        type="search"
+        placeholder="Search..."
+        class="w-full sm:w-48 md:w-64"
+        value={Astro.url.searchParams.get('search') || ''}
+      />
+
+      {type === 'business' && (
+        <select id="industry-filter" name="industry" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+          <option value="">All Industries</option>
+          {Object.entries(INDUSTRIES).map(([key, group]) => (
+            <optgroup label={group.label}>
+              {group.items.map(item => (
+                <option value={key}>
+                  {item}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
+
+      {(type === 'govs' || type === 'ngos') && (
+        <select id="category-filter" name="category" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+          <option value="">All Categories</option>
+          {allCategories.map(cat => (
+            <option value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      )}
+
+      <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+        <option value="recent">Recent</option>
+        <option value="name">Name A-Z</option>
+        <option value="rating">Top Rated</option>
+        <option value="popular">Popular</option>
+      </select>
+
+      <input type="hidden" name="type" value={type} />
+      <input type="hidden" name="page" value="1" />
+    </form>
+
+    <!-- Dynamic Content Island -->
+    <ListingContent server:defer>
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {[...Array(8)].map(() => (
+          <div class="bg-muted rounded-xl animate-pulse h-56"></div>
+        ))}
+      </div>
+      <div class="flex justify-center gap-2 mt-8">
+        <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
+        <div class="h-9 px-4 bg-muted rounded animate-pulse"></div>
+        <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
+      </div>
+    </ListingContent>
+  </div>
+</Layout>
+
+<script define:vars={{ industry, category }}>
+  // Set initial values for selects
+  const industryFilter = document.getElementById('industry-filter');
+  const categoryFilter = document.getElementById('category-filter');
+  const sortFilter = document.getElementById('sort-filter');
+
+  if (industryFilter) industryFilter.value = industry;
+  if (categoryFilter) categoryFilter.value = category;
+
+  // Handle filter changes
+  const form = document.getElementById('filter-form');
+  const handleChange = () => {
+    const params = new URLSearchParams(window.location.search);
+    const formData = new FormData(form);
+
+    params.set('page', '1');
+    formData.forEach((value, key) => {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    });
+
+    window.location.href = `/listing?${params.toString()}`;
+  };
+
+  form?.addEventListener('change', handleChange);
+</script>
