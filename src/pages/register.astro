@@ -6,7 +6,6 @@ import AuthCard from '../components/forms/AuthCard.astro';
 import FormMessage from '../components/forms/FormMessage.astro';
 import LoadingButton from '../components/forms/LoadingButton.astro';
 import PasswordInput from '../components/forms/PasswordInput.astro';
-import FormHandler from '../components/forms/FormHandler.astro';
 ---
 
 <Layout title="Register - TimorList">
@@ -98,30 +97,84 @@ import FormHandler from '../components/forms/FormHandler.astro';
         </a>
       </div>
     </form>
-
-    <FormHandler
-      formId="register-form"
-      submitBtnId="submit-btn"
-      messageId="form-message"
-      redirectOnSuccess="/account"
-      successMessage="Account created successfully!"
-    />
   </AuthCard>
 </Layout>
 
 <script>
-  // Client-side validation for password match
   const form = document.getElementById('register-form');
-  form?.addEventListener('submit', (e) => {
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
+  const btnText = document.getElementById('submit-btn-text');
+  const btnLoading = document.getElementById('submit-btn-loading');
+  const message = document.getElementById('form-message');
+
+  function setLoading(loading: boolean) {
+    if (submitBtn) submitBtn.disabled = loading;
+    btnText?.classList.toggle('hidden', loading);
+    btnLoading?.classList.toggle('hidden', !loading);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
     const password = (document.getElementById('password') as HTMLInputElement)?.value;
     const confirm = (document.getElementById('confirmPassword') as HTMLInputElement)?.value;
 
     if (password !== confirm) {
-      e.preventDefault();
-      const msg = document.getElementById('form-message');
-      if (msg) {
-        msg.textContent = 'Passwords do not match';
-        msg.classList.remove('hidden');
+      if (message) {
+        message.textContent = 'Passwords do not match';
+        message.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (password.length < 8) {
+      if (message) {
+        message.textContent = 'Password must be at least 8 characters';
+        message.classList.remove('hidden');
+      }
+      return;
+    }
+
+    message?.classList.add('hidden');
+    setLoading(true);
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch('/api/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      setLoading(false);
+
+      if (result.success) {
+        if (message) {
+          message.textContent = result.message || 'Account created successfully!';
+          message.className = message.className
+            .replace(/bg-red-\d+/g, 'bg-green-50')
+            .replace(/text-red-\d+/g, 'text-green-700')
+            .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
+            .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
+          message.classList.remove('hidden');
+        }
+        setTimeout(() => {
+          window.location.href = '/account';
+        }, 1500);
+      } else {
+        if (message) {
+          message.textContent = result.error?.message || 'Registration failed';
+          message.classList.remove('hidden');
+        }
+      }
+    } catch {
+      setLoading(false);
+      if (message) {
+        message.textContent = 'Network error. Please try again.';
+        message.classList.remove('hidden');
       }
     }
   });

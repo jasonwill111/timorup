@@ -23,39 +23,54 @@ export async function GET({ request }: { request: Request }) {
         .limit(1)
         .get();
 
-      if (session && session.expiresAt && new Date(session.expiresAt) > new Date()) {
-        // Session valid, get user
-        const user = await db.select()
-          .from(users)
-          .where(eq(users.id, session.userId))
-          .limit(1)
-          .get();
+      // expiresAt in D1 is Unix timestamp (seconds), need to convert to milliseconds
+      if (session && session.expiresAt) {
+        const expiresAtMs = typeof session.expiresAt === 'number'
+          ? session.expiresAt * 1000  // Convert seconds to milliseconds
+          : new Date(session.expiresAt).getTime();
 
-        if (user) {
-          return new Response(JSON.stringify({
-            user: {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              emailVerified: user.emailVerified ?? false,
-              image: user.image ?? null,
-              createdAt: user.createdAt?.toISOString?.() ?? null,
-              updatedAt: user.updatedAt?.toISOString?.() ?? null,
-            },
-            session: {
-              id: session.id,
-              expiresAt: session.expiresAt?.toISOString?.() ?? null,
-              token: session.token,
-              createdAt: session.createdAt?.toISOString?.() ?? null,
-              updatedAt: session.updatedAt?.toISOString?.() ?? null,
-              ipAddress: session.ipAddress,
-              userAgent: session.userAgent,
-              userId: session.userId,
-            }
-          }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-          });
+        if (expiresAtMs > Date.now()) {
+          // Session valid, get user
+          const user = await db.select()
+            .from(users)
+            .where(eq(users.id, session.userId))
+            .limit(1)
+            .get();
+
+          if (user) {
+            return new Response(JSON.stringify({
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                emailVerified: user.emailVerified ?? false,
+                image: user.image ?? null,
+                createdAt: user.createdAt ?
+                  (typeof user.createdAt === 'number' ? new Date(user.createdAt * 1000).toISOString() : user.createdAt.toISOString())
+                  : null,
+                updatedAt: user.updatedAt ?
+                  (typeof user.updatedAt === 'number' ? new Date(user.updatedAt * 1000).toISOString() : user.updatedAt.toISOString())
+                  : null,
+              },
+              session: {
+                id: session.id,
+                expiresAt: new Date(expiresAtMs).toISOString(),
+                token: session.token,
+                createdAt: session.createdAt ?
+                  (typeof session.createdAt === 'number' ? new Date(session.createdAt * 1000).toISOString() : session.createdAt.toISOString())
+                  : null,
+                updatedAt: session.updatedAt ?
+                  (typeof session.updatedAt === 'number' ? new Date(session.updatedAt * 1000).toISOString() : session.updatedAt.toISOString())
+                  : null,
+                ipAddress: session.ipAddress,
+                userAgent: session.userAgent,
+                userId: session.userId,
+              }
+            }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
         }
       }
     }

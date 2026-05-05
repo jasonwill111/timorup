@@ -1,5 +1,6 @@
 ---
-export const prerender = false;
+// SSG with Server Islands - static shell + deferred dynamic content
+export const prerender = true;
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Input from '../../components/ui/Input.astro';
@@ -48,8 +49,14 @@ const structuredData = {
       </form>
     </div>
 
-    <!-- Business List (Server Island) -->
-    <BusinessList />
+    <!-- Business List (Server Island - deferred dynamic content) -->
+    <BusinessList server:defer>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map(() => (
+          <div class="bg-muted rounded-lg animate-pulse h-64"></div>
+        ))}
+      </div>
+    </BusinessList>
 
     <!-- Organizations Link -->
     <div class="mt-12 p-6 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">

@@ -1,18 +1,19 @@
 ---
-export const prerender = false;
+// Categories Index - SSG with static data + client-side filtering
+export const prerender = true;
+
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
-import Button from '../../components/ui/Button.astro';
 import { getDb } from '@/lib/db';
-const db = await getDb();
 import { categories, businessPages } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 
+const db = await getDb();
 const PAGE_SIZE = 6;
 
+// Get all categories with their listings
 const categoriesData = await db.select().from(categories).all();
 
-// Get listings per category with initial data
 const categoriesWithListings = await Promise.all(
   categoriesData.map(async (cat) => {
     const listings = await db
@@ -49,8 +50,8 @@ const sortedCategories = categoriesWithListings
   .filter(c => c.listings.length > 0)
   .sort((a, b) => b.listings.length - a.listings.length);
 
+// Serialize for client
 const categoriesJson = JSON.stringify(sortedCategories.map(c => {
-  // Extract unique tags from listings
   const allTags = c.listings
     .map(l => {
       try { return l.tags ? JSON.parse(l.tags) : []; }
@@ -123,7 +124,22 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
 
     <!-- Categories with Listings -->
     <div id="categories-container" class="space-y-12">
-      <!-- Rendered by JS -->
+      <!-- Initial skeleton while JS renders -->
+      <div class="space-y-8">
+        {[...Array(3)].map(() => (
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-muted animate-pulse"></div>
+              <div class="h-5 w-32 bg-muted rounded animate-pulse"></div>
+            </div>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              {[...Array(8)].map(() => (
+                <div class="bg-muted rounded-lg animate-pulse aspect-square"></div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
 
     {sortedCategories.length === 0 && (
@@ -136,8 +152,7 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
   <script define:vars={{ categoriesJson, PAGE_SIZE }}>
     const categories = JSON.parse(categoriesJson);
     let currentFilter = 'all';
-    let visibleCounts = {}; // Track visible items per category
-
+    let visibleCounts = {};
     const container = document.getElementById('categories-container');
 
     const getUrl = (item) => {
@@ -147,13 +162,10 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
     };
 
     const renderCategory = (cat, filter = 'all', searchTerm = '', activeTag = null) => {
-      // Filter listings
       let filteredListings = cat.listings.filter(l => {
         const matchesType = filter === 'all' || l.entityType === filter;
-        const matchesSearch = !searchTerm ||
-          l.title.toLowerCase().includes(searchTerm);
-        const matchesTag = !activeTag ||
-          (l.tags && l.tags.includes(activeTag));
+        const matchesSearch = !searchTerm || l.title.toLowerCase().includes(searchTerm);
+        const matchesTag = !activeTag || (l.tags && l.tags.includes(activeTag));
         return matchesType && matchesSearch && matchesTag;
       });
 
@@ -161,7 +173,6 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
       const hasMore = filteredListings.length > visible;
       filteredListings = filteredListings.slice(0, visible);
 
-      // Only render if has content
       if (filteredListings.length === 0 && (searchTerm || activeTag)) return '';
 
       return `
@@ -218,18 +229,16 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
       `;
     };
 
-    let activeTags = {}; // Track active tag per category
+    let activeTags = {};
 
     const renderAll = () => {
       const searchTerm = document.getElementById('search')?.value.toLowerCase() || '';
 
-      // Initialize visible counts
       categories.forEach(cat => {
         if (!visibleCounts[cat.id]) visibleCounts[cat.id] = PAGE_SIZE;
         if (!(cat.id in activeTags)) activeTags[cat.id] = null;
       });
 
-      // Filter categories based on search
       const filteredCategories = categories.filter(cat => {
         const matchesSearch = !searchTerm || cat.name.toLowerCase().includes(searchTerm);
         const hasListings = cat.listings.some(l => {
@@ -244,7 +253,6 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
       container.innerHTML = filteredCategories.map(cat => renderCategory(cat, currentFilter, searchTerm, activeTags[cat.id])).join('');
     };
 
-    // Filter tabs
     document.querySelectorAll('.filter-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         currentFilter = tab.dataset.filter || 'all';
@@ -261,33 +269,26 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
       });
     });
 
-    // Search
-    document.getElementById('search')?.addEventListener('input', () => {
-      renderAll();
-    });
+    document.getElementById('search')?.addEventListener('input', () => renderAll());
 
-    // Tag filters (event delegation)
     container.addEventListener('click', (e) => {
       if (e.target.classList.contains('tag-filter')) {
         const btn = e.target;
         const catId = btn.dataset.category;
         const tag = btn.dataset.tag;
-
         activeTags[catId] = tag || null;
-        visibleCounts[catId] = PAGE_SIZE; // Reset visible count when changing filter
+        visibleCounts[catId] = PAGE_SIZE;
         renderAll();
       }
     });
 
-    // Load more (fetch from API)
     container.addEventListener('click', async (e) => {
       if (e.target.classList.contains('load-more-btn')) {
         const btn = e.target;
         const catSlug = btn.dataset.category;
         const filter = btn.dataset.filter || 'all';
         const activeTag = btn.dataset.tag || null;
-        const currentPage = parseInt(btn.dataset.page || '1');
-        const nextPage = currentPage + 1;
+        const nextPage = parseInt(btn.dataset.page || '1') + 1;
 
         btn.textContent = 'Loading...';
         btn.disabled = true;
@@ -297,7 +298,6 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
           const res = await fetch(`/api/categories/${catSlug}/listings?page=${nextPage}&limit=${PAGE_SIZE}${typeParam}`);
           const data = await res.json();
 
-          // Find category section and append new items
           const section = document.querySelector(`[data-category="${catSlug}"] .grid`);
           if (section && data.listings?.length > 0) {
             data.listings.forEach(item => {
@@ -333,7 +333,6 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
       }
     });
 
-    // Init
     renderAll();
   </script>
 </Layout>

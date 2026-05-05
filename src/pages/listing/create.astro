@@ -33,27 +33,34 @@ try {
       .limit(1)
       .get();
 
-    if (session && session.expiresAt && new Date(session.expiresAt) > new Date()) {
-      // Session valid, get user
-      const userRecord = await db.select()
-        .from(users)
-        .where(eq(users.id, session.userId))
-        .limit(1)
-        .get();
+    if (session && session.expiresAt) {
+      // expiresAt in D1 is Unix timestamp (seconds)
+      const expiresAtMs = typeof session.expiresAt === 'number'
+        ? session.expiresAt * 1000
+        : new Date(session.expiresAt).getTime();
 
-      if (userRecord) {
-        user = { id: userRecord.id };
-
-        // Get existing listing
-        const existing = await db.select()
-          .from(businessPages)
-          .where(eq(businessPages.ownerId, user.id))
+      if (expiresAtMs > Date.now()) {
+        // Session valid, get user
+        const userRecord = await db.select()
+          .from(users)
+          .where(eq(users.id, session.userId))
           .limit(1)
           .get();
 
-        if (existing) {
-          hasExistingListing = true;
-          existingListing = existing;
+        if (userRecord) {
+          user = { id: userRecord.id };
+
+          // Get existing listing
+          const existing = await db.select()
+            .from(businessPages)
+            .where(eq(businessPages.ownerId, user.id))
+            .limit(1)
+            .get();
+
+          if (existing) {
+            hasExistingListing = true;
+            existingListing = existing;
+          }
         }
       }
     }

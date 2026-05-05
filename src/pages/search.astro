@@ -1,5 +1,6 @@
 ---
-export const prerender = false;
+// Search page - SSG with client-side API fetching
+export const prerender = true;
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
 import Input from '../components/ui/Input.astro';
@@ -30,9 +31,18 @@ import CardContent from '../components/ui/CardContent.astro';
 
     <!-- Results -->
     <div id="search-results">
-      <p class="text-muted-foreground text-center py-8">
-        Enter a search term to find businesses
-      </p>
+      <!-- Initial skeleton -->
+      <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(8)].map(() => (
+          <div class="bg-card rounded-lg border shadow-sm overflow-hidden">
+            <div class="aspect-[3/2] bg-muted animate-pulse"></div>
+            <div class="p-4 space-y-2">
+              <div class="h-5 bg-muted rounded w-3/4 animate-pulse"></div>
+              <div class="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </Layout>

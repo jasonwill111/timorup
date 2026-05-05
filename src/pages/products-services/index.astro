@@ -1,19 +1,14 @@
 ---
-// Products & Services - /products-services
-export const prerender = false;
+// Products & Services - SSG with client-side filtering
+export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
 import { getDb } from '@/lib/db';
-const db = await getDb();
 import { products, businessPages } from '@/db/schema';
-import { desc, eq, like } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 
-const PAGE_SIZE = 12;
-const search = Astro.url.searchParams.get('search') || '';
-const businessId = Astro.url.searchParams.get('business') || '';
-const page = parseInt(Astro.url.searchParams.get('page') || '1');
-const sort = Astro.url.searchParams.get('sort') || 'recent';
+const db = await getDb();
 
 // Get all businesses for filter
 const allBusinesses = await db
@@ -57,65 +52,24 @@ const productsWithBusiness = allProducts
   })
   .filter(p => p.businessTitle !== 'Unknown');
 
-// Apply filters
-let filteredProducts = productsWithBusiness;
+// Serialize for client
+const businessesJson = JSON.stringify(allBusinesses);
+const productsJson = JSON.stringify(productsWithBusiness);
 
-if (search) {
-  filteredProducts = filteredProducts.filter(p =>
-    p.title.toLowerCase().includes(search.toLowerCase()) ||
-    p.businessTitle.toLowerCase().includes(search.toLowerCase())
-  );
-}
-
-if (businessId) {
-  filteredProducts = filteredProducts.filter(p => p.businessPageId === businessId);
-}
-
-// Sort
-if (sort === 'name') {
-  filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
-} else if (sort === 'price-low') {
-  filteredProducts.sort((a, b) => parseFloat(a.price || '0') - parseFloat(b.price || '0'));
-} else if (sort === 'price-high') {
-  filteredProducts.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0'));
-}
-
-// Pagination
-const offset = (page - 1) * PAGE_SIZE;
-const total = filteredProducts.length;
-const productsList = filteredProducts.slice(offset, offset + PAGE_SIZE);
-const totalPages = Math.ceil(total / PAGE_SIZE);
-
-const getPageUrl = (p: number) => {
-  const params = new URLSearchParams({
-    page: String(p),
-    search,
-    business: businessId,
-    sort,
-  });
-  return `/products-services?${params.toString()}`;
-};
-
-// Format price
-const formatPrice = (product: typeof productsList[0]) => {
-  if (product.priceFields) {
-    try {
-      const fields = JSON.parse(product.priceFields);
-      if (fields.length > 0 && fields[0].value) {
-        const unit = fields[0].unit ? `/${fields[0].unit.replace('/', '')}` : '';
-        return `$${fields[0].value}${unit}`;
-      }
-    } catch {}
-  }
-  if (product.price) {
-    const unit = product.priceUnit ? `/${product.priceUnit.replace('/', '')}` : '';
-    return `$${product.price}${unit}`;
-  }
-  return 'Ask for price';
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "TimorList Products & Services",
+  "description": "Browse products and services from businesses in Timor-Leste",
+  "url": "https://timorlist.com/products-services",
 };
 ---
 
-<Layout title="Products & Services - TimorList" description="Browse all products and services from businesses in Timor-Leste">
+<Layout
+  title="Products & Services - TimorList"
+  description="Browse all products and services from businesses in Timor-Leste"
+  structuredData={structuredData}
+>
   <div class="container py-4 sm:py-8">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 sm:mb-6">
       <div>
@@ -125,99 +79,134 @@ const formatPrice = (product: typeof productsList[0]) => {
       <a href="/listing" class="text-xs sm:text-sm text-primary hover:underline">← Directory</a>
     </div>
 
-    <!-- Filters - compact on mobile -->
-    <div class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
+    <!-- Filters -->
+    <form id="filter-form" class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
       <Input
         id="search"
+        name="search"
         type="search"
         placeholder="Search..."
-        value={search}
         class="w-full sm:w-48 md:w-64"
       />
 
-      <select id="business-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+      <select id="business-filter" name="business" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
         <option value="">All Businesses</option>
-        {allBusinesses.map(b => (
-          <option value={b.id} selected={businessId === b.id}>
-            {b.title}
-          </option>
+        {allBusinesses.slice(0, 50).map(b => (
+          <option value={b.id}>{b.title}</option>
         ))}
       </select>
 
-      <select id="sort-filter" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
-        <option value="recent" selected={sort === 'recent'}>Recent</option>
-        <option value="name" selected={sort === 'name'}>Name A-Z</option>
-        <option value="price-low" selected={sort === 'price-low'}>Price ↑</option>
-        <option value="price-high" selected={sort === 'price-high'}>Price ↓</option>
+      <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+        <option value="recent">Recent</option>
+        <option value="name">Name A-Z</option>
+        <option value="price-low">Price ↑</option>
+        <option value="price-high">Price ↓</option>
       </select>
+    </form>
+
+    <!-- Results -->
+    <div id="results-container" class="mb-3 sm:mb-4 text-xs sm:text-sm text-muted-foreground">
+      Loading...
     </div>
 
-    <!-- Results Count -->
-    <div class="mb-3 sm:mb-4 text-xs sm:text-sm text-muted-foreground">
-      Showing {productsList.length} of {total} products
+    <!-- Products Grid -->
+    <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+      <!-- Rendered by JS -->
     </div>
-
-    <!-- Products Grid - gap-2 on mobile -->
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-      {productsList.map(product => (
-        <a
-          href={product.businessType === 'business' ? `/business/${product.businessSlug}/product/${product.id}` : `/${product.businessType}/${product.businessSlug}`}
-          class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer"
-        >
-          <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
-            <span class="text-4xl font-bold text-amber-500/40">{product.title.charAt(0)}</span>
-            {product.serviceType && (
-              <span class="absolute top-1.5 left-1.5 sm:top-2 px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-black/75 text-white rounded-full capitalize">
-                {product.serviceType}
-              </span>
-            )}
-          </div>
-          <div class="p-2 sm:p-3">
-            <h3 class="font-medium sm:font-semibold text-xs sm:text-sm truncate group-hover:text-primary transition-colors">{product.title}</h3>
-            <p class="text-[10px] sm:text-xs text-muted-foreground truncate">{product.businessTitle}</p>
-            <p class="text-xs sm:text-sm font-bold text-primary mt-0.5">{formatPrice(product)}</p>
-          </div>
-        </a>
-      ))}
-    </div>
-
-    {productsList.length === 0 && (
-      <div class="text-center py-12 text-muted-foreground">
-        No products found
-      </div>
-    )}
-
-    <!-- Pagination -->
-    {totalPages > 1 && (
-      <div class="flex justify-center gap-2 mt-8">
-        {page > 1 && (
-          <a href={getPageUrl(page - 1)} class="px-4 py-2 border rounded hover:bg-muted">Previous</a>
-        )}
-        <span class="px-4 py-2">Page {page} of {totalPages}</span>
-        {page < totalPages && (
-          <a href={getPageUrl(page + 1)} class="px-4 py-2 border rounded hover:bg-muted">Next</a>
-        )}
-      </div>
-    )}
   </div>
 </Layout>
 
-<script>
-  const searchInput = document.getElementById('search') as HTMLInputElement;
-  const businessFilter = document.getElementById('business-filter') as HTMLSelectElement;
-  const sortFilter = document.getElementById('sort-filter') as HTMLSelectElement;
+<script define:vars={{ businessesJson, productsJson }}>
+  const businesses = JSON.parse(businessesJson);
+  let products = JSON.parse(productsJson);
 
-  const buildUrl = () => {
-    const params = new URLSearchParams({
-      page: '1',
-      search: searchInput?.value || '',
-      business: businessFilter?.value || '',
-      sort: sortFilter?.value || 'recent',
-    });
-    return `/products-services?${params.toString()}`;
-  };
+  const form = document.getElementById('filter-form');
+  const resultsContainer = document.getElementById('results-container');
+  const grid = document.getElementById('products-grid');
 
-  searchInput?.addEventListener('change', () => window.location.href = buildUrl());
-  businessFilter?.addEventListener('change', () => window.location.href = buildUrl());
-  sortFilter?.addEventListener('change', () => window.location.href = buildUrl());
+  function formatPrice(product) {
+    if (product.priceFields) {
+      try {
+        const fields = JSON.parse(product.priceFields);
+        if (fields.length > 0 && fields[0].value) {
+          const unit = fields[0].unit ? `/${fields[0].unit.replace('/', '')}` : '';
+          return `$${fields[0].value}${unit}`;
+        }
+      } catch {}
+    }
+    if (product.price) {
+      const unit = product.priceUnit ? `/${product.priceUnit.replace('/', '')}` : '';
+      return `$${product.price}${unit}`;
+    }
+    return 'Ask for price';
+  }
+
+  function getProductUrl(product) {
+    return product.businessType === 'business'
+      ? `/business/${product.businessSlug}/product/${product.id}`
+      : `/${product.businessType}/${product.businessSlug}`;
+  }
+
+  function renderProducts(filteredProducts) {
+    resultsContainer.textContent = `Showing ${filteredProducts.length} products`;
+
+    if (filteredProducts.length === 0) {
+      grid.innerHTML = '<div class="col-span-full text-center py-12 text-muted-foreground">No products found</div>';
+      return;
+    }
+
+    grid.innerHTML = filteredProducts.slice(0, 24).map(product => `
+      <a href="${getProductUrl(product)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer">
+        <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
+          <span class="text-4xl font-bold text-amber-500/40">${product.title.charAt(0)}</span>
+          ${product.serviceType ? `
+            <span class="absolute top-1.5 left-1.5 sm:top-2 px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-black/75 text-white rounded-full capitalize">
+              ${product.serviceType}
+            </span>
+          ` : ''}
+        </div>
+        <div class="p-2 sm:p-3">
+          <h3 class="font-medium sm:font-semibold text-xs sm:text-sm truncate group-hover:text-primary transition-colors">${product.title}</h3>
+          <p class="text-[10px] sm:text-xs text-muted-foreground truncate">${product.businessTitle}</p>
+          <p class="text-xs sm:text-sm font-bold text-primary mt-0.5">${formatPrice(product)}</p>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function applyFilters() {
+    const formData = new FormData(form);
+    const search = (formData.get('search') || '').toString().toLowerCase();
+    const businessId = (formData.get('business') || '').toString();
+    const sort = (formData.get('sort') || 'recent').toString();
+
+    let filtered = products;
+
+    if (search) {
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(search) ||
+        p.businessTitle.toLowerCase().includes(search)
+      );
+    }
+
+    if (businessId) {
+      filtered = filtered.filter(p => p.businessPageId === businessId);
+    }
+
+    if (sort === 'name') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sort === 'price-low') {
+      filtered.sort((a, b) => parseFloat(a.price || '0') - parseFloat(b.price || '0'));
+    } else if (sort === 'price-high') {
+      filtered.sort((a, b) => parseFloat(b.price || '0') - parseFloat(a.price || '0'));
+    }
+
+    renderProducts(filtered);
+  }
+
+  form.addEventListener('input', () => setTimeout(applyFilters, 300));
+  form.addEventListener('change', applyFilters);
+
+  // Init
+  applyFilters();
 </script>

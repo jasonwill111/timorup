@@ -1,11 +1,12 @@
 ---
-export const prerender = false;
+// Organization Index - SSG with client-side filtering
+export const prerender = true;
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Card from '../../components/ui/Card.astro';
 import CardContent from '../../components/ui/CardContent.astro';
 import BusinessCard from '../../components/business/BusinessCard.astro';
-import { db } from '../../lib/db';
+import { getDb } from '../../lib/db';
 import { businessPages, categories } from '../../db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 
@@ -22,12 +23,14 @@ interface Organization {
   profileImageId: string | null;
   verifiedBadge: boolean | null;
   categoryName: string;
+  likes: number;
 }
 
 let organizations: Organization[] = [];
 let totalCount = 0;
 
 try {
+  const db = await getDb();
   const result = await db.select()
     .from(businessPages)
     .where(eq(businessPages.entityType, 'organization'))
@@ -51,6 +54,7 @@ try {
     profileImageId: org.profileImageId,
     verifiedBadge: org.verifiedBadge,
     categoryName: categoryMap.get(org.categoryId) || 'Organization',
+    likes: org.likes || 0,
   }));
 
   const countResult = await db.select({ count: sql<number>`count(*)` })
@@ -61,6 +65,9 @@ try {
 } catch (e) {
   console.error('Failed to fetch organizations:', e);
 }
+
+// Serialize for client-side filtering
+const organizationsJson = JSON.stringify(organizations);
 
 const typeLabels: Record<string, string> = {
   government: 'Government',
@@ -105,23 +112,26 @@ const structuredData = {
       Showing <span id="result-count" class="font-medium text-foreground">{organizations.length}</span> organizations
     </div>
 
-    <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {organizations.length > 0 ? organizations.map((org) => (
-        <BusinessCard
-          title={org.title}
-          slug={org.slug}
-          category={typeLabels[org.organizationType || ''] || 'Organization'}
-          thumbnail={org.bannerImageId ? `/api/media/${org.bannerImageId}` : null}
-          rating={0}
-          likes={org.likes || 0}
-          reviews={0}
-          location={org.address?.split(',')[0] || ''}
-          tag={org.organizationType ? typeLabels[org.organizationType] : ''}
-          type="organization"
-          orgType={org.organizationType || ''}
-          verified={org.verifiedBadge || false}
-        />
-      )) : (
+    <div id="orgs-container" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {organizations.map((org) => (
+        <div data-card data-title={org.title} data-org-type={org.organizationType || ''}>
+          <BusinessCard
+            title={org.title}
+            slug={org.slug}
+            category={typeLabels[org.organizationType || ''] || 'Organization'}
+            thumbnail={org.bannerImageId ? `/api/media/${org.bannerImageId}` : null}
+            rating={0}
+            likes={org.likes}
+            reviews={0}
+            location={org.address?.split(',')[0] || ''}
+            tag={org.organizationType ? typeLabels[org.organizationType] : ''}
+            type="organization"
+            orgType={org.organizationType || ''}
+            verified={org.verifiedBadge || false}
+          />
+        </div>
+      ))}
+      {organizations.length === 0 && (
         <div class="col-span-full text-center py-12">
           <p class="text-lg text-muted-foreground">No organizations found</p>
           <a href="/register?type=organization" class="mt-4 inline-block">
@@ -162,7 +172,7 @@ const structuredData = {
     cards.forEach((card: any) => {
       const title = card.dataset.title || '';
       const matchType = !type || card.dataset.orgType === type;
-      const matchSearch = !search || title.includes(search);
+      const matchSearch = !search || title.toLowerCase().includes(search);
 
       if (matchType && matchSearch) {
         (card as HTMLElement).style.display = '';

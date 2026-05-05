@@ -1,6 +1,6 @@
 ---
-// SSR page with dynamic content
-export const prerender = false;
+// Static page with Server Island for dynamic content
+export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
@@ -36,8 +36,43 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
   </div>
 
   <div class="container py-6 sm:py-12">
-    <!-- Server Island: Dynamic content with 5min cache -->
-    <HomepageContent server:defer="5min" />
+    <!-- Server Island: Dynamic content with skeleton fallback -->
+    <HomepageContent server:defer>
+      <div class="space-y-8">
+        <!-- Featured Businesses Skeleton -->
+        <section class="mb-6 sm:mb-12">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="h-6 sm:h-8 w-40 bg-muted rounded animate-pulse"></div>
+            <div class="h-4 w-16 bg-muted rounded animate-pulse"></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+            {[...Array(8)].map(() => (
+              <div class="bg-card rounded-lg border p-3">
+                <div class="aspect-square bg-muted rounded mb-3 animate-pulse"></div>
+                <div class="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse"></div>
+                <div class="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </section>
+        <!-- Featured Products Skeleton -->
+        <section class="mb-6 sm:mb-12">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="h-6 sm:h-8 w-48 bg-muted rounded animate-pulse"></div>
+            <div class="h-4 w-16 bg-muted rounded animate-pulse"></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+            {[...Array(8)].map(() => (
+              <div class="bg-card rounded-lg border p-3">
+                <div class="aspect-square bg-muted rounded mb-3 animate-pulse"></div>
+                <div class="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse"></div>
+                <div class="h-3 bg-muted rounded w-1/3 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </HomepageContent>
 
     <!-- CTA -->
     <section class="text-center py-12 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl">

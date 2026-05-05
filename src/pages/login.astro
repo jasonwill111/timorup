@@ -6,7 +6,6 @@ import AuthCard from '../components/forms/AuthCard.astro';
 import FormMessage from '../components/forms/FormMessage.astro';
 import LoadingButton from '../components/forms/LoadingButton.astro';
 import PasswordInput from '../components/forms/PasswordInput.astro';
-import FormHandler from '../components/forms/FormHandler.astro';
 ---
 
 <Layout title="Login - TimorList">
@@ -87,13 +86,68 @@ import FormHandler from '../components/forms/FormHandler.astro';
         </a>
       </div>
     </form>
-
-    <FormHandler
-      formId="login-form"
-      submitBtnId="submit-btn"
-      messageId="form-message"
-      redirectOnSuccess="/account"
-      successMessage="Login successful!"
-    />
   </AuthCard>
 </Layout>
+
+<script>
+  const form = document.getElementById('login-form');
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
+  const btnText = document.getElementById('submit-btn-text');
+  const btnLoading = document.getElementById('submit-btn-loading');
+  const message = document.getElementById('form-message');
+
+  function setLoading(loading: boolean) {
+    if (submitBtn) submitBtn.disabled = loading;
+    btnText?.classList.toggle('hidden', loading);
+    btnLoading?.classList.toggle('hidden', !loading);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    message?.classList.add('hidden');
+    setLoading(true);
+
+    const formData = new FormData(form);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const res = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.success) {
+        if (message) {
+          message.textContent = 'Login successful! Redirecting...';
+          message.className = message.className
+            .replace(/bg-red-\d+/g, 'bg-green-50')
+            .replace(/text-red-\d+/g, 'text-green-700')
+            .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
+            .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
+          message.classList.remove('hidden');
+        }
+        if (data.user?.id) {
+          localStorage.setItem('userId', data.user.id);
+          localStorage.setItem('userName', data.user.name || '');
+        }
+        window.location.href = '/account';
+      } else {
+        if (message) {
+          message.textContent = data.error?.message || 'Login failed';
+          message.classList.remove('hidden');
+        }
+      }
+    } catch {
+      setLoading(false);
+      if (message) {
+        message.textContent = 'Network error. Please try again.';
+        message.classList.remove('hidden');
+      }
+    }
+  });
+</script>

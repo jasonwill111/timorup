@@ -35,8 +35,10 @@ try {
       .limit(1)
       .get();
 
-    if (session && session.expiresAt && new Date(session.expiresAt) > new Date()) {
-      const userRecord = await db.select()
+    if (session && session.expiresAt) {
+        const expiresAtMs = typeof session.expiresAt === 'number' ? session.expiresAt * 1000 : new Date(session.expiresAt).getTime();
+        if (expiresAtMs > Date.now()) {
+          const userRecord = await db.select()
         .from(users)
         .where(eq(users.id, session.userId))
         .limit(1)
@@ -161,6 +163,7 @@ try {
           .where(inArray(businessPages.id, pageIds));
 
           savedPages = savedPageList;
+          }
         }
       }
     }
