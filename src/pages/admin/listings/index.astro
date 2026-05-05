@@ -13,7 +13,7 @@ import Button from '../../../components/ui/Button.astro';
         <h1 class="text-2xl font-bold">Listing Management</h1>
         <p class="text-sm text-muted-foreground">Manage all listings (businesses, government, nonprofits)</p>
       </div>
-      <a href="/admin/listings/new">
+      <a href="/admin/listingss/new">
         <Button>
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -144,7 +144,7 @@ import Button from '../../../components/ui/Button.astro';
     if (status) params.set('status', status);
 
     try {
-      const res = await fetch(`/api/admin/listings?${params}`);
+      const res = await fetch(`/api/admin/listingss?${params}`);
       const data = await res.json();
 
       if (data.success) {
@@ -214,7 +214,7 @@ import Button from '../../../components/ui/Button.astro';
         </td>
         <td class="px-4 py-3 text-right">
           <div class="flex items-center justify-end gap-2">
-            <a href="/admin/listings/${listing.id}/edit" class="text-sm text-primary hover:underline">
+            <a href="/admin/listingss/${listing.id}/edit" class="text-sm text-primary hover:underline">
               Edit
             </a>
             <a href="/business/${listing.slug}" target="_blank" class="text-sm text-muted-foreground hover:text-foreground">
