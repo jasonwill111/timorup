@@ -100,8 +100,17 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
 ---
 
 <!-- Results Count -->
-<div class="mb-4 text-sm text-muted-foreground">
-  Showing {listings.length} of {total} listings
+<div class="mb-4 text-sm flex items-center gap-2">
+  <span class="text-muted-foreground">Showing</span>
+  <span class="font-semibold text-foreground">{listings.length}</span>
+  <span class="text-muted-foreground">of</span>
+  <span class="font-semibold text-primary">{total}</span>
+  <span class="text-muted-foreground">listings</span>
+  {type !== 'business' && (
+    <span class="ml-auto px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-medium">
+      {type === 'govs' ? 'Government' : 'Non-Profit'}
+    </span>
+  )}
 </div>
 
 <!-- Listings Grid -->

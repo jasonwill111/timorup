@@ -36,41 +36,61 @@ const structuredData = {
   <div class="container py-4 sm:py-8">
     <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Local Directory</h1>
 
-    <!-- Type Tabs - compact on mobile -->
-    <div class="flex gap-1 sm:gap-4 mb-4 sm:mb-6 border-b -mx-2 px-2 sm:mx-0 sm:px-0 overflow-x-auto">
+    <!-- Type Tabs - improved visibility -->
+    <div class="flex gap-1 sm:gap-2 mb-4 sm:mb-6 p-1 bg-muted/50 rounded-xl sm:rounded-lg sm:bg-transparent sm:border-b sm:border-border sm:p-0 overflow-x-auto">
       <a
         href="/listings?type=business"
-        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'business' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'business' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
       >
-        Businesses
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+          Businesses
+        </span>
       </a>
       <a
         href="/listings?type=govs"
-        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'govs' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'govs' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
       >
-        Government
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+          </svg>
+          Government
+        </span>
       </a>
       <a
         href="/listings?type=ngos"
-        class={`px-4 py-2 border-b-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${type === 'ngos' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'ngos' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
       >
-        NGOs & Non-Profits
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+          NGOs
+        </span>
       </a>
     </div>
 
-    <!-- Filters - compact on mobile -->
-    <form id="filter-form" class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
-      <Input
-        id="search"
-        name="search"
-        type="search"
-        placeholder="Search..."
-        class="w-full sm:w-48 md:w-64"
-        value={Astro.url.searchParams.get('search') || ''}
-      />
+    <!-- Filters - improved visibility -->
+    <form id="filter-form" class="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 p-3 sm:p-4 bg-card border border-border rounded-xl">
+      <div class="relative flex-1 min-w-[140px]">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          id="search"
+          name="search"
+          type="search"
+          placeholder="Search listings..."
+          value={Astro.url.searchParams.get('search') || ''}
+          class="w-full h-9 sm:h-10 pl-9 pr-3 rounded-lg border border-input bg-background text-xs sm:text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+        />
+      </div>
 
       {type === 'business' && (
-        <select id="industry-filter" name="industry" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+        <select id="industry-filter" name="industry" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
           <option value="">All Industries</option>
           {Object.entries(INDUSTRIES).map(([key, group]) => (
             <optgroup label={group.label}>
@@ -85,7 +105,7 @@ const structuredData = {
       )}
 
       {(type === 'govs' || type === 'ngos') && (
-        <select id="category-filter" name="category" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+        <select id="category-filter" name="category" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
           <option value="">All Categories</option>
           {allCategories.map(cat => (
             <option value={cat.id}>
@@ -95,7 +115,7 @@ const structuredData = {
         </select>
       )}
 
-      <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+      <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
         <option value="recent">Recent</option>
         <option value="name">Name A-Z</option>
         <option value="rating">Top Rated</option>
