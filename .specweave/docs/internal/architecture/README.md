@@ -11,13 +11,18 @@ TimorList is a multi-tenant business listing platform built on Cloudflare Worker
                     │     Cloudflare Workers     │
                     │                             │
                     │  ┌────────────────────────┐ │
-                    │  │      Astro SSR         │ │
-                    │  │  (Pages + API Routes) │ │
+                    │  │      Astro SSR/SSG      │ │
+                    │  │  (Pages + API Routes)  │ │
                     │  └────────────────────────┘ │
                     │                             │
                     │  ┌────────────────────────┐ │
                     │  │     better-auth        │ │
                     │  │   (Session + OAuth)    │ │
+                    │  └────────────────────────┘ │
+                    │                             │
+                    │  ┌────────────────────────┐ │
+                    │  │    Server Islands      │ │
+                    │  │ (Deferred DB Queries)  │ │
                     │  └────────────────────────┘ │
                     └─────────────────────────────┘
                               │    │    │
@@ -32,6 +37,11 @@ TimorList is a multi-tenant business listing platform built on Cloudflare Worker
                          └─────────┘
 ```
 
+**Rendering Strategy**:
+- SSG + Islands: Homepage, Businesses, Listing, Categories, Search, Organization
+- SSR: Business detail, Organization detail (personalized content)
+- Prerender: FAQ, Pricing, Privacy, Terms
+
 ## Key Design Decisions
 
 | ADR | Decision | Status |
@@ -39,13 +49,24 @@ TimorList is a multi-tenant business listing platform built on Cloudflare Worker
 | ADR-0001 | Cloudflare Workers runtime | ✅ Implemented |
 | ADR-0010 | Server Islands (hybrid mode) | ✅ Implemented |
 | ADR-0011 | Industry-specific product specs | ✅ Implemented |
+| ADR-0012 | R2 via Workers binding | ✅ Implemented |
+| ADR-0013 | SSG + Islands for high-traffic pages | ✅ Implemented |
 
 ## Module Structure
 
 ```
 src/
-├── pages/          # Astro pages + API routes
-├── components/    # Reusable UI components
+├── pages/          # Astro pages (SSG + SSR + Islands)
+├── components/
+│   ├── ui/        # UI primitives (Button, Card, Input)
+│   ├── business/  # BusinessCard, ProductCard
+│   └── islands/    # Server Islands (deferred components)
+│       ├── HomepageContent.astro
+│       ├── BusinessList.astro
+│       ├── ListingContent.astro
+│       ├── CategoryFilter.astro
+│       ├── ProductsSection.astro
+│       └── BusinessSidebar.astro
 ├── db/           # Drizzle schema
 ├── lib/          # Utilities (auth, media, constants)
 └── server/       # Hono route handlers
@@ -78,4 +99,4 @@ src/
 | APP_URL | Canonical URL |
 
 ---
-*Updated 2026-04-30*
+*Updated 2026-05-05*

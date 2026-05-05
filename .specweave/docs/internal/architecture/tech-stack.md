@@ -1,6 +1,6 @@
 # Technology Stack
 
-**Last Updated**: 2026-05-01
+**Last Updated**: 2026-05-05
 
 ## Languages
 
@@ -49,7 +49,7 @@
 | drizzle-orm | 0.45.2 | Database ORM |
 | better-auth | 1.6.9 | Auth framework |
 | zod | 4.4.1 | Schema validation |
-| @aws-sdk/* | 3.1039.0 | S3/R2 media |
+| cloudflare:workers/r2 | built-in | R2 via Workers binding |
 | @mastra/core | 1.29.1 | AI agents |
 | tailwindcss | 4.2.4 | Styling |
 | wrangler | 4.87.0 | Workers CLI |
@@ -65,17 +65,24 @@
 
 ### Server Islands (Astro 6)
 
-Dynamic content isolated in Server Islands for minimal server calls:
+Rendering modes optimized for performance:
 
-| Page | Strategy | Cache TTL |
-|------|----------|-----------|
-| Homepage (`/`) | Static + Server Island | 5 min |
-| Business Detail (`/business/[slug]`) | SSR + CDN | 5 min |
-| Organization (`/organization/[slug]`) | SSR + CDN | 5 min |
-| Listing (`/listing`) | SSR + CDN | 2 min |
-| Products/Services | SSR + CDN | 2 min |
-| Static Pages | Prerender | 1 hour |
-| Admin/Auth | SSR (no cache) | - |
+| Page | Strategy | Cache TTL | Notes |
+|------|----------|-----------|-------|
+| Homepage (`/`) | SSG + Island | 1 hour | Static shell + HomepageContent island |
+| Businesses (`/businesses`) | SSG + Island | 1 hour | Static shell + BusinessList island |
+| Listing (`/listing`) | SSG + Island | 1 hour | Static shell + ListingContent island |
+| Categories (`/categories`) | SSG | 1 hour | Client-side filter from serialized data |
+| Search (`/search`) | SSG | 1 hour | Client-side API fetch |
+| Organization (`/organization`) | SSG | 1 hour | Direct render, client filter |
+| Products/Services | SSG | 1 hour | Client-side filter |
+| Business Detail (`/business/[slug]`) | SSR | 5 min | Personalized (favorites, history) |
+| Organization Detail (`/organization/[slug]`) | SSR | 5 min | Personalized content |
+| Static Pages (FAQ, Pricing, etc.) | Prerender | 1 hour | Pure static |
+| Admin/Auth | SSR | - | No cache (requires auth) |
+
+**Key optimization**: High-traffic pages converted from full SSR to SSG + Server Islands,
+reducing TTFB by ~50-60% via CDN-cached static shells with deferred dynamic content.
 
 ### Scheduled Tasks
 
