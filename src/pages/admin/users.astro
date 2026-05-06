@@ -171,7 +171,11 @@ import Button from '@components/ui/Button.astro';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   }
-  
+
+  function escapeHtml(str: string) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   function escapeQuotes(str: string) {
     return str.replace(/'/g, "\\'");
   }
