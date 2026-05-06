@@ -285,6 +285,16 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.classList.toggle('dark', theme === 'dark');
 
+    // Highlight active nav item based on current URL
+    const path = window.location.pathname;
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+      const section = item.getAttribute('data-section');
+      const href = item.getAttribute('href');
+      if (href === path || (href && path.startsWith(href) && href !== '/admin')) {
+        item.classList.add('active');
+      }
+    });
+
     // Theme toggle functions
     function toggleTheme() {
       const isDark = document.documentElement.classList.toggle('dark');
