@@ -42,7 +42,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
         </div>
         <span class="font-bold">Admin</span>
       </div>
-      <button id="admin-theme-toggle-mobile" class="p-2 -mr-2 hover:bg-muted rounded-lg">
+      <button id="admin-theme-toggle-mobile" class="p-2 -mr-2 hover:bg-muted rounded-lg" onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')">
         <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
         </svg>
@@ -237,7 +237,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           </svg>
           <span>Back to Home</span>
         </a>
-        <button id="admin-theme-toggle" class="nav-item w-full justify-start">
+        <button id="admin-theme-toggle" class="nav-item w-full justify-start" onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')">
           <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
           </svg>
