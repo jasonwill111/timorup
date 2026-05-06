@@ -97,6 +97,18 @@ import Button from '../../../components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   interface Listing {
     id: string;
     title: string;
@@ -144,7 +156,7 @@ import Button from '../../../components/ui/Button.astro';
     if (status) params.set('status', status);
 
     try {
-      const res = await fetch(`/api/admin/listingss?${params}`);
+      const res = await fetch(`/api/admin/listing?${params}`);
       const data = await res.json();
 
       if (data.success) {

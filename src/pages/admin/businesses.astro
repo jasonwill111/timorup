@@ -11,9 +11,35 @@ import Button from '@components/ui/Button.astro';
       <h1 class="text-xl md:text-2xl font-bold">All Businesses</h1>
       <Button id="add-business-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add Business</Button>
     </div>
-    
+
+    <!-- Search and Filters -->
+    <div class="bg-card border rounded-lg p-3 md:p-4 mb-4">
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex-1">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search by name or slug..."
+            class="w-full px-3 py-2 border rounded-lg text-sm"
+          />
+        </div>
+        <div class="flex gap-2">
+          <select id="status-filter" class="px-3 py-2 border rounded-lg text-sm">
+            <option value="">All Status</option>
+            <option value="draft">Draft</option>
+            <option value="live">Live</option>
+            <option value="paid">Paid</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- Businesses List -->
     <div class="bg-card border rounded-lg p-3 md:p-4">
+      <div class="flex items-center justify-between mb-4">
+        <span id="businesses-count" class="text-xs text-muted-foreground">Loading...</span>
+      </div>
       <div id="businesses-list" class="space-y-2">
         <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
       </div>
@@ -89,34 +115,67 @@ import Button from '@components/ui/Button.astro';
       const data = await res.json();
 
       const container = document.getElementById('businesses-list');
+      const countEl = document.getElementById('businesses-count');
       if (!container) return;
 
       if (!data.success || data.data.length === 0) {
         container.innerHTML = '<p class="text-center text-muted-foreground py-8">No businesses yet</p>';
+        if (countEl) countEl.textContent = '0 businesses';
         return;
       }
 
       businessList = data.data;
-      container.innerHTML = data.data.map((biz: any) => `
-        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
-          <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">${biz.title}</p>
-            <p class="text-xs text-muted-foreground">/${biz.slug}</p>
-          </div>
-          <div class="flex items-center gap-2 ml-2">
-            <span class="px-2 py-0.5 text-xs rounded-full ${biz.status === 'live' || biz.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'}">${biz.status}</span>
-            <select class="text-xs border rounded px-1 py-0.5" onchange="updateBusinessStatus('${biz.id}', this.value)">
-              <option value="draft" ${biz.status === 'draft' ? 'selected' : ''}>Draft</option>
-              <option value="live" ${biz.status === 'live' ? 'selected' : ''}>Live</option>
-              <option value="paid" ${biz.status === 'paid' ? 'selected' : ''}>Paid</option>
-              <option value="expired" ${biz.status === 'expired' ? 'selected' : ''}>Expired</option>
-            </select>
-          </div>
-        </div>
-      `).join('');
+      renderBusinesses();
     } catch (err) {
       console.error('Error loading businesses:', err);
     }
+  }
+
+  // Render businesses with filters
+  function renderBusinesses() {
+    const container = document.getElementById('businesses-list');
+    const countEl = document.getElementById('businesses-count');
+    if (!container) return;
+
+    const search = (document.getElementById('search-input') as HTMLInputElement)?.value.toLowerCase() || '';
+    const status = (document.getElementById('status-filter') as HTMLSelectElement)?.value || '';
+
+    const filtered = businessList.filter(biz => {
+      const matchesSearch = !search ||
+        biz.title?.toLowerCase().includes(search) ||
+        biz.slug?.toLowerCase().includes(search);
+      const matchesStatus = !status || biz.status === status;
+      return matchesSearch && matchesStatus;
+    });
+
+    if (countEl) countEl.textContent = `${filtered.length} of ${businessList.length} businesses`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p class="text-center text-muted-foreground py-8">No businesses found</p>';
+      return;
+    }
+
+    container.innerHTML = filtered.map((biz: any) => `
+      <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm hover:bg-muted/30">
+        <div class="min-w-0 flex-1">
+          <p class="font-medium truncate">${escapeHtml(biz.title)}</p>
+          <p class="text-xs text-muted-foreground">/${escapeHtml(biz.slug)}</p>
+        </div>
+        <div class="flex items-center gap-2 ml-2">
+          <span class="px-2 py-0.5 text-xs rounded-full ${biz.status === 'live' || biz.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'}">${biz.status}</span>
+          <select class="text-xs border rounded px-1 py-0.5" onchange="updateBusinessStatus('${biz.id}', this.value)">
+            <option value="draft" ${biz.status === 'draft' ? 'selected' : ''}>Draft</option>
+            <option value="live" ${biz.status === 'live' ? 'selected' : ''}>Live</option>
+            <option value="paid" ${biz.status === 'paid' ? 'selected' : ''}>Paid</option>
+            <option value="expired" ${biz.status === 'expired' ? 'selected' : ''}>Expired</option>
+          </select>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str: string) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   
   // Auto-generate slug from title
@@ -148,10 +207,6 @@ import Button from '@components/ui/Button.astro';
 
     aboutContainer.innerHTML = `<textarea name="aboutUs" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Write about your business...">${escapeHtml(initialAbout)}</textarea>`;
     updatesContainer.innerHTML = `<textarea name="latestUpdates" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Latest news and updates...">${escapeHtml(initialUpdates)}</textarea>`;
-  }
-
-  function escapeHtml(str: string) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   addBtn?.addEventListener('click', () => {
@@ -239,6 +294,10 @@ import Button from '@components/ui/Button.astro';
     }
   };
   
+  // Event listeners for search and filter
+  document.getElementById('search-input')?.addEventListener('input', renderBusinesses);
+  document.getElementById('status-filter')?.addEventListener('change', renderBusinesses);
+
   // Initialize
   loadBusinesses();
 </script>

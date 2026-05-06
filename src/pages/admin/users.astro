@@ -11,7 +11,29 @@ import Button from '@components/ui/Button.astro';
       <h1 class="text-xl md:text-2xl font-bold">All Users</h1>
       <p class="text-sm text-muted-foreground mt-1">Manage registered users</p>
     </div>
-    
+
+    <!-- Search and Filters -->
+    <div class="bg-card border rounded-lg p-3 md:p-4 mb-4">
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex-1">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search by name or email..."
+            class="w-full px-3 py-2 border rounded-lg text-sm"
+          />
+        </div>
+        <div class="flex gap-2">
+          <select id="role-filter" class="px-3 py-2 border rounded-lg text-sm">
+            <option value="">All Roles</option>
+            <option value="user">User</option>
+            <option value="editor">Editor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- Users List -->
     <div class="bg-card border rounded-lg p-3 md:p-4">
       <div class="flex items-center justify-between mb-4">
@@ -69,6 +91,8 @@ import Button from '@components/ui/Button.astro';
 <script>
   import { toast } from '../../stores/toast';
 
+  let allUsers: any[] = [];
+
   // Auth fetch helper
   async function authFetch(url, options = {}) {
     return fetch(url, {
@@ -86,37 +110,58 @@ import Button from '@components/ui/Button.astro';
     try {
       const res = await authFetch('/api/admin/users');
       const data = await res.json();
-      
-      const container = document.getElementById('users-list');
-      const countEl = document.getElementById('users-count');
-      if (!container || !countEl) return;
-      
-      if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted-foreground py-8">No users yet</p>';
-        countEl.textContent = '0 users';
+
+      if (!data.success) {
+        toast.error(data.error?.message || 'Failed to load users');
         return;
       }
-      
-      countEl.textContent = `${data.data.length} user${data.data.length !== 1 ? 's' : ''}`;
-      
-      container.innerHTML = data.data.map((user: any) => `
-        <div class="flex items-center justify-between p-3 border rounded text-sm">
-          <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">${user.name}</p>
-            <p class="text-xs text-muted-foreground truncate">${user.email || 'No email'}</p>
-            <p class="text-xs text-muted-foreground truncate">${user.phone || 'No phone'}</p>
-          </div>
-          <div class="flex items-center gap-2 ml-2">
-            <span class="px-2 py-0.5 text-xs rounded-full ${getRoleClass(user.role)}">${user.role}</span>
-            <button class="text-blue-500 hover:text-blue-600 text-xs px-2 py-1" onclick="editUser('${user.id}', '${escapeQuotes(user.name)}', '${escapeQuotes(user.email || '')}', '${escapeQuotes(user.phone || '')}', '${user.role}')">Edit</button>
-            <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteUser('${user.id}')">Del</button>
-          </div>
-        </div>
-      `).join('');
+
+      allUsers = data.data || [];
+      renderUsers();
     } catch (err) {
       console.error('Error loading users:', err);
       toast.error('Failed to load users');
     }
+  }
+
+  // Render users with filters
+  function renderUsers() {
+    const container = document.getElementById('users-list');
+    const countEl = document.getElementById('users-count');
+    if (!container || !countEl) return;
+
+    const search = (document.getElementById('search-input') as HTMLInputElement)?.value.toLowerCase() || '';
+    const role = (document.getElementById('role-filter') as HTMLSelectElement)?.value || '';
+
+    const filtered = allUsers.filter(user => {
+      const matchesSearch = !search ||
+        user.name?.toLowerCase().includes(search) ||
+        user.email?.toLowerCase().includes(search);
+      const matchesRole = !role || user.role === role;
+      return matchesSearch && matchesRole;
+    });
+
+    countEl.textContent = `${filtered.length} of ${allUsers.length} users`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p class="text-center text-muted-foreground py-8">No users found</p>';
+      return;
+    }
+
+    container.innerHTML = filtered.map((user: any) => `
+      <div class="flex items-center justify-between p-3 border rounded text-sm hover:bg-muted/30">
+        <div class="min-w-0 flex-1">
+          <p class="font-medium truncate">${escapeHtml(user.name)}</p>
+          <p class="text-xs text-muted-foreground truncate">${escapeHtml(user.email || 'No email')}</p>
+          <p class="text-xs text-muted-foreground truncate">${escapeHtml(user.phone || 'No phone')}</p>
+        </div>
+        <div class="flex items-center gap-2 ml-2">
+          <span class="px-2 py-0.5 text-xs rounded-full ${getRoleClass(user.role)}">${user.role}</span>
+          <button class="text-blue-500 hover:text-blue-600 text-xs px-2 py-1" onclick="editUser('${user.id}', '${escapeQuotes(user.name)}', '${escapeQuotes(user.email || '')}', '${escapeQuotes(user.phone || '')}', '${user.role}')">Edit</button>
+          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteUser('${user.id}')">Del</button>
+        </div>
+      </div>
+    `).join('');
   }
   
   function getRoleClass(role: string) {
@@ -222,6 +267,10 @@ import Button from '@components/ui/Button.astro';
     }
   });
   
+  // Event listeners for search and filter
+  document.getElementById('search-input')?.addEventListener('input', renderUsers);
+  document.getElementById('role-filter')?.addEventListener('change', renderUsers);
+
   // Initialize
   loadUsers();
 </script>

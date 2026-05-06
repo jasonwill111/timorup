@@ -29,16 +29,43 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
-    <div class="mb-4 md:mb-6">
-      <h1 class="text-xl md:text-2xl font-bold">SKUs / Products</h1>
-      <p class="text-sm text-muted-foreground">Manage products and services with flexible pricing</p>
+    <div class="mb-4 md:mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold">SKUs / Products</h1>
+        <p class="text-sm text-muted-foreground">Manage products and services with flexible pricing</p>
+      </div>
+      <Button id="add-sku-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add SKU</Button>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-card border rounded-lg p-3 md:p-4 mb-4">
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex-1">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search by title..."
+            class="w-full px-3 py-2 border rounded-lg text-sm"
+          />
+        </div>
+        <div class="flex gap-2">
+          <select id="business-filter" class="px-3 py-2 border rounded-lg text-sm">
+            <option value="">All Businesses</option>
+          </select>
+          <select id="type-filter" class="px-3 py-2 border rounded-lg text-sm">
+            <option value="">All Types</option>
+            <option value="product">Product</option>
+            <option value="service">Service</option>
+            <option value="subscription">Subscription</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <!-- SKUs List -->
     <div class="bg-card border rounded-lg p-3 md:p-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-        <h3 class="font-semibold text-sm md:text-base">All SKUs</h3>
-        <Button id="add-sku-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add SKU</Button>
+      <div class="flex items-center justify-between mb-4">
+        <span id="skus-count" class="text-xs text-muted-foreground">Loading...</span>
       </div>
       <div id="skus-list" class="space-y-2">
         <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
@@ -535,61 +562,101 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     });
   }
 
+  // Global SKUs storage
+  (window as any).allSkus = [];
+
   // Load SKUs
   async function loadSKUs() {
     const container = document.getElementById('skus-list');
+    const countEl = document.getElementById('skus-count');
+    const businessFilter = document.getElementById('business-filter') as HTMLSelectElement;
     if (!container) return;
 
+    // Populate business filter options
+    if (businessFilter) {
+      businessFilter.innerHTML = '<option value="">All Businesses</option>' +
+        businessOptions.map(b => `<option value="${b.value}">${escapeHtml(b.label)}</option>`).join('');
+    }
+
     try {
-      const res = await authFetch('/api/products?isAdmin=true');
+      const res = await authFetch('/api/admin/skus');
       const data = await res.json();
 
-      if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">No SKUs yet. Click "+ Add SKU" to create one.</p>';
+      if (!data.success) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">Failed to load SKUs</p>';
         return;
       }
 
-      const bizMap = new Map(businessOptions.map(b => [b.value, b.label]));
-
-      container.innerHTML = data.data.map((sku) => {
-        let priceDisplay = 'Ask for price';
-        try {
-          const fields = sku.priceFields ? JSON.parse(sku.priceFields) : [];
-          if (fields.length > 0 && fields[0].value) {
-            const unit = fields[0].unit ? ` / ${fields[0].unit.replace('/', '')}` : '';
-            priceDisplay = `$${fields[0].value}${unit}`;
-          }
-        } catch {}
-
-        return `
-          <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm hover:bg-muted/30">
-            <div class="min-w-0 flex-1">
-              <p class="font-medium truncate">${sku.title}</p>
-              <p class="text-xs text-muted-foreground">
-                ${priceDisplay} - ${bizMap.get(sku.businessPageId) || 'Unknown'}
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button class="edit-sku text-primary hover:text-primary/80 text-xs px-2 py-1" data-id="${sku.id}">Edit</button>
-              <button class="delete-sku text-red-500 hover:text-red-600 text-xs px-2 py-1" data-id="${sku.id}">Del</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Edit handlers
-      container.querySelectorAll('.edit-sku').forEach(btn => {
-        btn.addEventListener('click', () => editSKU(btn.dataset.id));
-      });
-
-      // Delete handlers
-      container.querySelectorAll('.delete-sku').forEach(btn => {
-        btn.addEventListener('click', () => deleteSKU(btn.dataset.id));
-      });
+      (window as any).allSkus = data.data || [];
+      renderSkus();
     } catch (err) {
       console.error('Error loading SKUs:', err);
       container.innerHTML = '<p class="text-center text-muted-foreground py-4 text-sm">Error loading SKUs</p>';
     }
+  }
+
+  // Render SKUs with filters
+  function renderSkus() {
+    const container = document.getElementById('skus-list');
+    const countEl = document.getElementById('skus-count');
+    if (!container || !(window as any).allSkus) return;
+
+    const search = (document.getElementById('search-input') as HTMLInputElement)?.value.toLowerCase() || '';
+    const businessFilter = (document.getElementById('business-filter') as HTMLSelectElement)?.value || '';
+    const typeFilter = (document.getElementById('type-filter') as HTMLSelectElement)?.value || '';
+
+    const bizMap = new Map(businessOptions.map(b => [b.value, b.label]));
+
+    const filtered = (window as any).allSkus.filter((sku: any) => {
+      const matchesSearch = !search || sku.title?.toLowerCase().includes(search);
+      const matchesBusiness = !businessFilter || sku.businessPageId === businessFilter;
+      const matchesType = !typeFilter || sku.serviceType === typeFilter;
+      return matchesSearch && matchesBusiness && matchesType;
+    });
+
+    if (countEl) countEl.textContent = `${filtered.length} of ${(window as any).allSkus.length} SKUs`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p class="text-center text-muted-foreground py-8">No SKUs found</p>';
+      return;
+    }
+
+    container.innerHTML = filtered.map((sku: any) => {
+      let priceDisplay = 'Ask for price';
+      try {
+        const fields = sku.priceFields ? JSON.parse(sku.priceFields) : [];
+        if (fields.length > 0 && fields[0].value) {
+          const unit = fields[0].unit ? ` / ${fields[0].unit.replace('/', '')}` : '';
+          priceDisplay = `$${fields[0].value}${unit}`;
+        }
+      } catch {}
+
+      return `
+        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm hover:bg-muted/30">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">${escapeHtml(sku.title)}</p>
+            <p class="text-xs text-muted-foreground">
+              ${priceDisplay} - ${bizMap.get(sku.businessPageId) || 'Unknown'}
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-xs rounded-full ${sku.serviceType === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'}">${sku.serviceType || 'product'}</span>
+            <button class="edit-sku text-primary hover:text-primary/80 text-xs px-2 py-1" data-id="${sku.id}">Edit</button>
+            <button class="delete-sku text-red-500 hover:text-red-600 text-xs px-2 py-1" data-id="${sku.id}">Del</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Edit handlers
+    container.querySelectorAll('.edit-sku').forEach(btn => {
+      btn.addEventListener('click', () => editSKU(btn.dataset.id));
+    });
+
+    // Delete handlers
+    container.querySelectorAll('.delete-sku').forEach(btn => {
+      btn.addEventListener('click', () => deleteSKU(btn.dataset.id));
+    });
   }
 
   // Edit SKU
@@ -776,6 +843,10 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     }
   });
 
+  function escapeHtml(str: string) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   // Init
   populateBusinesses();
   renderPriceFields('product');
@@ -784,6 +855,11 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   // Initialize editor for create mode (will be reset on modal open)
   initEditor('');
   setupToolbar();
+
+  // Event listeners for search and filters
+  document.getElementById('search-input')?.addEventListener('input', renderSkus);
+  document.getElementById('business-filter')?.addEventListener('change', renderSkus);
+  document.getElementById('type-filter')?.addEventListener('change', renderSkus);
 </script>
 
 <style>
