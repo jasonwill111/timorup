@@ -1,5 +1,7 @@
 // Admin API Auth Helper
-import { initAuth } from '@/lib/auth';
+import { getDb } from '@/lib/db';
+import { sessions, users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export interface AuthUser {
   id: string;
@@ -14,22 +16,43 @@ export async function getAdminUser(request: Request): Promise<AuthUser | null> {
   if (!tokenMatch) return null;
 
   try {
-    const authApi = (await initAuth()).api;
-    const { user } = await authApi.getSession({
-      headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
-    });
+    const db = await getDb();
+    const token = tokenMatch[1];
+
+    // Direct DB query (same as session.ts)
+    const session = await db.select()
+      .from(sessions)
+      .where(eq(sessions.token, token))
+      .limit(1)
+      .get();
+
+    if (!session) return null;
+
+    // Check expiry
+    const expiresAtMs = typeof session.expiresAt === 'number'
+      ? session.expiresAt * 1000
+      : new Date(session.expiresAt).getTime();
+
+    if (expiresAtMs <= Date.now()) return null;
+
+    // Get user
+    const user = await db.select()
+      .from(users)
+      .where(eq(users.id, session.userId))
+      .limit(1)
+      .get();
 
     if (!user) return null;
 
     // Check if user has admin role
-    const role = (user as any).role as AuthUser['role'];
-    if (!role || !['admin', 'super_admin', 'editor'].includes(role)) {
+    const role = (user.role || 'user') as AuthUser['role'];
+    if (!['admin', 'super_admin', 'editor'].includes(role)) {
       return null;
     }
 
     return {
       id: user.id,
-      email: user.email as string,
+      email: user.email,
       name: user.name,
       role,
     };

@@ -23,45 +23,45 @@ import '../../styles/globals.css';
         <h1 class="text-2xl font-bold mt-4">Admin Login</h1>
         <p class="text-muted-foreground mt-2">Sign in to manage the site</p>
       </div>
-      
+
       <!-- Login Form -->
       <div class="bg-card border rounded-lg p-6">
         <form id="login-form" class="space-y-4">
           <div>
             <label for="email" class="block text-sm font-medium mb-1">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
+            <input
+              type="email"
+              id="email"
+              name="email"
               required
               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="admin@example.com"
             />
           </div>
-          
+
           <div>
             <label for="password" class="block text-sm font-medium mb-1">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              name="password" 
+            <input
+              type="password"
+              id="password"
+              name="password"
               required
               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="••••••••"
             />
           </div>
-          
-          <button 
+
+          <button
             type="submit"
             class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity"
           >
             Sign In
           </button>
         </form>
-        
+
         <div id="error-message" class="mt-4 text-center text-red-500 text-sm hidden"></div>
       </div>
-      
+
       <!-- Back to Site -->
       <div class="text-center mt-6">
         <a href="/" class="text-sm text-muted-foreground hover:text-foreground">
@@ -75,36 +75,43 @@ import '../../styles/globals.css';
 <script>
   const form = document.getElementById('login-form') as HTMLFormElement;
   const errorMsg = document.getElementById('error-message');
-  
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData(form);
     const email = formData.get('email');
     const password = formData.get('password');
-    
+
     try {
-      const res = await fetch('/api/admin/auth/login', {
+      // First sign in via better-auth (sets httpOnly cookie)
+      const signInRes = await fetch('/api/auth/sign-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        // Store session in localStorage
-        localStorage.setItem('adminSession', JSON.stringify(data.session));
-        localStorage.setItem('adminUser', JSON.stringify(data.user));
-        // Also set cookie for API session checks
-        document.cookie = `auth_token=${data.session.id}; path=/; max-age=${7 * 24 * 60 * 60}`;
-        document.cookie = `user_id=${data.user.id}; path=/; max-age=${7 * 24 * 60 * 60}`;
-        // Redirect to admin dashboard
-        window.location.href = '/admin';
-      } else {
-        errorMsg!.textContent = data.error?.message || 'Invalid credentials';
+
+      const signInData = await signInRes.json();
+
+      if (!signInData.user) {
+        errorMsg!.textContent = 'Invalid email or password';
         errorMsg!.classList.remove('hidden');
+        return;
       }
+
+      // Then check admin role via session API
+      const sessionRes = await fetch('/api/auth/session');
+      const sessionData = await sessionRes.json();
+
+      if (!sessionData.user || !['admin', 'super_admin', 'editor'].includes(sessionData.user.role)) {
+        errorMsg!.textContent = 'Access denied. Admin role required.';
+        errorMsg!.classList.remove('hidden');
+        return;
+      }
+
+      // Store user info and redirect
+      localStorage.setItem('adminUser', JSON.stringify(sessionData.user));
+      window.location.href = '/admin';
     } catch (err) {
       errorMsg!.textContent = 'An error occurred. Please try again.';
       errorMsg!.classList.remove('hidden');

@@ -3,9 +3,9 @@
 ---
 
 <script>
-import { animate } from 'motion';
+import { animate, stagger, inView } from 'motion';
 
-// Entrance animations with stagger
+// Entrance animations
 export function fadeInUp(selector: string, delay = 0) {
   const elements = document.querySelectorAll(selector);
   elements.forEach((el, i) => {
@@ -58,7 +58,103 @@ export function addHoverLift(selector: string) {
   });
 }
 
-// Auto-initialize common animations
+// Slide in from left
+export function slideInLeft(selector: string, delay = 0) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((el, i) => {
+    animate(
+      el,
+      { opacity: [0, 1], x: [-30, 0] },
+      { duration: 0.4, delay: delay + i * 0.08, easing: [0.25, 0.1, 0.25, 1] }
+    );
+  });
+}
+
+// Slide in from right
+export function slideInRight(selector: string, delay = 0) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((el, i) => {
+    animate(
+      el,
+      { opacity: [0, 1], x: [30, 0] },
+      { duration: 0.4, delay: delay + i * 0.08, easing: [0.25, 0.1, 0.25, 1] }
+    );
+  });
+}
+
+// Button click feedback
+export function addButtonFeedback(selector: string) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(el => {
+    el.addEventListener('mousedown', () => {
+      animate(el, { scale: 0.95 }, { duration: 0.1 });
+    });
+    el.addEventListener('mouseup', () => {
+      animate(el, { scale: 1 }, { duration: 0.1 });
+    });
+  });
+}
+
+// Link hover underline animation
+export function addLinkUnderline(selector: string) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      animate(el, { textDecorationThickness: [0, 2] }, { duration: 0.2 });
+    });
+    el.addEventListener('mouseleave', () => {
+      animate(el, { textDecorationThickness: [2, 0] }, { duration: 0.2 });
+    });
+  });
+}
+
+// Counter animation
+export function animateCounter(element: Element, target: number, duration = 1) {
+  const start = 0;
+  animate((t) => {
+    const value = Math.round(start + (target - start) * t);
+    element.textContent = value.toString();
+  }, { duration });
+}
+
+// Filter tag click effect
+export function addFilterClickEffect(selector: string) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(el => {
+    el.addEventListener('click', () => {
+      animate(el, { scale: [1, 0.9, 1.05, 1] }, { duration: 0.3 });
+    });
+  });
+}
+
+// Card border glow on hover
+export function addCardGlow(selector: string) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      animate(el, { '--tw-shadow-color': 'rgba(255, 209, 80, 0.4)' }, { duration: 0.3 });
+    });
+    el.addEventListener('mouseleave', () => {
+      animate(el, { '--tw-shadow-color': 'rgba(0, 0, 0, 0.05)' }, { duration: 0.3 });
+    });
+  });
+}
+
+// Staggered fade in for children
+export function staggerFadeIn(parentSelector: string, childSelector: string, delay = 0) {
+  const parent = document.querySelector(parentSelector);
+  if (!parent) return;
+  const children = parent.querySelectorAll(childSelector);
+  children.forEach((child, i) => {
+    animate(
+      child,
+      { opacity: [0, 1], y: [15, 0] },
+      { duration: 0.35, delay: delay + i * 0.06, easing: [0.25, 0.1, 0.25, 1] }
+    );
+  });
+}
+
+// Auto-initialize
 document.addEventListener('DOMContentLoaded', () => {
   // Hero section text reveal
   const heroTitle = document.querySelector('h1');
@@ -67,7 +163,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Card hover effects
-  addHoverLift('.listing-card, .product-card');
+  addHoverLift('.listing-card, .product-card, .business-card');
+  addCardGlow('.listing-card, .product-card, .business-card');
+
+  // Form elements
+  staggerFadeIn('form', 'input, select, textarea, button', 0.1);
+
+  // Listings/products staggered entrance
+  staggerFadeIn('.grid', '.listing-card, .product-card', 0.15);
+
+  // Stats counter animation
+  const statNumbers = document.querySelectorAll('[data-count]');
+  statNumbers.forEach(el => {
+    const target = parseInt(el.getAttribute('data-count') || '0', 10);
+    inView(el, () => {
+      animateCounter(el, target, 1.5);
+    }, { amount: 0.5 });
+  });
+
+  // Button feedback
+  addButtonFeedback('button, a.btn, [role="button"]');
+
+  // Filter tag effects
+  addFilterClickEffect('.filter-tag, .category-tag');
+
+  // Link underline
+  addLinkUnderline('nav a, footer a');
+
+  // Business header sections
+  setTimeout(() => {
+    slideInLeft('.header-left-section', 0.1);
+    slideInRight('.header-right-section', 0.15);
+  }, 200);
 
   // Entrance animations
   setTimeout(() => {

@@ -45,6 +45,7 @@ export async function GET({ request }: { request: Request }) {
                 name: user.name,
                 emailVerified: user.emailVerified ?? false,
                 image: user.image ?? null,
+                role: user.role ?? 'user',
                 createdAt: user.createdAt ?
                   (typeof user.createdAt === 'number' ? new Date(user.createdAt * 1000).toISOString() : user.createdAt.toISOString())
                   : null,
