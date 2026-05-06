@@ -334,4 +334,19 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
       if (e.key === 'Escape' && !mobileMenu?.classList.contains('hidden')) closeMobileMenu();
     });
   })();
+
+  // Auth fetch helper - includes credentials for cookie-based auth
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
+  // Expose globally for admin pages
+  (window as any).authFetch = authFetch;
 </script>

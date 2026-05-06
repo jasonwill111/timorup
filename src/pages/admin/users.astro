@@ -68,11 +68,23 @@ import Button from '@components/ui/Button.astro';
 
 <script>
   import { toast } from '../../stores/toast';
-  
+
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   // Load users
   async function loadUsers() {
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await authFetch('/api/admin/users');
       const data = await res.json();
       
       const container = document.getElementById('users-list');

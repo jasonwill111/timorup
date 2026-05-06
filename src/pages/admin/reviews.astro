@@ -93,6 +93,18 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   let currentPage = 1;
   const pageSize = 20;
 
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   // Load reviews
   async function loadReviews() {
     try {
@@ -107,7 +119,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       if (fromDate) url += `&from=${fromDate}`;
       if (toDate) url += `&to=${toDate}`;
 
-      const res = await fetch(url);
+      const res = await authFetch(url);
       const data = await res.json();
 
       const container = document.getElementById('reviews-list');
@@ -271,7 +283,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (!id) return;
 
     try {
-      const res = await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
+      const res = await authFetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
       const data = await res.json();
 
       if (data.success) {

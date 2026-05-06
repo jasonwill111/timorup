@@ -23,7 +23,12 @@ async function requireAdminAuth(request: Request) {
     .limit(1)
     .get();
 
-  if (!session || !session.expiresAt || new Date(session.expiresAt) < new Date()) {
+  // expiresAt is Unix timestamp in seconds
+  const expiresAtMs = typeof session.expiresAt === 'number'
+    ? session.expiresAt * 1000
+    : new Date(session.expiresAt).getTime();
+
+  if (!session || !session.expiresAt || expiresAtMs <= Date.now()) {
     return { authorized: false, error: new Response(JSON.stringify({
       success: false,
       error: { code: 'UNAUTHORIZED', message: 'Session expired' }

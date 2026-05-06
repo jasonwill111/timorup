@@ -5,12 +5,24 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
 <AdminLayout title="Dashboard">
 <script>
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   // Check authentication on page load
   async function checkAuth() {
     try {
-      const res = await fetch('/api/auth/session');
+      const res = await authFetch('/api/auth/session');
       const data = await res.json();
-      if (!data.user || data.user.role !== 'admin') {
+      if (!data.user || !['admin', 'super_admin', 'editor'].includes(data.user.role)) {
         window.location.href = '/admin/login?redirect=/admin';
       }
     } catch (e) {
@@ -56,10 +68,22 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   // Load dashboard stats
   async function loadStats() {
     try {
-      const res = await fetch('/api/admin/stats');
+      const res = await authFetch('/api/admin/stats');
       const data = await res.json();
       
       if (data.success) {
@@ -76,7 +100,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   // Load recent orders
   async function loadOrders() {
     try {
-      const res = await fetch('/api/admin/orders');
+      const res = await authFetch('/api/admin/orders');
       const data = await res.json();
       
       const container = document.getElementById('orders-list');

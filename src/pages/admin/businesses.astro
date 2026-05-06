@@ -66,6 +66,18 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   let businessList: any[] = [];
   let aboutContent = '';
   let updatesContent = '';
@@ -73,7 +85,7 @@ import Button from '@components/ui/Button.astro';
   // Load businesses
   async function loadBusinesses() {
     try {
-      const res = await fetch('/api/admin/businesses');
+      const res = await authFetch('/api/admin/businesses');
       const data = await res.json();
 
       const container = document.getElementById('businesses-list');
@@ -183,9 +195,8 @@ import Button from '@components/ui/Button.astro';
     };
     
     try {
-      const res = await fetch('/api/admin/businesses', {
+      const res = await authFetch('/api/admin/businesses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(businessData),
       });
       

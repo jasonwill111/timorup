@@ -523,13 +523,25 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     }).join('');
   }
 
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
   // Load SKUs
   async function loadSKUs() {
     const container = document.getElementById('skus-list');
     if (!container) return;
 
     try {
-      const res = await fetch('/api/products?isAdmin=true');
+      const res = await authFetch('/api/products?isAdmin=true');
       const data = await res.json();
 
       if (!data.success || data.data.length === 0) {
