@@ -35,12 +35,12 @@ export async function GET() {
     .limit(8);
 
   // Get category names
-  const categoryMap = new Map();
+  const categoryMap = new Map<string, typeof categories.$inferSelect>();
   const allCategories = await db.select().from(categories);
-  allCategories.forEach((cat: any) => categoryMap.set(cat.id, cat));
+  allCategories.forEach((cat) => categoryMap.set(cat.id, cat));
 
   // Add category name to businesses
-  const businessesWithCategory = featuredBusinesses.map((biz: any) => ({
+  const businessesWithCategory = featuredBusinesses.map((biz) => ({
     ...biz,
     categoryName: categoryMap.get(biz.categoryId)?.name || 'Business',
   }));

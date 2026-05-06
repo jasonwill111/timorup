@@ -1,9 +1,13 @@
 import type { APIRoute } from 'astro'
 import { agents } from '@/mastra/agents'
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth'
 
 export const prerender = false
 
 export const POST: APIRoute = async ({ request }) => {
+  const user = await getAdminUser(request)
+  if (!user) return unauthorizedResponse()
+
   try {
     const { message } = await request.json()
 

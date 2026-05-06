@@ -4,8 +4,12 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { blogPosts } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
-export async function GET() {
+export async function GET({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).all();

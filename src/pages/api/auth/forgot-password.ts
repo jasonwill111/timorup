@@ -33,14 +33,12 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // In real app, generate reset token and send email
-    const resetToken = `reset-${Date.now()}`;
-    
+    // Generate secure reset token (in production, store in DB with expiry)
+    // crypto.randomUUID();
+
     return new Response(JSON.stringify({
       success: true,
-      message: 'Password reset link sent to email',
-      // DEBUG ONLY - remove in production
-      debugToken: resetToken
+      message: 'Password reset link sent to email'
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     console.error('Forgot password error:', error);

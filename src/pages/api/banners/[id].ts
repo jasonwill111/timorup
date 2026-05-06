@@ -4,8 +4,12 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function PUT({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   const url = new URL(request.url);
   const pathParts = url.pathname.split('/');
@@ -51,6 +55,9 @@ export async function PUT({ request }: { request: Request }) {
 }
 
 export async function DELETE({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   const url = new URL(request.url);
   const pathParts = url.pathname.split('/');

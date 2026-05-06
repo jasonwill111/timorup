@@ -159,12 +159,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     const total = Number(totalResult?.count) || 0;
 
     // Get category names
-    const categoryMap = new Map();
+    const categoryMap = new Map<string, typeof categories.$inferSelect>();
     const allCategories = await db.select().from(categories).all();
-    allCategories.forEach((cat: any) => categoryMap.set(cat.id, cat));
+    allCategories.forEach((cat) => categoryMap.set(cat.id, cat));
 
     // Add category name to businesses
-    const businessesWithCategory = allBusinesses.map((biz: any) => ({
+    const businessesWithCategory = allBusinesses.map((biz) => ({
       ...biz,
       categoryName: categoryMap.get(biz.categoryId)?.name || 'Business',
     }));

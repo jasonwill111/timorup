@@ -3,7 +3,7 @@ import * as z from 'zod';
 
 // File size limits (in bytes)
 export const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
-export const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_VIDEO_SIZE = 8 * 1024 * 1024; // 8MB - aligned with media.ts
 
 // Allowed MIME types
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];

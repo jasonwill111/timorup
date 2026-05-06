@@ -4,8 +4,12 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { orders, businessPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
-export async function GET({ params }: { params: Record<string, string> }) {
+export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const { id } = params;
@@ -40,6 +44,9 @@ export async function GET({ params }: { params: Record<string, string> }) {
 }
 
 export async function PUT({ params, request }: { params: Record<string, string>; request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const body = await request.json();
@@ -134,7 +141,10 @@ export async function PUT({ params, request }: { params: Record<string, string>;
   }
 }
 
-export async function DELETE({ params }: { params: Record<string, string> }) {
+export async function DELETE({ params, request }: { params: Record<string, string>; request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const { id } = params;

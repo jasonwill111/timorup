@@ -1,76 +1,46 @@
-// Drizzle DB Instance - Astro 6 Cloudflare Workers + Local Development
-// Workers: drizzle-orm/d1 (Cloudflare D1 binding)
-// Local: drizzle-orm/libsql (local SQLite via @libsql/client)
+// Drizzle DB Instance - Astro 6 Cloudflare Workers + Remote Bindings
+// Uses cloudflare:workers env.DB (works in both local dev and production)
 
 import { drizzle } from 'drizzle-orm/d1';
-import { drizzle as drizzleLibsql } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
 import * as schema from '@/db/schema';
 
-// Check if running in Cloudflare Workers runtime - cached
-let _isWorkersRuntime: boolean | null = null;
-async function isWorkersRuntime(): Promise<boolean> {
-  if (_isWorkersRuntime !== null) return _isWorkersRuntime;
-  try {
-    await import('cloudflare:workers');
-    _isWorkersRuntime = true;
-  } catch {
-    _isWorkersRuntime = false;
-  }
-  return _isWorkersRuntime;
-}
+// Global singleton - initialized once per Worker cold start
+let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
-// Get local SQLite path (from wrangler state)
-function getLocalDbPath(): string {
-  // wrangler dev --local creates SQLite at this path
-  const stateDir = process.env.WRANGLER_STATE_DIR || '.wrangler/state/v3/d1';
-  return `${stateDir}/timorlist-db.sqlite`;
-}
-
-// Get D1 database binding
+/**
+ * Get Drizzle DB instance
+ * Uses cloudflare:workers env.DB - works with remote bindings in local dev
+ */
 export async function getDb() {
-  // 1. Cloudflare Workers runtime: use D1 binding from env
-  if (await isWorkersRuntime()) {
-    try {
-      const { env } = await import('cloudflare:workers');
-      const cfEnv = env as { DB?: any };
-      if (cfEnv.DB) {
-        console.log('[getDb] Using D1 (Workers runtime)');
-        return drizzle(cfEnv.DB, { schema, casing: 'snake_case' });
-      }
-    } catch (e) {
-      // fall through to next option
+  if (_db) return _db;
+
+  try {
+    const { env } = await import('cloudflare:workers');
+    if (env.DB) {
+      _db = drizzle(env.DB, { schema, casing: 'snake_case' });
+      console.log('[getDb] Drizzle/D1 initialized');
     }
+  } catch (e) {
+    console.error('[getDb] Failed to initialize:', e);
   }
 
-  // 2. Wrangler dev --remote: use Astro globals D1
-  if (typeof globalThis !== 'undefined' && (globalThis as any).__ASTRO_ENV?.D1) {
-    const d1 = (globalThis as any).__ASTRO_ENV.D1;
-    console.log('[getDb] Using D1 (wrangler dev --remote)');
-    return drizzle(d1, { schema, casing: 'snake_case' });
-  }
+  return _db;
+}
 
-  // 3. Local development (Node): use @libsql/client + local SQLite
-  if (process.env.USE_CLOUDFLARE !== '1') {
-    try {
-      const localDbPath = getLocalDbPath();
-      console.log('[getDb] Using local SQLite:', localDbPath);
+/**
+ * Initialize DB with a D1Database instance (for middleware)
+ */
+export function initDb(d1Db: D1Database) {
+  _db = drizzle(d1Db, { schema, casing: 'snake_case' });
+  console.log('[getDb] Drizzle/D1 initialized with provided binding');
+  return _db;
+}
 
-      // Check if local SQLite exists
-      const fs = await import('fs');
-      if (fs.existsSync(localDbPath)) {
-        const client = createClient({ url: `file://${localDbPath}` });
-        return drizzleLibsql(client, { schema, casing: 'snake_case' });
-      } else {
-        console.warn('[getDb] Local SQLite not found at:', localDbPath);
-        console.warn('[getDb] Run: pnpm db:setup-local to create it');
-      }
-    } catch (e) {
-      console.error('[getDb] Failed to create local DB:', e);
-    }
-  }
-
-  throw new Error('[getDb] D1 not available. Use: wrangler dev dist/server/entry.mjs --remote');
+/**
+ * Check if db is ready
+ */
+export function isDbReady(): boolean {
+  return _db !== null;
 }
 
 // Legacy sync export - DO NOT USE

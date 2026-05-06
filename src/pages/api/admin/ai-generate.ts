@@ -2,10 +2,14 @@
 export const prerender = false;
 
 import { agents } from '@/mastra/agents';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 const AI_TIMEOUT = 60000;
 
 export async function POST({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   try {
     const body = await request.json();
     const { type, data } = body;
@@ -27,7 +31,7 @@ export async function POST({ request }: { request: Request }) {
         break;
       case 'sku':
         agent = agents.skuCreator;
-        prompt = `Create a ${data.serviceType} called ${data.title}. Description: ${data.description}. Price: ${data.priceFields?.map((p: any) => `${p.label}: $${p.value}${p.unit}`).join(', ') || 'TBD'}.`;
+        prompt = `Create a ${data.serviceType} called ${data.title}. Description: ${data.description}. Price: ${data.priceFields?.map((p: { label: string; value: string; unit: string }) => `${p.label}: $${p.value}${p.unit}`).join(', ') || 'TBD'}.`;
         break;
       case 'blog':
         agent = agents.blogCreator;

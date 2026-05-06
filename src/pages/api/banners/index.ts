@@ -4,6 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -54,6 +55,9 @@ export async function GET({ request }: { request: Request }) {
 }
 
 export async function POST({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   try {
     const db = await getDb();
     const body = await request.json();

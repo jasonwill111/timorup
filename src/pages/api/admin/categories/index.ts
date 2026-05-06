@@ -4,9 +4,13 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { categories } from '@/db/schema';
 import { eq, desc, sql, or, isNull } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 // GET - List all categories (with optional entityType filter)
 export async function GET({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const url = new URL(request.url);
@@ -49,6 +53,9 @@ export async function GET({ request }: { request: Request }) {
 
 // POST - Create category
 export async function POST({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const body = await request.json();
@@ -81,6 +88,9 @@ export async function POST({ request }: { request: Request }) {
 
 // PUT - Update category
 export async function PUT({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const body = await request.json();

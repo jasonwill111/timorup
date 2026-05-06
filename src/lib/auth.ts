@@ -33,16 +33,23 @@ function convertToTimestamp(value: unknown): number | unknown {
   return value;
 }
 
+// Drizzle DB wrapper interface for timestamp conversion
+interface DrizzleDbWrapper {
+  insert: (table: unknown) => {
+    values: (data: unknown) => unknown;
+  };
+}
+
 // Wrap db to convert Date objects to timestamps before insert
-function wrapDbForD1(db: any) {
+function wrapDbForD1(db: DrizzleDbWrapper): DrizzleDbWrapper {
   if (!db || !db.insert) return db;
 
   const originalInsert = db.insert.bind(db);
-  db.insert = (table: any) => {
+  db.insert = (table: unknown) => {
     const originalQueryBuilder = originalInsert(table);
     const originalValues = originalQueryBuilder.values.bind(originalQueryBuilder);
 
-    originalQueryBuilder.values = (data: any) => {
+    originalQueryBuilder.values = (data: unknown) => {
       return originalValues(convertToTimestamp(data));
     };
 
@@ -53,7 +60,7 @@ function wrapDbForD1(db: any) {
 }
 
 // Factory function to create auth instance with given db
-export function createAuth(db: any) {
+export function createAuth(db: DrizzleDbWrapper) {
   console.log('[Auth] Creating auth instance');
   console.log('[Auth] DB type:', db?.constructor?.name || typeof db);
   console.log('[Auth] Schema tables:', Object.keys({ user: users, session: sessions, account: accounts, verification: verifications }).join(', '));
@@ -110,14 +117,23 @@ export function createAuth(db: any) {
       maxAge: 60 * 10, // 10 minutes TTL for auth cache
     },
 
-    // Trusted origins
-    trustedOrigins: [
-      'http://localhost:8788',
-      'http://localhost:8787',
-      'http://localhost:4321',
-      'http://localhost:4322',
-      process.env.APP_URL || '',
-    ].filter(Boolean),
+    // Trusted origins - validate APP_URL format, no localhost in production
+    trustedOrigins: (() => {
+      const origins: string[] = [];
+      const appUrl = process.env.APP_URL;
+      if (appUrl) {
+        try {
+          const url = new URL(appUrl);
+          // Only add if it's a valid HTTPS URL (not localhost)
+          if (url.protocol === 'https:' && !url.hostname.endsWith('.localhost') && url.hostname !== 'localhost') {
+            origins.push(appUrl);
+          }
+        } catch {
+          console.warn('[Auth] Invalid APP_URL format:', appUrl);
+        }
+      }
+      return origins;
+    })(),
 
     // Password configuration
     password: {
@@ -125,6 +141,13 @@ export function createAuth(db: any) {
       maxLength: 100,
     },
   });
+}
+
+// Validate AUTH_SECRET at startup (must be >= 32 chars)
+const authSecret = process.env.BETTER_AUTH_SECRET;
+if (authSecret && authSecret.length < 32) {
+  console.error('[Auth] FATAL: BETTER_AUTH_SECRET must be at least 32 characters. Current length:', authSecret.length);
+  throw new Error('BETTER_AUTH_SECRET must be at least 32 characters');
 }
 
 // Default auth instance - lazily initialized via initAuth()

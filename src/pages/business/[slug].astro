@@ -150,7 +150,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
     <!-- Banner -->
     <div class="relative h-48 md:h-64 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
       {business.bannerImageId && (
-        <img src={`/api/media/${business.bannerImageId}`} class="w-full h-full object-cover" alt="" />
+        <img src={`/api/media/${business.bannerImageId}`} class="w-full h-full object-cover" alt="" loading="eager" decoding="auto" />
       )}
       <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
     </div>
@@ -166,7 +166,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
             <div class="flex-shrink-0">
               <div class="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden bg-muted border-2 border-background shadow-lg">
                 {business.profileImageId ? (
-                  <img src={`/api/media/${business.profileImageId}`} class="w-full h-full object-cover" alt={business.title} />
+                  <img src={`/api/media/${business.profileImageId}`} class="w-full h-full object-cover" alt={business.title} loading="eager" decoding="auto" />
                 ) : (
                   <div class="w-full h-full flex items-center justify-center text-4xl md:text-5xl font-bold text-muted-foreground bg-primary/10">
                     {business.title.charAt(0)}
@@ -351,7 +351,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
                 <div class="grid grid-cols-3 gap-2" id="gallery-grid">
                   {galleryImages.slice(0, 6).map((img, idx) => (
                     <div class={`aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:opacity-90 transition-opacity ${galleryImages.length === 1 ? 'col-span-3' : ''}`} data-gallery-idx={idx}>
-                      <img src={img.url} alt={`Gallery ${idx + 1}`} class="w-full h-full object-cover" />
+                      <img src={img.url} alt={`Gallery ${idx + 1}`} class="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </div>
                   ))}
                 </div>

@@ -19,4 +19,6 @@ export const blogPosts = sqliteTable('blog_posts', {
   slugIdx: index('blog_posts_slug_idx').on(t.slug),
   authorIdx: index('blog_posts_author_idx').on(t.authorId),
   statusIdx: index('blog_posts_status_idx').on(t.status),
+  coverIdx: index('blog_posts_cover_idx').on(t.coverImageId),
+  publishedIdx: index('blog_posts_published_idx').on(t.publishedAt),
 }));

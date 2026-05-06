@@ -149,7 +149,7 @@ import Button from '@components/ui/Button.astro';
     }
 
     container.innerHTML = filtered.map((user: any) => `
-      <div class="flex items-center justify-between p-3 border rounded text-sm hover:bg-muted/30">
+      <div class="flex items-center justify-between p-3 border rounded text-sm hover:bg-muted/30" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name)}" data-user-email="${escapeHtml(user.email || '')}" data-user-phone="${escapeHtml(user.phone || '')}" data-user-role="${user.role}">
         <div class="min-w-0 flex-1">
           <p class="font-medium truncate">${escapeHtml(user.name)}</p>
           <p class="text-xs text-muted-foreground truncate">${escapeHtml(user.email || 'No email')}</p>
@@ -157,8 +157,8 @@ import Button from '@components/ui/Button.astro';
         </div>
         <div class="flex items-center gap-2 ml-2">
           <span class="px-2 py-0.5 text-xs rounded-full ${getRoleClass(user.role)}">${user.role}</span>
-          <button class="text-blue-500 hover:text-blue-600 text-xs px-2 py-1" onclick="editUser('${user.id}', '${escapeQuotes(user.name)}', '${escapeQuotes(user.email || '')}', '${escapeQuotes(user.phone || '')}', '${user.role}')">Edit</button>
-          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteUser('${user.id}')">Del</button>
+          <button class="text-blue-500 hover:text-blue-600 text-xs px-2 py-1 edit-user-btn">Edit</button>
+          <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1 delete-user-btn" data-user-id="${user.id}">Del</button>
         </div>
       </div>
     `).join('');
@@ -173,28 +173,41 @@ import Button from '@components/ui/Button.astro';
   }
 
   function escapeHtml(str: string) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g, '&#39;');
   }
 
-  function escapeQuotes(str: string) {
-    return str.replace(/'/g, "\\'");
-  }
-  
-  // Edit user
-  (window as any).editUser = function(id: string, name: string, email: string, phone: string, role: string) {
-    (document.getElementById('user-id') as HTMLInputElement).value = id;
-    (document.getElementById('user-name') as HTMLInputElement).value = name;
-    (document.getElementById('user-email') as HTMLInputElement).value = email;
-    (document.getElementById('user-phone') as HTMLInputElement).value = phone;
-    (document.getElementById('user-role') as HTMLSelectElement).value = role;
-    
-    const modal = document.getElementById('edit-modal');
-    modal?.classList.remove('hidden');
-    modal?.classList.add('flex');
-  };
-  
+  // Event delegation for edit/delete buttons
+  document.getElementById('users-list')?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const row = target.closest('[data-user-id]') as HTMLElement;
+    if (!row) return;
+
+    if (target.classList.contains('edit-user-btn')) {
+      const id = row.dataset.userId || '';
+      const name = row.dataset.userName || '';
+      const email = row.dataset.userEmail || '';
+      const phone = row.dataset.userPhone || '';
+      const role = row.dataset.userRole || 'user';
+      (document.getElementById('user-id') as HTMLInputElement).value = id;
+      (document.getElementById('user-name') as HTMLInputElement).value = name;
+      (document.getElementById('user-email') as HTMLInputElement).value = email;
+      (document.getElementById('user-phone') as HTMLInputElement).value = phone;
+      (document.getElementById('user-role') as HTMLSelectElement).value = role;
+      const modal = document.getElementById('edit-modal');
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    }
+
+    if (target.classList.contains('delete-user-btn')) {
+      const id = row.dataset.userId || '';
+      if (confirm('Delete this user and all their data? This action cannot be undone.')) {
+        deleteUser(id);
+      }
+    }
+  });
+
   // Delete user
-  (window as any).deleteUser = async function(id: string) {
+  async function deleteUser(id: string) {
     if (!confirm('Delete this user and all their data? This action cannot be undone.')) return;
     
     try {

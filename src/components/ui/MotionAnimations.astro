@@ -20,9 +20,16 @@ export function fadeInUp(selector: string, delay = 0) {
 // Text reveal animation
 export function textReveal(element: Element, duration = 0.8) {
   const words = element.textContent?.split(' ') || [];
-  element.innerHTML = words
-    .map(word => `<span class="word-reveal" style="display: inline-block; opacity: 0; transform: translateY(100%)">${word}</span>`)
-    .join(' ');
+  const fragment = document.createDocumentFragment();
+  words.forEach((word, i) => {
+    const span = document.createElement('span');
+    span.className = 'word-reveal';
+    span.style.cssText = 'display: inline-block; opacity: 0; transform: translateY(100%)';
+    span.textContent = word;
+    fragment.appendChild(span);
+  });
+  element.textContent = '';
+  element.appendChild(fragment);
 
   element.querySelectorAll('.word-reveal').forEach((word, i) => {
     animate(

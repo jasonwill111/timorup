@@ -1,42 +1,23 @@
 import { defineMiddleware } from 'astro:middleware';
+import { getDb } from './lib/db';
+
+// Initialize DB at cold start
+let bindingsInitialized = false;
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // Static pages with server islands: cache HTML, islands refresh independently
-  const staticPaths = ['/about', '/contact', '/faqs', '/privacy', '/terms', '/pricing', '/'];
-  if (staticPaths.some(p => context.url.pathname === p || context.url.pathname === p + '/')) {
-    const response = await next();
-    const maxAge = context.url.pathname === '/' || context.url.pathname === '' ? 300 : 3600;
-    response.headers.set('Cache-Control', `public, max-age=${maxAge}, stale-while-revalidate=3600`);
-    return response;
+  // Initialize D1 binding once per Worker cold start
+  if (!bindingsInitialized) {
+    try {
+      const db = await getDb();
+      if (db) {
+        bindingsInitialized = true;
+        console.log('[Middleware] DB initialized');
+      }
+    } catch (e: unknown) {
+      console.error('[Middleware] DB init failed:', e instanceof Error ? e.message : String(e));
+    }
   }
 
-  // Business detail pages: cache 5 min
-  if (context.url.pathname.startsWith('/business/') && !context.url.pathname.includes('/edit')) {
-    const response = await next();
-    response.headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
-    return response;
-  }
-
-  // Organization pages: same as business
-  if (context.url.pathname.startsWith('/organization/') && !context.url.pathname.includes('/edit')) {
-    const response = await next();
-    response.headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
-    return response;
-  }
-
-  // Products/Services page: cache 2 min
-  if (context.url.pathname === '/products-services' || context.url.pathname === '/products-services/') {
-    const response = await next();
-    response.headers.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
-    return response;
-  }
-
-  // Listings pages: cache 2 min
-  if (context.url.pathname === '/listings' || context.url.pathname === '/listings/') {
-    const response = await next();
-    response.headers.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
-    return response;
-  }
-
+  // Simple pass-through
   return next();
 });

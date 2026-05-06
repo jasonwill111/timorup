@@ -1,5 +1,12 @@
 // Rate limiter for Cloudflare Workers (in-memory, per-instance)
 // For production at scale, use Cloudflare KV or Redis
+//
+// KV Support Limitation:
+// Currently uses in-memory Map which resets on each Worker instance cold start.
+// For production at scale, implement KV-based storage:
+//   - Use env.SESSION (KV namespace) for distributed rate limiting
+//   - Store rate limit data with TTL in KV
+//   - Example: await env.SESSION.put(`ratelimit:${identifier}`, JSON.stringify(data), { expirationTtl: 60 })
 
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 

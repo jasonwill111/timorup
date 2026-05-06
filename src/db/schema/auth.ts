@@ -1,5 +1,5 @@
 // Database schema for Better Auth
-import { sqliteTable, text, integer, customType } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, customType, index } from 'drizzle-orm/sqlite-core';
 
 // Custom timestamp type that handles Date -> Unix timestamp conversion for D1
 const timestamp = () => customType<{ data: number; notNull: false; hasDefault: true }>({
@@ -22,7 +22,9 @@ export const sessions = sqliteTable('sessions', {
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
   userId: text('user_id').notNull(),
-});
+}, (sessions) => ({
+  userIdx: index('sessions_user_idx').on(sessions.userId),
+}));
 
 // Accounts table (OAuth)
 export const accounts = sqliteTable('accounts', {
@@ -39,7 +41,9 @@ export const accounts = sqliteTable('accounts', {
   password: text('password'),
   createdAt: timestamp()(),
   updatedAt: timestamp()(),
-});
+}, (accounts) => ({
+  userIdx: index('accounts_user_idx').on(accounts.userId),
+}));
 
 // Verifications table
 export const verifications = sqliteTable('verifications', {
@@ -48,7 +52,9 @@ export const verifications = sqliteTable('verifications', {
   value: text('value').notNull(),
   expiresAt: integer('expires_at').notNull(),
   createdAt: timestamp()(),
-});
+}, (verifications) => ({
+  expiresIdx: index('verifications_expires_idx').on(verifications.expiresAt),
+}));
 
 // Export types
 export type Session = typeof sessions.$inferSelect;

@@ -15,6 +15,19 @@ type CategoryData = {
   slug: string;
   description: string | null;
   icon: string | null;
+  count: number;
+  iconType: string;
+};
+
+type ProductListing = {
+  id: string;
+  title: string;
+  price: string;
+  priceUnit: string;
+  priceFields: { label: string; value: string; unit: string }[];
+  serviceType: string;
+  businessTitle: string;
+  businessSlug: string;
 };
 
 type BusinessListing = {
@@ -55,7 +68,7 @@ try {
   .limit(20);
 
   const categoryMap: Record<string, { name: string; icon: string }> = {};
-  categoriesResult.forEach((c: any) => {
+  categoriesResult.forEach((c) => {
     categoryMap[c.id] = { name: c.name, icon: c.icon || '' };
   });
 
@@ -185,7 +198,7 @@ const mappedCategories = categoriesData;
     <a href="/listings?type=business" class="text-xs sm:text-sm text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
   </div>
   <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-    {featuredBusinesses.length > 0 ? featuredBusinesses.map((business: any) => (
+    {featuredBusinesses.length > 0 ? featuredBusinesses.map((business: BusinessListing) => (
       <BusinessCard
         title={business.title}
         slug={business.slug}
@@ -214,10 +227,10 @@ const mappedCategories = categoriesData;
       <h2 class="text-lg sm:text-2xl font-bold">Government</h2>
       <a href="/listings?type=govs" class="text-purple-600 hover:text-purple-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {featuredGovs.map((gov: any) => (
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {featuredGovs.map((gov: BusinessListing) => (
         <a href={`/business/${gov.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
-          <div class="aspect-square bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 relative flex items-center justify-center">
+          <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40">
             {gov.profileImageId ? (
               <img src={`/api/media/${gov.profileImageId}`} alt={gov.title} class="w-full h-full object-cover" loading="lazy" />
             ) : (
@@ -241,10 +254,10 @@ const mappedCategories = categoriesData;
       <h2 class="text-lg sm:text-2xl font-bold">NGOs & Non-Profits</h2>
       <a href="/listings?type=ngos" class="text-orange-600 hover:text-orange-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {featuredNgos.map((ngo: any) => (
+    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {featuredNgos.map((ngo: BusinessListing) => (
         <a href={`/business/${ngo.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
-          <div class="aspect-square bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 relative flex items-center justify-center">
+          <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40">
             {ngo.profileImageId ? (
               <img src={`/api/media/${ngo.profileImageId}`} alt={ngo.title} class="w-full h-full object-cover" loading="lazy" />
             ) : (
@@ -269,7 +282,7 @@ const mappedCategories = categoriesData;
   </div>
   {featuredProducts.length > 0 ? (
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-      {featuredProducts.map((product: any) => (
+      {featuredProducts.map((product: ProductListing) => (
         <ProductCard
           title={product.title}
           businessTitle={product.businessTitle}
@@ -295,8 +308,8 @@ const mappedCategories = categoriesData;
 <!-- Categories -->
 <section class="mb-6 sm:mb-12">
   <h2 class="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Browse by Category</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
-    {mappedCategories.map((cat: any) => (
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+    {mappedCategories.map((cat: CategoryData) => (
       <a href={`/listings?type=business&industry=${cat.slug}`} class="block cursor-pointer">
         <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <div class="w-8 h-8 mx-auto mb-2 text-amber-500 flex items-center justify-center">

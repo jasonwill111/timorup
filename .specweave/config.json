@@ -4,6 +4,18 @@
     "name": "timorlist",
     "version": "0.1.0"
   },
+  "quality": {
+    "thinkingBudget": 1024,
+    "grillConfidenceThreshold": 0.7,
+    "tokenBudgets": {
+      "heavy": 16000,
+      "medium": 8000,
+      "light": 4000
+    }
+  },
+  "cache": {
+    "staticContextFiles": true
+  },
   "adapters": {
     "default": "claude"
   },

@@ -4,9 +4,13 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { siteSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 // GET - Get all settings
-export async function GET() {
+export async function GET({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const settingsResult = await db.select().from(siteSettings).all();
@@ -38,6 +42,9 @@ export async function GET() {
 
 // PUT - Update a setting
 export async function PUT({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const body = await request.json();
@@ -77,6 +84,9 @@ export async function PUT({ request }: { request: Request }) {
 
 // POST - Save all settings at once
 export async function POST({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+
   const db = await getDb();
   try {
     const body = await request.json();

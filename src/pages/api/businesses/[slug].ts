@@ -124,8 +124,8 @@ export async function GET({ params, request }: { params: { slug: string }; reque
     }
 
     // Only fetch products and reviews for businesses, not organizations
-    let businessProducts: any[] = [];
-    let businessReviews: any[] = [];
+    let businessProducts: typeof products.$inferSelect[] = [];
+    let businessReviews: typeof reviews.$inferSelect[] = [];
 
     if (business.entityType !== 'organization') {
       businessProducts = await db.select()

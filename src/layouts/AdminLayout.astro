@@ -8,6 +8,13 @@ interface Props {
 
 const { title } = Astro.props;
 const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
+const currentPath = Astro.url.pathname;
+
+// Helper to check if nav item is active
+const isActive = (href: string) => {
+  if (href === '/admin') return currentPath === '/admin';
+  return currentPath.startsWith(href);
+};
 ---
 
 <!DOCTYPE html>
@@ -57,7 +64,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
       <div id="mobile-menu-backdrop" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
       <div id="mobile-menu-panel" class="absolute left-0 top-0 h-full w-64 bg-card border-r pt-14 -translate-x-full transition-transform duration-200 ease-out">
         <nav class="p-4 space-y-1">
-          <a href="/admin" class="nav-item" data-section="dashboard">
+          <a href="/admin" class:list={["nav-item", { active: isActive('/admin') }]} data-section="dashboard">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
             </svg>
@@ -66,55 +73,55 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           <div class="pt-2 mt-2 border-t">
             <p class="px-2 py-1 text-xs text-muted-foreground">Manage</p>
           </div>
-          <a href="/admin/subscriptions" class="nav-item" data-section="subscriptions">
+          <a href="/admin/subscriptions" class:list={["nav-item", { active: isActive('/admin/subscriptions') }]} data-section="subscriptions">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
             <span>Subscriptions</span>
           </a>
-          <a href="/admin/listings" class="nav-item" data-section="listing">
+          <a href="/admin/listings" class:list={["nav-item", { active: isActive('/admin/listings') }]} data-section="listing">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
             <span>Listings</span>
           </a>
-          <a href="/admin/ai-tools" class="nav-item" data-section="ai-tools">
+          <a href="/admin/ai-tools" class:list={["nav-item", { active: isActive('/admin/ai-tools') }]} data-section="ai-tools">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
             <span>AI Tools</span>
           </a>
-          <a href="/admin/users" class="nav-item" data-section="users">
+          <a href="/admin/users" class:list={["nav-item", { active: isActive('/admin/users') }]} data-section="users">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             <span>Users</span>
           </a>
-          <a href="/admin/skus" class="nav-item" data-section="skus">
+          <a href="/admin/skus" class:list={["nav-item", { active: isActive('/admin/skus') }]} data-section="skus">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
             <span>SKUs</span>
           </a>
-          <a href="/admin/categories" class="nav-item" data-section="categories">
+          <a href="/admin/categories" class:list={["nav-item", { active: isActive('/admin/categories') }]} data-section="categories">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
             <span>Categories</span>
           </a>
-          <a href="/admin/heroes" class="nav-item" data-section="heroes">
+          <a href="/admin/heroes" class:list={["nav-item", { active: isActive('/admin/heroes') }]} data-section="heroes">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
             <span>Hero Sections</span>
           </a>
-          <a href="/admin/blogs" class="nav-item" data-section="blogs">
+          <a href="/admin/blogs" class:list={["nav-item", { active: isActive('/admin/blogs') }]} data-section="blogs">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
             </svg>
             <span>Blog Posts</span>
           </a>
-          <a href="/admin/settings" class="nav-item" data-section="settings">
+          <a href="/admin/settings" class:list={["nav-item", { active: isActive('/admin/settings') }]} data-section="settings">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -129,7 +136,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
               </svg>
               <span>Back to Home</span>
             </a>
-            <button id="admin-logout-btn-mobile" class="nav-item w-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+            <button id="admin-logout-btn-mobile" class="nav-item w-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onclick="if(confirm('Log out?')){fetch('/api/auth/sign-out',{method:'POST',credentials:'include'}).then(()=>{window.location.href='/admin/login'})}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
               </svg>
@@ -154,7 +161,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
       
       <!-- Navigation -->
       <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-        <a href="/admin" class="nav-item" data-section="dashboard">
+        <a href="/admin" class:list={["nav-item", { active: isActive('/admin') }]} data-section="dashboard">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
           </svg>
@@ -165,62 +172,62 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           <p class="px-2 py-1 text-xs text-muted-foreground">Manage</p>
         </div>
         
-        <a href="/admin/subscriptions" class="nav-item" data-section="subscriptions">
+        <a href="/admin/subscriptions" class:list={["nav-item", { active: isActive('/admin/subscriptions') }]} data-section="subscriptions">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
           </svg>
           <span>Subscriptions</span>
         </a>
         
-        <a href="/admin/listings" class="nav-item" data-section="listing">
+        <a href="/admin/listings" class:list={["nav-item", { active: isActive('/admin/listings') }]} data-section="listing">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
           </svg>
           <span>Listings</span>
         </a>
-        <a href="/admin/ai-tools" class="nav-item" data-section="ai-tools">
+        <a href="/admin/ai-tools" class:list={["nav-item", { active: isActive('/admin/ai-tools') }]} data-section="ai-tools">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
           <span>AI Tools</span>
         </a>
 
-        <a href="/admin/users" class="nav-item" data-section="users">
+        <a href="/admin/users" class:list={["nav-item", { active: isActive('/admin/users') }]} data-section="users">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
           <span>Users</span>
         </a>
         
-        <a href="/admin/skus" class="nav-item" data-section="skus">
+        <a href="/admin/skus" class:list={["nav-item", { active: isActive('/admin/skus') }]} data-section="skus">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
           </svg>
           <span>SKUs</span>
         </a>
         
-        <a href="/admin/categories" class="nav-item" data-section="categories">
+        <a href="/admin/categories" class:list={["nav-item", { active: isActive('/admin/categories') }]} data-section="categories">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
           </svg>
           <span>Categories</span>
         </a>
         
-        <a href="/admin/heroes" class="nav-item" data-section="heroes">
+        <a href="/admin/heroes" class:list={["nav-item", { active: isActive('/admin/heroes') }]} data-section="heroes">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
           <span>Hero Sections</span>
         </a>
         
-        <a href="/admin/blogs" class="nav-item" data-section="blogs">
+        <a href="/admin/blogs" class:list={["nav-item", { active: isActive('/admin/blogs') }]} data-section="blogs">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
           </svg>
           <span>Blog Posts</span>
         </a>
         
-        <a href="/admin/settings" class="nav-item" data-section="settings">
+        <a href="/admin/settings" class:list={["nav-item", { active: isActive('/admin/settings') }]} data-section="settings">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -246,7 +253,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           </svg>
           <span>Theme</span>
         </button>
-        <button id="admin-logout-btn" class="nav-item w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+        <button id="admin-logout-btn" class="nav-item w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onclick="if(confirm('Log out?')){fetch('/api/auth/sign-out',{method:'POST',credentials:'include'}).then(()=>{window.location.href='/admin/login'})}">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
@@ -305,12 +312,12 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     document.getElementById('admin-theme-toggle')?.addEventListener('click', toggleTheme);
     document.getElementById('admin-theme-toggle-mobile')?.addEventListener('click', toggleTheme);
 
-    // Logout
+    // Logout via API call (cookie-based auth)
     function handleLogout() {
       if (confirm('Are you sure you want to log out?')) {
-        localStorage.removeItem('adminSession');
-        localStorage.removeItem('adminUser');
-        window.location.href = '/admin/login';
+        // Use authFetch helper that includes credentials for cookie-based auth
+        (window as any).authFetch('/api/auth/sign-out', { method: 'POST' })
+          .then(() => window.location.href = '/admin/login');
       }
     }
     document.getElementById('admin-logout-btn')?.addEventListener('click', handleLogout);

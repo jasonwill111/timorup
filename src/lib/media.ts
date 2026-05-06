@@ -63,17 +63,22 @@ export async function uploadToR2(
   const bucket = getR2Bucket();
   const publicUrl = getR2PublicUrl();
 
-  await bucket.put(key, data, {
-    httpMetadata: {
-      contentType: mimeType,
-      cacheControl: 'public, max-age=31536000, immutable',
-    },
-  });
+  try {
+    await bucket.put(key, data, {
+      httpMetadata: {
+        contentType: mimeType,
+        cacheControl: 'public, max-age=31536000, immutable',
+      },
+    });
 
-  return {
-    url: `${publicUrl}/${key}`,
-    size: data instanceof Buffer ? data.length : data.byteLength,
-  };
+    return {
+      url: `${publicUrl}/${key}`,
+      size: data instanceof Buffer ? data.length : data.byteLength,
+    };
+  } catch (error) {
+    console.error('R2 upload failed:', error);
+    throw new Error(`Failed to upload to R2: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 // Process and upload image
@@ -84,38 +89,43 @@ export async function uploadImageToR2(
   let inputBuffer: Buffer;
   let mimeType: string;
 
-  if (file instanceof File) {
-    inputBuffer = Buffer.from(await file.arrayBuffer());
-    mimeType = file.type;
-  } else {
-    inputBuffer = file;
-    mimeType = 'image/webp';
+  try {
+    if (file instanceof File) {
+      inputBuffer = Buffer.from(await file.arrayBuffer());
+      mimeType = file.type;
+    } else {
+      inputBuffer = file;
+      mimeType = 'image/webp';
+    }
+
+    // Optimize image
+    const processed = await sharp(inputBuffer)
+      .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
+      .webp({ quality: IMAGE_QUALITY })
+      .toBuffer({ resolveWithObject: true });
+
+    const bucket = getR2Bucket();
+    const publicUrl = getR2PublicUrl();
+
+    await bucket.put(key, processed.data, {
+      httpMetadata: {
+        contentType: 'image/webp',
+        cacheControl: 'public, max-age=31536000, immutable',
+      },
+    });
+
+    return {
+      url: `${publicUrl}/${key}`,
+      path: key,
+      size: processed.data.length,
+      mimeType: 'image/webp',
+      width: processed.info.width,
+      height: processed.info.height,
+    };
+  } catch (error) {
+    console.error('Image processing/upload failed:', error);
+    throw new Error(`Failed to process image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  // Optimize image
-  const processed = await sharp(inputBuffer)
-    .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
-    .webp({ quality: IMAGE_QUALITY })
-    .toBuffer({ resolveWithObject: true });
-
-  const bucket = getR2Bucket();
-  const publicUrl = getR2PublicUrl();
-
-  await bucket.put(key, processed.data, {
-    httpMetadata: {
-      contentType: 'image/webp',
-      cacheControl: 'public, max-age=31536000, immutable',
-    },
-  });
-
-  return {
-    url: `${publicUrl}/${key}`,
-    path: key,
-    size: processed.data.length,
-    mimeType: 'image/webp',
-    width: processed.info.width,
-    height: processed.info.height,
-  };
 }
 
 // Delete single file from R2
@@ -193,7 +203,7 @@ export function getOptimizedImageUrl(
   transforms.push(`quality=${quality}`);
   transforms.push(`format=${format}`);
 
-  return `https://timorlist.com/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
+  return `${env.SITE_URL || 'https://timorlist.com'}/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
 }
 
 // Check if running in Cloudflare environment

@@ -46,7 +46,7 @@ if (productIds.length > 0) {
           <a href={`/business/${slug}/product/${product.id}`} class="group flex items-center gap-4 p-3 hover:bg-muted/30 transition-colors -mx-3">
             <div class="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
               {firstImage ? (
-                <img src={`/api/media/${firstImage}`} alt={product.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src={`/api/media/${firstImage}`} alt={product.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" />
               ) : (
                 <div class="w-full h-full flex items-center justify-center text-xl font-bold text-muted-foreground bg-gradient-to-br from-amber-100 to-amber-200">
                   {product.title.charAt(0)}

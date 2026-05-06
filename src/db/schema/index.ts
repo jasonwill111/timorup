@@ -22,7 +22,9 @@ export const users = sqliteTable('users', {
   role: text('role').default('user'),
   createdAt: integer('created_at'),
   updatedAt: integer('updated_at'),
-});
+}, (users) => ({
+  roleIdx: index('users_role_idx').on(users.role),
+}));
 
 // Categories table - use string reference to avoid circular
 // entityType: 'business' | 'government' | 'nonprofit' | null (null = all types)
@@ -36,7 +38,10 @@ export const categories = sqliteTable('categories', {
   entityType: text('entity_type').default('business'), // 'business' | 'government' | 'nonprofit' | null (all types)
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
+}, (categories) => ({
+  parentIdx: index('categories_parent_idx').on(categories.parentId),
+  entityTypeIdx: index('categories_entity_type_idx').on(categories.entityType),
+}));
 
 // Media table
 export const media = sqliteTable('media', {
@@ -52,7 +57,10 @@ export const media = sqliteTable('media', {
   businessId: text('business_id'),
   createdById: text('created_by_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
+}, (media) => ({
+  businessIdx: index('media_business_idx').on(media.businessId),
+  creatorIdx: index('media_creator_idx').on(media.createdById),
+}));
 
 // Business Pages table
 // Also used for organizations (gov, nonprofits) with entityType field
@@ -105,6 +113,7 @@ export const businessPages = sqliteTable('business_pages', {
   ownerIdx: index('business_owner_idx').on(businessPages.ownerId),
   statusIdx: index('business_status_idx').on(businessPages.status),
   entityTypeIdx: index('business_entity_type_idx').on(businessPages.entityType),
+  categoryIdx: index('business_category_idx').on(businessPages.categoryId),
 }));
 
 // Products/SKUs table with flexible pricing
@@ -242,7 +251,10 @@ export const productImages = sqliteTable('product_images', {
   productId: text('product_id').notNull(),
   mediaId: text('media_id').notNull(),
   position: integer('position').default(0),
-});
+}, (productImages) => ({
+  productIdx: index('product_images_product_idx').on(productImages.productId),
+  mediaIdx: index('product_images_media_idx').on(productImages.mediaId),
+}));
 
 // Reviews table
 export const reviews = sqliteTable('reviews', {
@@ -280,6 +292,7 @@ export const orders = sqliteTable('orders', {
 }, (orders) => ({
   businessIdx: index('orders_business_idx').on(orders.businessPageId),
   userIdx: index('orders_user_idx').on(orders.userId),
+  statusIdx: index('orders_status_idx').on(orders.status),
 }));
 
 // Ad Banners table
@@ -295,7 +308,10 @@ export const adBanners = sqliteTable('ad_banners', {
   endDate: integer('end_date', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
+}, (adBanners) => ({
+  activeIdx: index('ad_banners_active_idx').on(adBanners.isActive),
+  dateRangeIdx: index('ad_banners_date_range_idx').on(adBanners.startDate, adBanners.endDate),
+}));
 
 // Site Settings (global)
 export const siteSettings = sqliteTable('site_settings', {

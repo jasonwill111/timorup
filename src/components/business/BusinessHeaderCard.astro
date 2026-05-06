@@ -58,7 +58,7 @@ const colors = typeColors[entityType] || typeColors.business;
       <div class="flex-shrink-0 mx-auto lg:mx-0">
         <div class="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-muted border-4 border-background shadow-lg">
           {profileImageId ? (
-            <img src={`/api/media/${profileImageId}`} class="w-full h-full object-cover" alt={title} />
+            <img src={`/api/media/${profileImageId}`} class="w-full h-full object-cover" alt={title} loading="lazy" decoding="async" />
           ) : (
             <div class={`w-full h-full flex items-center justify-center text-4xl md:text-5xl font-bold ${colors.icon}`}>
               {title.charAt(0)}

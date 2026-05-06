@@ -1,30 +1,19 @@
 name = "timorlist"
 main = "@astrojs/cloudflare/entrypoints/server"
-compatibility_date = "2025-03-22"
+compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
-# Assets (static files)
 assets = { binding = "ASSETS", directory = "./dist/client" }
 
-# Observability disabled for cost
-[observability]
-enabled = false
-
-# Migrations
-migrations_dir = "./src/db/migrations"
-
-# D1
 [[d1_databases]]
 binding = "DB"
 database_name = "timorlist-db"
 database_id = "e7e1e025-7ba2-4106-a905-bbcd8038b3e4"
 
-# KV
 [[kv_namespaces]]
 binding = "SESSION"
 id = "3e9ae14a105b4aa48316eaa029f5bc5f"
 
-# R2
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
 bucket_name = "timorlist-media"

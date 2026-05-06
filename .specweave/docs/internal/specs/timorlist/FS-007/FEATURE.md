@@ -58,6 +58,6 @@ stakeholder_relevant: true
 
 ## Related Documentation
 
-- [Testing Module](../modules/testing.md) - E2E test setup and troubleshooting
-- [Pages Module](../modules/pages.md) - Subscription flow pages
-- [DB Module](../modules/db.md) - Local SQLite support for tests
+- [Testing Module](../../../modules/testing.md) - E2E test setup and troubleshooting
+- [Pages Module](../../../modules/pages.md) - Subscription flow pages
+- [DB Module](../../../modules/db.md) - Local SQLite support for tests

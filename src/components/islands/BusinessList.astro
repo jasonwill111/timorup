@@ -112,7 +112,7 @@ const businesses = businessesResult.map(b => ({
 
 <!-- Businesses Grid -->
 <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4" id="businesses-grid">
-  {businesses.length > 0 ? businesses.map((business: any) => (
+  {businesses.length > 0 ? businesses.map((business) => (
     <BusinessCard
       title={business.title}
       slug={business.slug}

@@ -164,7 +164,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
     const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName');
     const desktopAuth = document.getElementById('desktop-auth');
     const mobileAuth = document.getElementById('mobile-auth');
-    const initial = userName ? userName.charAt(0).toUpperCase() : '?';
+    const initial = userName ? escapeHtml(userName).charAt(0).toUpperCase() : '?';
 
     if (userId) {
       if (desktopAuth) {
@@ -209,4 +209,8 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
   }
 
   updateAuthState();
+
+  function escapeHtml(str: string) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 </script>

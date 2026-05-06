@@ -72,7 +72,7 @@ export async function POST({ request }: { request: Request }) {
     });
 
     if (token) {
-      headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Path=/`);
+      headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Strict; Secure; Max-Age=${maxAge}; Path=/`);
     }
 
     const response = new Response(JSON.stringify({ success: true, user }), {
