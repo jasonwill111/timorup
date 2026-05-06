@@ -4,41 +4,97 @@
 
 ## Purpose
 
-Reusable UI components for Astro pages.
+Astro components and UI elements. Includes business cards, product cards, motion animations, and islands.
 
-## Overview
+## Directory Structure
 
-The components module contains 25 files with approximately 1,600 lines of code.
+```
+src/components/
+├── ui/
+│   ├── MotionAnimations.astro  # Motion.js animations
+│   ├── BusinessCard.astro      # Business listing card
+│   ├── ProductCard.astro       # Product/SKU card
+│   └── ...
+├── islands/                    # Astro Islands (hydrated)
+│   ├── HomepageContent.astro   # Homepage dynamic content
+│   └── ListingContent.astro     # Listings dynamic content
+└── ...
+```
 
-## Key Components
+## Motion Animations
 
-| Component | Purpose |
-|-----------|---------|
-| `ImageUploader` | R2 media upload with progress |
-| `LexicalEditor` | Rich text editor (TipTap) |
-| `OptimizedImage` | Cloudflare Image optimization |
-| `ReviewForm` | Review submission form |
-| `StarRating` | Rating display/input |
-| `ReviewsList` | Review list with pagination |
-| `ToastContainer` | Toast notifications |
+Uses [Motion](https://motion.dev) library for animations.
 
-## Patterns Used
+### Available Functions
 
-- Preact Islands for interactive components
-- nanostores for state management
-- TailwindCSS v4 for styling
+| Function | Purpose |
+|----------|---------|
+| `fadeInUp()` | Elements fade in + slide up |
+| `slideInLeft/Right()` | Slide from left/right |
+| `scaleIn()` | Scale from 0.9 to 1 |
+| `staggerFadeIn()` | Staggered children animation |
+| `addHoverLift()` | Card hover lift effect |
+| `addCardGlow()` | Card border glow on hover |
+| `addButtonFeedback()` | Button press feedback |
+| `textReveal()` | Word-by-word text reveal |
+| `animateCounter()` | Number counter animation |
+
+### Auto-Initialized Effects
+
+```typescript
+// MotionAnimations.astro - auto-initializes on DOMContentLoaded
+- Hero title text reveal
+- Card hover lift + glow
+- Filter tag click effects
+- Button feedback
+- Link underline animation
+- Header slide-in (left/right sections)
+- Listing card entrance
+```
+
+### Usage
+
+```astro
+<!-- In any .astro file -->
+<script>
+  import { fadeInUp, addHoverLift } from '@/components/ui/MotionAnimations.astro';
+
+  // Manual call
+  fadeInUp('.listing-card', 0.2);
+  addHoverLift('.product-card');
+</script>
+```
+
+## Business Components
+
+### BusinessCard
+
+```astro
+<BusinessCard business={business} showActions={true} />
+```
+
+### ProductCard
+
+```astro
+<ProductCard product={product} />
+```
+
+## Islands (SSR Hydrated Components)
+
+### HomepageContent
+
+Server-rendered with client-side interactivity for dynamic sections.
+
+### ListingContent
+
+Handles listing grid with filters and pagination.
 
 ## Analysis Summary
 
-- **Source Files**: 25
+- **Files Analyzed**: 42
+- **Source Files**: 42
 - **Test Files**: 0
-- **Total Exports**: 15+
-
-## Dependencies
-
-- `@lexical/react` (editor)
-- `nanostores` (state)
-- `@nanostores/react`
+- **Documentation Coverage**: 60%
 
 ---
-*Updated 2026-04-30*
+*Analysis updated on 2026-05-06*

@@ -4,86 +4,104 @@
 
 ## Purpose
 
-Astro pages and API routes for the application.
-
-## Overview
-
-The pages module contains 60 files with approximately 1,500 lines of code.
+Astro pages and API routes. Includes public pages, admin dashboard, and REST APIs.
 
 ## Directory Structure
 
 ```
-pages/
-├── api/                    # API endpoints (SSR)
-│   ├── products/          # Product CRUD operations
-│   ├── businesses/         # Business listing APIs
-│   ├── auth/              # Auth endpoints
-│   └── media/             # Media upload
-├── admin/                  # Admin dashboard
-│   ├── skus.astro         # SKU management
+src/pages/
+├── index.astro           # Homepage
+├── login.astro           # User login
+├── register.astro        # User registration
+├── account.astro         # User account
+├── business/[slug].astro # Business detail page
+├── listings/             # Business listings
+├── products-services/     # Products/SKUs
+├── admin/                # Admin dashboard
+│   ├── index.astro       # Dashboard
+│   ├── login.astro       # Admin login
+│   ├── users.astro       # User management
 │   ├── businesses.astro   # Business management
-│   └── dashboard.astro    # Admin home
-├── business/              # Business pages
-│   └── [slug]/
-│       └── product/
-│           └── [id]/      # Product detail page
-└── index.astro            # Homepage
+│   └── ...
+└── api/                  # REST APIs
+    ├── auth/             # Authentication
+    │   ├── sign-in.ts    # better-auth sign-in
+    │   ├── sign-up.ts    # better-auth sign-up
+    │   ├── sign-out.ts   # better-auth sign-out
+    │   └── session.ts    # Get current session (+ role)
+    └── admin/            # Admin APIs
+        ├── auth/login.ts # Admin login
+        ├── users/        # User CRUD
+        ├── businesses/    # Business CRUD
+        └── stats.ts      # Dashboard stats
 ```
 
-## API Routes
+## Admin Authentication Flow
 
-### Products API (`/api/products`)
+```
+User → POST /api/auth/sign-in → better-auth (sets cookie)
+     → GET /api/auth/session → returns user with role
+     → /admin checks role → redirect if not admin
+```
 
-| Method | Purpose |
-|--------|---------|
-| GET | List products by businessPageId |
-| POST | Create new product (admin only) |
-| PUT | Update product (by id param) |
+### Admin Login (login.astro)
 
-**Features**:
-- SKU limit enforcement per plan
-- JSON field parsing on response
-- ServiceType validation
-- Industry-specific specifications support
+```typescript
+// 1. Sign in via better-auth
+const signInRes = await fetch('/api/auth/sign-in', {
+  method: 'POST',
+  body: JSON.stringify({ email, password })
+});
 
-### Businesses API (`/api/businesses`)
+// 2. Check admin role
+const sessionRes = await fetch('/api/auth/session');
+const sessionData = await sessionRes.json();
 
-| Method | Purpose |
-|--------|---------|
-| GET | List/create businesses |
-| PUT | Update business (admin) |
+if (!['admin', 'super_admin', 'editor'].includes(sessionData.user.role)) {
+  // Show "Access denied"
+}
+```
 
-## Admin Pages
+### Admin API Auth
 
-- `/admin/skus` - SKU management with dynamic specification fields
-- `/admin/businesses` - Business listing management
-- `/admin/orders` - Order/subscription management
-- `/admin/reviews` - Review management
+```typescript
+// admin-auth.ts - shared auth helper
+export async function getAdminUser(request: Request) {
+  // Direct DB query for session validation
+  const session = await db.select().from(sessions).where(...).get();
+  const user = await db.select().from(users).where(...).get();
+  if (!['admin', 'super_admin', 'editor'].includes(user.role)) {
+    return null;
+  }
+  return user;
+}
 
-## Frontend Pages
+// Usage in API
+export async function GET({ request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
+  // ... handle request
+}
+```
 
-- `/` - Homepage with business listings
-- `/business/[slug]` - Business detail page
-- `/business/[slug]/product/[id]` - Product/SKU detail page
-- `/listing/create` - Create listing (supports gov/ngo free type)
-- `/subscribe` - Subscription plan selection
-- `/account` - User account with saved SKUs
+## API Response Format
 
-## Subscription Flow (Gov/NGO Free)
+### Success
+```json
+{ "success": true, "data": {...} }
+```
 
-| Entity Type | Subscription Required | Flow |
-|-------------|-------------------|------|
-| business | Yes | Create listing → Select plan → Pay → Publish |
-| government | No | Create listing → Publish (Free) |
-| nonprofit | No | Create listing → Publish (Free) |
-
-**E2E Test**: `e2e/gov-ngo-subscription-flow.spec.ts`
+### Error
+```json
+{ "success": false, "error": { "code": "ERROR_CODE", "message": "..." } }
+```
 
 ## Analysis Summary
 
-- **Source Files**: 60
-- **API Files**: 8
-- **Total Exports**: 20+
+- **Files Analyzed**: 56
+- **Source Files**: 52
+- **Test Files**: 4
+- **Total Exports**: 127
 
 ---
-*Updated 2026-04-30*
+*Analysis updated on 2026-05-06*

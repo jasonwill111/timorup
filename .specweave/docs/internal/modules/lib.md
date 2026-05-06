@@ -4,71 +4,93 @@
 
 ## Purpose
 
-Utility functions, constants, and shared business logic.
+Core library utilities: authentication (better-auth), database access (Drizzle/D1), admin authorization.
 
-## Overview
+## Key Files
 
-The lib module contains 15 files with approximately 1,400 lines of code.
+| File | Purpose |
+|------|---------|
+| `auth.ts` | better-auth configuration + factory (`initAuth()`, `createAuth()`) |
+| `admin-auth.ts` | Admin role verification (`getAdminUser()`) |
+| `db.ts` | Drizzle/D1 instance (`getDb()`, `initDb()`) |
 
-## Key Modules
+## Auth Architecture
 
-| Module | Purpose |
-|--------|---------|
-| `auth.ts` | better-auth configuration |
-| `db.ts` | Drizzle ORM D1 connection |
-| `media.ts` | R2 upload, Cloudflare Images |
-| `constants.ts` | Service types, specs, price units |
-| `utils.ts` | Helper functions |
-
-## ⚠️ CRITICAL: better-auth Password Hashing
-
-**better-auth uses `@noble/hashes/scrypt`** — NOT Node.js `crypto.scrypt`.
-
-| 实现 | 输出 | 用途 |
-|------|------|------|
-| `@noble/hashes/scrypt` | 64字节 (128 hex) | better-auth 内部 |
-| `Node.js crypto.scrypt` | 128字节 (256 hex) | ❌ 不兼容 |
-
-### Seed 脚本正确示例
-
-```javascript
-// seed-wrangler.cjs — 使用 better-auth 密码模块
-const { hashPassword } = require('./node_modules/.pnpm/@better-auth+utils@0.4.0/node_modules/@better-auth/utils/dist/password.node.cjs');
-
-const hash = await hashPassword('TestPassword123!');
-db.prepare('INSERT INTO accounts ...').run(..., hash, now, now);
-```
-
-## Core Constants
+### better-auth Setup
 
 ```typescript
-// Service types
-const SERVICE_TYPES = ['product', 'service', 'rental', 'food',
-  'accommodation', 'automotive', 'healthcare',
-  'education', 'beauty', 'event']
+// auth.ts
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 
-// Industry specification fields
-const SPECIFICATION_FIELDS: Record<string, FieldConfig[]>
+export function createAuth(db) {
+  return betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:8787',
+    database: drizzleAdapter(db, { provider: 'sqlite' }),
+    emailAndPassword: { enabled: true },
+    session: { expiresIn: 60 * 60 * 24 * 7 },
+  });
+}
+
+export async function initAuth() {
+  if (!_initAuth) {
+    const db = await getDb();
+    _initAuth = createAuth(db);
+  }
+  return _initAuth;
+}
 ```
 
-## Patterns Used
+### Admin Authorization
 
-- ESM imports
-- Drizzle ORM with D1 adapter
-- Cloudflare Workers bindings (env)
+```typescript
+// admin-auth.ts
+export async function getAdminUser(request: Request): Promise<AuthUser | null> {
+  // Direct DB query for session verification
+  const db = await getDb();
+  const session = await db.select().from(sessions).where(...).get();
+  const user = await db.select().from(users).where(...).get();
+
+  if (!user || !['admin', 'super_admin', 'editor'].includes(user.role)) {
+    return null;
+  }
+  return { id: user.id, email: user.email, role: user.role };
+}
+```
+
+### DB Access Pattern
+
+```typescript
+// db.ts
+export async function getDb() {
+  if (_db) return _db;
+  const { env } = await import('cloudflare:workers');
+  if (env.DB) {
+    _db = drizzle(env.DB, { schema, casing: 'snake_case' });
+  }
+  return _db;
+}
+```
+
+## Environment
+
+| Runtime | Auth | DB |
+|---------|------|-----|
+| Local (`pnpm dev`) | better-auth | D1 via `env.DB` |
+| Workers | better-auth | D1 via `env.DB` |
+
+## Common Issues
+
+- **Session cookie name**: `better-auth.session_token` (httpOnly)
+- **Role check**: Use `getAdminUser()` from `admin-auth.ts`, not `authApi.getSession()`
+- **Custom user fields** (role): Query DB directly, better-auth doesn't return them
 
 ## Analysis Summary
 
-- **Source Files**: 15
-- **Test Files**: 2
-- **Total Exports**: 20+
-
-## Dependencies
-
-- `better-auth` (auth)
-- `drizzle-orm/d1` (DB)
-- `@aws-sdk/*` (S3/R2)
-- `zod` (validation)
+- **Files Analyzed**: 20
+- **Source Files**: 14
+- **Test Files**: 6
+- **Total Exports**: 92
 
 ---
-*Updated 2026-04-30*
+*Analysis updated on 2026-05-06*

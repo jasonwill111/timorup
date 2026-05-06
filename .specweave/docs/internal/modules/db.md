@@ -4,74 +4,77 @@
 
 ## Purpose
 
-Database schema and Drizzle ORM configuration for D1 SQLite.
+Drizzle ORM schema definitions for D1/SQLite database.
 
-## Overview
-
-The db module contains 12 files with approximately 500 lines of code.
-
-## Tables
+## Key Tables
 
 | Table | Purpose |
 |-------|---------|
-| `users` | User accounts with email/phone |
-| `businessPages` | Business/Gov/NGO listings |
-| `products` | SKU/Product system |
-| `categories` | Listing categories |
-| `media` | Uploaded media files |
-| `reviews` | Business reviews |
-| `orders` | Subscription orders |
-| `sessions` | Auth sessions |
-| `accounts` | OAuth accounts |
-| `adBanners` | Advertisement banners |
-| `siteSettings` | Global settings |
+| `users` | User accounts with role |
+| `sessions` | better-auth sessions |
+| `businesses` | Business listings |
+| `categories` | Two-level hierarchy |
+| `media` | Images/videos (R2) |
+| `products` | SKUs with pricing |
+| `reviews` | User reviews |
 
-## Products Schema
-
-Products support industry-specific specifications:
+## Schema Pattern
 
 ```typescript
-// Core fields
-id, title, description, businessPageId
-priceFields: JSON string (array of {label, value, unit})
-serviceType: 'product'|'service'|'rental'|'food'|'accommodation'|'automotive'|'healthcare'|'education'|'beauty'|'event'
-specifications: JSON string (industry-specific)
-featured: boolean
-active: boolean
+// src/db/schema/index.ts
+import { text, integer } from 'drizzle-orm/sqlite-core';
+
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  name: text('name'),
+  role: text('role').default('user'),  // 'user' | 'admin' | 'super_admin' | 'editor'
+  // ... better-auth fields
+});
+
+export const businesses = sqliteTable('businesses', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  userId: text('user_id').references(() => users.id),
+  // ...
+});
 ```
 
-## Dependencies
+## Drizzle Config
 
-- `drizzle-orm` (ORM)
-- `better-auth` (auth tables)
-- `better-sqlite3` (local development)
-
-## Local Development
-
-`src/lib/db.ts` provides `getDb()` for multi-environment support:
-
-| Environment | Driver | Adapter |
-|-------------|--------|---------|
-| Cloudflare Workers | `cloudflare:workers` D1 binding | `drizzle-orm/d1` |
-| Local Development | Local SQLite file | `drizzle-orm/better-sqlite3` |
-
-**Local DB Path**: `./.wrangler/state/v3/d1/timorlist-db.sqlite`
-
-### ⚠️ wrangler dev 使用独立数据库
-
-`wrangler dev` 启动的 workerd 运行时使用不同的本地数据库：
-
-```
-./.wrangler/state/v3/d1/miniflare-D1DatabaseObject/{hash}.sqlite
+```typescript
+// drizzle.config.json
+{
+  "dialect": "sqlite",
+  "schema": "./src/db/schema/index.ts",
+  "dbCredentials": {
+    "url": "https://{account}.user.devcloud.cloudflarestored.com"
+  }
+}
 ```
 
-**seed-wrangler.cjs** 脚本用于更新 wrangler dev 的数据库。
+## DB Access
+
+```typescript
+// src/lib/db.ts
+import { drizzle } from 'drizzle-orm/d1';
+import { getDb } from '@/lib/db';
+
+export async function getDb() {
+  const { env } = await import('cloudflare:workers');
+  return drizzle(env.DB, { schema, casing: 'snake_case' });
+}
+```
+
+**Note**: `casing: 'snake_case'` converts Drizzle camelCase to DB snake_case.
 
 ## Analysis Summary
 
-- **Source Files**: 10
+- **Files Analyzed**: 4
+- **Source Files**: 4
 - **Test Files**: 0
-- **Total Exports**: 40+
+- **Total Exports**: 34
 
 ---
-*Updated 2026-05-02*
+*Analysis updated on 2026-05-06*
