@@ -1,0 +1,12 @@
+{
+  "jobId": "66afe459",
+  "projectPath": "/home/jasonwill/dev-projects/timorlist",
+  "userInputs": {
+    "analysisDepth": "quick",
+    "priorityAreas": [],
+    "additionalSources": [],
+    "knownPainPoints": []
+  },
+  "dependsOn": [],
+  "startedAt": "2026-05-06T02:13:50.651Z"
+}

@@ -1,31 +1,76 @@
 {
-  "generatedAt": "2026-03-22T09:59:59.508Z",
+  "generatedAt": "2026-05-06T02:13:51.018Z",
   "summary": {
     "totalModules": 8,
     "modulesDocumented": 0,
-    "modulesPartial": 5,
-    "modulesUndocumented": 3,
-    "totalWorkItems": 0,
-    "matchedWorkItems": 0,
-    "coveragePercent": 28
+    "modulesPartial": 3,
+    "modulesUndocumented": 5,
+    "totalWorkItems": 82,
+    "matchedWorkItems": 10,
+    "coveragePercent": 20
   },
-  "priorityZones": [],
+  "priorityZones": [
+    {
+      "name": "components",
+      "path": "src/components",
+      "workItems": 6,
+      "docStatus": "none",
+      "action": "START HERE - Create comprehensive module documentation",
+      "focusFiles": [
+        "Migrate Basic Input Components",
+        "Migrate Display Components",
+        "Migrate Interactive Components"
+      ]
+    },
+    {
+      "name": "pages",
+      "path": "src/pages",
+      "workItems": 3,
+      "docStatus": "partial",
+      "action": "ENHANCE - Add detailed API docs and usage examples",
+      "focusFiles": [
+        "Business Pages - Status & Featured",
+        "Unified Color Theme (P1)",
+        "CDN Cache Optimization"
+      ]
+    },
+    {
+      "name": "lib",
+      "path": "src/lib",
+      "workItems": 1,
+      "docStatus": "partial",
+      "action": "ENHANCE - Add detailed API docs and usage examples",
+      "focusFiles": [
+        "Add Astro-Native Dependencies"
+      ]
+    }
+  ],
   "immediateActions": [
     {
       "priority": 1,
+      "module": "components",
+      "action": "Create foundational documentation",
+      "files": [
+        "src/components/README.md",
+        "src/components/API.md"
+      ],
+      "reason": "High activity module with 6 related work items"
+    },
+    {
+      "priority": 2,
       "module": "pages",
       "action": "Add README based on existing test cases",
       "files": [
-        "src\\pages/README.md"
+        "src/pages/README.md"
       ],
       "reason": "Has test coverage but lacks documentation"
     },
     {
-      "priority": 2,
-      "module": "components",
+      "priority": 3,
+      "module": "lib",
       "action": "Add README based on existing test cases",
       "files": [
-        "src\\components/README.md"
+        "src/lib/README.md"
       ],
       "reason": "Has test coverage but lacks documentation"
     }
@@ -33,57 +78,67 @@
   "moduleStatuses": [
     {
       "moduleName": "pages",
-      "modulePath": "src\\pages",
+      "modulePath": "src/pages",
       "hasReadme": false,
       "hasAnalysis": true,
-      "coverage": 40,
-      "workItemCount": 0,
+      "coverage": 60,
+      "workItemCount": 3,
       "priority": "low",
       "status": "partial"
     },
     {
       "moduleName": "components",
-      "modulePath": "src\\components",
+      "modulePath": "src/components",
       "hasReadme": false,
-      "hasAnalysis": true,
-      "coverage": 40,
-      "workItemCount": 0,
-      "priority": "low",
-      "status": "partial"
+      "hasAnalysis": false,
+      "coverage": 0,
+      "workItemCount": 6,
+      "priority": "medium",
+      "status": "none"
     },
     {
-      "moduleName": "server",
-      "modulePath": "src\\server",
+      "moduleName": "lib",
+      "modulePath": "src/lib",
       "hasReadme": false,
       "hasAnalysis": true,
-      "coverage": 40,
-      "workItemCount": 0,
+      "coverage": 60,
+      "workItemCount": 1,
       "priority": "low",
       "status": "partial"
     },
     {
       "moduleName": "db",
-      "modulePath": "src\\db",
+      "modulePath": "src/db",
       "hasReadme": false,
       "hasAnalysis": true,
       "coverage": 40,
-      "workItemCount": 0,
-      "priority": "low",
-      "status": "partial"
-    },
-    {
-      "moduleName": "lib",
-      "modulePath": "src\\lib",
-      "hasReadme": false,
-      "hasAnalysis": true,
-      "coverage": 60,
       "workItemCount": 0,
       "priority": "low",
       "status": "partial"
     },
     {
       "moduleName": "layouts",
-      "modulePath": "src\\layouts",
+      "modulePath": "src/layouts",
+      "hasReadme": false,
+      "hasAnalysis": false,
+      "coverage": 0,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "none"
+    },
+    {
+      "moduleName": "mastra",
+      "modulePath": "src/mastra",
+      "hasReadme": false,
+      "hasAnalysis": false,
+      "coverage": 0,
+      "workItemCount": 0,
+      "priority": "low",
+      "status": "none"
+    },
+    {
+      "moduleName": "stores",
+      "modulePath": "src/stores",
       "hasReadme": false,
       "hasAnalysis": false,
       "coverage": 0,
@@ -93,17 +148,7 @@
     },
     {
       "moduleName": "styles",
-      "modulePath": "src\\styles",
-      "hasReadme": false,
-      "hasAnalysis": false,
-      "coverage": 0,
-      "workItemCount": 0,
-      "priority": "low",
-      "status": "none"
-    },
-    {
-      "moduleName": "test",
-      "modulePath": "src\\test",
+      "modulePath": "src/styles",
       "hasReadme": false,
       "hasAnalysis": false,
       "coverage": 0,
@@ -115,37 +160,17 @@
   "additionalSources": [],
   "notAnalyzed": [
     {
-      "path": "src\\pages",
-      "reason": "Sampled (tier: medium)",
-      "filesSkipped": 19
-    },
-    {
-      "path": "src\\components",
-      "reason": "Sampled (tier: medium)",
-      "filesSkipped": 13
-    },
-    {
-      "path": "src\\server",
-      "reason": "Sampled (tier: medium)",
-      "filesSkipped": 8
-    },
-    {
-      "path": "src\\lib",
-      "reason": "Sampled (tier: medium)",
-      "filesSkipped": 4
-    },
-    {
-      "path": "src\\layouts",
+      "path": "src/mastra",
       "reason": "Analysis skipped",
       "filesSkipped": 2
     },
     {
-      "path": "src\\styles",
+      "path": "src/stores",
       "reason": "Analysis skipped",
       "filesSkipped": 1
     },
     {
-      "path": "src\\test",
+      "path": "src/styles",
       "reason": "Analysis skipped",
       "filesSkipped": 1
     }

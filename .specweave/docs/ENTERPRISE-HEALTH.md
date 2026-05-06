@@ -1,72 +1,80 @@
 # Enterprise Documentation Health Report
 
-*Generated: 2026/05/02*
+*Generated: 5/6/2026, 10:13:51 AM*
 
 ## Documentation Health Score
 
 | Metric | Score | Grade |
 |--------|-------|-------|
-| **Overall** | 85% | **B** |
-| Freshness | 95% | - |
-| Coverage | 80% | - |
-| Accuracy | 100% | - |
+| **Overall** | 70% | **C** |
+| Freshness | 100% | - |
+| Coverage | 59% | - |
+| Accuracy | 65% | - |
 
 ## Documentation Categories
 
 | Category | Documents | Last Updated |
 |----------|-----------|--------------|
-| Feature Specs | 22 | 2026/05/01 |
-| Architecture | 6 | 2026/03/22 |
-| ADRs | 1 | 2026/03/22 |
-| Modules | 6 | 2026/03/22 |
+| Feature Specs | 109 | 5/6/2026 |
+| Architecture | 8 | 5/6/2026 |
+| ADRs | 3 | 5/4/2026 |
+| Modules | 9 | 5/6/2026 |
+| Increment Specs | 26 | 5/4/2026 |
 
-**Total Documents**: 113 files
+**Total Documents**: 155
 
-## Increments Summary
+## Spec-Code Mismatches
 
-| ID | Feature | Status |
-|----|---------|--------|
-| 0001 | One Business Per User | Done |
-| 0002 | P0 Compliance Fix | Done |
-| 0003 | Deps Cleanup/React Removal | Done |
-| 0004 | UI Components Astro Migration | Done |
-| 0005 | TipTap Rich Editor | Done |
-| 0006 | API Review | Done |
-| 0007 | DB Schema V2 | Done |
-| 0008 | UI Refresh | Done |
-| 0009 | Expired Business Modal | Done |
-| 0010 | Descriptive Industry Images | Done |
-| 0011 | Restore Missing Pages | Done |
-| 0012 | Admin Sidebar Unified | Done |
-| 0013 | Business Detail Enhancement | Done |
-| 0014 | Category Icons Sync | Done |
-| 0015 | Hono Removal | Done |
-| 0016 | Homepage Featured Sections | Done |
-| 0017 | Mobile UI Optimization | Done |
-| 0018 | QA Concerns Fix | Done |
-| 0019 | Project Knowledge Base | Done |
-| 0020 | Review Management | Done |
-| 0021 | Admin SKUs TipTap | Done |
-| 0022 | Admin Media Upload | Done |
+| AC ID | Type | Confidence | File |
+|-------|------|------------|------|
+| AC-US3-01 | 👻 ghost_completion | 70% | us-003-server-side-sort-options.md |
+| AC-US3-03 | 👻 ghost_completion | 70% | us-003-server-side-sort-options.md |
+| AC-US2-02 | 👻 ghost_completion | 70% | us-002-server-side-category-filter.md |
+| AC-US1-02 | 👻 ghost_completion | 70% | us-001-business-directory-with-server-side-pagination.md |
+| AC-US3-01 | 👻 ghost_completion | 70% | us-003-cdn-cache-optimization.md |
+| AC-US2-02 | 👻 ghost_completion | 70% | us-002-faq-json-ld-schema.md |
+| AC-US2-03 | 👻 ghost_completion | 70% | us-002-add-image-upload-to-admin-heroes.md |
+| AC-US1-03 | 👻 ghost_completion | 70% | us-001-add-image-upload-to-admin-categories.md |
+| AC-US1-01 | 👻 ghost_completion | 70% | us-001-tiptap-editor-in-admin-skus.md |
+| AC-US1-02 | 👻 ghost_completion | 70% | us-001-tiptap-editor-in-admin-skus.md |
+| AC-US1-03 | 👻 ghost_completion | 70% | us-001-tiptap-editor-in-admin-skus.md |
+| AC-US1-04 | 👻 ghost_completion | 70% | us-001-tiptap-editor-in-admin-skus.md |
+| AC-US3-01 | 👻 ghost_completion | 70% | us-003-document-edge-cases-in-0001.md |
+| AC-US3-02 | 👻 ghost_completion | 70% | us-003-document-edge-cases-in-0001.md |
+| AC-US2-01 | 👻 ghost_completion | 70% | us-002-document-edge-cases-in-0015.md |
+| AC-US1-01 | 👻 ghost_completion | 70% | us-001-add-bdd-test-scenarios-to-0015.md |
+| AC-US1-02 | 👻 ghost_completion | 70% | us-001-add-bdd-test-scenarios-to-0015.md |
+| AC-US1-03 | 👻 ghost_completion | 70% | us-001-add-bdd-test-scenarios-to-0015.md |
+| AC-US5-05 | 👻 ghost_completion | 70% | us-005-migrate-remaining-api-routes.md |
+| AC-US2-03 | 👻 ghost_completion | 70% | us-002-migrate-auth-api-routes.md |
+| ... | ... | ... | *163 more* |
 
-## Recent Changes
+## Naming Convention Violations
 
-- **2026/05/02**: Synced all increments, fixed 58 YAML validation errors, rebuilt docs
-- **2026/05/01**: Completed admin media upload feature
-- **2026/04/29**: Completed admin SKUs TipTap integration
+| File | Type | Severity | Expected Pattern |
+|------|------|----------|------------------|
+| .specweave/docs/internal/architecture/adr/ADR-0012-r2-workers-binding.md | 🟡 mixed_case | warning | lowercase-kebab-case.md |
+| .specweave/docs/internal/architecture/adr/ADR-0011-industry-specifications.md | 🟡 mixed_case | warning | lowercase-kebab-case.md |
+| .specweave/docs/internal/architecture/adr/ADR-0012-r2-workers-binding.md | 🟡 mixed_case | warning | XXXX-title-in-kebab-case.md |
+| .specweave/docs/internal/architecture/adr/ADR-0011-industry-specifications.md | 🟡 mixed_case | warning | XXXX-title-in-kebab-case.md |
+
+## Duplicate Documents
+
+| Files | Similarity | Type |
+|-------|------------|------|
+| .specweave/docs/internal/specs/timorlist/FS-018/us-003-document-edge-cases-in-0001.md, .specweave/docs/internal/specs/timorlist/FS-018/us-002-document-edge-cases-in-0015.md | 80% | same_title |
+
+## Documentation Discrepancies
+
+| File | Type | Description |
+|------|------|-------------|
+| .specweave/docs/internal/specs/timorlist/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/testing.md |
+| .specweave/docs/internal/specs/timorlist/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/pages.md |
+| .specweave/docs/internal/specs/timorlist/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/db.md |
 
 ## Recommendations
 
-- Documentation coverage improved to 80%
-- Add more acceptance criteria to older documents
-- Consider adding governance documentation for coding standards
-
-## Build Status
-
-✅ Documentation build: **PASSED**
-- Output: `.specweave/docs-site-internal/build`
-- Validation: 0 errors, 0 warnings
-
----
-
-*Last updated: 2026-05-02 00:57 UTC*
+- Documentation coverage is limited. Add acceptance criteria to more documents.
+- 183 acceptance criteria are marked complete but lack code evidence. Review: AC-US3-01, AC-US3-03, AC-US2-02...
+- No governance documentation found. Consider adding coding standards to .specweave/docs/internal/governance/
+- 📁 "Feature Specs" has 109 files. Run sw:organize-docs to generate themed navigation indexes for easier browsing.

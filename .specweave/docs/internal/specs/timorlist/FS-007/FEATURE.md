@@ -4,7 +4,7 @@ title: "Database Schema V2 - Roles, Subscriptions, Media"
 type: feature
 status: completed
 priority: P1
-created: 2026-04-18T00:00:00.000Z
+created: "2026-04-18T00:00:00.000Z"
 lastUpdated: 2026-05-02
 tldr: "重构数据库结构，优化用户角色体系，新增订阅系统，扩展媒体和商品支持。."
 complexity: high

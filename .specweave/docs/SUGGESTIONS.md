@@ -1,6 +1,6 @@
 # Living Docs Suggestions
 
-*Generated: 2026/3/22 17:59:59*
+*Generated: 5/6/2026, 10:13:51 AM*
 
 ## Summary
 
@@ -8,30 +8,50 @@
 |--------|-------|
 | Total Modules | 8 |
 | Fully Documented | 0 |
-| Partially Documented | 5 |
-| Undocumented | 3 |
-| Documentation Coverage | 28% |
-| Work Items Matched | 0/0 |
+| Partially Documented | 3 |
+| Undocumented | 5 |
+| Documentation Coverage | 20% |
+| Work Items Matched | 10/82 |
+
+## Priority Zones
+
+These modules have the most work items and need attention:
+
+| Module | Path | Work Items | Status | Action |
+|--------|------|------------|--------|--------|
+| components | `src/components` | 6 | ❌ | START HERE - Create comprehensive module documentation |
+| pages | `src/pages` | 3 | ⚠️ | ENHANCE - Add detailed API docs and usage examples |
+| lib | `src/lib` | 1 | ⚠️ | ENHANCE - Add detailed API docs and usage examples |
 
 ## Immediate Actions
 
-### 1. pages
+### 1. components
+
+**Action**: Create foundational documentation
+
+**Reason**: High activity module with 6 related work items
+
+**Files**:
+- `src/components/README.md`
+- `src/components/API.md`
+
+### 2. pages
 
 **Action**: Add README based on existing test cases
 
 **Reason**: Has test coverage but lacks documentation
 
 **Files**:
-- `src\pages/README.md`
+- `src/pages/README.md`
 
-### 2. components
+### 3. lib
 
 **Action**: Add README based on existing test cases
 
 **Reason**: Has test coverage but lacks documentation
 
 **Files**:
-- `src\components/README.md`
+- `src/lib/README.md`
 
 ## Directories Not Fully Analyzed
 
@@ -39,13 +59,9 @@ Due to codebase size, these directories were sampled:
 
 | Path | Reason | Files Skipped |
 |------|--------|---------------|
-| `src\pages` | Sampled (tier: medium) | 19 |
-| `src\components` | Sampled (tier: medium) | 13 |
-| `src\server` | Sampled (tier: medium) | 8 |
-| `src\lib` | Sampled (tier: medium) | 4 |
-| `src\layouts` | Analysis skipped | 2 |
-| `src\styles` | Analysis skipped | 1 |
-| `src\test` | Analysis skipped | 1 |
+| `src/mastra` | Analysis skipped | 2 |
+| `src/stores` | Analysis skipped | 1 |
+| `src/styles` | Analysis skipped | 1 |
 
 ## Module Documentation Status
 
@@ -54,14 +70,14 @@ Due to codebase size, these directories were sampled:
 
 | Module | Path | README | Analysis | Coverage | Work Items | Priority |
 |--------|------|--------|----------|----------|------------|----------|
-| pages | `src\pages` | ❌ | ✅ | 40% | 0 | low |
-| components | `src\components` | ❌ | ✅ | 40% | 0 | low |
-| server | `src\server` | ❌ | ✅ | 40% | 0 | low |
-| db | `src\db` | ❌ | ✅ | 40% | 0 | low |
-| lib | `src\lib` | ❌ | ✅ | 60% | 0 | low |
-| layouts | `src\layouts` | ❌ | ❌ | 0% | 0 | low |
-| styles | `src\styles` | ❌ | ❌ | 0% | 0 | low |
-| test | `src\test` | ❌ | ❌ | 0% | 0 | low |
+| pages | `src/pages` | ❌ | ✅ | 60% | 3 | low |
+| components | `src/components` | ❌ | ❌ | 0% | 6 | medium |
+| lib | `src/lib` | ❌ | ✅ | 60% | 1 | low |
+| db | `src/db` | ❌ | ✅ | 40% | 0 | low |
+| layouts | `src/layouts` | ❌ | ❌ | 0% | 0 | low |
+| mastra | `src/mastra` | ❌ | ❌ | 0% | 0 | low |
+| stores | `src/stores` | ❌ | ❌ | 0% | 0 | low |
+| styles | `src/styles` | ❌ | ❌ | 0% | 0 | low |
 
 </details>
 

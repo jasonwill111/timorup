@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-05-06T02:13:50.998Z",
-  "summary": {
-    "criticalModules": 0,
-    "highModules": 0,
-    "mediumModules": 1,
-    "lowModules": 7
+  "completedAt": "2026-05-06T02:13:50.998Z",
+  "stats": {
+    "totalWorkItems": 82,
+    "matchedWorkItems": 10,
+    "unmatchedWorkItems": 72,
+    "modulesWithWorkItems": 3
   },
-  "queue": [
+  "priorityQueue": [
     {
       "moduleName": "components",
       "modulePath": "src/components",
