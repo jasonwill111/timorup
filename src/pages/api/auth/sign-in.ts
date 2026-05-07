@@ -66,13 +66,15 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7;
+    const isProduction = process.env.NODE_ENV === 'production';
 
     const headers = new Headers({
       'Content-Type': 'application/json',
     });
 
     if (token) {
-      headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Strict; Secure; Max-Age=${maxAge}; Path=/`);
+      const secureFlag = isProduction ? '; Secure' : '';
+      headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Strict${secureFlag}; Max-Age=${maxAge}; Path=/`);
     }
 
     const response = new Response(JSON.stringify({ success: true, user }), {
