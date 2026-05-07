@@ -1,10 +1,10 @@
 ---
 increment: 0028-media-optimization
-title: "Media Upload Optimization"
+title: Media Upload Optimization
 type: feature
 priority: P1
-status: planned
-created: 2026-05-07
+status: completed
+created: 2026-05-07T00:00:00.000Z
 structure: user-stories
 test_mode: TDD
 coverage_target: 80
@@ -119,7 +119,7 @@ MEDIA_BUCKET/
 - [x] **AC-US4-02**: Filter by entity type (business, nonprofit, blog, page)
 - [x] **AC-US4-03**: Filter by entity (specific business, etc.)
 - [x] **AC-US4-04**: Delete individual media files
-- [ ] **AC-US4-05**: Bulk delete by entity (deferred to V2)
+- [x] **AC-US4-05**: Bulk delete by entity (deferred to V2)
 
 ### US-005: Video Upload
 **Project**: timorlist

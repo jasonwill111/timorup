@@ -1,0 +1,24 @@
+---
+interface Props {
+  bannerImageId?: string | null;
+  type?: 'business' | 'nonprofit';
+}
+
+const { bannerImageId, type = 'business' } = Astro.props;
+const gradientClass = type === 'nonprofit'
+  ? 'from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30'
+  : 'from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30';
+---
+
+<div class={`relative h-48 md:h-64 bg-gradient-to-br ${gradientClass}`}>
+  {bannerImageId && (
+    <img
+      src={`/api/media/${bannerImageId}`}
+      class="w-full h-full object-cover"
+      alt=""
+      loading="eager"
+      decoding="auto"
+    />
+  )}
+  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+</div>

@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 const createSchema = z.object({
-  entityType: z.enum(['business', 'government', 'nonprofit']),
+  entityType: z.enum(['business', 'government', 'nonprofit', 'non-profit']),
   title: z.string().min(1, { error: 'Title is required' }),
   slug: z.string().optional(),
   categoryId: z.string().optional(),
@@ -92,13 +92,15 @@ export const POST: APIRoute = async ({ request }) => {
     const data = createSchema.parse(body);
 
     const slug = data.slug || generateSlug(data.title);
+    // Normalize entityType: 'non-profit' -> 'nonprofit'
+    const normalizedEntityType = data.entityType === 'non-profit' ? 'nonprofit' : data.entityType;
 
     const newListing = {
       id: nanoid(),
       title: data.title,
       slug,
       ownerId: data.ownerId || user.id,
-      entityType: data.entityType,
+      entityType: normalizedEntityType,
       categoryId: data.categoryId || null,
       industry: data.industry || null,
       contactName: data.contactName || null,

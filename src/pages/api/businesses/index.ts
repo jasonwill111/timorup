@@ -86,17 +86,20 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '12');
     const offset = (page - 1) * limit;
-    const type = url.searchParams.get('type') || ''; // 'business' | 'organization'
-    const organizationType = url.searchParams.get('organizationType') || ''; // 'government' | 'ngo' | etc.
+    const type = url.searchParams.get('type') || ''; // 'business' | 'non-profit'
+    const organizationType = url.searchParams.get('organizationType') || ''; // 'government' | 'ngo'
 
     // Build query conditions
     const conditions = [eq(businessPages.status, 'live')];
 
-    // Filter by entity type
-    if (type === 'organization') {
-      conditions.push(eq(businessPages.entityType, 'organization'));
+    // Filter by entity type (accept both 'nonprofit' and 'non-profit')
+    if (type === 'nonprofit' || type === 'non-profit') {
+      conditions.push(eq(businessPages.entityType, 'nonprofit'));
     } else if (type === 'business') {
       conditions.push(eq(businessPages.entityType, 'business'));
+    } else if (type === 'organization') {
+      // Legacy type - return empty (old data needs migration)
+      conditions.push(eq(businessPages.entityType, '__nonexistent__'));
     }
     // Otherwise return all types
 

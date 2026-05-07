@@ -25,5 +25,6 @@
     "src/db/schema/auth.ts",
     "src/db/seed.sql"
   ],
-  "commitHash": "fcc3d5c"
+  "commitHash": "fcc3d5c",
+  "externalLinks": {}
 }

@@ -9,7 +9,7 @@ export const GET: APIRoute = async ({ params, url }) => {
   const page = parseInt(url.searchParams.get('page') || '1');
   const limit = parseInt(url.searchParams.get('limit') || '6');
   const offset = (page - 1) * limit;
-  const entityType = url.searchParams.get('type'); // 'business' | 'organization' | null
+  const entityType = url.searchParams.get('type'); // 'business' | 'nonprofit' | null
 
   if (!slug) {
     return new Response(JSON.stringify({ error: 'Category slug required' }), {

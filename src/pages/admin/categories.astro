@@ -26,11 +26,7 @@ import Button from '@components/ui/Button.astro';
         <p class="text-xs text-muted-foreground">Business</p>
       </div>
       <div class="bg-card border rounded-lg p-3 text-center">
-        <p class="text-xl md:text-2xl font-bold text-purple-600" id="stat-government">-</p>
-        <p class="text-xs text-muted-foreground">Government</p>
-      </div>
-      <div class="bg-card border rounded-lg p-3 text-center">
-        <p class="text-xl md:text-2xl font-bold text-orange-600" id="stat-nonprofit">-</p>
+        <p class="text-xl md:text-2xl font-bold text-purple-600" id="stat-nonprofit">-</p>
         <p class="text-xs text-muted-foreground">Non-Profit</p>
       </div>
     </div>
@@ -41,7 +37,6 @@ import Button from '@components/ui/Button.astro';
         <select id="entity-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
           <option value="">All Types</option>
           <option value="business">Business</option>
-          <option value="government">Government</option>
           <option value="nonprofit">Non-Profit</option>
         </select>
         <select id="level-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
@@ -106,7 +101,6 @@ import Button from '@components/ui/Button.astro';
           <label for="cat-entity-type" class="block text-sm font-medium mb-1">Entity Type *</label>
           <select id="cat-entity-type" required class="w-full px-3 py-2 border rounded-md text-sm">
             <option value="business">Business</option>
-            <option value="government">Government</option>
             <option value="nonprofit">Non-Profit</option>
           </select>
           <p class="text-xs text-muted-foreground mt-1">Category type determines which listings can use this category</p>
@@ -293,9 +287,7 @@ import Button from '@components/ui/Button.astro';
         <td class="p-3 hidden md:table-cell">
           ${cat.entityType === 'business'
             ? '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">Business</span>'
-            : cat.entityType === 'government'
-            ? '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800">Gov</span>'
-            : '<span class="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-800">Nonprofit</span>'
+            : '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800">Non-Profit</span>'
           }
         </td>
         <td class="p-3 hidden lg:table-cell">

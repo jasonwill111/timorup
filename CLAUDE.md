@@ -333,7 +333,7 @@ See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **timorlist** (1570 symbols, 2322 relationships, 53 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **timorlist** (1728 symbols, 2606 relationships, 72 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

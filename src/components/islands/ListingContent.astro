@@ -21,14 +21,17 @@ const sort = Astro.url.searchParams.get('sort') || 'recent';
 
 // Build entity type filter
 const statusFilter = eq(businessPages.status, 'live');
+const organizationType = Astro.url.searchParams.get('orgType') || '';
 let entityFilter = null;
 
 if (type === 'business') {
   entityFilter = eq(businessPages.entityType, 'business');
-} else if (type === 'govs') {
-  entityFilter = eq(businessPages.entityType, 'government');
-} else if (type === 'ngos') {
+} else if (type === 'non-profit') {
   entityFilter = eq(businessPages.entityType, 'nonprofit');
+  // Add organization type filter if specified
+  if (organizationType) {
+    entityFilter = and(entityFilter, eq(businessPages.organizationType, organizationType));
+  }
 }
 
 // Combine filters
@@ -45,6 +48,7 @@ const allListings = await db
     title: businessPages.title,
     slug: businessPages.slug,
     entityType: businessPages.entityType,
+    organizationType: businessPages.organizationType,
     industry: businessPages.industry,
     categoryId: businessPages.categoryId,
     profileImageId: businessPages.profileImageId,
@@ -96,7 +100,7 @@ const totalPages = Math.ceil(total / PAGE_SIZE);
 
 // Get page base URL
 const pageBase = `/listings?type=${type}`;
-const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&industry=${industry}&category=${category}&sort=${sort}`;
+const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&industry=${industry}&category=${category}&sort=${sort}&orgType=${organizationType}`;
 ---
 
 <!-- Results Count -->
@@ -108,7 +112,7 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
   <span class="text-muted-foreground">listings</span>
   {type !== 'business' && (
     <span class="ml-auto px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-medium">
-      {type === 'govs' ? 'Government' : 'Non-Profit'}
+      Non-Profit
     </span>
   )}
 </div>
@@ -117,7 +121,7 @@ const getPageUrl = (p: number) => `${pageBase}&page=${p}&search=${search}&indust
 <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 listing-grid">
   {listings.map(listing => (
     <a
-      href={type === 'business' ? `/business/${listing.slug}` : `/${type}/${listing.slug}`}
+      href={type === 'business' ? `/business/${listing.slug}` : `/non-profit/${listing.slug}`}
       class="listing-card block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer"
     >
       <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40">

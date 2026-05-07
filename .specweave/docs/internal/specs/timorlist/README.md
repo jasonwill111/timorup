@@ -28,6 +28,7 @@ sw:sync-docs 0001
 
 - [FS-021: Admin SKUs TipTap Editor](FS-021/FEATURE.md)
 - [FS-022: Admin Media Upload UI](FS-022/FEATURE.md)
+- [FS-028: Media Upload Optimization](FS-028/FEATURE.md)
 
 ---
 

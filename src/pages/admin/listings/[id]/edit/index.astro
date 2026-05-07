@@ -49,10 +49,15 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
         <h2 class="text-lg font-semibold mb-4">Listing Type</h2>
         <div class="flex items-center gap-4">
           <span class="text-3xl">
-            {listing.entityType === 'business' ? '🏪' : listing.entityType === 'government' ? '🏛️' : '❤️'}
+            {listing.entityType === 'business' ? '🏪' : '🏛️'}
           </span>
           <div>
             <div class="font-medium">{ENTITY_TYPES.find(t => t.value === listing.entityType)?.label || listing.entityType}</div>
+            {listing.entityType === 'nonprofit' && listing.organizationType && (
+              <div class="text-xs text-muted-foreground">
+                ({listing.organizationType === 'government' ? 'Government Agency' : 'NGO'})
+              </div>
+            )}
             <div class="text-xs text-muted-foreground">Type cannot be changed after creation</div>
           </div>
         </div>

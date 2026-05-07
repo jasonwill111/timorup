@@ -8,7 +8,7 @@ import Input from '../../../../components/ui/Input.astro';
 import Textarea from '../../../../components/ui/Textarea.astro';
 import { db } from '@/lib/db';
 import { categories } from '@/db/schema';
-import { ENTITY_TYPES, INDUSTRIES } from '@/lib/constants';
+import { ENTITY_TYPES, NONPROFIT_TYPES, INDUSTRIES } from '@/lib/constants';
 
 const allCategories = await db.select().from(categories).all();
 ---
@@ -26,20 +26,35 @@ const allCategories = await db.select().from(categories).all();
       <!-- Step 1: Select Type -->
       <div id="type-selector" class="bg-card rounded-lg border p-6">
         <h2 class="text-lg font-semibold mb-4">1. Select Listing Type</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ENTITY_TYPES.map(type => (
             <label class="type-option cursor-pointer">
               <input type="radio" name="entityType" value={type.value} class="sr-only peer" />
               <div class="p-4 rounded-lg border-2 border-muted peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-muted-foreground/30">
                 <div class="text-2xl mb-2">
-                  {type.value === 'business' ? '🏪' : type.value === 'government' ? '🏛️' : '❤️'}
+                  {type.value === 'business' ? '🏪' : '🏛️'}
                 </div>
                 <div class="font-medium">{type.label}</div>
                 <div class="text-xs text-muted-foreground mt-1">
                   {type.value === 'business' && 'Companies, shops, services'}
-                  {type.value === 'government' && 'Government agencies, ministries'}
-                  {type.value === 'nonprofit' && 'NGOs, charities, foundations'}
+                  {type.value === 'non-profit' && 'Government agencies, NGOs'}
                 </div>
+              </div>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <!-- Nonprofit sub-type selector -->
+      <div id="nonprofit-subtype" class="bg-card rounded-lg border p-6 hidden">
+        <h2 class="text-lg font-semibold mb-4">Organization Type</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {NONPROFIT_TYPES.map(type => (
+            <label class="cursor-pointer">
+              <input type="radio" name="organizationType" value={type.value} class="sr-only peer" />
+              <div class="p-4 rounded-lg border-2 border-muted peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-muted-foreground/30">
+                <div class="text-2xl mb-2">{type.value === 'government' ? '🏛️' : '🌍'}</div>
+                <div class="font-medium">{type.label}</div>
               </div>
             </label>
           ))}

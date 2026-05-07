@@ -1,8 +1,13 @@
 // Entity types for listings
 export const ENTITY_TYPES = [
   { value: 'business', label: 'Business' },
-  { value: 'government', label: 'Government' },
-  { value: 'nonprofit', label: 'Non-Profit' },
+  { value: 'non-profit', label: 'Non-Profit' },
+] as const;
+
+// Organization sub-types for nonprofits
+export const NONPROFIT_TYPES = [
+  { value: 'government', label: 'Government Agency' },
+  { value: 'ngo', label: 'NGO' },
 ] as const;
 
 // Industry classifications for businesses

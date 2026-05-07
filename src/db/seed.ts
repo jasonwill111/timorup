@@ -44,20 +44,16 @@ const categories = [
 // USERS
 // ========================
 const users = [
+  { id: 'user-0', email: 'user@timorlist.com', name: 'Test User', role: 'user', phone: '+6707700001' },
   { id: 'user-1', email: 'joao.silva@cafetimor.tl', name: 'João Silva', role: 'user', phone: '+6707701234' },
-  { id: 'user-2', email: 'maria.reis@hoteltimor.tl', name: 'Maria Reis', role: 'user', phone: '+6707705678' },
-  { id: 'user-3', email: 'carlos@timortech.tl', name: 'Carlos Almeida', role: 'user', phone: '+6707709999' },
-  { id: 'user-4', email: 'admin@timorlist.tl', name: 'Admin User', role: 'admin', phone: '+6707700000' },
-  { id: 'user-5', email: 'fernanda@restaurante.tl', name: 'Fernanda Soares', role: 'user', phone: '+6707701111' },
-  { id: 'user-6', email: 'pedro@autocare.tl', name: 'Pedro Santos', role: 'user', phone: '+6707702222' },
-  { id: 'user-7', email: 'ana@phoneshop.tl', name: 'Ana Martins', role: 'user', phone: '+6707703333' },
-  { id: 'user-8', email: 'jose@tourstimetor.tl', name: 'José Sousa', role: 'user', phone: '+6707704444' },
+  { id: 'user-4', email: 'admin@timorlist.com', name: 'Admin User', role: 'admin', phone: '+6707700000' },
 ];
 
 // ========================
 // ACCOUNTS (for better-auth password login)
 // ========================
-const TEST_PASSWORD = 'timor123';
+const USER_PASSWORD = 'user12345';
+const ADMIN_PASSWORD = 'admin12345';
 let accountsData: Array<{
   id: string;
   accountId: string;
@@ -1235,18 +1231,20 @@ async function seed() {
     await db.insert(schema.users).values(users);
   }
 
-  // Hash password and create accounts (required for better-auth password login)
+  // Hash passwords and create accounts (required for better-auth password login)
   console.log('🔐 Creating account credentials (using scrypt)...');
-  const passwordHash = await hashPassword(TEST_PASSWORD);
-  console.log(`🔐 Password hash generated: ${passwordHash.substring(0, 40)}...`);
+  const userPasswordHash = await hashPassword(USER_PASSWORD);
+  const adminPasswordHash = await hashPassword(ADMIN_PASSWORD);
+  console.log(`🔐 Password hashes generated`);
+
   const now = new Date();  // Date object for drizzle timestamp mode
 
-  accountsData = users.map((user, i) => ({
-    id: `acc-${i + 1}`,
+  accountsData = users.map((user) => ({
+    id: `acc-${user.id}`,
     accountId: user.id,
     providerId: 'credential',  // Email/password provider
     userId: user.id,
-    password: passwordHash,
+    password: user.role === 'admin' ? adminPasswordHash : userPasswordHash,
     createdAt: now,
     updatedAt: now,
   }));
@@ -1286,7 +1284,7 @@ async function seed() {
   console.log('📊 Summary:');
   console.log(`   - ${categories.length} categories`);
   console.log(`   - ${users.length} users`);
-  console.log(`   - ${accountsData.length} accounts (password: ${TEST_PASSWORD})`);
+  console.log(`   - ${accountsData.length} accounts (user: user12345, admin: admin12345)`);
   console.log(`   - ${businesses.length} businesses`);
   console.log(`   - ${organizations.length} organizations`);
   console.log(`   - ${products.length} products/SKUs`);

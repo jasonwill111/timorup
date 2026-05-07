@@ -1,0 +1,113 @@
+---
+interface Props {
+  images: { id: string; url: string }[];
+  title: string;
+}
+
+const { images, title } = Astro.props;
+---
+
+{images.length > 0 && (
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold mb-4">Photo Gallery</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {images.map((img, i) => (
+        <button
+          class="aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary"
+          data-gallery-item
+          data-index={i}
+          aria-label={`View photo ${i + 1}`}
+        >
+          <img
+            src={img.url}
+            alt={`${title} photo ${i + 1}`}
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </button>
+      ))}
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="gallery-modal" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" data-gallery-modal>
+      <button
+        id="gallery-close"
+        class="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-lg transition-colors"
+        aria-label="Close gallery"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <button id="gallery-prev" class="absolute left-4 text-white p-2 hover:bg-white/20 rounded-lg transition-colors" aria-label="Previous">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <button id="gallery-next" class="absolute right-4 text-white p-2 hover:bg-white/20 rounded-lg transition-colors" aria-label="Next">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <img id="gallery-image" src="" alt="" class="max-w-full max-h-[85vh] object-contain" />
+      <div id="gallery-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm"></div>
+    </div>
+  </section>
+)}
+
+<script define:vars={{ images }}>
+  const modal = document.getElementById('gallery-modal');
+  const image = document.getElementById('gallery-image');
+  const counter = document.getElementById('gallery-counter');
+  let currentIndex = 0;
+
+  function showImage(index) {
+    currentIndex = index;
+    if (image && images[currentIndex]) {
+      image.src = images[currentIndex].url;
+      image.alt = images[currentIndex].alt || `Photo ${currentIndex + 1}`;
+      if (counter) counter.textContent = `${currentIndex + 1} / ${images.length}`;
+    }
+  }
+
+  document.querySelectorAll('[data-gallery-item]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const index = parseInt(btn.getAttribute('data-index') || '0');
+      showImage(index);
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    });
+  });
+
+  document.getElementById('gallery-close')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+
+  document.getElementById('gallery-prev')?.addEventListener('click', () => {
+    showImage((currentIndex - 1 + images.length) % images.length);
+  });
+
+  document.getElementById('gallery-next')?.addEventListener('click', () => {
+    showImage((currentIndex + 1) % images.length);
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!modal?.classList.contains('flex')) return;
+    if (e.key === 'Escape') {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    } else if (e.key === 'ArrowLeft') {
+      showImage((currentIndex - 1 + images.length) % images.length);
+    } else if (e.key === 'ArrowRight') {
+      showImage((currentIndex + 1) % images.length);
+    }
+  });
+</script>

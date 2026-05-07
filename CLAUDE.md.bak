@@ -1,7 +1,82 @@
 <!-- gitnexus:start -->
+<!-- timorlist:start -->
+
+# TimorList
+
+> Astro 6.2.2 + Cloudflare Workers + D1
+
+## 技术栈
+- 框架: Astro 6.2.2 (SSR)
+- 部署: Cloudflare Workers
+- 数据库: D1 (SQLite)
+- ORM: Drizzle 0.45.2
+- 认证: better-auth 1.6.9
+
+## 开发命令
+
+```bash
+pnpm dev      # wrangler dev --local --port 8787
+pnpm build    # astro build
+pnpm db:push  # Drizzle push schema
+```
+
+## 关键文件
+
+| 文件 | 用途 |
+|------|------|
+| `astro.config.mjs` | Cloudflare 适配器 |
+| `wrangler.toml` | D1/KV/R2 绑定 |
+| `.dev.vars` | 本地环境变量 |
+| `src/lib/db.ts` | D1 访问模式 |
+
+## 框架特定规范
+
+`@rules/TECH/astro-cloudflare.md`
+
+---
+
+## 开发流程（强制）
+
+**先遵循，再质疑，最后更新**
+
+```
+1. 严格遵循 — 按本地知识库开发
+2. 验证遵循 — 出问题时确认是否遵循了规则
+3. 质疑规则 — 遵循后仍有问题 → 查官方验证
+4. 更新知识库 — 确认过时 → 用 MCP/llms.txt 更新
+```
+
+### 禁止
+
+- 不遵循本地知识库直接开发
+- 不验证遵循情况就质疑规则
+- 不查官方就声称知识库过时
+
+---
+
+## SpecWeave
+
+| 文件 | 用途 |
+|------|------|
+| `.specweave/config.json` | 项目配置 |
+| `.specweave/increments/` | 开发增量 |
+| `.specweave/docs/` | 项目文档 |
+
+### 增量开发
+
+每个功能/修复 = 一个 increment，遵循：
+1. spec.md 编写规范
+2. 实现
+3. 验证
+4. 更新文档
+
+---
+
+<!-- timorlist:end -->
+<!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **timorlist** (1728 symbols, 2606 relationships, 72 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **timorlist** (1596 symbols, 2682 relationships, 127 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

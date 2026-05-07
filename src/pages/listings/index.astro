@@ -23,14 +23,14 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "TimorList Local Directory",
-  "description": `Browse ${type === 'business' ? 'businesses' : type === 'govs' ? 'government agencies' : 'NGOs'} in Timor-Leste.`,
+  "description": `Browse ${type === 'business' ? 'businesses' : 'non-profit organizations'} in Timor-Leste.`,
   "url": `https://timorlist.com/listings?type=${type}`,
 };
 ---
 
 <Layout
   title="Local Directory - TimorList"
-  description="Browse businesses, government agencies, and nonprofits in Timor-Leste"
+  description="Browse businesses and non-profit organizations in Timor-Leste"
   structuredData={structuredData}
 >
   <div class="container py-4 sm:py-8">
@@ -50,25 +50,14 @@ const structuredData = {
         </span>
       </a>
       <a
-        href="/listings?type=govs"
-        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'govs' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
-      >
-        <span class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
-          </svg>
-          Government
-        </span>
-      </a>
-      <a
-        href="/listings?type=ngos"
-        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'ngos' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
+        href="/listings?type=non-profit"
+        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'non-profit' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
       >
         <span class="flex items-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
           </svg>
-          NGOs
+          Non-Profit
         </span>
       </a>
     </div>
@@ -89,7 +78,7 @@ const structuredData = {
         />
       </div>
 
-      {type === 'business' && (
+      {(type === 'business') && (
         <select id="industry-filter" name="industry" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
           <option value="">All Industries</option>
           {Object.entries(INDUSTRIES).map(([key, group]) => (
@@ -104,14 +93,11 @@ const structuredData = {
         </select>
       )}
 
-      {(type === 'govs' || type === 'ngos') && (
-        <select id="category-filter" name="category" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
-          <option value="">All Categories</option>
-          {allCategories.map(cat => (
-            <option value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
+      {(type === 'non-profit') && (
+        <select id="orgtype-filter" name="orgType" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
+          <option value="">All Non-Profits</option>
+          <option value="government">Government</option>
+          <option value="ngo">NGOs</option>
         </select>
       )}
 
@@ -144,14 +130,20 @@ const structuredData = {
   </div>
 </Layout>
 
-<script define:vars={{ industry, category }}>
+<script define:vars={{ industry, category, type }}>
   // Set initial values for selects
   const industryFilter = document.getElementById('industry-filter');
-  const categoryFilter = document.getElementById('category-filter');
+  const orgTypeFilter = document.getElementById('orgtype-filter');
   const sortFilter = document.getElementById('sort-filter');
 
   if (industryFilter) industryFilter.value = industry;
-  if (categoryFilter) categoryFilter.value = category;
+
+  // Get orgType from URL for nonprofits
+  if (type === 'non-profit') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orgType = urlParams.get('orgType') || '';
+    if (orgTypeFilter) orgTypeFilter.value = orgType;
+  }
 
   // Handle filter changes
   const form = document.getElementById('filter-form');

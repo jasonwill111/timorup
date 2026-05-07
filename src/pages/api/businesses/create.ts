@@ -95,9 +95,10 @@ export async function POST({ request }: { request: Request }) {
       publishNow, industry, yearOfEstablishment, socialLinks
     } = body as Record<string, string | boolean | number | null>;
 
-    // Validate entity type
-    const validTypes = ['business', 'government', 'nonprofit'];
-    const finalEntityType = validTypes.includes(entityType as string) ? entityType as string : 'business';
+    // Validate entity type (accept both 'nonprofit' and 'non-profit', store as 'nonprofit')
+    const validTypes = ['business', 'nonprofit', 'non-profit'];
+    const rawType = entityType as string;
+    const finalEntityType = validTypes.includes(rawType) ? (rawType === 'non-profit' ? 'nonprofit' : rawType) : 'business';
 
     // 2. Check one-listing-per-user limit
     const existingListing = await db.select()

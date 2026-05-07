@@ -31,8 +31,8 @@ const {
   class: className = '',
 } = Astro.props;
 
-const href = type === 'organization' ? `/organization/${slug}` : `/business/${slug}`;
-const isOrg = type === 'organization';
+const href = type === 'nonprofit' ? `/non-profit/${slug}` : `/business/${slug}`;
+const isOrg = type === 'nonprofit';
 
 const orgTypeColors: Record<string, string> = {
   government: 'from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40',

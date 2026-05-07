@@ -1,0 +1,11 @@
+{
+  "skills": {
+    "sw": {
+      "version": "1.0.581",
+      "sha": "58d2432538ae",
+      "tier": "BUNDLED",
+      "installedAt": "2026-05-06T10:48:27.915Z",
+      "source": "local:specweave"
+    }
+  }
+}
