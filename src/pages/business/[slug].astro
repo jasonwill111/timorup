@@ -5,12 +5,15 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import Card from '../../components/ui/Card.astro';
+import LocationMap from '../../components/ui/LocationMap.astro';
+import MediaGallery from '../../components/ui/MediaGallery.astro';
+import UpdatesSection from '../../components/UpdatesSection.astro';
 import ProductsSection from '../../components/islands/ProductsSection.astro';
 import BusinessSidebar from '../../components/islands/BusinessSidebar.astro';
 import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
 import { getDb } from '@/lib/db';
 const db = await getDb();
-import { businessPages, categories, reviews, media } from '@/db/schema';
+import { businessPages, categories, reviews, media, businessUpdates } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const { slug } = Astro.params;
@@ -86,6 +89,19 @@ if (photoGallery.length > 0) {
     .all();
   galleryImages = mediaItems.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
 }
+
+// Load business updates
+const businessUpdatesData = await db.select()
+  .from(businessUpdates)
+  .where(eq(businessUpdates.businessId, business.id))
+  .orderBy(desc(businessUpdates.createdAt))
+  .limit(4)
+  .all();
+
+const updates = businessUpdatesData.map(u => ({
+  ...u,
+  images: u.images ? JSON.parse(u.images) : [],
+}));
 
 const pageTitle = `${business.title} - TimorList`;
 const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${category?.name || 'Business'} in Timor-Leste`;
@@ -266,8 +282,23 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
             </Card>
           )}
 
-          <!-- Latest Update -->
-          {latestUpdate && (
+          <!-- Updates Section -->
+          {updates.length > 0 && (
+            <Card>
+              <div class="p-4">
+                <h2 class="font-semibold text-base mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                  </svg>
+                  Updates
+                </h2>
+                <UpdatesSection updates={updates} slug={slug} isOwner={isOwner} />
+              </div>
+            </Card>
+          )}
+
+          <!-- Legacy Latest Update (hidden when new Updates exist) -->
+          {!latestUpdate && updates.length === 0 && (
             <Card class="border-l-4 border-l-primary">
               <div class="p-3">
                 <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
@@ -341,31 +372,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
           <!-- Photo Gallery -->
           <Card>
             <div class="p-3">
-              <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                Photo Gallery
-              </h3>
-              {galleryImages.length > 0 ? (
-                <div class="grid grid-cols-3 gap-2" id="gallery-grid">
-                  {galleryImages.slice(0, 6).map((img, idx) => (
-                    <div class={`aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:opacity-90 transition-opacity ${galleryImages.length === 1 ? 'col-span-3' : ''}`} data-gallery-idx={idx}>
-                      <img src={img.url} alt={`Gallery ${idx + 1}`} class="w-full h-full object-cover" loading="lazy" decoding="async" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div class="grid grid-cols-3 gap-2">
-                  {[1, 2, 3, 4, 5, 6].map(() => (
-                    <div class="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/20 flex items-center justify-center bg-muted/30">
-                      <svg class="w-6 h-6 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <MediaGallery items={galleryImages} title="Photo Gallery" gridCols={3} maxDisplay={6} />
             </div>
           </Card>
 
@@ -377,20 +384,13 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
                 Location
               </h3>
               {business.locationLat && business.locationLng ? (
-                <>
-                  <div class="aspect-video rounded-lg overflow-hidden border mb-2">
-                    <img
-                      src={`https://static-maps.yandex.ru/1.x/?ll=${business.locationLng},${business.locationLat}&z=15&l=map&size=400,200&pt=${business.locationLng},${business.locationLat},pm2rdm`}
-                      alt="Map"
-                      class="w-full h-full object-cover"
-                      onerror={`this.src='https://www.openstreetmap.org/export/embed.html?bbox=${(business.locationLng - 0.01).toFixed(4)},${(business.locationLat - 0.01).toFixed(4)},${(business.locationLng + 0.01).toFixed(4)},${(business.locationLat + 0.01).toFixed(4)}&layer=mapnik&marker=${business.locationLat},${business.locationLng}'`}
-                    />
-                  </div>
-                  {business.address && <p class="text-xs text-muted-foreground mb-2">{business.address}</p>}
-                  <a href={`https://www.openstreetmap.org/?mlat=${business.locationLat}&mlon=${business.locationLng}#map=15/${business.locationLat}/${business.locationLng}`} target="_blank" class="text-xs text-primary hover:underline">
-                    Open in Maps →
-                  </a>
-                </>
+                <LocationMap
+                  id="business-map"
+                  lat={business.locationLat}
+                  lng={business.locationLng}
+                  address={business.address || 'View Location'}
+                  openFn="openBusinessMap"
+                />
               ) : (
                 <p class="text-xs text-muted-foreground italic">Location not available.</p>
               )}
@@ -445,88 +445,9 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
     </div>
   </div>
 
-  <!-- Gallery Lightbox Modal -->
-  <div id="lightbox-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center">
-    <button id="lightbox-close" class="absolute top-4 right-4 p-2 text-white hover:bg-white/20 rounded-full transition-colors">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-      </svg>
-    </button>
-    <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/20 rounded-full transition-colors">
-      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-    </button>
-    <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/20 rounded-full transition-colors">
-      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
-    </button>
-    <div id="lightbox-content" class="max-w-4xl max-h-[90vh]"></div>
-    <div id="lightbox-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm"></div>
-  </div>
 </Layout>
 
 <script>
-  // Gallery Lightbox
-  const modal = document.getElementById('lightbox-modal');
-  const content = document.getElementById('lightbox-content');
-  const counter = document.getElementById('lightbox-counter');
-  const galleryItems = document.querySelectorAll('[data-gallery-idx]');
-  let currentIdx = 0;
-
-  function openLightbox(idx: number) {
-    currentIdx = idx;
-    showItem(currentIdx);
-    modal?.classList.remove('hidden');
-    modal?.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeLightbox() {
-    modal?.classList.add('hidden');
-    modal?.classList.remove('flex');
-    document.body.style.overflow = '';
-  }
-
-  function showItem(idx: number) {
-    if (!content || !counter) return;
-    const imgs = document.querySelectorAll('[data-gallery-idx] img');
-    const total = imgs.length;
-    if (total === 0) return;
-
-    currentIdx = (idx + total) % total;
-    const img = imgs[currentIdx] as HTMLImageElement;
-    // Use DOM APIs instead of innerHTML to prevent XSS
-    content.textContent = '';
-    const imgEl = document.createElement('img');
-    imgEl.src = img.src;
-    imgEl.alt = img.alt || '';
-    imgEl.className = 'max-w-full max-h-[85vh] object-contain rounded-lg';
-    content.appendChild(imgEl);
-    counter.textContent = `${currentIdx + 1} / ${total}`;
-  }
-
-  galleryItems.forEach((item, idx) => {
-    item.addEventListener('click', () => openLightbox(idx));
-  });
-
-  document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
-  document.getElementById('lightbox-prev')?.addEventListener('click', () => showItem(currentIdx - 1));
-  document.getElementById('lightbox-next')?.addEventListener('click', () => showItem(currentIdx + 1));
-
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) closeLightbox();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (modal?.classList.contains('flex')) {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') showItem(currentIdx - 1);
-      if (e.key === 'ArrowRight') showItem(currentIdx + 1);
-    }
-  });
-
   // Share
   document.getElementById('share-btn')?.addEventListener('click', () => {
     if (navigator.share) {
@@ -546,4 +467,17 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
   document.getElementById('like-btn')?.addEventListener('click', () => {
     alert('Like feature coming soon!');
   });
+
+  // Global map navigation function
+  window.openBusinessMap = function(lat: string, lng: string) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      const url = navigator.userAgent.includes('iPhone')
+        ? `http://maps.apple.com/?daddr=${lat},${lng}`
+        : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      window.open(url, '_blank');
+    } else {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+    }
+  };
 </script>

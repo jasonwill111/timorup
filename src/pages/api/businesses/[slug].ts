@@ -123,11 +123,11 @@ export async function GET({ params, request }: { params: { slug: string }; reque
       }
     }
 
-    // Only fetch products and reviews for businesses, not organizations
+    // Only fetch products and reviews for businesses, not nonprofits
     let businessProducts: typeof products.$inferSelect[] = [];
     let businessReviews: typeof reviews.$inferSelect[] = [];
 
-    if (business.entityType !== 'organization') {
+    if (business.entityType !== 'nonprofit') {
       businessProducts = await db.select()
         .from(products)
         .where(eq(products.businessPageId, business.id))

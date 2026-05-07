@@ -1,0 +1,324 @@
+---
+interface Update {
+  id: string;
+  content: string;
+  images: string[];
+  createdAt: Date | null;
+  postedDate: string;
+}
+
+interface Props {
+  updates: Update[];
+  slug: string;
+  isOwner?: boolean;
+}
+
+const { updates = [], slug, isOwner = false } = Astro.props;
+
+// Parse SKU mentions: @SKU-XXX -> link
+// Parse hashtags: #tag -> link
+function parseContent(content: string): string {
+  // Escape HTML first
+  let parsed = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // @SKU-XXX pattern (alphanumeric, hyphenated)
+  parsed = parsed.replace(
+    /@([A-Za-z0-9][A-Za-z0-9-]*)/g,
+    '<a href="/products-services?sku=$1" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">@$1</a>'
+  );
+
+  // #hashtag pattern
+  parsed = parsed.replace(
+    /#([A-Za-z0-9][A-Za-z0-9-]*)/g,
+    '<a href="/search?q=%23$1" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">#$1</a>'
+  );
+
+  return parsed;
+}
+
+function formatRelativeTime(date: Date | null): string {
+  if (!date) return '';
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString();
+}
+---
+
+{updates.length > 0 && (
+  <div class="space-y-3" id="updates-section">
+    {updates.map((update) => (
+      <div class="bg-card border rounded-xl p-4">
+        {/* Header with time */}
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2 text-xs text-muted-foreground">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+            </svg>
+            <span>Update</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted-foreground">
+              {formatRelativeTime(update.createdAt)}
+            </span>
+            {isOwner && (
+              <button
+                class="text-xs text-red-500 hover:text-red-700 delete-update"
+                data-update-id={update.id}
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Content with parsed links */}
+        <p class="text-sm leading-relaxed whitespace-pre-wrap" set:html={parseContent(update.content)} />
+
+        {/* Images */}
+        {update.images && update.images.length > 0 && (
+          <div class="grid grid-cols-4 gap-2 mt-3">
+            {update.images.slice(0, 4).map((imgId, idx) => (
+              <div
+                class="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:opacity-90 transition-opacity"
+                data-update-img={imgId}
+              >
+                <img
+                  src={`/api/media/${imgId}`}
+                  alt={`Update image ${idx + 1}`}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+)}
+
+{isOwner && (
+  <button
+    id="add-update-btn"
+    class="w-full mt-3 px-4 py-2 border-2 border-dashed border-muted-foreground/30 rounded-xl text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+  >
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    Add Update
+  </button>
+
+  <!-- Update Modal -->
+  <div id="update-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    <div class="bg-background rounded-xl p-6 max-w-md w-full shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">New Update</h3>
+        <button id="close-update-modal" class="p-1 hover:bg-muted rounded">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="update-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">What's new?</label>
+          <textarea
+            id="update-content"
+            name="content"
+            maxlength="140"
+            rows="3"
+            class="w-full px-3 py-2 border rounded-lg text-sm resize-none"
+            placeholder="Share an update... Use @SKU-001 or #hashtag"
+            required
+          ></textarea>
+          <div class="flex justify-between mt-1">
+            <span class="text-xs text-muted-foreground">@SKU or #tag for links</span>
+            <span id="char-count" class="text-xs text-muted-foreground">0/140</span>
+          </div>
+        </div>
+
+        <div id="update-images" class="hidden">
+          <label class="block text-sm font-medium mb-1">Images (optional, max 4)</label>
+          <div class="grid grid-cols-4 gap-2" id="image-preview-grid"></div>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="button" id="add-images-btn" class="px-3 py-1.5 border rounded-lg text-sm hover:bg-muted">
+            + Images
+          </button>
+          <input type="file" id="image-input" accept="image/*" multiple class="hidden" />
+        </div>
+
+        <div id="update-error" class="text-sm text-red-500 hidden"></div>
+
+        <button
+          type="submit"
+          class="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+        >
+          Post Update
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+
+<script define:vars={{ slug }}>
+  // Character counter
+  const contentInput = document.getElementById('update-content');
+  const charCount = document.getElementById('char-count');
+  if (contentInput && charCount) {
+    contentInput.addEventListener('input', () => {
+      const len = contentInput.value.length;
+      charCount.textContent = `${len}/140`;
+      charCount.className = len > 120 ? 'text-xs text-amber-500' : 'text-xs text-muted-foreground';
+    });
+  }
+
+  // Modal controls
+  const modal = document.getElementById('update-modal');
+  const addBtn = document.getElementById('add-update-btn');
+  const closeBtn = document.getElementById('close-update-modal');
+  const form = document.getElementById('update-form');
+  const errorDiv = document.getElementById('update-error');
+
+  addBtn?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+    contentInput?.focus();
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+    form?.reset();
+    errorDiv?.classList.add('hidden');
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  });
+
+  // Image handling
+  const addImagesBtn = document.getElementById('add-images-btn');
+  const imageInput = document.getElementById('image-input');
+  const imagePreview = document.getElementById('image-preview-grid');
+  const imagesDiv = document.getElementById('update-images');
+  let selectedImages = [];
+
+  addImagesBtn?.addEventListener('click', () => imageInput?.click());
+
+  imageInput?.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []).slice(0, 4 - selectedImages.length);
+    if (files.length === 0) return;
+
+    imagesDiv?.classList.remove('hidden');
+
+    for (const file of files) {
+      if (selectedImages.length >= 4) break;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const resp = await fetch('/api/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+          selectedImages.push(data.id);
+          renderImagePreviews();
+        }
+      } catch (err) {
+        console.error('Upload failed:', err);
+      }
+    }
+  });
+
+  function renderImagePreviews() {
+    if (!imagePreview) return;
+    imagePreview.innerHTML = selectedImages.map((id, idx) => `
+      <div class="relative aspect-square">
+        <img src="/api/media/${id}" alt="Preview ${idx + 1}" class="w-full h-full object-cover rounded-lg" />
+        <button type="button" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs remove-img" data-idx="${idx}">×</button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.remove-img').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        selectedImages.splice(idx, 1);
+        renderImagePreviews();
+        if (selectedImages.length === 0) imagesDiv?.classList.add('hidden');
+      });
+    });
+  }
+
+  // Form submit
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const content = contentInput?.value.trim();
+
+    if (!content) return;
+
+    errorDiv?.classList.add('hidden');
+
+    try {
+      const resp = await fetch(`/api/businesses/${slug}/updates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, images: selectedImages }),
+      });
+
+      const data = await resp.json();
+
+      if (data.success) {
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+        form.reset();
+        selectedImages = [];
+        renderImagePreviews();
+        // Reload page to show new update
+        window.location.reload();
+      } else {
+        errorDiv.textContent = data.error;
+        errorDiv.classList.remove('hidden');
+      }
+    } catch (err) {
+      errorDiv.textContent = 'Failed to post update';
+      errorDiv.classList.remove('hidden');
+    }
+  });
+
+  // Delete update
+  document.querySelectorAll('.delete-update').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this update?')) return;
+      const updateId = btn.dataset.updateId;
+
+      try {
+        await fetch(`/api/businesses/${slug}/updates?id=${updateId}`, { method: 'DELETE' });
+        window.location.reload();
+      } catch (err) {
+        alert('Failed to delete');
+      }
+    });
+  });
+</script>

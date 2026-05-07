@@ -27,7 +27,7 @@ export const users = sqliteTable('users', {
 }));
 
 // Categories table - use string reference to avoid circular
-// entityType: 'business' | 'government' | 'nonprofit' | null (null = all types)
+// entityType: 'business' | 'nonprofit' | null (null = all types)
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -35,7 +35,7 @@ export const categories = sqliteTable('categories', {
   description: text('description'),
   icon: text('icon').default(''), // 'emoji:🍽️' or 'lucide:utensils' or ''
   parentId: text('parent_id'),
-  entityType: text('entity_type').default('business'), // 'business' | 'government' | 'nonprofit' | null (all types)
+  entityType: text('entity_type').default('business'), // 'business' | 'nonprofit' | null (all types)
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }, (categories) => ({
@@ -70,7 +70,8 @@ export const businessPages = sqliteTable('business_pages', {
   slug: text('slug').notNull().unique(),
   ownerId: text('owner_id').notNull(),
   categoryId: text('category_id'),
-  entityType: text('entity_type').default('business'), // 'business' | 'government' | 'nonprofit'
+  entityType: text('entity_type').default('business'), // 'business' | 'nonprofit'
+  organizationType: text('organization_type'), // 'government' | 'ngo' (only for nonprofit)
   status: text('status').default('draft'),
   bannerImageId: text('banner_image_id'),
   profileImageId: text('profile_image_id'),
@@ -114,6 +115,19 @@ export const businessPages = sqliteTable('business_pages', {
   statusIdx: index('business_status_idx').on(businessPages.status),
   entityTypeIdx: index('business_entity_type_idx').on(businessPages.entityType),
   categoryIdx: index('business_category_idx').on(businessPages.categoryId),
+}));
+
+// Business Updates (News) - up to 4 updates per business/nonprofit
+export const businessUpdates = sqliteTable('business_updates', {
+  id: text('id').primaryKey(),
+  businessId: text('business_id').notNull(),  // FK to business_pages
+  content: text('content').notNull(),          // max 140 chars
+  images: text('images'),                      // JSON array of media IDs, max 4
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  postedDate: text('posted_date'),            // YYYY-MM-DD for daily limit
+}, (businessUpdates) => ({
+  businessIdx: index('updates_business_idx').on(businessUpdates.businessId),
+  createdAtIdx: index('updates_created_idx').on(businessUpdates.createdAt),
 }));
 
 // Products/SKUs table with flexible pricing

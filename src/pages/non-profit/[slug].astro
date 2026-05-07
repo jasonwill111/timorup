@@ -1,0 +1,296 @@
+---
+// Organization page with SSR
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import CardContent from '../../components/ui/CardContent.astro';
+import LocationMap from '../../components/ui/LocationMap.astro';
+import MediaGallery from '../../components/ui/MediaGallery.astro';
+import UpdatesSection from '../../components/UpdatesSection.astro';
+import ListingBanner from '../../components/ListingBanner.astro';
+import ListingHeader from '../../components/ListingHeader.astro';
+import { getDb } from '@/lib/db';
+import { businessPages, media, businessUpdates } from '@/db/schema';
+import { eq, desc, inArray } from 'drizzle-orm';
+
+const db = await getDb();
+
+const { slug } = Astro.params;
+const siteUrl = import.meta.env.SITE || 'https://timorlist.com';
+const canonicalUrl = `${siteUrl}/non-profit/${slug}`;
+
+// SSR: Load organization data
+const org = await db.select()
+  .from(businessPages)
+  .where(eq(businessPages.slug, slug ?? ''))
+  .get();
+
+// Redirect if not found or not a nonprofit
+if (!org || org.entityType !== 'nonprofit') {
+  return Astro.redirect('/non-profit');
+}
+
+// JSON-Ld type
+const jsonLdType = org.organizationType === 'government' ? 'GovernmentOrganization' : 'NGO';
+
+// Parse opening hours
+const openingHours = org.openingHours ? JSON.parse(org.openingHours) : null;
+
+// Parse social links
+const socialLinks = org.socialLinks ? JSON.parse(org.socialLinks) : {};
+
+// Load photo gallery
+const photoGallery = org.photoGallery ? JSON.parse(org.photoGallery) : [];
+let galleryImages: { id: string; url: string }[] = [];
+if (photoGallery.length > 0) {
+  const mediaItems = await db.select({ id: media.id, url: media.url })
+    .from(media)
+    .where(inArray(media.id, photoGallery))
+    .all();
+  galleryImages = mediaItems.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
+}
+
+// Load business updates
+const updatesData = await db.select()
+  .from(businessUpdates)
+  .where(eq(businessUpdates.businessId, org.id))
+  .orderBy(desc(businessUpdates.createdAt))
+  .limit(4)
+  .all();
+
+const updates = updatesData.map(u => ({
+  ...u,
+  images: u.images ? JSON.parse(u.images) : [],
+}));
+
+// Title & description
+const pageTitle = `${org.title} - TimorList`;
+const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - Organization in Timor-Leste`;
+
+// Prepare header info
+const headerInfo = {
+  profileImageId: org.profileImageId,
+  title: org.title,
+  contactNumber: org.contactNumber,
+  contactName: org.contactName,
+  email: org.email,
+  countryCode: org.countryCode,
+  yearOfEstablishment: org.yearOfEstablishment,
+  verifiedBadge: org.verifiedBadge,
+  views: org.views,
+  likes: org.likes,
+  saves: org.saves,
+};
+
+// Organization type labels
+const typeLabels: Record<string, string> = {
+  government: 'Government Agency',
+  ngo: 'NGO',
+};
+const typeLabel = typeLabels[org.organizationType || ''] || 'Organization';
+---
+
+<Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": jsonLdType,
+    "name": org.title,
+    "description": org.aboutUs,
+    "url": canonicalUrl,
+    "image": org.profileImageId ? `/api/media/${org.profileImageId}` : undefined,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": org.address,
+      "addressLocality": "Dili",
+      "addressCountry": "TL"
+    },
+    "telephone": org.contactNumber ? `${org.countryCode} ${org.contactNumber}` : undefined,
+  })} />
+
+  <div class="bg-background min-h-screen">
+    <!-- Banner -->
+    <ListingBanner bannerImageId={org.bannerImageId} type="nonprofit" />
+
+    <div class="container max-w-6xl mx-auto px-4 md:px-6 -mt-16 relative z-10 pb-12">
+      <!-- Header -->
+      <ListingHeader info={headerInfo} organizationType={org.organizationType || undefined} type="nonprofit" showWhatsApp={true} />
+
+      <!-- Main Content: About Us (left) | Sidebar (right) -->
+      <div class="grid lg:grid-cols-10 gap-6">
+        <!-- Left Column: About Us (60%) -->
+        <div class="lg:col-span-6 space-y-3">
+          <!-- About Us -->
+          {org.aboutUs && (
+            <Card>
+              <div class="p-4">
+                <h2 class="font-semibold text-base mb-2">About</h2>
+                <p class="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{org.aboutUs}</p>
+              </div>
+            </Card>
+          )}
+
+
+	          <!-- Updates Section -->
+	          {updates.length > 0 && (
+	            <Card>
+	              <div class="p-4">
+	                <h2 class="font-semibold text-base mb-3 flex items-center gap-2">
+	                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+	                  </svg>
+	                  Updates
+	                </h2>
+	                <UpdatesSection updates={updates} slug={slug} isOwner={false} />
+	              </div>
+	            </Card>
+	          )}
+
+          <!-- Latest Update -->
+          {org.latestUpdate && (
+            <Card class="border-l-4 border-l-primary">
+              <div class="p-3">
+                <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+                  </svg>
+                  Latest Update
+                </h3>
+                <p class="text-sm text-muted-foreground">{org.latestUpdate}</p>
+                {org.latestUpdateDate && (
+                  <p class="text-xs text-muted-foreground/60 mt-1">
+                    {new Date(org.latestUpdateDate).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            </Card>
+          )}
+        </div>
+
+        <!-- Right Sidebar (40%) -->
+        <div class="lg:col-span-4 space-y-3">
+          <!-- Social Links -->
+          {(socialLinks.facebook || socialLinks.instagram || socialLinks.tiktok) && (
+            <Card>
+              <div class="p-3">
+                <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9 9m9 9c0 1.657-1.343 3-3 3m0-9c-1.657 0-3 1.343-3 3m0-9a9 9 0 010-18m0 9c0 1.657-1.343 3-3 3m3 3c0 1.657-1.343 3-3 3"/>
+                  </svg>
+                  Follow Us
+                </h3>
+                <div class="flex gap-3">
+                  {socialLinks.facebook && (
+                    <a href={socialLinks.facebook} target="_blank" class="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-200 transition-colors">
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    </a>
+                  )}
+                  {socialLinks.instagram && (
+                    <a href={socialLinks.instagram} target="_blank" class="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 hover:bg-pink-200 transition-colors">
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.281.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                    </a>
+                  )}
+                  {socialLinks.tiktok && (
+                    <a href={socialLinks.tiktok} target="_blank" class="p-2 rounded-full bg-black dark:bg-gray-800 text-white hover:bg-gray-700 transition-colors">
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          <!-- Photo Gallery -->
+          <Card>
+            <div class="p-3">
+              <MediaGallery items={galleryImages} title="Photo Gallery" gridCols={3} maxDisplay={6} />
+            </div>
+          </Card>
+
+          <!-- Location -->
+          <Card>
+            <div class="p-3">
+              <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Location
+              </h3>
+              {org.locationLat && org.locationLng ? (
+                <LocationMap
+                  id="org-map"
+                  lat={org.locationLat}
+                  lng={org.locationLng}
+                  address={org.address || 'View Location'}
+                  openFn="openOrgMap"
+                />
+              ) : (
+                <p class="text-xs text-muted-foreground italic">Location not available.</p>
+              )}
+            </div>
+          </Card>
+
+          <!-- Hours -->
+          <Card>
+            <div class="p-3">
+              <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Hours
+              </h3>
+              {openingHours ? (
+                <div class="space-y-1 text-xs">
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
+                    const dayData = openingHours[day];
+                    const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+                    if (dayData?.open === 'closed') {
+                      return <div class="flex justify-between"><span>{dayName}</span><span class="text-red-500">Closed</span></div>;
+                    }
+                    if (dayData?.open && dayData?.close) {
+                      return <div class="flex justify-between"><span>{dayName}</span><span>{dayData.open} - {dayData.close}</span></div>;
+                    }
+                    return null;
+                  })}
+                </div>
+              ) : (
+                <p class="text-xs text-muted-foreground italic">Hours not available.</p>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</Layout>
+
+<script>
+  // Share button
+  document.getElementById('share-btn')?.addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({ title: document.title, url: window.location.href });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied!');
+    }
+  });
+
+  // Global map function
+  window.openOrgMap = function(lat: string, lng: string) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const url = isMobile
+      ? (navigator.userAgent.includes('iPhone') ? `http://maps.apple.com/?daddr=${lat},${lng}` : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`)
+      : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    window.open(url, '_blank');
+  };
+</script>
