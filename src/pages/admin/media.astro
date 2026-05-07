@@ -1,0 +1,298 @@
+---
+// Admin Media Management Page
+export const prerender = false;
+
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { getDb } from '@/lib/db';
+import { media } from '@/db/schema';
+import { eq, like, sql, desc, isNull } from 'drizzle-orm';
+import { initAuth } from '@/lib/auth';
+
+// Check admin auth
+const cookieHeader = Astro.request.headers.get('cookie') || '';
+const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+
+let isAdmin = false;
+if (tokenMatch) {
+  try {
+    const authApi = (await initAuth()).api;
+    const { user } = await authApi.getSession({
+      headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
+    });
+    isAdmin = user?.role === 'admin';
+  } catch { isAdmin = false; }
+}
+
+if (!isAdmin) {
+  return Astro.redirect('/admin/login');
+}
+
+// Get query params for filtering
+const url = new URL(Astro.request.url);
+const entityTypeFilter = url.searchParams.get('entityType') || '';
+const entityIdFilter = url.searchParams.get('entityId') || '';
+const categoryFilter = url.searchParams.get('category') || '';
+const page = parseInt(url.searchParams.get('page') || '1');
+const limit = 24;
+const offset = (page - 1) * limit;
+
+const db = await getDb();
+
+// Build query conditions
+let mediaQuery = db.select().from(media);
+
+// Apply filters
+if (entityTypeFilter) {
+  mediaQuery = mediaQuery.where(eq(media.entityType, entityTypeFilter)) as any;
+}
+if (entityIdFilter) {
+  mediaQuery = mediaQuery.where(eq(media.entityId, entityIdFilter)) as any;
+}
+if (categoryFilter) {
+  mediaQuery = mediaQuery.where(eq(media.category, categoryFilter)) as any;
+}
+
+// Get total count
+const countResult = await db.select({ count: sql<number>`count(*)` }).from(media);
+const total = countResult[0]?.count || 0;
+
+// Get paginated results
+const mediaItems = await mediaQuery
+  .orderBy(desc(media.createdAt))
+  .limit(limit)
+  .offset(offset)
+  .all();
+
+// Calculate total size
+const totalSize = mediaItems.reduce((acc, item) => acc + (item.size || 0), 0);
+const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+
+// Get unique entity types for filter dropdown
+const entityTypes = await db.selectDistinct({ entityType: media.entityType }).from(media);
+const categories = await db.selectDistinct({ category: media.category }).from(media);
+
+// Helper to format file size
+function formatSize(bytes: number | null): string {
+  if (!bytes) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+// Helper to get media icon
+function getMediaIcon(type: string | null): string {
+  if (type === 'video') return '🎬';
+  if (type === 'image') return '🖼️';
+  return '📄';
+}
+
+// Helper to get media thumbnail URL
+function getThumbnailUrl(item: any): string {
+  if (item.url?.startsWith('data:')) return item.url;
+  if (item.url?.startsWith('http')) return item.url;
+  return `/api/media/${item.id}`;
+}
+
+const totalPages = Math.ceil(total / limit);
+---
+
+<AdminLayout title="Media Library">
+  <div class="p-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">Media Library</h1>
+        <p class="text-muted-foreground text-sm mt-1">
+          {total} files • {totalSizeMB} MB total
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <a href="/admin/media/cleanup" class="px-4 py-2 border rounded-lg hover:bg-muted text-sm">
+          🧹 Cleanup
+        </a>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-card border rounded-xl p-4 mb-6">
+      <form id="filter-form" class="flex flex-wrap gap-4 items-end">
+        <div class="flex-1 min-w-[150px]">
+          <label class="block text-sm font-medium mb-1">Entity Type</label>
+          <select name="entityType" class="w-full px-3 py-2 border rounded-lg bg-background">
+            <option value="">All Types</option>
+            <option value="business" selected={entityTypeFilter === 'business'}>Business</option>
+            <option value="nonprofit" selected={entityTypeFilter === 'nonprofit'}>Nonprofit</option>
+            <option value="blog" selected={entityTypeFilter === 'blog'}>Blog</option>
+            <option value="page" selected={entityTypeFilter === 'page'}>Page</option>
+            <option value="general" selected={entityTypeFilter === 'general'}>General</option>
+          </select>
+        </div>
+
+        <div class="flex-1 min-w-[150px]">
+          <label class="block text-sm font-medium mb-1">Category</label>
+          <select name="category" class="w-full px-3 py-2 border rounded-lg bg-background">
+            <option value="">All Categories</option>
+            <option value="profile" selected={categoryFilter === 'profile'}>Profile</option>
+            <option value="banner" selected={categoryFilter === 'banner'}>Banner</option>
+            <option value="gallery" selected={categoryFilter === 'gallery'}>Gallery</option>
+            <option value="sku" selected={categoryFilter === 'sku'}>SKU</option>
+            <option value="updates" selected={categoryFilter === 'updates'}>Updates</option>
+            <option value="hero" selected={categoryFilter === 'hero'}>Hero</option>
+            <option value="content" selected={categoryFilter === 'content'}>Content</option>
+          </select>
+        </div>
+
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium mb-1">Entity ID</label>
+          <input
+            type="text"
+            name="entityId"
+            value={entityIdFilter}
+            placeholder="Filter by ID..."
+            class="w-full px-3 py-2 border rounded-lg bg-background"
+          />
+        </div>
+
+        <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+          Filter
+        </button>
+        <a href="/admin/media" class="px-4 py-2 border rounded-lg hover:bg-muted">
+          Reset
+        </a>
+      </form>
+    </div>
+
+    <!-- Media Grid -->
+    {mediaItems.length === 0 ? (
+      <div class="bg-card border rounded-xl p-12 text-center">
+        <div class="text-6xl mb-4">📁</div>
+        <h3 class="text-lg font-semibold mb-2">No media found</h3>
+        <p class="text-muted-foreground">Upload some files to get started</p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {mediaItems.map((item) => (
+          <div class="bg-card border rounded-xl overflow-hidden group">
+            <div class="aspect-square bg-muted relative">
+              {item.type === 'image' ? (
+                <img
+                  src={getThumbnailUrl(item)}
+                  alt={item.alt || item.filename}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : item.type === 'video' ? (
+                <div class="w-full h-full flex items-center justify-center text-4xl">
+                  🎬
+                </div>
+              ) : (
+                <div class="w-full h-full flex items-center justify-center text-4xl">
+                  📄
+                </div>
+              )}
+
+              <!-- Overlay with actions -->
+              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button
+                  class="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white copy-url"
+                  data-url={item.url}
+                  title="Copy URL"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                </button>
+                <button
+                  class="p-2 bg-red-500/80 hover:bg-red-500 rounded-lg text-white delete-media"
+                  data-id={item.id}
+                  title="Delete"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Type badge -->
+              <div class="absolute top-2 left-2 px-2 py-1 bg-black/50 rounded text-xs text-white">
+                {item.type || 'file'}
+              </div>
+            </div>
+
+            <div class="p-2">
+              <p class="text-sm truncate" title={item.filename}>{item.filename}</p>
+              <p class="text-xs text-muted-foreground">{formatSize(item.size)}</p>
+              {item.entityType && (
+                <p class="text-xs text-muted-foreground/70 truncate" title={`${item.entityType}/${item.entityId}`}>
+                  {item.entityType} {item.category && `• ${item.category}`}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- Pagination -->
+    {totalPages > 1 && (
+      <div class="flex justify-center gap-2 mt-6">
+        {page > 1 && (
+          <a
+            href={`/admin/media?page=${page - 1}${entityTypeFilter ? `&entityType=${entityTypeFilter}` : ''}${categoryFilter ? `&category=${categoryFilter}` : ''}`}
+            class="px-4 py-2 border rounded-lg hover:bg-muted"
+          >
+            Previous
+          </a>
+        )}
+        <span class="px-4 py-2">
+          Page {page} of {totalPages}
+        </span>
+        {page < totalPages && (
+          <a
+            href={`/admin/media?page=${page + 1}${entityTypeFilter ? `&entityType=${entityTypeFilter}` : ''}${categoryFilter ? `&category=${categoryFilter}` : ''}`}
+            class="px-4 py-2 border rounded-lg hover:bg-muted"
+          >
+            Next
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</AdminLayout>
+
+<script>
+  // Copy URL to clipboard
+  document.querySelectorAll('.copy-url').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const url = btn.getAttribute('data-url');
+      if (url) {
+        await navigator.clipboard.writeText(url);
+        alert('URL copied!');
+      }
+    });
+  });
+
+  // Delete media
+  document.querySelectorAll('.delete-media').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (!id) return;
+
+      if (!confirm('Delete this media? This cannot be undone.')) return;
+
+      try {
+        const resp = await fetch(`/api/media/${id}`, { method: 'DELETE' });
+        const data = await resp.json();
+
+        if (data.success) {
+          // Remove from DOM
+          btn.closest('.bg-card')?.remove();
+        } else {
+          alert(data.error || 'Failed to delete');
+        }
+      } catch (err) {
+        alert('Failed to delete');
+      }
+    });
+  });
+</script>

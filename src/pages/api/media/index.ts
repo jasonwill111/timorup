@@ -62,7 +62,13 @@ export async function GET({ request }: { request: Request }) {
 
     const businessId = url.searchParams.get('businessId');
     const userId = url.searchParams.get('userId');
+    const entityType = url.searchParams.get('entityType');
+    const entityId = url.searchParams.get('entityId');
+    const category = url.searchParams.get('category');
     const id = url.pathname.split('/').pop();
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const offset = (page - 1) * limit;
 
     if (id && id !== 'media') {
       const item = await db.select().from(media).where(eq(media.id, id)).limit(1);
@@ -78,15 +84,45 @@ export async function GET({ request }: { request: Request }) {
       });
     }
 
-    let whereCondition;
+    // Build query with filters
+    const allMedia = await db.select().from(media);
+
+    // Apply filters
+    let filtered = allMedia;
     if (businessId) {
-      whereCondition = eq(media.businessId, businessId);
+      filtered = filtered.filter(m => m.businessId === businessId);
     } else if (userId) {
-      whereCondition = eq(media.createdById, userId);
+      filtered = filtered.filter(m => m.createdById === userId);
+    }
+    if (entityType) {
+      filtered = filtered.filter(m => m.entityType === entityType);
+    }
+    if (entityId) {
+      filtered = filtered.filter(m => m.entityId === entityId);
+    }
+    if (category) {
+      filtered = filtered.filter(m => m.category === category);
     }
 
-    const allMedia = await db.select().from(media).where(whereCondition).orderBy(media.createdAt);
-    return new Response(JSON.stringify({ success: true, data: allMedia }), {
+    // Sort by createdAt desc
+    filtered.sort((a, b) => {
+      const aTime = a.createdAt?.getTime() || 0;
+      const bTime = b.createdAt?.getTime() || 0;
+      return bTime - aTime;
+    });
+
+    // Paginate
+    const total = filtered.length;
+    const paginated = filtered.slice(offset, offset + limit);
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: paginated,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });

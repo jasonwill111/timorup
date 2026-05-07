@@ -57,9 +57,17 @@ export const media = sqliteTable('media', {
   businessId: text('business_id'),
   createdById: text('created_by_id'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  // New fields for structured storage and deduplication
+  hash: text('hash').unique(),                    // SHA256 for deduplication
+  entityType: text('entity_type'),                 // 'business' | 'nonprofit' | 'blog' | 'page' | 'general'
+  entityId: text('entity_id'),                     // business_id / sku_id / blog_id
+  category: text('category'),                      // 'profile' | 'banner' | 'gallery' | 'sku' | 'updates' | 'hero'
+  r2Key: text('r2_key').unique(),                // Full R2 key path
 }, (media) => ({
   businessIdx: index('media_business_idx').on(media.businessId),
   creatorIdx: index('media_creator_idx').on(media.createdById),
+  hashIdx: index('media_hash_idx').on(media.hash),
+  entityIdx: index('media_entity_idx').on(media.entityType, media.entityId),
 }));
 
 // Business Pages table

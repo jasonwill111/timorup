@@ -1,11 +1,11 @@
 // Media API - Upload endpoint
+// Supports: client-side compression, SHA256 deduplication, structured R2 paths
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { media, businessPages } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
-import sharp from 'sharp';
 import { env } from 'cloudflare:workers';
 
 function getErrorMessage(error: unknown): string {
@@ -27,10 +27,8 @@ function getR2PublicUrl(): string {
   return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
 }
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
-const MAX_VIDEO_SIZE = 8 * 1024 * 1024;
-const MAX_IMAGE_WIDTH = 1200;
-const IMAGE_QUALITY = 85;
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
@@ -41,26 +39,42 @@ const PLAN_LIMITS: Record<string, { maxImages: number; maxVideos: number }> = {
   max: { maxImages: 10, maxVideos: 1 },
 };
 
-// Folder structure: business/{id}/, gov/{id}/, ngo/{id}/, blog/{id}/, hero/, category/, page/{name}/, system/, files/
-function getFolderPath(params: {
-  entityType?: string;
-  businessId?: string;
-  category?: string;
-  pageName?: string;
+// Build R2 key from upload parameters
+function buildR2Key(params: {
+  entityType: string;
+  entityId: string;
+  category: string;
+  filename: string;
+  timestamp: number;
+  id: string;
 }): string {
-  const { entityType, businessId, category, pageName } = params;
+  const { entityType, entityId, category, filename, timestamp, id } = params;
 
-  if (category === 'hero') return 'hero';
-  if (category === 'category') return 'category';
-  if (category === 'system') return 'system';
-  if (category === 'files') return 'files';
-  if (pageName) return `page/${pageName}`;
+  // Sanitize filename - keep extension only
+  const ext = filename.split('.').pop() || 'webp';
+  const safeFilename = `${timestamp}-${id}.${ext}`;
 
-  if (entityType && businessId) {
-    return `${entityType}/${businessId}`;
+  if (entityType === 'general') {
+    return `general/${category}/${safeFilename}`;
   }
 
-  return 'general';
+  if (entityType === 'business' || entityType === 'nonprofit') {
+    const folder = `listings/${entityType}/${entityId}`;
+
+    // SKU images get their own subfolder
+    if (category === 'sku') {
+      return `${folder}/sku-${entityId}/${safeFilename}`;
+    }
+
+    return `${folder}/${category}/${safeFilename}`;
+  }
+
+  if (entityType === 'blog') {
+    return `blogs/${entityId}/${safeFilename}`;
+  }
+
+  // pages
+  return `pages/${entityId}/${safeFilename}`;
 }
 
 async function getCurrentUser(request: Request) {
@@ -102,12 +116,6 @@ async function countBusinessMedia(businessId: string) {
 
 export async function POST({ request }: { request: Request }) {
   const db = await getDb();
-  const url = new URL(request.url);
-  const businessId = url.searchParams.get('businessId');
-  const entityType = url.searchParams.get('entityType') || 'business';
-  const category = url.searchParams.get('category'); // hero, category, system, files
-  const pageName = url.searchParams.get('pageName');
-  const skuId = url.searchParams.get('skuId');
 
   const user = await getCurrentUser(request);
 
@@ -129,6 +137,14 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
+    // Get entity params from formData
+    const entityType = (body as Record<string, unknown>).entityType as string || 'general';
+    const entityId = (body as Record<string, unknown>).entityId as string || '';
+    const category = (body as Record<string, unknown>).category as string || 'gallery';
+    const hash = (body as Record<string, unknown>).hash as string | undefined;
+    const width = (body as Record<string, unknown>).width as number | undefined;
+    const height = (body as Record<string, unknown>).height as number | undefined;
+
     const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
     const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
 
@@ -147,35 +163,45 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (businessId) {
-      const limits = await getBusinessPlanLimits(businessId);
-      const counts = await countBusinessMedia(businessId);
-      if (isImage && counts.images >= limits.maxImages) {
-        return new Response(JSON.stringify({
-          success: false,
-          error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxImages} images allowed` }
-        }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-      }
-      if (isVideo && counts.videos >= limits.maxVideos) {
-        return new Response(JSON.stringify({
-          success: false,
-          error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxVideos} video allowed` }
-        }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-      }
-    }
-
     const id = crypto.randomUUID();
     const timestamp = Date.now();
 
-    // Build folder path
-    const folder = getFolderPath({ entityType, businessId, category, pageName });
-    const subFolder = skuId ? `${skuId}/` : '';
+    // Check deduplication by hash
+    if (hash) {
+      const existing = await db.select()
+        .from(media)
+        .where(eq(media.hash, hash))
+        .limit(1);
+
+      if (existing.length > 0) {
+        return new Response(JSON.stringify({
+          success: true,
+          data: {
+            id: existing[0].id,
+            url: existing[0].url,
+            filename: existing[0].filename,
+            mimeType: existing[0].mimeType,
+            size: existing[0].size,
+            type: existing[0].type,
+          },
+          isDuplicate: true,
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+    }
+
+    // Build R2 key
+    const r2Key = buildR2Key({
+      entityType,
+      entityId,
+      category,
+      filename: file.name,
+      timestamp,
+      id,
+    });
 
     let finalUrl: string;
     let finalSize = file.size;
     let finalMimeType = file.type;
-    let finalWidth: number | undefined;
-    let finalHeight: number | undefined;
     let storedPath: string;
 
     // Check if R2 bucket is available
@@ -188,45 +214,34 @@ export async function POST({ request }: { request: Request }) {
 
     if (bucket) {
       if (isImage) {
-        // Optimize image with sharp
-        const inputBuffer = Buffer.from(await file.arrayBuffer());
-        const processed = await sharp(inputBuffer)
-          .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
-          .webp({ quality: IMAGE_QUALITY })
-          .toBuffer({ resolveWithObject: true });
+        // Client should have already compressed to WebP
+        // Just upload the provided file
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-        const key = `${folder}/${subFolder}${timestamp}-${id}.webp`;
-        const r2PublicUrl = getR2PublicUrl();
-
-        await bucket.put(key, processed.data, {
+        await bucket.put(r2Key, buffer, {
           httpMetadata: {
             contentType: 'image/webp',
             cacheControl: 'public, max-age=31536000, immutable',
           },
         });
 
-        finalUrl = `${r2PublicUrl}/${key}`;
-        storedPath = key;
-        finalSize = processed.data.length;
+        finalUrl = `${getR2PublicUrl()}/${r2Key}`;
+        storedPath = r2Key;
         finalMimeType = 'image/webp';
-        finalWidth = processed.info.width;
-        finalHeight = processed.info.height;
+        finalSize = buffer.length;
       } else {
         // Video - store as-is
         const buffer = Buffer.from(await file.arrayBuffer());
-        const ext = file.name.split('.').pop() || 'mp4';
-        const key = `${folder}/${subFolder}${timestamp}-${id}.${ext}`;
-        const r2PublicUrl = getR2PublicUrl();
 
-        await bucket.put(key, buffer, {
+        await bucket.put(r2Key, buffer, {
           httpMetadata: {
             contentType: file.type,
             cacheControl: 'public, max-age=31536000, immutable',
           },
         });
 
-        finalUrl = `${r2PublicUrl}/${key}`;
-        storedPath = key;
+        finalUrl = `${getR2PublicUrl()}/${r2Key}`;
+        storedPath = r2Key;
       }
     } else {
       // Local dev without R2 - base64 inline
@@ -242,11 +257,17 @@ export async function POST({ request }: { request: Request }) {
       filename: file.name,
       mimeType: finalMimeType,
       size: finalSize,
-      width: finalWidth,
-      height: finalHeight,
+      width: width || null,
+      height: height || null,
       type: isImage ? 'image' : 'video',
-      businessId: businessId || null,
+      businessId: entityId || null,
       createdById: user.id,
+      // New fields
+      hash: hash || null,
+      entityType: entityType,
+      entityId: entityId || null,
+      category: category,
+      r2Key: storedPath,
     }).returning();
 
     return new Response(JSON.stringify({
@@ -258,9 +279,10 @@ export async function POST({ request }: { request: Request }) {
         mimeType: finalMimeType,
         size: finalSize,
         type: isImage ? 'image' : 'video',
-        width: finalWidth,
-        height: finalHeight,
-      }
+        width: width || null,
+        height: height || null,
+      },
+      isDuplicate: false,
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     return new Response(JSON.stringify({
