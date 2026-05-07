@@ -48,7 +48,7 @@ async function requireAdminAuth(request: Request) {
     .limit(1)
     .get();
 
-  if (!user || user.role !== 'admin') {
+  if (!user || !['admin', 'super_admin', 'editor'].includes(user.role)) {
     return { authorized: false, error: new Response(JSON.stringify({
       success: false,
       error: { code: 'FORBIDDEN', message: 'Admin access required' }
