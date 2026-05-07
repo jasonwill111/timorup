@@ -2,6 +2,9 @@
 export const prerender = false;
 
 import { initAuth } from '@/lib/auth';
+import { getDb } from '@/lib/db';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 // Rate limiter
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
@@ -55,7 +58,17 @@ export async function POST({ request }: { request: Request }) {
     const user = result.user;
     const token = result.token;
 
-    console.log('[SignIn] Sign in successful, token:', token?.substring(0, 20) + '...');
+    // Query DB for role (better-auth doesn't return custom fields like role)
+    const db = await getDb();
+    const dbUser = await db.select({ role: users.role })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1)
+      .get();
+
+    const userRole = dbUser?.role || 'user';
+
+    console.log('[SignIn] Sign in successful, role:', userRole, ', token:', token?.substring(0, 20) + '...');
 
     // Immediately verify the session
     if (token) {
@@ -77,7 +90,13 @@ export async function POST({ request }: { request: Request }) {
       headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Strict${secureFlag}; Max-Age=${maxAge}; Path=/`);
     }
 
-    const response = new Response(JSON.stringify({ success: true, user }), {
+    const response = new Response(JSON.stringify({
+      success: true,
+      user: {
+        ...user,
+        role: userRole
+      }
+    }), {
       status: 200,
       headers,
     });
