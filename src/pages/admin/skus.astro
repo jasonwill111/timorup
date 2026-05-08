@@ -29,12 +29,12 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
-    <div class="mb-4 md:mb-6 flex items-center justify-between">
-      <div>
-        <h1 class="text-xl md:text-2xl font-bold">SKUs / Products</h1>
-        <p class="text-sm text-muted-foreground">Manage products and services with flexible pricing</p>
+    <div class="mb-4 md:mb-6 flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h1 class="text-lg md:text-2xl font-bold truncate">SKUs / Products</h1>
+        <p class="text-xs md:text-sm text-muted-foreground hidden sm:block">Manage products and services with flexible pricing</p>
       </div>
-      <Button id="add-sku-btn" class="text-xs py-1 h-7 md:text-sm md:h-9">+ Add SKU</Button>
+      <Button id="add-sku-btn" class="text-xs px-2 py-1 h-7 flex-shrink-0 whitespace-nowrap md:text-sm md:px-4 md:h-9">+ Add SKU</Button>
     </div>
 
     <!-- Search and Filters -->
@@ -49,10 +49,10 @@ const businessOptionsJson = JSON.stringify(businessOptions);
           />
         </div>
         <div class="flex gap-2">
-          <select id="business-filter" class="px-3 py-2 border rounded-lg text-sm">
+          <select id="business-filter" class="px-3 py-2 border rounded-lg text-sm bg-background">
             <option value="">All Businesses</option>
           </select>
-          <select id="type-filter" class="px-3 py-2 border rounded-lg text-sm">
+          <select id="type-filter" class="px-3 py-2 border rounded-lg text-sm bg-background">
             <option value="">All Types</option>
             <option value="product">Product</option>
             <option value="service">Service</option>
@@ -90,7 +90,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         <!-- Business -->
         <div>
           <label for="sku-business" class="block text-sm font-medium mb-1">Business *</label>
-          <select id="sku-business" name="businessPageId" required class="w-full px-3 py-2 border rounded-md text-sm">
+          <select id="sku-business" name="businessPageId" required class="w-full px-3 py-2 border rounded-md text-sm bg-background">
             <option value="">Select a business...</option>
           </select>
         </div>
@@ -104,7 +104,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         <!-- Service Type -->
         <div>
           <label for="sku-service-type" class="block text-sm font-medium mb-1">Service Type</label>
-          <select id="sku-service-type" name="serviceType" class="w-full px-3 py-2 border rounded-md text-sm">
+          <select id="sku-service-type" name="serviceType" class="w-full px-3 py-2 border rounded-md text-sm bg-background">
             {SKU_SERVICE_TYPES.map(type => (
               <option value={type.value}>{type.icon} {type.label}</option>
             ))}
@@ -414,7 +414,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       <div class="flex gap-2 items-center price-field-row" data-index="${idx}">
         <input type="text" name="priceLabel_${idx}" value="${field.label}" placeholder="Label (e.g., Hourly Rate)" class="flex-1 px-2 py-1 border rounded text-xs" />
         <input type="number" name="priceValue_${idx}" value="${field.value}" placeholder="${field.unit ? '0.00' : 'Ask for price'}" class="w-20 px-2 py-1 border rounded text-xs" step="0.01" />
-        <select name="priceUnit_${idx}" class="px-2 py-1 border rounded text-xs">
+        <select name="priceUnit_${idx}" class="px-2 py-1 border rounded text-xs bg-background">
           ${units.map(u => `<option value="${u.value}" ${u.value === field.unit ? 'selected' : ''}>${u.label}</option>`).join('')}
         </select>
         <button type="button" class="remove-price-field text-red-500 hover:text-red-600 p-1" ${idx === 0 ? 'style="visibility:hidden"' : ''}>
@@ -442,7 +442,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     row.innerHTML = `
       <input type="text" name="priceLabel_${count - 1}" placeholder="Label (e.g., Weekend Rate)" class="flex-1 px-2 py-1 border rounded text-xs" />
       <input type="number" name="priceValue_${count - 1}" placeholder="0.00" class="w-20 px-2 py-1 border rounded text-xs" step="0.01" />
-      <select name="priceUnit_${count - 1}" class="px-2 py-1 border rounded text-xs">
+      <select name="priceUnit_${count - 1}" class="px-2 py-1 border rounded text-xs bg-background">
         ${units.map(u => `<option value="${u.value}">${u.label}</option>`).join('')}
       </select>
       <button type="button" class="remove-price-field text-red-500 hover:text-red-600 p-1">
@@ -516,7 +516,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         return `
           <div>
             <label for="${id}" class="block text-xs font-medium text-muted-foreground mb-1">${field.label}</label>
-            <select id="${id}" name="spec_${field.key}" class="w-full px-3 py-2 border rounded-md text-sm">
+            <select id="${id}" name="spec_${field.key}" class="w-full px-3 py-2 border rounded-md text-sm bg-background">
               <option value="">Select...</option>
               ${field.options.map(opt => `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt.charAt(0).toUpperCase() + opt.slice(1).replace('_', ' ')}</option>`).join('')}
             </select>
@@ -563,7 +563,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   }
 
   // Global SKUs storage
-  (window as any).allSkus = [];
+  (window as SkuData).allSkus = [];
 
   // Load SKUs
   async function loadSKUs() {
@@ -587,7 +587,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         return;
       }
 
-      (window as any).allSkus = data.data || [];
+      (window as SkuData).allSkus = data.data || [];
       renderSkus();
     } catch (err) {
       console.error('Error loading SKUs:', err);
@@ -599,7 +599,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   function renderSkus() {
     const container = document.getElementById('skus-list');
     const countEl = document.getElementById('skus-count');
-    if (!container || !(window as any).allSkus) return;
+    if (!container || !(window as SkuData).allSkus) return;
 
     const search = (document.getElementById('search-input') as HTMLInputElement)?.value.toLowerCase() || '';
     const businessFilter = (document.getElementById('business-filter') as HTMLSelectElement)?.value || '';
@@ -607,21 +607,21 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
     const bizMap = new Map(businessOptions.map(b => [b.value, b.label]));
 
-    const filtered = (window as any).allSkus.filter((sku: any) => {
+    const filtered = (window as SkuData).allSkus.filter((sku: SkuData) => {
       const matchesSearch = !search || sku.title?.toLowerCase().includes(search);
       const matchesBusiness = !businessFilter || sku.businessPageId === businessFilter;
       const matchesType = !typeFilter || sku.serviceType === typeFilter;
       return matchesSearch && matchesBusiness && matchesType;
     });
 
-    if (countEl) countEl.textContent = `${filtered.length} of ${(window as any).allSkus.length} SKUs`;
+    if (countEl) countEl.textContent = `${filtered.length} of ${(window as SkuData).allSkus.length} SKUs`;
 
     if (filtered.length === 0) {
       container.innerHTML = '<p class="text-center text-muted-foreground py-8">No SKUs found</p>';
       return;
     }
 
-    container.innerHTML = filtered.map((sku: any) => {
+    container.innerHTML = filtered.map((sku: SkuData) => {
       let priceDisplay = 'Ask for price';
       try {
         const fields = sku.priceFields ? JSON.parse(sku.priceFields) : [];

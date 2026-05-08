@@ -12,7 +12,7 @@ import Button from '@components/ui/Button.astro';
         <h1 class="text-xl md:text-2xl font-bold">Categories</h1>
         <p class="text-sm text-muted-foreground">Manage categories by entity type (Business, Government, Non-Profit)</p>
       </div>
-      <Button id="add-category-btn" class="text-xs py-1 h-8 md:text-sm md:h-9">+ Add Category</Button>
+      <Button id="add-category-btn" class="text-xs px-2 py-1 h-7 flex-shrink-0 whitespace-nowrap md:text-sm md:px-4 md:h-9">+ Add Category</Button>
     </div>
 
     <!-- Stats Cards -->
@@ -154,6 +154,9 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  import { badges } from '@/lib/badges';
+  import { injectModal, createDeleteDialog, showModal, hideModal } from '@/lib/modal';
+
   let categories: any[] = [];
   let parentCategories: any[] = [];
   let editingId: string | null = null;
@@ -461,23 +464,37 @@ import Button from '@components/ui/Button.astro';
     }
   });
 
-  // Delete category
-  (window as any).deleteCategory = async function(id: string) {
-    if (!confirm('Delete this category? Sub-categories and businesses using this category may be affected.')) return;
+  // Initialize delete confirmation modal
+  const deleteModalHtml = createDeleteDialog({ id: 'delete-category-dialog', itemName: '' });
+  const deleteModal = injectModal(deleteModalHtml);
+  let deleteTargetId: string | null = null;
 
+  (deleteModal.querySelector('[data-confirm-btn]') as HTMLButtonElement)?.addEventListener('click', async () => {
+    if (!deleteTargetId) return;
     try {
-      const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/categories/${deleteTargetId}`, { method: 'DELETE' });
       const data = await res.json();
-
       if (data.success) {
         showToast('Category deleted');
         loadCategories();
       } else {
         showToast(data.error?.message || 'Failed to delete', 'error');
       }
-    } catch (err) {
+    } catch {
       showToast('Error deleting category', 'error');
     }
+  });
+
+  // Delete category
+  (window as any).deleteCategory = function(id: string) {
+    deleteTargetId = id;
+    const cat = categories.find((c: any) => c.id === id);
+    const modal = document.getElementById('delete-category-dialog');
+    if (modal) {
+      const msgEl = modal.querySelector('.modal-body p');
+      if (msgEl) msgEl.textContent = `Are you sure you want to delete "${cat?.name || 'this category'}"? This action cannot be undone.`;
+    }
+    showModal('delete-category-dialog');
   };
 
   // Filter listeners
