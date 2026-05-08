@@ -33,17 +33,12 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 </script>
   <div class="container py-4 px-2 md:py-6 max-w-7xl">
     <!-- Page Header -->
-    <div class="mb-4 md:mb-6 flex items-center justify-between">
-      <div>
-        <h1 class="text-xl md:text-2xl font-bold">Dashboard</h1>
-        <p class="text-xs md:text-sm text-muted-foreground">Overview of your platform</p>
-      </div>
-      <a href="/admin/businesses" class="text-xs px-2 py-1 border rounded hover:bg-muted md:text-sm md:px-3">
-        View All →
-      </a>
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">Dashboard</h1>
+      <p class="text-xs md:text-sm text-muted-foreground">Overview of your platform</p>
     </div>
 
-    <!-- Stats Cards - 2x3 Grid -->
+    <!-- Stats Cards - 3x3 Grid -->
     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
       <!-- Users -->
       <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800 rounded-xl p-4 border">
@@ -71,6 +66,21 @@ import AdminLayout from '@layouts/AdminLayout.astro';
           <div>
             <p class="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300" id="stat-businesses">-</p>
             <p class="text-xs text-emerald-600 dark:text-emerald-400">Businesses</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Non-Profits -->
+      <div class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950/50 dark:to-teal-900/50 border-teal-200 dark:border-teal-800 rounded-xl p-4 border">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl md:text-3xl font-bold text-teal-700 dark:text-teal-300" id="stat-nonprofits">-</p>
+            <p class="text-xs text-teal-600 dark:text-teal-400">Non-Profits</p>
           </div>
         </div>
       </div>
@@ -204,7 +214,8 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       
       if (data.success) {
         document.getElementById('stat-users')!.textContent = String(data.data.totalUsers);
-        document.getElementById('stat-businesses')!.textContent = String(data.data.totalBusinesses);
+        document.getElementById('stat-businesses')!.textContent = String(data.data.totalBusinesses - data.data.totalNonProfits);
+        document.getElementById('stat-nonprofits')!.textContent = String(data.data.totalNonProfits);
         document.getElementById('stat-subscriptions')!.textContent = String(data.data.totalSubscriptions);
         document.getElementById('stat-revenue')!.textContent = '$' + String(data.data.totalRevenue || 0);
         document.getElementById('stat-products')!.textContent = String(data.data.totalProducts);

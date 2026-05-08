@@ -30,6 +30,13 @@ export async function GET({ request }: { request: Request }) {
       .get();
     const liveBusinesses = Number(liveBusinessesResult?.count) || 0;
 
+    // Get non-profit businesses count
+    const nonProfitsResult = await db.select({ count: sql`count(*)` })
+      .from(businessPages)
+      .where(eq(businessPages.entityType, 'nonprofit'))
+      .get();
+    const totalNonProfits = Number(nonProfitsResult?.count) || 0;
+
     // Get total subscriptions (using orders table - it stores subscription data)
     const subscriptionsResult = await db.select({ count: sql`count(*)` }).from(orders).get();
     const totalSubscriptions = Number(subscriptionsResult?.count) || 0;
@@ -54,6 +61,7 @@ export async function GET({ request }: { request: Request }) {
       data: {
         totalUsers,
         totalBusinesses,
+        totalNonProfits,
         liveBusinesses,
         totalSubscriptions,
         totalRevenue,
