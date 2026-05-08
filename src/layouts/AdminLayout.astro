@@ -64,7 +64,7 @@ const isActive = (href: string) => {
       <div id="mobile-menu-backdrop" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
       <div id="mobile-menu-panel" class="absolute left-0 top-0 h-full w-64 bg-card border-r pt-14 -translate-x-full transition-transform duration-200 ease-out">
         <nav class="p-4 space-y-1">
-          data-astro-prefetch="false" <a href="/admin" class:list={["nav-item", { active: isActive('/admin') }]} data-section="dashboard">
+          <a href="/admin" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin') }]} data-section="dashboard">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
             </svg>
@@ -73,55 +73,67 @@ const isActive = (href: string) => {
           <div class="pt-2 mt-2 border-t">
             <p class="px-2 py-1 text-xs text-muted-foreground">Manage</p>
           </div>
-          data-astro-prefetch="false" <a href="/admin/subscriptions" class:list={["nav-item", { active: isActive('/admin/subscriptions') }]} data-section="subscriptions">
+          <a href="/admin/subscriptions" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/subscriptions') }]} data-section="subscriptions">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
             <span>Subscriptions</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/listings" class:list={["nav-item", { active: isActive('/admin/listings') }]} data-section="listing">
+          <a href="/admin/plans" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/plans') }]} data-section="plans">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Plans</span>
+          </a>
+          <a href="/admin/listings" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/listings') }]} data-section="listing">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
             <span>Listings</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/ai-tools" class:list={["nav-item", { active: isActive('/admin/ai-tools') }]} data-section="ai-tools">
+          <a href="/admin/ai-tools" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/ai-tools') }]} data-section="ai-tools">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
             <span>AI Tools</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/users" class:list={["nav-item", { active: isActive('/admin/users') }]} data-section="users">
+          <a href="/admin/users" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/users') }]} data-section="users">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             <span>Users</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/skus" class:list={["nav-item", { active: isActive('/admin/skus') }]} data-section="skus">
+          <a href="/admin/skus" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/skus') }]} data-section="skus">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
             <span>SKUs</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/categories" class:list={["nav-item", { active: isActive('/admin/categories') }]} data-section="categories">
+          <a href="/admin/categories" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/categories') }]} data-section="categories">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
             <span>Categories</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/heroes" class:list={["nav-item", { active: isActive('/admin/heroes') }]} data-section="heroes">
+          <a href="/admin/media" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/media') }]} data-section="media">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span>Media</span>
+          </a>
+          <a href="/admin/heroes" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/heroes') }]} data-section="heroes">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
             <span>Hero Sections</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/blogs" class:list={["nav-item", { active: isActive('/admin/blogs') }]} data-section="blogs">
+          <a href="/admin/blogs" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/blogs') }]} data-section="blogs">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
             </svg>
             <span>Blog Posts</span>
           </a>
-          data-astro-prefetch="false" <a href="/admin/settings" class:list={["nav-item", { active: isActive('/admin/settings') }]} data-section="settings">
+          <a href="/admin/settings" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/settings') }]} data-section="settings">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -148,10 +160,10 @@ const isActive = (href: string) => {
     </div>
 
     <!-- Desktop Sidebar -->
-    <aside class="hidden md:flex fixed left-0 top-0 h-full w-56 bg-card border-r flex-col z-40">
+    <aside class="hidden md:flex fixed left-0 top-0 h-full w-48 bg-card border-r flex-col z-40">
       <!-- Logo -->
       <div class="p-4 border-b">
-        data-astro-prefetch="false" <a href="/admin" class="flex items-center gap-2">
+        <a href="/admin" data-astro-prefetch="false" class="flex items-center gap-2">
           <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center flex-shrink-0">
             <span class="text-white font-bold text-lg">T</span>
           </div>
@@ -160,74 +172,93 @@ const isActive = (href: string) => {
       </div>
       
       <!-- Navigation -->
-      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-        data-astro-prefetch="false" <a href="/admin" class:list={["nav-item", { active: isActive('/admin') }]} data-section="dashboard">
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="admin-nav">
+        <!-- Role badge (populated by JS) -->
+        <div id="role-badge-container" class="px-3 py-2 mb-2 hidden">
+          <span id="role-badge" class="px-2 py-1 text-xs font-medium rounded-full"></span>
+        </div>
+
+        <a href="/admin" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin') }]} data-section="dashboard" data-min-role="editor">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
           </svg>
           <span>Dashboard</span>
         </a>
-        
-        <div class="pt-2 mt-2 border-t">
+
+        <div class="pt-2 mt-2 border-t" data-nav-group="manage">
           <p class="px-2 py-1 text-xs text-muted-foreground">Manage</p>
         </div>
-        
-        data-astro-prefetch="false" <a href="/admin/subscriptions" class:list={["nav-item", { active: isActive('/admin/subscriptions') }]} data-section="subscriptions">
+
+        <a href="/admin/subscriptions" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/subscriptions') }]} data-section="subscriptions" data-min-role="admin">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
           </svg>
           <span>Subscriptions</span>
         </a>
-        
-        data-astro-prefetch="false" <a href="/admin/listings" class:list={["nav-item", { active: isActive('/admin/listings') }]} data-section="listing">
+
+        <a href="/admin/plans" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/plans') }]} data-section="plans" data-min-role="admin">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Plans</span>
+        </a>
+
+        <a href="/admin/listings" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/listings') }]} data-section="listing" data-min-role="editor">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
           </svg>
           <span>Listings</span>
         </a>
-        data-astro-prefetch="false" <a href="/admin/ai-tools" class:list={["nav-item", { active: isActive('/admin/ai-tools') }]} data-section="ai-tools">
+        <a href="/admin/ai-tools" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/ai-tools') }]} data-section="ai-tools" data-min-role="admin">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
           <span>AI Tools</span>
         </a>
 
-        data-astro-prefetch="false" <a href="/admin/users" class:list={["nav-item", { active: isActive('/admin/users') }]} data-section="users">
+        <a href="/admin/users" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/users') }]} data-section="users" data-min-role="admin">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
           <span>Users</span>
         </a>
-        
-        data-astro-prefetch="false" <a href="/admin/skus" class:list={["nav-item", { active: isActive('/admin/skus') }]} data-section="skus">
+
+        <a href="/admin/skus" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/skus') }]} data-section="skus" data-min-role="editor">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
           </svg>
           <span>SKUs</span>
         </a>
-        
-        data-astro-prefetch="false" <a href="/admin/categories" class:list={["nav-item", { active: isActive('/admin/categories') }]} data-section="categories">
+
+        <a href="/admin/categories" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/categories') }]} data-section="categories" data-min-role="admin">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
           </svg>
           <span>Categories</span>
         </a>
-        
-        data-astro-prefetch="false" <a href="/admin/heroes" class:list={["nav-item", { active: isActive('/admin/heroes') }]} data-section="heroes">
+
+        <a href="/admin/media" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/media') }]} data-section="media" data-min-role="admin">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>Media</span>
+        </a>
+
+        <a href="/admin/heroes" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/heroes') }]} data-section="heroes" data-min-role="admin">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
           <span>Hero Sections</span>
         </a>
-        
-        data-astro-prefetch="false" <a href="/admin/blogs" class:list={["nav-item", { active: isActive('/admin/blogs') }]} data-section="blogs">
+
+        <a href="/admin/blogs" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/blogs') }]} data-section="blogs" data-min-role="editor">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
           </svg>
           <span>Blog Posts</span>
         </a>
-        
-        data-astro-prefetch="false" <a href="/admin/settings" class:list={["nav-item", { active: isActive('/admin/settings') }]} data-section="settings">
+
+        <a href="/admin/settings" data-astro-prefetch="false" class:list={["nav-item", { active: isActive('/admin/settings') }]} data-section="settings" data-min-role="admin">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -235,35 +266,39 @@ const isActive = (href: string) => {
           <span>Settings</span>
         </a>
       </nav>
-      
-      <!-- Theme Toggle -->
-      <div class="p-4 border-t space-y-1">
-        <a href="/" target="_blank" class="nav-item">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-          </svg>
-          <span>Back to Home</span>
-        </a>
-        <button id="admin-theme-toggle" class="nav-item w-full justify-start" onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')">
-          <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-          </svg>
-          <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <span>Theme</span>
-        </button>
-        <button id="admin-logout-btn" class="nav-item w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onclick="if(confirm('Log out?')){fetch('/api/auth/sign-out',{method:'POST',credentials:'include'}).then(()=>{window.location.href='/admin/login'})}">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-          <span>Log Out</span>
-        </button>
+
+      <!-- Bottom section: Role badge above icons -->
+      <div class="p-4 border-t">
+        <!-- Role badge centered above icons -->
+        <div class="flex justify-center mb-2">
+          <span id="sidebar-role-badge" class="hidden px-2 py-1 text-xs font-medium rounded-full"></span>
+        </div>
+        <!-- Icons row -->
+        <div class="flex items-center justify-center gap-1">
+          <a href="/" target="_blank" class="nav-item p-2" title="Back to Home">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+          </a>
+          <button id="admin-theme-toggle" class="nav-item p-2" title="Toggle Theme">
+            <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </button>
+          <button id="admin-logout-btn" class="nav-item p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Log Out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="pt-14 md:pt-0 md:pl-56">
+    <main class="pt-14 md:pt-0 md:pl-48">
       <slot />
     </main>
   </body>
@@ -302,6 +337,58 @@ const isActive = (href: string) => {
       }
     });
 
+    // Role hierarchy for filtering
+    const roleHierarchy = { user: 1, editor: 2, admin: 3, super_admin: 4 };
+    const roleBadgeClasses = {
+      user: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+      editor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      super_admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    };
+    const roleDisplayNames = {
+      user: 'User',
+      editor: 'Editor',
+      admin: 'Admin',
+      super_admin: 'Super Admin'
+    };
+
+    // Get user's role level
+    function getRoleLevel(role) {
+      return roleHierarchy[role] || 1;
+    }
+
+    // Filter nav items based on user role
+    async function filterNavByRole() {
+      try {
+        const res = await authFetch('/api/auth/session');
+        const data = await res.json();
+        const userRole = data.user?.role || 'user';
+        const userLevel = getRoleLevel(userRole);
+
+        // Show role badge in sidebar (inline with theme toggle)
+        const sidebarBadge = document.getElementById('sidebar-role-badge');
+        if (sidebarBadge) {
+          const userRole = data.user?.role || 'user';
+          sidebarBadge.textContent = roleDisplayNames[userRole] || userRole;
+          sidebarBadge.className = 'px-2 py-1 text-xs font-medium rounded-full ' + (roleBadgeClasses[userRole] || roleBadgeClasses.user);
+        }
+
+        // Hide nav items user can't access
+        document.querySelectorAll('[data-min-role]').forEach(item => {
+          const minRole = item.getAttribute('data-min-role');
+          const minLevel = getRoleLevel(minRole);
+          if (userLevel < minLevel) {
+            item.style.display = 'none';
+          }
+        });
+
+        // Store user role globally for admin pages
+        window.ADMIN_USER_ROLE = userRole;
+      } catch (err) {
+        console.error('[AdminLayout] Failed to filter nav:', err);
+      }
+    }
+
     // Theme toggle functions
     function toggleTheme() {
       const isDark = document.documentElement.classList.toggle('dark');
@@ -316,7 +403,7 @@ const isActive = (href: string) => {
     function handleLogout() {
       if (confirm('Are you sure you want to log out?')) {
         // Use authFetch helper that includes credentials for cookie-based auth
-        (window as any).authFetch('/api/auth/sign-out', { method: 'POST' })
+        window.authFetch('/api/auth/sign-out', { method: 'POST' })
           .then(() => window.location.href = '/admin/login');
       }
     }
@@ -349,6 +436,9 @@ const isActive = (href: string) => {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !mobileMenu?.classList.contains('hidden')) closeMobileMenu();
     });
+
+    // Initialize role-based filtering
+    filterNavByRole();
   })();
 
   // Auth fetch helper - includes credentials for cookie-based auth
@@ -364,5 +454,5 @@ const isActive = (href: string) => {
   }
 
   // Expose globally for admin pages
-  (window as any).authFetch = authFetch;
+  window.authFetch = authFetch;
 </script>

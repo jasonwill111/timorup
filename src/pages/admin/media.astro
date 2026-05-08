@@ -4,22 +4,43 @@ export const prerender = false;
 
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import { getDb } from '@/lib/db';
-import { media } from '@/db/schema';
+import { media, sessions, users } from '@/db/schema';
 import { eq, like, sql, desc, isNull } from 'drizzle-orm';
-import { initAuth } from '@/lib/auth';
 
-// Check admin auth
+// Check admin auth using direct DB query
 const cookieHeader = Astro.request.headers.get('cookie') || '';
 const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 
 let isAdmin = false;
 if (tokenMatch) {
   try {
-    const authApi = (await initAuth()).api;
-    const { user } = await authApi.getSession({
-      headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
-    });
-    isAdmin = user?.role === 'admin';
+    const db = await getDb();
+    const token = tokenMatch[1];
+
+    const session = await db.select()
+      .from(sessions)
+      .where(eq(sessions.token, token))
+      .limit(1)
+      .get();
+
+    if (session && session.expiresAt) {
+      const expiresAtMs = typeof session.expiresAt === 'number'
+        ? session.expiresAt * 1000
+        : new Date(session.expiresAt).getTime();
+
+      if (expiresAtMs > Date.now()) {
+        const user = await db.select()
+          .from(users)
+          .where(eq(users.id, session.userId))
+          .limit(1)
+          .get();
+
+        if (user) {
+          const adminRoles = ['admin', 'super_admin'];
+          isAdmin = adminRoles.includes(user.role);
+        }
+      }
+    }
   } catch { isAdmin = false; }
 }
 
@@ -43,13 +64,13 @@ let mediaQuery = db.select().from(media);
 
 // Apply filters
 if (entityTypeFilter) {
-  mediaQuery = mediaQuery.where(eq(media.entityType, entityTypeFilter)) as any;
+  mediaQuery = mediaQuery.where(eq(media.entityType, entityTypeFilter)) as MediaData;
 }
 if (entityIdFilter) {
-  mediaQuery = mediaQuery.where(eq(media.entityId, entityIdFilter)) as any;
+  mediaQuery = mediaQuery.where(eq(media.entityId, entityIdFilter)) as MediaData;
 }
 if (categoryFilter) {
-  mediaQuery = mediaQuery.where(eq(media.category, categoryFilter)) as any;
+  mediaQuery = mediaQuery.where(eq(media.category, categoryFilter)) as MediaData;
 }
 
 // Get total count
@@ -87,7 +108,7 @@ function getMediaIcon(type: string | null): string {
 }
 
 // Helper to get media thumbnail URL
-function getThumbnailUrl(item: any): string {
+function getThumbnailUrl(item: MediaData): string {
   if (item.url?.startsWith('data:')) return item.url;
   if (item.url?.startsWith('http')) return item.url;
   return `/api/media/${item.id}`;
@@ -132,13 +153,20 @@ const totalPages = Math.ceil(total / limit);
           <label class="block text-sm font-medium mb-1">Category</label>
           <select name="category" class="w-full px-3 py-2 border rounded-lg bg-background">
             <option value="">All Categories</option>
+            <!-- Business/Nonprofit categories -->
             <option value="profile" selected={categoryFilter === 'profile'}>Profile</option>
             <option value="banner" selected={categoryFilter === 'banner'}>Banner</option>
             <option value="gallery" selected={categoryFilter === 'gallery'}>Gallery</option>
             <option value="sku" selected={categoryFilter === 'sku'}>SKU</option>
             <option value="updates" selected={categoryFilter === 'updates'}>Updates</option>
+            <!-- Blog categories -->
+            <option value="cover" selected={categoryFilter === 'cover'}>Cover</option>
+            <!-- Page categories -->
+            <option value="thumbnail" selected={categoryFilter === 'thumbnail'}>Thumbnail</option>
+            <!-- General categories -->
             <option value="hero" selected={categoryFilter === 'hero'}>Hero</option>
-            <option value="content" selected={categoryFilter === 'content'}>Content</option>
+            <option value="files" selected={categoryFilter === 'files'}>Files (PDF/Doc)</option>
+            <option value="avatar" selected={categoryFilter === 'avatar'}>Avatar</option>
           </select>
         </div>
 

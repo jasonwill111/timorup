@@ -1,1 +1,7 @@
-{"dialect":"sqlite","schema":"./src/db/schema/index.ts","dbCredentials":{"url":"https://e7e1e025-7ba2-4106-a905-bbcd8038b3e4.user.devcloud.cloudflaredb.com"}}
+{
+  "dialect": "sqlite",
+  "schema": "./src/db/schema/index.ts",
+  "dbCredentials": {
+    "url": "./.wrangler/state/v3/d1/miniflare-D1DatabaseObject/b35dc1252703368fd322588b14dfdbedf063db1b9844683bfee80e94dd327afa.sqlite"
+  }
+}
