@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { users, businessPages, orders, categories } from '@/db/schema';
+import { users, businessPages, subscriptions, categories, products } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
@@ -30,16 +30,20 @@ export async function GET({ request }: { request: Request }) {
       .get();
     const liveBusinesses = Number(liveBusinessesResult?.count) || 0;
 
-    // Get total orders
-    const ordersResult = await db.select({ count: sql`count(*)` }).from(orders).get();
-    const totalOrders = Number(ordersResult?.count) || 0;
+    // Get total subscriptions
+    const subscriptionsResult = await db.select({ count: sql`count(*)` }).from(subscriptions).get();
+    const totalSubscriptions = Number(subscriptionsResult?.count) || 0;
 
-    // Get total revenue (sum of paid orders)
+    // Get total revenue (sum of paid subscriptions)
     const revenueResult = await db.select({ total: sql`COALESCE(SUM(amount), 0)` })
-      .from(orders)
-      .where(eq(orders.status, 'paid'))
+      .from(subscriptions)
+      .where(eq(subscriptions.status, 'paid'))
       .get();
     const totalRevenue = Number(revenueResult?.total) || 0;
+
+    // Get total products/SKUs
+    const productsResult = await db.select({ count: sql`count(*)` }).from(products).get();
+    const totalProducts = Number(productsResult?.count) || 0;
 
     // Get categories count
     const categoriesResult = await db.select({ count: sql`count(*)` }).from(categories).get();
@@ -51,8 +55,9 @@ export async function GET({ request }: { request: Request }) {
         totalUsers,
         totalBusinesses,
         liveBusinesses,
-        totalOrders,
+        totalSubscriptions,
         totalRevenue,
+        totalProducts,
         totalCategories,
         pendingBusinesses: totalBusinesses - liveBusinesses
       }
