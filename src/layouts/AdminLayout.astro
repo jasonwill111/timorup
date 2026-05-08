@@ -30,7 +30,6 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     <!-- Toast Container -->
     <ToastContainer />
     <!-- Mobile Header -->
-    <!-- Mobile Header -->
     <header class="md:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b z-50 flex items-center px-3 gap-2">
       <button id="mobile-menu-btn" class="p-2 -ml-2 hover:bg-muted rounded-lg flex-shrink-0">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,27 +170,6 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
             <span class="text-xs text-muted-foreground truncate">super_admin</span>
           </div>
         </a>
-        <!-- Header actions: View Site + Theme + Logout -->
-        <div class="flex items-center gap-1">
-          <a href="/" target="_blank" class="p-1.5 hover:bg-muted rounded-lg" title="View Site">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-            </svg>
-          </a>
-          <button id="admin-theme-toggle-desktop" class="p-1.5 hover:bg-muted rounded-lg" title="Toggle Theme">
-            <svg class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-            <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-          </button>
-          <button id="admin-logout-btn-desktop" class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500" title="Log Out">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-          </button>
-        </div>
       </div>
 
       <!-- Navigation -->
@@ -202,14 +180,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           </svg>
           <span>Dashboard</span>
         </a>
-        
-        <a href="/" target="_blank" class="nav-item" data-section="site">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-          </svg>
-          <span>View Site</span>
-        </a>
-        
+
         <div class="pt-2 mt-2 border-t">
           <p class="px-2 py-1 text-xs text-muted-foreground">Manage</p>
         </div>
@@ -277,25 +248,34 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           <span>Settings</span>
         </a>
       </nav>
-      
-      <!-- Theme Toggle -->
-      <div class="p-4 border-t space-y-1">
-        <button id="admin-theme-toggle" class="nav-item w-full justify-start">
-          <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-          </svg>
-          <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <span>Theme</span>
-        </button>
-        <button id="admin-logout-btn" class="nav-item w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-          <span>Log Out</span>
-        </button>
+
+      <!-- Bottom Actions: View Site + Theme + Logout -->
+      <div class="p-4 border-t">
+        <!-- Role name with badge style -->
+        <p class="text-sm text-center font-medium text-primary mb-3">Super Admin</p>
+        <!-- Icons row - vertically aligned -->
+        <div class="flex items-center justify-center gap-4">
+          <a href="/" target="_blank" class="p-2 hover:bg-muted rounded-lg" title="View Site">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+          <button id="admin-theme-toggle-desktop" class="p-2 hover:bg-muted rounded-lg" title="Toggle Theme">
+            <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </button>
+          <button id="admin-logout-btn-desktop" class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500" title="Log Out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+          </button>
+        </div>
       </div>
+
     </aside>
 
     <!-- Main Content -->
@@ -335,7 +315,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     }
 
     // Attach to all theme toggles
-    document.getElementById('admin-theme-toggle')?.addEventListener('click', toggleTheme);
+    document.getElementById('admin-theme-toggle-desktop')?.addEventListener('click', toggleTheme);
     document.getElementById('admin-theme-toggle-mobile')?.addEventListener('click', toggleTheme);
 
     // Logout
@@ -346,7 +326,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
         window.location.href = '/admin/login';
       }
     }
-    document.getElementById('admin-logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('admin-logout-btn-desktop')?.addEventListener('click', handleLogout);
     document.getElementById('admin-logout-btn-mobile')?.addEventListener('click', handleLogout);
 
     // Mobile menu
