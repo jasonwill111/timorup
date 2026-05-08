@@ -3,10 +3,9 @@ export const prerender = false;
 
 import { initAuth } from '@/lib/auth';
 import { getDb } from '@/lib/db';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, sessions } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 
-// Rate limiter
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const MAX_REQUESTS = 10;
@@ -50,33 +49,64 @@ export async function POST({ request }: { request: Request }) {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    console.log('[SignIn] Attempting sign in for:', email);
+    const db = await getDb();
+
+    // Step 1: Check if user exists by email
+    const existingUser = await db.select()
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()))
+      .limit(1)
+      .get();
+    console.log('[SignIn] existingUser:', existingUser ? `${existingUser.id}/${existingUser.role}` : 'null');
+
+    // Step 2: Call better-auth to verify password and create session
     const result = await authApi.signInEmail({
       body: { email, password },
     });
 
-    const user = result.user;
+    const newUser = result.user;
     const token = result.token;
 
-    // Query DB for role (better-auth doesn't return custom fields like role)
-    const db = await getDb();
-    const dbUser = await db.select({ role: users.role })
-      .from(users)
-      .where(eq(users.id, user.id))
-      .limit(1)
-      .get();
+    let userId: string;
+    let userRole: string;
 
-    const userRole = dbUser?.role || 'user';
+    if (existingUser && newUser.id !== existingUser.id) {
+      // better-auth created a NEW user instead of finding existing one
+      // Fix: delete the new user, use existing user's session
+      console.log('[SignIn] better-auth created duplicate user. New:', newUser.id, 'Existing:', existingUser.id);
 
-    console.log('[SignIn] Sign in successful, role:', userRole, ', token:', token?.substring(0, 20) + '...');
+      // Delete the newly created (duplicate) user
+      await db.delete(users).where(eq(users.id, newUser.id)).run();
 
-    // Immediately verify the session
-    if (token) {
-      const session = await authApi.getSession({
-        headers: new Headers({ cookie: `better-auth.session_token=${token}` }),
-      });
-      console.log('[SignIn] Session verification:', session ? 'OK' : 'NULL');
+      // Get the session that better-auth just created
+      const session = await db.select()
+        .from(sessions)
+        .where(and(eq(sessions.token, token!), eq(sessions.userId, newUser.id)))
+        .limit(1)
+        .get();
+
+      if (session) {
+        // Update session to point to existing user
+        await db.update(sessions)
+          .set({ userId: existingUser.id })
+          .where(eq(sessions.id, session.id))
+          .run();
+        console.log('[SignIn] Session updated from new user to existing user');
+      }
+
+      userId = existingUser.id;
+      userRole = existingUser.role || 'user';
+    } else if (existingUser) {
+      // User exists and IDs match - normal flow
+      userId = existingUser.id;
+      userRole = existingUser.role || 'user';
+    } else {
+      // New user created by better-auth - use new user's data
+      userId = newUser.id;
+      userRole = 'user';
     }
+
+    console.log('[SignIn] Sign in successful, userId:', userId, ', role:', userRole);
 
     const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7;
     const isProduction = process.env.NODE_ENV === 'production';
@@ -90,18 +120,22 @@ export async function POST({ request }: { request: Request }) {
       headers.set('Set-Cookie', `better-auth.session_token=${token}; HttpOnly; SameSite=Strict${secureFlag}; Max-Age=${maxAge}; Path=/`);
     }
 
-    const response = new Response(JSON.stringify({
+    return new Response(JSON.stringify({
       success: true,
       user: {
-        ...user,
-        role: userRole
+        id: userId,
+        email: existingUser?.email || email.toLowerCase(),
+        name: existingUser?.name || newUser.name,
+        role: userRole,
+        emailVerified: existingUser?.emailVerified ?? 0,
+        image: existingUser?.image ?? null,
+        createdAt: existingUser?.createdAt ? String(existingUser.createdAt) : String(newUser.createdAt),
+        updatedAt: existingUser?.updatedAt ? String(existingUser.updatedAt) : String(newUser.updatedAt),
       }
     }), {
       status: 200,
       headers,
     });
-
-    return response;
   } catch (error) {
     console.error('[SignIn] Error:', error);
     return new Response(JSON.stringify({

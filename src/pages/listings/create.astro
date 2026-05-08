@@ -582,7 +582,12 @@ try {
       const result = await res.json();
 
       if (result.success && result.data?.slug) {
-        window.location.href = `/business/${result.data.slug}`;
+        // Non-profits go live immediately, businesses need subscription
+        if (result.data.entityType === 'nonprofit') {
+          window.location.href = `/business/${result.data.slug}`;
+        } else {
+          window.location.href = `/subscribe?business=${result.data.slug}`;
+        }
       } else {
         alert(result.error?.message || 'Failed to create listing');
       }

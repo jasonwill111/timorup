@@ -2,12 +2,15 @@ import type { APIRoute } from 'astro';
 import { getDb } from '@/lib/db';
 import { categories, businessPages } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { PaginationSchema } from '@/lib/validation';
 
 export const GET: APIRoute = async ({ params, url }) => {
   const db = await getDb();
   const slug = params.slug;
-  const page = parseInt(url.searchParams.get('page') || '1');
-  const limit = parseInt(url.searchParams.get('limit') || '6');
+  const { page, limit } = PaginationSchema.parse({
+    page: url.searchParams.get('page') || '1',
+    limit: url.searchParams.get('limit') || '6',
+  });
   const offset = (page - 1) * limit;
   const entityType = url.searchParams.get('type'); // 'business' | 'nonprofit' | null
 

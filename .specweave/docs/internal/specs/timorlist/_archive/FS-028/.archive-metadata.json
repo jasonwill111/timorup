@@ -1,0 +1,11 @@
+{
+  "id": "FS-028",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:17.801Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-028",
+  "linkedIncrements": [
+    "0028-media-optimization"
+  ]
+}

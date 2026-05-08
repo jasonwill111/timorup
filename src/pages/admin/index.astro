@@ -97,33 +97,33 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     }
   }
   
-  // Load recent orders
+  // Load recent subscriptions (orders are now subscriptions)
   async function loadOrders() {
     try {
-      const res = await authFetch('/api/admin/orders');
+      const res = await authFetch('/api/admin/subscriptions');
       const data = await res.json();
-      
+
       const container = document.getElementById('orders-list');
       if (!container) return;
-      
-      if (!data.success || data.data.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted-foreground py-8 text-sm">No orders yet</p>';
+
+      if (!data.success || !data.subscriptions || data.subscriptions.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-8 text-sm">No subscriptions yet</p>';
         return;
       }
-      
-      container.innerHTML = data.data.slice(0, 5).map((order: any) => `
+
+      container.innerHTML = data.subscriptions.slice(0, 5).map((sub: any) => `
         <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
           <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">#${order.id.slice(0, 8)}</p>
-            <p class="text-xs text-muted-foreground truncate">${order.planType || 'Subscription'} - $${order.amount}</p>
+            <p class="font-medium truncate">#${sub.id.slice(0, 8)}</p>
+            <p class="text-xs text-muted-foreground truncate">${sub.planType || 'Subscription'} - $${sub.amount}</p>
           </div>
           <div class="flex items-center gap-2 ml-2">
-            <span class="px-2 py-0.5 text-xs rounded-full ${order.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${order.status}</span>
+            <span class="px-2 py-0.5 text-xs rounded-full ${sub.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${sub.status}</span>
           </div>
         </div>
       `).join('');
     } catch (err) {
-      console.error('Error loading orders:', err);
+      console.error('Error loading subscriptions:', err);
     }
   }
   

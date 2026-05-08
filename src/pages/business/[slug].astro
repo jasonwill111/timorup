@@ -55,14 +55,23 @@ if (business.status === 'draft') {
   }
 }
 
-// Check if business is expired
-const isExpired = business.expiryDate && business.expiryDate < new Date();
-const daysSinceExpiry = business.expiryDate
-  ? Math.floor((Date.now() - business.expiryDate.getTime()) / (1000 * 60 * 60 * 24))
-  : 0;
+// Check pending_payment status - show message to owner
+const isPending = business.status === 'pending_payment';
 
-// If expired < 60 days, show modal only
-const showExpiredModal = isExpired && daysSinceExpiry < 60;
+// Check grace period using subscription fields
+const subscriptionStatus = business.subscriptionStatus || 'none';
+const gracePeriodEndDate = business.gracePeriodEndDate
+  ? new Date(business.gracePeriodEndDate * 1000)
+  : null;
+
+const now = new Date();
+const isInGracePeriod = gracePeriodEndDate
+  ? subscriptionStatus === 'expired' && now < gracePeriodEndDate
+  : false;
+
+const daysRemaining = gracePeriodEndDate
+  ? Math.max(0, Math.ceil((gracePeriodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+  : 0;
 
 const category = business.categoryId
   ? await db.select().from(categories).where(eq(categories.id, business.categoryId)).get()
@@ -108,9 +117,27 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
 ---
 
 <Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
-  <!-- Expired Business Modal -->
-  {showExpiredModal && (
-    <div id="expired-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70">
+  <!-- Pending Approval Banner -->
+  {isPending && (
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+      <div class="flex items-center gap-3">
+        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <p class="font-semibold text-amber-800 dark:text-amber-200">Pending Approval</p>
+          <p class="text-sm text-amber-700 dark:text-amber-300">等待管理员确认付款后，您的商家页面将公开发布。</p>
+          <a href="/subscribe" class="inline-block mt-2 text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400">
+            完成付款 →
+          </a>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Grace Period Modal -->
+  {isInGracePeriod && (
+    <div id="grace-period-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70">
       <div class="bg-card border rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
           <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,18 +145,18 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
           </svg>
         </div>
         <h2 class="text-xl font-bold mb-2">{business.title}</h2>
-        <p class="text-muted-foreground mb-2">此商家未付费</p>
-        <p class="text-sm text-muted-foreground mb-6">
-          已过期 <span class="font-semibold text-foreground">{daysSinceExpiry}</span> 天
-          {daysSinceExpiry >= 50 && '，即将被删除'}
+        <p class="text-muted-foreground mb-4">
+          请及时为Business Page续费,否则60天之后会删除。谢谢配合!
+        </p>
+        <p class="text-lg font-semibold text-primary mb-6">
+          剩余 {daysRemaining} 天
         </p>
         <a
-          href="/pricing"
+          href={`/subscribe?business=${business.slug}`}
           class="inline-block px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity"
         >
           立即续费
         </a>
-        <p class="text-xs text-muted-foreground mt-4">续费后可恢复正常展示</p>
       </div>
     </div>
   )}

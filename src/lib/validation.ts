@@ -1,7 +1,20 @@
 // File validation schemas using Zod v4
 import * as z from 'zod';
 
+// ============================================
+// Query Parameter Schemas (Zod 4 Coerce)
+// ============================================
+
+export const PaginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const BooleanSchema = z.coerce.boolean();
+
+// ============================================
 // File size limits (in bytes)
+// ============================================
 export const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 export const MAX_VIDEO_SIZE = 8 * 1024 * 1024; // 8MB - aligned with media.ts
 

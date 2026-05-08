@@ -1,0 +1,19 @@
+{
+  "id": "0036-type-refactor",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-07T11:27:03.991Z",
+  "lastActivity": "2026-05-07T11:44:42.278Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-07T11:44:42.230Z",
+  "approvedAt": "2026-05-07T11:44:42.278Z"
+}

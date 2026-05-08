@@ -389,7 +389,7 @@ import CardContent from '../../components/ui/CardContent.astro'
       if (data.success && data.data) {
         const categorySelect = document.getElementById('category') as HTMLSelectElement;
         if (categorySelect) {
-          data.data.forEach((cat: any) => {
+          data.data.forEach((cat: CategoryData) => {
             const option = document.createElement('option');
             option.value = cat.id;
             option.textContent = cat.name;

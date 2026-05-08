@@ -1,0 +1,11 @@
+{
+  "id": "FS-018",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:16.617Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-018",
+  "linkedIncrements": [
+    "0018-qa-concerns-fix"
+  ]
+}

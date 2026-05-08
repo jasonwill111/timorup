@@ -1,0 +1,36 @@
+// Badge utilities for consistent styling across Astro and JS templates
+
+export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'blue' | 'green' | 'purple' | 'orange';
+
+const variantClasses: Record<BadgeVariant, string> = {
+  default: 'bg-primary text-primary-foreground shadow hover:bg-primary/80',
+  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+  destructive: 'bg-destructive text-destructive-foreground shadow hover:bg-destructive/80',
+  outline: 'text-foreground border border-input bg-background',
+  blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  green: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+  orange: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+};
+
+export const badgeBaseClass = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
+
+export function getBadgeClass(variant: BadgeVariant = 'default'): string {
+  return `${badgeBaseClass} ${variantClasses[variant]}`;
+}
+
+export function createBadgeHtml(variant: BadgeVariant, text: string, extraClass = ''): string {
+  return `<span class="${badgeBaseClass} ${variantClasses[variant]} ${extraClass}">${text}</span>`;
+}
+
+// Predefined badges
+export const badges = {
+  business: createBadgeHtml('blue', 'Business'),
+  nonprofit: createBadgeHtml('purple', 'Non-Profit'),
+  sub: createBadgeHtml('green', 'Sub'),
+  industry: createBadgeHtml('blue', 'Industry'),
+  live: createBadgeHtml('green', 'Live'),
+  draft: createBadgeHtml('orange', 'Draft'),
+  expired: createBadgeHtml('destructive', 'Expired'),
+  paid: createBadgeHtml('green', 'Paid'),
+};

@@ -11,6 +11,14 @@ export { sessions, accounts, verifications };
 import { blogPosts } from './blogs';
 export { blogPosts };
 
+// Re-export plans table
+import { plans } from './plans';
+export { plans };
+
+// Re-export landing pages table
+import { landingPages } from './landing-pages';
+export { landingPages };
+
 // Users table
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -105,6 +113,9 @@ export const businessPages = sqliteTable('business_pages', {
   planType: text('plan_type'),
   publishDate: integer('publish_date', { mode: 'timestamp' }),
   expiryDate: integer('expiry_date', { mode: 'timestamp' }),
+  // Subscription status for business listings
+  subscriptionStatus: text('subscription_status').default('none'), // 'none' | 'active' | 'expired' | 'cancelled'
+  gracePeriodEndDate: integer('grace_period_end_date'), // timestamp: expiry + 60 days
   // Organization-specific fields
   registrationUrl: text('registration_url'), // Link to official registration
   verifiedBadge: integer('verified_badge', { mode: 'boolean' }).default(false),
@@ -373,6 +384,107 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
     references: [users.id],
+  }),
+}));
+
+// Business Pages relations
+export const businessPagesRelations = relations(businessPages, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [businessPages.ownerId],
+    references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [businessPages.categoryId],
+    references: [categories.id],
+  }),
+  products: many(products),
+  reviews: many(reviews),
+  orders: many(orders),
+  businessUpdates: many(businessUpdates),
+  media: many(media),
+}));
+
+// Products relations
+export const productsRelations = relations(products, ({ one, many }) => ({
+  businessPage: one(businessPages, {
+    fields: [products.businessPageId],
+    references: [businessPages.id],
+  }),
+  images: many(productImages),
+}));
+
+// Reviews relations
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  businessPage: one(businessPages, {
+    fields: [reviews.businessPageId],
+    references: [businessPages.id],
+  }),
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id],
+  }),
+}));
+
+// Orders relations
+export const ordersRelations = relations(orders, ({ one }) => ({
+  businessPage: one(businessPages, {
+    fields: [orders.businessPageId],
+    references: [businessPages.id],
+  }),
+  user: one(users, {
+    fields: [orders.userId],
+    references: [users.id],
+  }),
+}));
+
+// Product Images relations
+export const productImagesRelations = relations(productImages, ({ one }) => ({
+  product: one(products, {
+    fields: [productImages.productId],
+    references: [products.id],
+  }),
+  media: one(media, {
+    fields: [productImages.mediaId],
+    references: [media.id],
+  }),
+}));
+
+// Categories relations (self-referential)
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  parent: one(categories, {
+    fields: [categories.parentId],
+    references: [categories.id],
+    relationName: 'parentChild',
+  }),
+  children: many(categories, { relationName: 'parentChild' }),
+  businessPages: many(businessPages),
+}));
+
+// Media relations
+export const mediaRelations = relations(media, ({ one }) => ({
+  business: one(businessPages, {
+    fields: [media.businessId],
+    references: [businessPages.id],
+  }),
+  uploader: one(users, {
+    fields: [media.createdById],
+    references: [users.id],
+  }),
+}));
+
+// Saved Items relations
+export const savedItemsRelations = relations(savedItems, ({ one }) => ({
+  user: one(users, {
+    fields: [savedItems.userId],
+    references: [users.id],
+  }),
+}));
+
+// Business Updates relations
+export const businessUpdatesRelations = relations(businessUpdates, ({ one }) => ({
+  businessPage: one(businessPages, {
+    fields: [businessUpdates.businessId],
+    references: [businessPages.id],
   }),
 }));
 

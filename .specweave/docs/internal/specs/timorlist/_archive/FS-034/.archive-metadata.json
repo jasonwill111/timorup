@@ -1,0 +1,11 @@
+{
+  "id": "FS-034",
+  "type": "feature",
+  "archivedAt": "2026-05-07T15:31:20.638Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-034",
+  "linkedIncrements": [
+    "0034-server-actions"
+  ]
+}

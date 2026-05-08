@@ -4,7 +4,7 @@ title: "Media Upload Optimization"
 type: feature
 status: completed
 priority: P1
-created: 2026-05-07T00:00:00.000Z
+created: "2026-05-07T00:00:00.000Z"
 lastUpdated: 2026-05-07
 tldr: "Refactor media upload system to use client-side Canvas compression, SHA256 deduplication, and a structured R2 folder hierarchy for better organi."
 complexity: high

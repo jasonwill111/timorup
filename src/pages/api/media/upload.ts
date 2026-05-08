@@ -3,7 +3,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { media, businessPages } from '@/db/schema';
+import { media, businessPages, plans } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
@@ -33,11 +33,7 @@ const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
-const PLAN_LIMITS: Record<string, { maxImages: number; maxVideos: number }> = {
-  basic: { maxImages: 10, maxVideos: 1 },
-  pro: { maxImages: 10, maxVideos: 1 },
-  max: { maxImages: 10, maxVideos: 1 },
-};
+const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1 };
 
 // Build R2 key from upload parameters
 function buildR2Key(params: {
@@ -96,8 +92,19 @@ async function getBusinessPlanLimits(businessId: string) {
     .from(businessPages)
     .where(eq(businessPages.id, businessId))
     .limit(1);
-  const plan = business?.planType || 'basic';
-  return PLAN_LIMITS[plan] || PLAN_LIMITS.basic;
+
+  if (!business?.planType) return DEFAULT_LIMITS;
+
+  const plan = await db.select({
+    maxImages: plans.maxImages,
+    maxVideos: plans.maxVideos,
+  })
+    .from(plans)
+    .where(eq(plans.id, business.planType))
+    .limit(1)
+    .get();
+
+  return plan ? { maxImages: plan.maxImages, maxVideos: plan.maxVideos } : DEFAULT_LIMITS;
 }
 
 async function countBusinessMedia(businessId: string) {

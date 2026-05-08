@@ -1,0 +1,19 @@
+{
+  "id": "0006-api-review",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-04-18T11:46:30.367Z",
+  "lastActivity": "2026-04-18T12:17:44.644Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-04-18T12:17:44.598Z",
+  "approvedAt": "2026-04-18T12:17:44.644Z"
+}

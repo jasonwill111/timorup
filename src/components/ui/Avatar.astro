@@ -1,10 +1,29 @@
 ---
+/**
+ * Reusable Avatar Component
+ *
+ * Usage:
+ *   <Avatar src="/api/media/xxx" alt="User" size="md" />
+ *   <Avatar fallback="John Doe" size="lg" />
+ *   <Avatar src={profileImageId ? `/api/media/${profileImageId}` : null} fallback={name} size="md" />
+ *   <Avatar fallback="John" size="xl" rounded="none" /> for square listing images
+ */
+import { getAvatarColor, getUserInitials } from '@/lib/avatar';
+
 interface Props {
-  src?: string;
+  /** Image URL */
+  src?: string | null;
+  /** Alt text for image */
   alt?: string;
+  /** Fallback text (name) - initials will be extracted */
   fallback?: string;
-  size?: 'sm' | 'md' | 'lg';
+  /** Avatar size */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Border radius style (default: full) */
+  rounded?: 'full' | 'none' | 'sm' | 'md' | 'lg';
+  /** Additional CSS classes */
   class?: string;
+  /** Data slot identifier */
   'data-slot'?: string;
 }
 
@@ -13,21 +32,37 @@ const {
   alt = 'Avatar',
   fallback,
   size = 'md',
+  rounded = 'full',
   class: className = '',
   'data-slot': slot = 'avatar',
   ...props
 } = Astro.props;
 
 const sizes = {
-  sm: 'h-8 w-8',
-  md: 'h-10 w-10',
-  lg: 'h-12 w-12',
+  sm: 'h-8 w-8 text-xs',
+  md: 'h-10 w-10 text-sm',
+  lg: 'h-12 w-12 text-base',
+  xl: 'h-16 w-16 text-lg',
 };
+
+const roundedClasses = {
+  full: 'rounded-full',
+  none: 'rounded-none',
+  sm: 'rounded',
+  md: 'rounded-lg',
+  lg: 'rounded-xl',
+};
+
+const initials = fallback ? getUserInitials(fallback) : null;
+const bgColor = fallback ? getAvatarColor(fallback) : 'bg-muted';
+const sizeNum = sizes[size].match(/h-(\d+)/)?.[1] || '10';
+const pxSize = parseInt(sizeNum) * 4;
 ---
 
 <div
   class:list={[
-    'relative inline-flex shrink-0 overflow-hidden rounded-full',
+    'relative inline-flex shrink-0 overflow-hidden',
+    roundedClasses[rounded],
     sizes[size],
     className
   ]}
@@ -36,34 +71,38 @@ const sizes = {
 >
   {src ? (
     <img
-      class="aspect-square h-full w-full"
+      class="aspect-square h-full w-full object-cover"
       src={src}
       alt={alt}
-      width={sizes[size].match(/h-(\d+)/)?.[1] ? parseInt(sizes[size].match(/h-(\d+)/)?.[1] || '10') * 4 : 40}
-      height={sizes[size].match(/h-(\d+)/)?.[1] ? parseInt(sizes[size].match(/h-(\d+)/)?.[1] || '10') * 4 : 40}
+      width={pxSize}
+      height={pxSize}
       loading="lazy"
       decoding="async"
     />
+  ) : initials ? (
+    <span
+      class:list={[
+        'flex h-full w-full items-center justify-center font-medium text-white',
+        bgColor
+      ]}
+    >
+      {initials}
+    </span>
   ) : (
-    <div class="flex h-full w-full items-center justify-center rounded-full bg-muted">
-      {fallback ? (
-        <span class="text-sm font-medium">{fallback.slice(0, 2).toUpperCase()}</span>
-      ) : (
-        <svg
-          class="h-4 w-4 text-muted-foreground"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
-          />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      )}
-    </div>
+    <svg
+      class="h-1/2 w-1/2 text-muted-foreground"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+      />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
   )}
 </div>

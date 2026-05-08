@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { media, businessPages } from '@/db/schema';
+import { media, businessPages, plans } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
@@ -28,11 +28,23 @@ const MAX_VIDEO_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
-const PLAN_LIMITS: Record<string, { maxProducts: number; maxImages: number; maxVideos: number }> = {
-  basic: { maxProducts: 10, maxImages: 10, maxVideos: 1 },
-  pro: { maxProducts: 30, maxImages: 10, maxVideos: 1 },
-  max: { maxProducts: 60, maxImages: 10, maxVideos: 1 },
-};
+const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1 };
+
+async function getPlanLimits(planType: string | null): Promise<{ maxImages: number; maxVideos: number }> {
+  if (!planType) return DEFAULT_LIMITS;
+
+  const db = await getDb();
+  const plan = await db.select({
+    maxImages: plans.maxImages,
+    maxVideos: plans.maxVideos,
+  })
+    .from(plans)
+    .where(eq(plans.id, planType))
+    .limit(1)
+    .get();
+
+  return plan ? { maxImages: plan.maxImages, maxVideos: plan.maxVideos } : DEFAULT_LIMITS;
+}
 
 async function getCurrentUser(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';
@@ -184,8 +196,7 @@ export async function POST({ request }: { request: Request }) {
           .from(businessPages)
           .where(eq(businessPages.id, businessId))
           .limit(1);
-        const plan = business?.planType || 'basic';
-        const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.basic;
+        const limits = await getPlanLimits(business?.planType || null);
 
         const imageCount = await db.select({ count: sql<number>`count(*)` })
           .from(media)

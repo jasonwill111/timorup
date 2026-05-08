@@ -1,0 +1,19 @@
+{
+  "id": "0030-subscription-workflow",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-07T07:41:04.492Z",
+  "lastActivity": "2026-05-07T09:34:36.814Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-07T09:34:14.935Z",
+  "approvedAt": "2026-05-07T09:34:36.814Z"
+}

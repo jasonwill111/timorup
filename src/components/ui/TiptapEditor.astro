@@ -1,0 +1,146 @@
+---
+// Tiptap Editor Component - Shareable rich text editor
+// Usage: <TiptapEditor id="content" placeholder="Write..." initialContent={html} />
+interface Props {
+  id: string;
+  placeholder?: string;
+  initialContent?: string;
+  class?: string;
+}
+
+const { id, placeholder = 'Start typing...', initialContent = '', class: className = '' } = Astro.props;
+---
+
+<div class={`tiptap-editor-wrapper ${className}`}>
+  <div id={`${id}-editor`} class="tiptap-editor-element"></div>
+</div>
+
+<!-- Hidden textarea for form submission - synced by JS -->
+<input type="hidden" name={id} id={`${id}-textarea`} value={initialContent} />
+
+<!-- TipTap CSS -->
+<link rel="stylesheet" href="https://unpkg.com/@tiptap/core@3.22.3/dist/tiptap.min.css" />
+
+<script>
+  // Initialize Tiptap editor after page load
+  document.addEventListener('DOMContentLoaded', async () => {
+    const editors = document.querySelectorAll('.tiptap-editor-element[data-tiptap-init]');
+    for (const el of editors) {
+      await initExistingTiptapEditor(el as HTMLElement);
+    }
+  });
+
+  async function initExistingTiptapEditor(element: HTMLElement) {
+    const textareaId = element.id.replace('-editor', '-textarea');
+    const textarea = document.getElementById(textareaId);
+
+    // Dynamic imports
+    const [tiptapCore, tiptapStarterKit, tiptapLink, tiptapPlaceholder] = await Promise.all([
+      import('https://esm.sh/@tiptap/core@3.22.3'),
+      import('https://esm.sh/@tiptap/starter-kit@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-link@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-placeholder@3.22.3'),
+    ]);
+
+    const { Editor } = tiptapCore;
+    const { default: StarterKit } = tiptapStarterKit;
+    const { default: Link } = tiptapLink;
+    const { default: Placeholder } = tiptapPlaceholder;
+
+    const placeholder = element.dataset.placeholder || 'Start typing...';
+
+    const editor = new Editor({
+      element,
+      extensions: [
+        StarterKit.configure({ heading: { levels: [2, 3] } }),
+        Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
+        Placeholder.configure({ placeholder, emptyEditorClass: 'is-editor-empty' }),
+      ],
+      content: textarea?.value || '',
+      onUpdate: ({ editor }) => {
+        if (textarea) textarea.value = editor.getHTML();
+        // Dispatch custom event for listeners
+        element.dispatchEvent(new CustomEvent('tiptap:update', { detail: { html: editor.getHTML() } }));
+      },
+      editorProps: {
+        attributes: {
+          class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] px-3 py-2',
+        },
+      },
+    });
+
+    // Initial sync
+    if (textarea) textarea.value = editor.getHTML();
+
+    return editor;
+  }
+
+  // Global function for manual initialization
+  (window as any).initTipTapEditor = async function(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
+    const textareaId = `${element.id}-content`;
+
+    // Create hidden textarea if not exists
+    let textarea = document.getElementById(textareaId);
+    if (!textarea) {
+      textarea = document.createElement('textarea');
+      textarea.id = textareaId;
+      textarea.name = element.id;
+      textarea.className = 'hidden';
+      element.insertAdjacentElement('afterend', textarea);
+    }
+
+    // Dynamic imports
+    const [tiptapCore, tiptapStarterKit, tiptapLink, tiptapPlaceholder] = await Promise.all([
+      import('https://esm.sh/@tiptap/core@3.22.3'),
+      import('https://esm.sh/@tiptap/starter-kit@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-link@3.22.3'),
+      import('https://esm.sh/@tiptap/extension-placeholder@3.22.3'),
+    ]);
+
+    const { Editor } = tiptapCore;
+    const { default: StarterKit } = tiptapStarterKit;
+    const { default: Link } = tiptapLink;
+    const { default: Placeholder } = tiptapPlaceholder;
+
+    const editor = new Editor({
+      element,
+      extensions: [
+        StarterKit.configure({ heading: { levels: [2, 3] } }),
+        Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
+        Placeholder.configure({ placeholder: options.placeholder || 'Start typing...', emptyEditorClass: 'is-editor-empty' }),
+      ],
+      content: options.content || '',
+      onUpdate: ({ editor }) => { textarea.value = editor.getHTML(); },
+      editorProps: {
+        attributes: { class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] px-3 py-2' },
+      },
+    });
+
+    // Initial sync
+    textarea.value = editor.getHTML();
+
+    return editor;
+  };
+</script>
+
+<style>
+  .tiptap-editor-element {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.375rem;
+    background: hsl(var(--card));
+  }
+
+  .tiptap-editor-element:focus-within {
+    ring: 2px;
+    ring-color: hsl(var(--ring));
+  }
+
+  /* Placeholder styling */
+  .tiptap-editor-element .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+</style>

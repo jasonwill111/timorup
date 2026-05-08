@@ -206,7 +206,7 @@ const mediaItemsJson = JSON.stringify(mediaItems);
     if (!thumbnailsContainer) return;
     thumbnailsContainer.innerHTML = '';
 
-    mediaItems.forEach((item: any, idx: number) => {
+    mediaItems.forEach((item: MediaItem, idx: number) => {
       const thumb = document.createElement('button');
       thumb.className = `flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 thumb-btn ${
         idx === currentIdx ? 'border-white scale-110' : 'border-transparent opacity-60 hover:opacity-100'

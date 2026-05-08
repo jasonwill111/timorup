@@ -2,65 +2,17 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { users, businessPages, orders, categories, sessions } from '@/db/schema';
+import { users, businessPages, orders, categories } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
-
-async function requireAdminAuth(request: Request) {
-  const cookieHeader = request.headers.get('cookie') || '';
-  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
-  if (!tokenMatch) {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
-  }
-
-  // Direct session query instead of using auth API
-  const db = await getDb();
-  const session = await db.select()
-    .from(sessions)
-    .where(eq(sessions.token, tokenMatch[1]))
-    .limit(1)
-    .get();
-
-  if (!session || !session.expiresAt) {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Session expired' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
-  }
-
-  // expiresAt is Unix timestamp in seconds
-  const expiresAtMs = typeof session.expiresAt === 'number'
-    ? session.expiresAt * 1000
-    : new Date(session.expiresAt).getTime();
-
-  if (expiresAtMs <= Date.now()) {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Session expired' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
-  }
-
-  const user = await db.select()
-    .from(users)
-    .where(eq(users.id, session.userId))
-    .limit(1)
-    .get();
-
-  if (!user || !['admin', 'super_admin', 'editor'].includes(user.role)) {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'FORBIDDEN', message: 'Admin access required' }
-    }), { status: 403, headers: { 'Content-Type': 'application/json' } }) };
-  }
-  return { authorized: true, user };
-}
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function GET({ request }: { request: Request }) {
+  const adminUser = await getAdminUser(request);
+  if (!adminUser) {
+    return unauthorizedResponse();
+  }
+
   const db = await getDb();
-  const authResult = await requireAdminAuth(request);
-  if (!authResult.authorized) return authResult.error;
 
   try {
     // Get total users

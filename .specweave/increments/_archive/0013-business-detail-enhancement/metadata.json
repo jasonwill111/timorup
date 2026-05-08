@@ -1,0 +1,18 @@
+{
+  "id": "0013-business-detail-enhancement",
+  "name": "Business Detail Page Enhancement",
+  "description": "Add yearOfEstablishment, socialLinks, photoGallery, latestUpdate, gallery lightbox to business detail page",
+  "created": "2026-04-26",
+  "status": "completed",
+  "tags": [
+    "feature",
+    "business-page",
+    "willingness-to-pay"
+  ],
+  "externalLinks": {},
+  "priority": "medium",
+  "lastActivity": "2026-04-26",
+  "testMode": "test-after",
+  "coverageTarget": 80,
+  "type": "feature"
+}

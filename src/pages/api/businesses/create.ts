@@ -178,7 +178,16 @@ export async function POST({ request }: { request: Request }) {
     const parsedSocialLinks = socialLinks ? (typeof socialLinks === 'string' ? JSON.parse(socialLinks as string) : socialLinks) : null;
 
     const id = `biz-${Date.now()}`;
-    const pageStatus = publishNow ? 'live' : 'draft';
+
+    // 4. Set initial status based on entity type
+    // - nonprofit: immediate publish (free, no payment needed)
+    // - business: pending_payment (requires subscription + admin confirmation)
+    let pageStatus: string;
+    if (finalEntityType === 'nonprofit') {
+      pageStatus = 'live'; // Non-profits go live immediately
+    } else {
+      pageStatus = 'pending_payment'; // Businesses require subscription
+    }
 
     await db.insert(businessPages).values({
       id,
@@ -204,6 +213,7 @@ export async function POST({ request }: { request: Request }) {
       profileImageId: uploadedImageIds.profile || null,
       socialLinks: parsedSocialLinks ? JSON.stringify(parsedSocialLinks) : null,
       status: pageStatus,
+      subscriptionStatus: 'none', // Initialize subscription status
     }).run();
 
     return new Response(JSON.stringify({

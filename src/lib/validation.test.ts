@@ -268,6 +268,56 @@ describe('Zod v4 error handling', () => {
   });
 });
 
+// Zod 4 Coerce schemas for query params
+describe('Zod v4 Coerce Schemas', () => {
+  it('coerces string to number', () => {
+    const schema = z.coerce.number();
+    const result = schema.safeParse('123');
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toBe(123);
+  });
+
+  it('coerces query page param', () => {
+    const schema = z.object({
+      page: z.coerce.number().int().min(1).default(1),
+      limit: z.coerce.number().int().min(1).max(100).default(20),
+    });
+    const result = schema.safeParse({ page: '2', limit: '10' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(2);
+      expect(result.data.limit).toBe(10);
+    }
+  });
+
+  it('uses defaults when params missing', () => {
+    const schema = z.object({
+      page: z.coerce.number().int().min(1).default(1),
+    });
+    const result = schema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.page).toBe(1);
+  });
+
+  it('rejects invalid page number', () => {
+    const schema = z.object({
+      page: z.coerce.number().int().min(1),
+    });
+    const result = schema.safeParse({ page: '-1' });
+    expect(result.success).toBe(false);
+  });
+
+  it('coerces boolean from string', () => {
+    const schema = z.object({
+      active: z.coerce.boolean(),
+    });
+    expect(schema.safeParse({ active: 'true' }).success).toBe(true);
+    expect(schema.safeParse({ active: 'false' }).success).toBe(true);
+    expect(schema.safeParse({ active: '1' }).success).toBe(true);
+    expect(schema.safeParse({ active: '0' }).success).toBe(true);
+  });
+});
+
 // File validation schemas
 import {
   ImageFileSchema,

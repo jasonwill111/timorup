@@ -1,0 +1,15 @@
+{
+  "id": "0002-p0-compliance-fix",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-03-22T23:50:10.136Z",
+  "lastActivity": "2026-04-18T11:18:46.816Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "project": "timorlist",
+  "approvedAt": "2026-04-18T11:18:46.816Z"
+}

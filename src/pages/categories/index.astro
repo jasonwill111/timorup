@@ -1,5 +1,4 @@
 ---
-// Categories Index - SSG with static data + client-side filtering
 export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
@@ -65,7 +64,7 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
     id: c.id,
     slug: c.slug,
     name: c.name,
-    icon: c.icon,
+    icon: c.icon?.replace('emoji:', '') || c.icon,
     description: c.description,
     listings: c.listings.map(l => ({
       id: l.id,

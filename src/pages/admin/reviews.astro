@@ -23,7 +23,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
           />
         </div>
         <div class="flex gap-2">
-          <select id="rating-filter" class="px-3 py-2 border rounded-lg text-sm">
+          <select id="rating-filter" class="px-3 py-2 border rounded-lg text-sm bg-background">
             <option value="">All Ratings</option>
             <option value="5">5 Stars</option>
             <option value="4">4 Stars</option>
@@ -154,7 +154,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       // Clear and render
       container.textContent = '';
 
-      data.data.forEach((review: any) => {
+      data.data.forEach((review: ReviewData) => {
         const reviewDiv = document.createElement('div');
         reviewDiv.className = 'p-3 border rounded text-sm';
 

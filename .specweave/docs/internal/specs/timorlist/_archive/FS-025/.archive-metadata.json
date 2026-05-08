@@ -1,0 +1,11 @@
+{
+  "id": "FS-025",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:17.534Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-025",
+  "linkedIncrements": [
+    "0025-r2-workers-binding"
+  ]
+}

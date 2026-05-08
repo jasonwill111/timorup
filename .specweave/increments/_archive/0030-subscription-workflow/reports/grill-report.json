@@ -1,0 +1,101 @@
+{
+  "version": "1.1",
+  "incrementId": "0030-subscription-workflow",
+  "timestamp": "2026-05-07T00:00:00Z",
+  "verdict": "NEEDS REVIEW",
+  "shipReadiness": "NEEDS REVIEW",
+  "summary": {
+    "totalFindings": 5,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "low": 2
+  },
+  "acCompliance": {
+    "totalACs": 26,
+    "passed": 26,
+    "failed": 0,
+    "scopeCreep": [],
+    "results": [
+      { "acId": "AC-US1-01", "status": "pass", "evidence": "listings/create.astro shows both options when no listing exists" },
+      { "acId": "AC-US1-02", "status": "pass", "evidence": "listings/create.astro shows existing listing type when user has one" },
+      { "acId": "AC-US1-03", "status": "pass", "evidence": "Create button hidden when hasExistingListing is true" },
+      { "acId": "AC-US1-04", "status": "pass", "evidence": "businesses/create.ts checks existingListing before insert" },
+      { "acId": "AC-US2-01", "status": "pass", "evidence": "Non-profit gets status='live' (vs spec 'published' but consistent)" },
+      { "acId": "AC-US2-02", "status": "pass", "evidence": "Non-profit subscriptionStatus='none', no expiry tracking" },
+      { "acId": "AC-US2-03", "status": "pass", "evidence": "products/index.ts line 148 blocks SKU for nonprofit" },
+      { "acId": "AC-US2-04", "status": "pass", "evidence": "Non-profit has subscriptionStatus='none', grace period only for expired" },
+      { "acId": "AC-US3-01", "status": "pass", "evidence": "businesses/create.ts line 189 sets pending_payment for business" },
+      { "acId": "AC-US3-02", "status": "pass", "evidence": "listings/create.astro line 589 redirects to /subscribe" },
+      { "acId": "AC-US3-03", "status": "pass", "evidence": "subscriptions/[id]/status.ts updates order to 'paid'" },
+      { "acId": "AC-US3-04", "status": "pass", "evidence": "subscriptions/[id]/status.ts line 86 sets status='live'" },
+      { "acId": "AC-US3-05", "status": "pass", "evidence": "business/[slug].astro lines 120-136 show pending banner" },
+      { "acId": "AC-US4-01", "status": "pass", "evidence": "products/index.ts checks canCreateSku before insert" },
+      { "acId": "AC-US4-02", "status": "pass", "evidence": "subscription.ts PLAN_SKU_LIMITS defined" },
+      { "acId": "AC-US4-03", "status": "pass", "evidence": "subscription.ts line 103-105 returns error at limit" },
+      { "acId": "AC-US4-04", "status": "pass", "evidence": "Admin API allows product management" },
+      { "acId": "AC-US5-01", "status": "pass", "evidence": "Schema has subscriptionStatus field" },
+      { "acId": "AC-US5-02", "status": "pass", "evidence": "gracePeriodEndDate field in schema, 60 days" },
+      { "acId": "AC-US5-03", "status": "pass", "evidence": "business/[slug].astro lines 138-162 shows modal" },
+      { "acId": "AC-US5-04", "status": "pass", "evidence": "canCreateSku checks isInGracePeriod" },
+      { "acId": "AC-US5-05", "status": "pass", "evidence": "Modal shows daysRemaining" },
+      { "acId": "AC-US5-06", "status": "pass", "evidence": "_cleanup-expired.ts deletes listings past grace" },
+      { "acId": "AC-US6-01", "status": "pass", "evidence": "canCreateSku checks subscription status" },
+      { "acId": "AC-US6-02", "status": "pass", "evidence": "canCreateSku blocks expired status" },
+      { "acId": "AC-US6-03", "status": "pass", "evidence": "business-logic.ts canEditBusiness checks grace" },
+      { "acId": "AC-US6-04", "status": "pass", "evidence": "subscriptions/[id]/status.ts clears grace on renewal" }
+    ]
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "confidence": 75,
+      "category": "correctness",
+      "title": "Subscription status check produces confusing error for pending_payment businesses",
+      "file": "src/lib/subscription.ts:82-85",
+      "issue": "The canCreateSku() function returns 'Business subscription not active' for subscriptionStatus='none', but this is also the initial status for businesses in pending_payment state. Users see a confusing error when they should see 'Waiting for payment confirmation'.",
+      "suggestion": "Update canCreateSku() to check if the business status is 'pending_payment' and return a more specific error message for that case.",
+      "impact": "Business owners initiating payment see confusing 'subscription not active' message instead of expected 'waiting for confirmation'."
+    },
+    {
+      "severity": "medium",
+      "confidence": 60,
+      "category": "edge-case",
+      "title": "Grace period calculation uses inconsistent time handling",
+      "file": "src/lib/subscription.ts:59-61",
+      "issue": "The isInGracePeriod calculation uses Date objects inconsistently, mixing Date comparisons with timestamp comparisons. This could cause edge-case issues in different timezones.",
+      "suggestion": "Use Unix timestamps consistently: const now = Math.floor(Date.now() / 1000) for all comparisons.",
+      "impact": "Minor timezone-related edge cases possible where grace period boundary is off by a few hours."
+    },
+    {
+      "severity": "medium",
+      "confidence": 85,
+      "category": "maintainability",
+      "title": "Missing unit tests for subscription helper functions",
+      "file": "src/lib/subscription.ts",
+      "issue": "Tasks.md specified src/lib/subscription.test.ts but this file doesn't exist. The subscription helper functions have no unit test coverage.",
+      "suggestion": "Create src/lib/subscription.test.ts with tests for canCreateSku, canEditBusiness, isInGracePeriod, and SKU limit enforcement.",
+      "impact": "Regression bugs in subscription logic may go undetected. Critical business logic without tests is a maintenance liability."
+    },
+    {
+      "severity": "low",
+      "confidence": 70,
+      "category": "maintainability",
+      "title": "Status value inconsistency between spec and implementation",
+      "file": "src/pages/api/businesses/create.ts:187",
+      "issue": "Spec AC-US2-01 says status should be 'published' but implementation uses 'live'. The codebase consistently uses 'live' but spec should match.",
+      "suggestion": "Update spec.md to say 'live' instead of 'published', or update implementation for consistency.",
+      "impact": "Low - spec drift, no runtime impact since codebase is consistent."
+    },
+    {
+      "severity": "low",
+      "confidence": 90,
+      "category": "testing",
+      "title": "E2E tests are unimplemented TODOs",
+      "file": "e2e/us-*.spec.ts",
+      "issue": "All 26 E2E test cases (us-001 through us-007) contain only TODO comments with no actual test implementation.",
+      "suggestion": "Implement critical E2E flows: nonprofit creation, business creation + payment, SKU limits, grace period modal.",
+      "impact": "No automated verification of subscription workflow. Manual testing required for all user stories."
+    }
+  ]
+}

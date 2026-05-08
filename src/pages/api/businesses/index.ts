@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { businessPages, categories } from '@/db/schema';
 import { eq, like, desc, sql, or, and, asc } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { PaginationSchema } from '@/lib/validation';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -83,8 +84,10 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     const search = url.searchParams.get('search') || '';
     const category = url.searchParams.get('category') || '';
     const sort = url.searchParams.get('sort') || 'recent';
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '12');
+    const { page, limit } = PaginationSchema.parse({
+      page: url.searchParams.get('page') || '1',
+      limit: url.searchParams.get('limit') || '12',
+    });
     const offset = (page - 1) * limit;
     const type = url.searchParams.get('type') || ''; // 'business' | 'non-profit'
     const organizationType = url.searchParams.get('organizationType') || ''; // 'government' | 'ngo'

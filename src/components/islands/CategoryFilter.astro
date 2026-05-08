@@ -26,7 +26,7 @@ const categoryParam = Astro.url.searchParams.get('category') || '';
     class="h-10 px-3 rounded-md border border-input bg-background text-sm"
   >
     <option value="">All Categories</option>
-    {categoriesData.map((cat: any) => (
+    {categoriesData.map((cat: { id: number; name: string; slug: string }) => (
       <option value={cat.slug} selected={cat.slug === categoryParam}>
         {cat.name}
       </option>

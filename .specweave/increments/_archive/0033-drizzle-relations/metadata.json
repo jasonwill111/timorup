@@ -1,0 +1,17 @@
+{
+  "id": "0033-drizzle-relations",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-07T10:58:42.751Z",
+  "lastActivity": "2026-05-07T12:08:00.000Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}

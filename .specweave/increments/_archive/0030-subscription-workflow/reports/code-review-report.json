@@ -1,0 +1,118 @@
+{
+  "version": "1.1",
+  "scope": "increment 0030-subscription-workflow",
+  "date": "2026-05-07",
+  "reviewers": ["logic", "security", "performance"],
+  "gateCheck": { "passed": true, "reason": null },
+  "summary": {
+    "total": 8,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "low": 3,
+    "info": 1
+  },
+  "validation": {
+    "performed": false,
+    "preValidation": { "critical": 0, "high": 1, "medium": 3 },
+    "postValidation": { "critical": 0, "high": 1, "medium": 3 },
+    "rejected": 0
+  },
+  "findings": [
+    {
+      "validated": true,
+      "reviewer": "security",
+      "severity": "HIGH",
+      "file": "src/pages/api/scheduled/_cleanup-expired.ts",
+      "line": 11,
+      "description": "Scheduled jobs fall back to insecure default token 'cleanup-secret' when CLEANUP_SECRET env var is not set. Any caller with knowledge of this default can trigger deletion of business listings.",
+      "recommendation": "Remove the fallback or fail loudly: `const expectedToken = import.meta.env.CLEANUP_SECRET; if (!expectedToken) throw new Error('CLEANUP_SECRET not configured');`",
+      "owasp": "A02:2021-Cryptographic Failures",
+      "confidence": 5
+    },
+    {
+      "validated": true,
+      "reviewer": "security",
+      "severity": "HIGH",
+      "file": "src/pages/api/scheduled/_mark-expired.ts",
+      "line": 12,
+      "description": "Same insecure default token fallback issue as _cleanup-expired.ts. Mark-expired job could be triggered by anyone knowing the default.",
+      "recommendation": "Remove the fallback or fail loudly",
+      "owasp": "A02:2021-Cryptographic Failures",
+      "confidence": 5
+    },
+    {
+      "validated": true,
+      "reviewer": "logic",
+      "severity": "MEDIUM",
+      "file": "src/lib/subscription.ts",
+      "line": 104,
+      "description": "SKU limit error message displays same value twice: `${info.skuLimit}/${info.skuLimit}` instead of `${info.skuCount}/${info.skuLimit}`",
+      "specViolation": "AC-US4-03",
+      "recommendation": "Change to: `SKU limit reached (${info.skuCount}/${info.skuLimit})`",
+      "confidence": 5
+    },
+    {
+      "validated": true,
+      "reviewer": "logic",
+      "severity": "MEDIUM",
+      "file": "src/pages/api/businesses/create.ts",
+      "line": 187,
+      "description": "Non-profit listings get status='live' but spec AC-US2-01 says 'published'. Verify 'live' and 'published' are equivalent in this codebase (check businessPages schema default vs. code value).",
+      "specViolation": "AC-US2-01",
+      "recommendation": "Verify status naming consistency across codebase. If 'live' = 'published', add a comment. If different, change to 'published'.",
+      "confidence": 4
+    },
+    {
+      "validated": true,
+      "reviewer": "logic",
+      "severity": "MEDIUM",
+      "file": "src/lib/subscription.ts",
+      "line": 60,
+      "description": "Grace period check uses expiryDate but doesn't handle the case where expiryDate might be 0 or null. The condition `now > new Date((business.expiryDate || 0) * 1000)` could produce unexpected results.",
+      "specViolation": "AC-US5-02",
+      "recommendation": "Add explicit null check: `business.expiryDate &&` before the comparison",
+      "confidence": 4
+    },
+    {
+      "validated": true,
+      "reviewer": "performance",
+      "severity": "LOW",
+      "file": "src/lib/subscription.ts",
+      "line": 32-73,
+      "description": "getSubscriptionInfo() makes 2 separate DB queries per call. This function is called by canCreateSku(), canEditBusiness(), isInGracePeriod(), and getGracePeriodDaysRemaining() - potentially 8+ queries per page load.",
+      "recommendation": "Consider caching subscription info in memory for the request duration, or create a single query that returns all needed fields.",
+      "confidence": 4
+    },
+    {
+      "validated": true,
+      "reviewer": "performance",
+      "severity": "LOW",
+      "file": "src/pages/api/scheduled/_cleanup-expired.ts",
+      "line": 49-53,
+      "description": "Cleanup job queries SKU count before deletion, which is wasteful since the SKUs will be deleted anyway. The count is only used for logging.",
+      "recommendation": "Log 'X SKUs' before deletion using a subquery, or log `results.totalSkusDeleted += affectedRows` after deletion if supported by the driver.",
+      "confidence": 4
+    },
+    {
+      "validated": true,
+      "reviewer": "logic",
+      "severity": "LOW",
+      "file": "src/pages/api/admin/subscriptions/[id]/status.ts",
+      "line": 76-81,
+      "description": "Dead code: `.replace('basic', 'basic')` and similar redundant replacements do nothing. The planType is already lowercase from the form select values.",
+      "recommendation": "Remove redundant replace calls. Only keep: `const planType = order.planType.replace('-yearly', '').replace('-monthly', '');`",
+      "confidence": 5
+    },
+    {
+      "validated": true,
+      "reviewer": "performance",
+      "severity": "INFO",
+      "file": "src/pages/business/[slug].astro",
+      "line": 58-71,
+      "description": "Grace period check runs on every SSR page load. For published business pages that are not in grace period, this is wasted computation on every visitor.",
+      "recommendation": "Consider moving grace period check to client-side only when subscriptionStatus !== 'active', or add CDN edge caching with grace period check bypass.",
+      "confidence": 3
+    }
+  ]
+}

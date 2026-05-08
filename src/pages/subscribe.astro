@@ -85,24 +85,55 @@ const url = new URL(Astro.request.url);
 const planParam = url.searchParams.get('plan') || 'basic-monthly';
 const isConfirmed = url.searchParams.get('confirmed') === 'true';
 
-// Plan details
-const PLAN_INFO: Record<string, {
+// Fetch plans from DB
+let PLAN_INFO: Record<string, {
+  id: string;
   name: string;
   amount: number;
   period: string;
   skuLimit: number;
   features: string[];
   description: string;
-}> = {
-  'basic-monthly': { name: 'Basic', amount: 29, period: 'Monthly', skuLimit: 10, features: ['10 products/services', '5 images per product', 'Photo gallery', 'Map integration', 'Customer reviews'], description: 'For small businesses getting started' },
-  'basic-yearly': { name: 'Basic', amount: 290, period: 'Yearly', skuLimit: 10, features: ['10 products/services', '5 images per product', 'Photo gallery', 'Map integration', 'Customer reviews'], description: 'Save 17% with annual billing' },
-  'pro-monthly': { name: 'Pro', amount: 59, period: 'Monthly', skuLimit: 30, features: ['30 products/services', '5 images per product', 'Priority support', 'Enhanced visibility', 'All Basic features'], description: 'For growing businesses' },
-  'pro-yearly': { name: 'Pro', amount: 590, period: 'Yearly', skuLimit: 30, features: ['30 products/services', '5 images per product', 'Priority support', 'Enhanced visibility', 'All Basic features'], description: 'Save 17% with annual billing' },
-  'max-monthly': { name: 'Max', amount: 89, period: 'Monthly', skuLimit: 60, features: ['60 products/services', '5 images per product', 'Dedicated support', 'Featured placement', 'All Pro features'], description: 'For established businesses' },
-  'max-yearly': { name: 'Max', amount: 890, period: 'Yearly', skuLimit: 60, features: ['60 products/services', '5 images per product', 'Dedicated support', 'Featured placement', 'All Pro features'], description: 'Save 17% with annual billing' },
-};
+}> = {};
 
-const selectedPlan = PLAN_INFO[planParam] || PLAN_INFO['basic-monthly'];
+try {
+  const { getDb } = await import('@/lib/db');
+  const db = await getDb();
+  const { plans } = await import('@/db/schema');
+  const { eq, asc } = await import('drizzle-orm');
+
+  const allPlans = await db.select()
+    .from(plans)
+    .where(eq(plans.active, true))
+    .orderBy(asc(plans.sortOrder))
+    .all();
+
+  PLAN_INFO = allPlans.reduce((acc, plan) => {
+    acc[plan.id] = {
+      id: plan.id,
+      name: plan.name,
+      amount: plan.amount,
+      period: plan.period,
+      skuLimit: plan.skuLimit,
+      features: plan.features ? JSON.parse(plan.features) : [],
+      description: plan.description || '',
+    };
+    return acc;
+  }, {} as typeof PLAN_INFO);
+} catch (e) {
+  console.error('Failed to fetch plans:', e);
+  // Fallback to empty - page will show error
+}
+
+const selectedPlan = PLAN_INFO[planParam] || PLAN_INFO['basic-monthly'] || {
+  id: 'basic-monthly',
+  name: 'Basic',
+  amount: 29,
+  period: 'monthly',
+  skuLimit: 10,
+  features: [],
+  description: 'Plan unavailable',
+};
 
 // Get or create order
 let orderId: string | null = null;
@@ -236,7 +267,7 @@ const adminInfo = {
             <CardContent>
               <div class="flex justify-between items-center mb-4">
                 <span class="text-3xl font-bold text-primary">${selectedPlan.amount}</span>
-                <span class="text-muted-foreground">/{selectedPlan.period.toLowerCase()}</span>
+                <span class="text-muted-foreground">/{selectedPlan.period === 'yearly' ? 'year' : 'month'}</span>
               </div>
 
               <div class="border-t pt-4">

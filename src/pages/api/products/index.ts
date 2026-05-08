@@ -3,9 +3,9 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { products, businessPages } from '@/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, and } from 'drizzle-orm';
 import { z } from 'zod';
-import { PLAN_LIMITS } from '@/lib/media';
+import { canCreateSku, canEditBusiness } from '@/lib/subscription';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 const VALID_SERVICE_TYPES = [
@@ -43,11 +43,14 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
     const db = await getDb();
     const activeOnly = url.searchParams.get('active') !== 'false';
-    let query = db.select().from(products).where(eq(products.businessPageId, businessPageId));
+    const conditions = [eq(products.businessPageId, businessPageId)];
     if (activeOnly) {
-      query = query.where(eq(products.active, true));
+      conditions.push(eq(products.active, true));
     }
-    const allProducts = await query.orderBy(desc(products.featured), desc(products.createdAt)).all();
+    const allProducts = await db.select().from(products)
+      .where(and(...conditions))
+      .orderBy(desc(products.featured), desc(products.createdAt))
+      .all();
 
     return new Response(JSON.stringify({
       success: true,
@@ -67,14 +70,19 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
   const businessPageId = url.searchParams.get('businessPageId');
   const activeOnly = url.searchParams.get('active') !== 'false';
 
-  let query = db.select().from(products).orderBy(desc(products.createdAt));
-
+  const conditions = [];
   if (businessPageId) {
-    query = query.where(eq(products.businessPageId, businessPageId));
-    if (activeOnly) {
-      query = query.where(eq(products.active, true));
-    }
+    conditions.push(eq(products.businessPageId, businessPageId));
   }
+  if (activeOnly) {
+    conditions.push(eq(products.active, true));
+  }
+
+  let query = db.select().from(products);
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions));
+  }
+  query = query.orderBy(desc(products.createdAt));
 
   const allProducts = await query.all();
 
@@ -116,10 +124,10 @@ export async function POST({ request }: { request: Request }) {
     // Validate serviceType
     const finalServiceType = VALID_SERVICE_TYPES.includes(serviceType) ? serviceType : 'product';
 
-    // Check SKU limit
+    // Check business exists
     const business = await db.select({
-      planType: businessPages.planType,
-      expiryDate: businessPages.expiryDate,
+      id: businessPages.id,
+      entityType: businessPages.entityType,
     })
     .from(businessPages)
     .where(eq(businessPages.id, businessPageId))
@@ -136,26 +144,25 @@ export async function POST({ request }: { request: Request }) {
       });
     }
 
-    let effectivePlan = business.planType || 'basic';
-    if (business.expiryDate && new Date(business.expiryDate) < new Date()) {
-      effectivePlan = 'basic';
+    // Non-profits cannot have SKUs
+    if (business.entityType === 'nonprofit') {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: 'Non-profit listings cannot have SKUs' }
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    const limit = PLAN_LIMITS[effectivePlan]?.maxProducts || PLAN_LIMITS.basic.maxProducts;
-    const countResult = await db.select({ count: sql<number>`count(*)` })
-      .from(products)
-      .where(eq(products.businessPageId, businessPageId));
-    const current = Number(countResult[0]?.count) || 0;
-
-    if (current >= limit) {
+    // Check subscription status and SKU limit using subscription helper
+    const canCreate = await canCreateSku(businessPageId);
+    if (!canCreate.can) {
       return new Response(JSON.stringify({
         success: false,
         error: {
-          code: 'SKU_LIMIT_EXCEEDED',
-          message: `SKU limit reached (${current}/${limit}). Upgrade to add more.`,
-          plan: effectivePlan,
-          limit,
-          current,
+          code: 'SKU_NOT_ALLOWED',
+          message: canCreate.reason || 'Cannot create SKU',
         }
       }), {
         status: 403,
@@ -225,7 +232,21 @@ export async function PUT({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { title, price, priceUnit, description, priceFields, serviceType, specifications, featured, active } = body;
+    const { title, price, priceUnit, description, priceFields, serviceType, specifications, featured, active, businessPageId } = body;
+
+    // Check grace period if updating business association
+    if (businessPageId) {
+      const check = await canEditBusiness(businessPageId);
+      if (!check.can) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: { code: 'EDIT_BLOCKED', message: check.reason || 'Cannot edit during grace period' }
+        }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
 
     const existing = await db.select().from(products).where(eq(products.id, id)).limit(1).get();
     if (!existing) {
@@ -233,6 +254,21 @@ export async function PUT({ request }: { request: Request }) {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // Check grace period for existing product's business
+    const productBusinessId = existing.businessPageId;
+    if (productBusinessId) {
+      const check = await canEditBusiness(productBusinessId);
+      if (!check.can) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: { code: 'EDIT_BLOCKED', message: check.reason || 'Cannot edit during grace period' }
+        }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     const updateData: Record<string, unknown> = {};

@@ -1,0 +1,11 @@
+{
+  "id": "FS-032",
+  "type": "feature",
+  "archivedAt": "2026-05-07T15:31:20.522Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-032",
+  "linkedIncrements": [
+    "0032-zod4-upgrade"
+  ]
+}

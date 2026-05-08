@@ -4,7 +4,7 @@ feature: FS-028
 title: "Image Upload with Compression"
 status: completed
 priority: P1
-created: 2026-05-07T00:00:00.000Z
+created: "2026-05-07T00:00:00.000Z"
 tldr: "**As a** business owner."
 project: timorlist
 ---

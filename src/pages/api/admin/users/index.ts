@@ -2,52 +2,17 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { users, sessions } from '@/db/schema';
+import { users } from '@/db/schema';
 import { eq, desc, sql, like, and, or } from 'drizzle-orm';
-
+import { PaginationSchema } from '@/lib/validation';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 async function requireAdminAuth(request: Request) {
-  const cookieHeader = request.headers.get('cookie') || '';
-  const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
-  if (!tokenMatch) {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
+  const adminUser = await getAdminUser(request);
+  if (!adminUser) {
+    return { authorized: false, error: unauthorizedResponse() };
   }
-
-  const db = await getDb();
-  const session = await db.select()
-    .from(sessions)
-    .where(eq(sessions.token, tokenMatch[1]))
-    .limit(1)
-    .get();
-
-  // expiresAt is Unix timestamp in seconds
-  const expiresAtMs = typeof session.expiresAt === 'number'
-    ? session.expiresAt * 1000
-    : new Date(session.expiresAt).getTime();
-
-  if (!session || !session.expiresAt || expiresAtMs <= Date.now()) {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Session expired' }
-    }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
-  }
-
-  const user = await db.select()
-    .from(users)
-    .where(eq(users.id, session.userId))
-    .limit(1)
-    .get();
-
-  if (!user || user.role !== 'admin') {
-    return { authorized: false, error: new Response(JSON.stringify({
-      success: false,
-      error: { code: 'FORBIDDEN', message: 'Admin access required' }
-    }), { status: 403, headers: { 'Content-Type': 'application/json' } }) };
-  }
-  return { authorized: true, user };
+  return { authorized: true, user: adminUser };
 }
 
 // GET - List all users with pagination
@@ -58,8 +23,10 @@ export async function GET({ request }: { request: Request }) {
   try {
     const db = await getDb();
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const { page, limit } = PaginationSchema.parse({
+      page: url.searchParams.get('page') || '1',
+      limit: url.searchParams.get('limit') || '20',
+    });
     const offset = (page - 1) * limit;
     const search = url.searchParams.get('search') || '';
     const role = url.searchParams.get('role') || '';

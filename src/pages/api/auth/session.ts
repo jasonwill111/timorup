@@ -1,5 +1,4 @@
 // Auth API - Session (Get current user)
-// Uses direct DB query instead of better-auth getSession due to adapter bug with D1 timestamp mode
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
@@ -16,7 +15,6 @@ export async function GET({ request }: { request: Request }) {
       const token = tokenMatch[1];
       const db = await getDb();
 
-      // Direct query using Drizzle
       const session = await db.select()
         .from(sessions)
         .where(eq(sessions.token, token))

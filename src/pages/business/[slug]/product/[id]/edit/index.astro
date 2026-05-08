@@ -196,9 +196,9 @@ import CardContent from '@/components/ui/CardContent.astro'
   const slug = slugIndex >= 0 ? pathParts[slugIndex + 1] : '';
   const productId = pathParts[pathParts.length - 1];
 
-  let currentUser: any = null;
-  let currentProduct: any = null;
-  let currentBusiness: any = null;
+  let currentUser: ProductData = null;
+  let currentProduct: ProductData = null;
+  let currentBusiness: ProductData = null;
   let uploadedImages: string[] = [];
 
   const loading = document.getElementById('loading');
@@ -294,14 +294,14 @@ import CardContent from '@/components/ui/CardContent.astro'
 
     // Load existing images
     if (currentProduct.images && currentProduct.images.length > 0) {
-      uploadedImages = currentProduct.images.map((img: any) => img.mediaId);
+      uploadedImages = currentProduct.images.map((img: ProductData) => img.mediaId);
       const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
       if (mediaIdsInput) {
         mediaIdsInput.value = uploadedImages.join(',');
       }
       
       // Render existing images
-      currentProduct.images.forEach((img: any) => {
+      currentProduct.images.forEach((img: ProductData) => {
         renderExistingImage(img.mediaId);
       });
     }

@@ -134,9 +134,9 @@ import CardContent from '../../../components/ui/CardContent.astro'
   const notFound = document.getElementById('not-found');
   const content = document.getElementById('content');
   
-  let currentUser: any = null;
-  let currentBusiness: any = null;
-  let subscriptionStatus: any = null;
+  let currentUser: ProductData = null;
+  let currentBusiness: ProductData = null;
+  let subscriptionStatus: ProductData = null;
   
   // Get session
   async function getSession() {
@@ -221,8 +221,9 @@ import CardContent from '../../../components/ui/CardContent.astro'
       return; // Already handled in loadBusiness
     }
     
-    // Check ownership
-    if (currentBusiness.ownerId !== currentUser.id) {
+    // Check ownership OR admin role
+    const isAdmin = currentUser.role === 'admin' || currentUser.role === 'super_admin';
+    if (currentBusiness.ownerId !== currentUser.id && !isAdmin) {
       loading?.classList.add('hidden');
       accessDenied?.classList.remove('hidden');
       return;
@@ -263,7 +264,7 @@ import CardContent from '../../../components/ui/CardContent.astro'
   }
   
   // Display products
-  function displayProducts(products: any[]) {
+  function displayProducts(products: ProductData) {
     const loadingEl = document.getElementById('products-loading');
     const emptyEl = document.getElementById('products-empty');
     const listEl = document.getElementById('products-list');
@@ -277,7 +278,7 @@ import CardContent from '../../../components/ui/CardContent.astro'
       return;
     }
     
-    products.forEach((product: any) => {
+    products.forEach((product: ProductData) => {
       const firstImage = product.images && product.images.length > 0
         ? `/api/media/${product.images[0].mediaId}`
         : null;

@@ -1,12 +1,14 @@
 ---
 interface Props {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'blue' | 'green' | 'purple' | 'orange' | 'custom';
+  colorClass?: string;
   class?: string;
   'data-slot'?: string;
 }
 
 const {
   variant = 'default',
+  colorClass,
   class: className = '',
   'data-slot': slot = 'badge',
   ...props
@@ -16,7 +18,12 @@ const variants = {
   default: 'bg-primary text-primary-foreground shadow hover:bg-primary/80',
   secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
   destructive: 'bg-destructive text-destructive-foreground shadow hover:bg-destructive/80',
-  outline: 'text-foreground',
+  outline: 'text-foreground border border-input bg-background',
+  blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  green: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+  orange: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+  custom: colorClass || '',
 };
 ---
 

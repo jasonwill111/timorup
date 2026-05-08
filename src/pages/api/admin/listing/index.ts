@@ -22,7 +22,10 @@ const createSchema = z.object({
   aboutUs: z.string().optional(),
   tags: z.array(z.string()).optional(),
   yearOfEstablishment: z.number().optional(),
-  openingHours: z.record(z.string(), z.string()).optional(),
+  openingHours: z.record(z.string(), z.object({
+    open: z.string(),
+    close: z.string(),
+  })).optional(),
   locationLat: z.number().optional(),
   locationLng: z.number().optional(),
   status: z.enum(['draft', 'live', 'suspended']).default('draft'),

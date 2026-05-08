@@ -1,0 +1,60 @@
+{
+  "version": "1.1",
+  "incrementId": "0002-p0-compliance-fix",
+  "timestamp": "2026-04-18T19:15:00Z",
+  "verdict": "PASS",
+  "shipReadiness": "READY",
+  "summary": {
+    "totalFindings": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "low": 0
+  },
+  "acCompliance": {
+    "totalACs": 10,
+    "passed": 10,
+    "failed": 0,
+    "scopeCreep": [],
+    "results": [
+      { "acId": "AC-US1-01", "status": "pass", "evidence": "subscribe.astro:163 fetches from /api/settings/public on load" },
+      { "acId": "AC-US1-02", "status": "pass", "evidence": "subscribe.astro:166-179 handles null/empty with placeholder message" },
+      { "acId": "AC-US1-03", "status": "pass", "evidence": "src/pages/api/settings/public/index.ts:14-43 returns { success, data: { payment_qr } }" },
+      { "acId": "AC-US1-04", "status": "pass", "evidence": "Existing admin settings API at src/pages/api/admin/settings/index.ts handles payment_qr" },
+      { "acId": "AC-US2-01", "status": "pass", "evidence": "create.astro:344 imports geocodeAddress; edit.astro:259 does same" },
+      { "acId": "AC-US2-02", "status": "pass", "evidence": "geo.ts:33-39 implements 1100ms debounce blocking wait" },
+      { "acId": "AC-US2-03", "status": "pass", "evidence": "create.astro:639-644 and edit.astro:528-531 auto-populate lat/lng and call setMarker" },
+      { "acId": "AC-US2-04", "status": "pass", "evidence": "create.astro:646 and edit.astro:533 show 'not found' alert message" },
+      { "acId": "AC-US2-05", "status": "pass", "evidence": "create.astro:630-631 disables button; 651-653 re-enables in finally block" },
+      { "acId": "AC-US2-06", "status": "pass", "evidence": "All Nominatim calls go through geocodeAddress from src/lib/geo.ts" },
+      { "acId": "NFR-GEO-01", "status": "pass", "evidence": "geo.ts:48 includes headers: { 'User-Agent': 'TMBIZ/1.0' }" },
+      { "acId": "NFR-GEO-02", "status": "pass", "evidence": "geo.ts:43 appends ', Timor-Leste' to address query" },
+      { "acId": "NFR-QR-01", "status": "pass", "evidence": "subscribe.astro:62 has loading='lazy' on img element" },
+      { "acId": "NFR-QR-02", "status": "pass", "evidence": "subscribe.astro:54-55 shows skeleton while loading; 163 starts async loadPaymentQR" }
+    ]
+  },
+  "findings": [
+    {
+      "title": "subscribe.astro URL is still hardcoded in src attribute (line 59)",
+      "severity": "medium",
+      "confidence": 85,
+      "category": "correctness",
+      "file": "src/pages/subscribe.astro",
+      "line": 59,
+      "issue": "The img element has src='/images/payment-qr.png' hardcoded. While this is overridden at runtime by loadPaymentQR(), the default src still points to a non-existent file. If JavaScript fails to load, users see a broken image icon instead of the configured placeholder.",
+      "suggestion": "Change src attribute to empty string or use a data URI placeholder. The JS will override it with the configured URL or hide the element. Alternative: use the same placeholder div structure with a hidden class, not an img with wrong src.",
+      "impact": "Users with JS disabled or on very slow connections may see a broken image instead of the placeholder message."
+    },
+    {
+      "title": "geocodeAddress returns null silently on HTTP errors (including 429 Rate Limit)",
+      "severity": "medium",
+      "confidence": 70,
+      "category": "edge-case",
+      "file": "src/lib/geo.ts",
+      "line": "55-57",
+      "issue": "When Nominatim returns a non-200 status (including 429 Too Many Requests from the User-Agent violation), geocodeAddress returns null with no indication to the user that rate limiting occurred. The user sees the same 'Address not found' message.",
+      "suggestion": "Consider checking for 429 status and providing a more specific message: 'Rate limit exceeded. Please wait before trying again.' Alternatively, add a console.warn for debugging. The current behavior is acceptable for MVP since it degrades gracefully.",
+      "impact": "Users hitting the Nominatim rate limit won't know why their search failed. They'll see the same generic 'not found' message."
+    }
+  ]
+}

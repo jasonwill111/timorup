@@ -1,52 +1,55 @@
 ---
+// Reusable Skeleton Loading Components
 interface Props {
+  variant?: 'line' | 'circle' | 'square' | 'card' | 'text' | 'avatar';
+  width?: string;
+  height?: string;
   class?: string;
+  count?: number;
   'data-slot'?: string;
 }
 
 const {
+  variant = 'line',
+  width,
+  height,
   class: className = '',
+  count = 1,
   'data-slot': slot = 'skeleton',
   ...props
 } = Astro.props;
+
+const baseClass = 'bg-muted rounded animate-pulse';
+
+const variantStyles = {
+  line: 'h-4 w-full',
+  circle: 'h-10 w-10 rounded-full',
+  square: 'h-20 w-20 rounded-lg',
+  text: 'h-4 w-3/4',
+  avatar: 'h-10 w-10 rounded-full',
+  card: 'aspect-[4/3] rounded-xl',
+};
+
+const style = [
+  width ? `width: ${width}` : '',
+  height ? `height: ${height}` : '',
+].filter(Boolean).join('; ');
 ---
 
-<div
-  class:list={[
-    'animate-pulse rounded-md bg-muted',
-    className
-  ]}
-  data-slot={slot}
-  {...props}
->
-  <slot />
-</div>
-
-<!-- Business Card Skeleton -->
-<div class="block bg-card rounded-xl border shadow-sm overflow-hidden" data-skeleton="business-card">
-  <div class="aspect-[4/3] bg-muted animate-pulse"></div>
-  <div class="p-3">
-    <div class="h-4 w-3/4 bg-muted rounded animate-pulse mb-2"></div>
-    <div class="h-3 w-1/2 bg-muted rounded animate-pulse mb-3"></div>
-    <div class="flex items-center justify-between pt-2 border-t border-border/50">
-      <div class="h-3 w-16 bg-muted rounded animate-pulse"></div>
-      <div class="h-5 w-12 bg-muted rounded animate-pulse"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Product Card Skeleton -->
-<div class="block bg-card rounded-xl border shadow-sm overflow-hidden" data-skeleton="product-card">
-  <div class="aspect-square bg-muted animate-pulse"></div>
-  <div class="p-3">
-    <div class="h-4 w-3/4 bg-muted rounded animate-pulse mb-1"></div>
-    <div class="h-3 w-1/2 bg-muted rounded animate-pulse mb-2"></div>
-    <div class="h-5 w-20 bg-muted rounded animate-pulse"></div>
-  </div>
-</div>
-
-<!-- Category Skeleton -->
-<div class="p-4 text-center border rounded-xl" data-skeleton="category">
-  <div class="w-10 h-10 mx-auto bg-muted rounded-lg animate-pulse mb-2"></div>
-  <div class="h-4 w-16 mx-auto bg-muted rounded animate-pulse"></div>
-</div>
+{count === 1 ? (
+  <div
+    class:list={[baseClass, variantStyles[variant] || variantStyles.line, className]}
+    data-slot={slot}
+    style={style || undefined}
+    {...props}
+  />
+) : (
+  Array.from({ length: count }).map(() => (
+    <div
+      class:list={[baseClass, variantStyles[variant] || variantStyles.line, className]}
+      data-slot={slot}
+      style={style || undefined}
+      {...props}
+    />
+  ))
+)}

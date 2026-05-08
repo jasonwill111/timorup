@@ -1,0 +1,18 @@
+{
+  "id": "0009-expired-business-modal",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-04-19T09:40:18.318Z",
+  "lastActivity": "2026-04-19T10:16:34.827Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "approvedAt": "2026-04-19T10:16:34.827Z"
+}

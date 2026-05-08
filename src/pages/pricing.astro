@@ -1,6 +1,5 @@
 ---
 export const prerender = true;
-
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
 import Card from '../components/ui/Card.astro'
@@ -233,87 +232,127 @@ import CardTitle from '../components/ui/CardTitle.astro'
 </Layout>
 
 <script>
-  const monthlyBtn = document.getElementById('monthly-btn');
-  const yearlyBtn = document.getElementById('yearly-btn');
-  
-  const basicPrice = document.getElementById('basic-price');
-  const basicPeriod = document.getElementById('basic-period');
-  const basicYearly = document.getElementById('basic-yearly');
-  
-  const proPrice = document.getElementById('pro-price');
-  const proPeriod = document.getElementById('pro-period');
-  const proYearly = document.getElementById('pro-yearly');
-  
-  const maxPrice = document.getElementById('max-price');
-  const maxPeriod = document.getElementById('max-period');
-  const maxYearly = document.getElementById('max-yearly');
-  
-  // Get all subscribe links
-  const subscribeLinks = document.querySelectorAll('.subscribe-link');
-  const yearlyLinks = document.querySelectorAll('.yearly-link');
-  
-  function updateLinks(isYearly) {
-    const suffix = isYearly ? '-yearly' : '';
-    subscribeLinks.forEach(link => {
-      const plan = link.dataset.plan;
-      if (plan) {
-        link.href = `/subscribe?plan=${plan}${suffix}`;
+  // Fetch plans from API and update UI
+  async function initPricing() {
+    const monthlyBtn = document.getElementById('monthly-btn');
+    const yearlyBtn = document.getElementById('yearly-btn');
+
+    const basicPrice = document.getElementById('basic-price');
+    const basicPeriod = document.getElementById('basic-period');
+    const basicYearly = document.getElementById('basic-yearly');
+
+    const proPrice = document.getElementById('pro-price');
+    const proPeriod = document.getElementById('pro-period');
+    const proYearly = document.getElementById('pro-yearly');
+
+    const maxPrice = document.getElementById('max-price');
+    const maxPeriod = document.getElementById('max-period');
+    const maxYearly = document.getElementById('max-yearly');
+
+    // Get all subscribe links
+    const subscribeLinks = document.querySelectorAll('.subscribe-link');
+    const yearlyLinks = document.querySelectorAll('.yearly-link');
+
+    // Fetch plans from API
+    let plans = {};
+    try {
+      const res = await fetch('/api/plans');
+      const data = await res.json();
+      if (data.success && data.data) {
+        data.data.forEach(plan => {
+          plans[plan.id] = plan;
+        });
       }
-    });
+    } catch (e) {
+      console.error('Failed to fetch plans:', e);
+    }
+
+    // Helper to get plan by name and period
+    function getPlan(name, period) {
+      return Object.values(plans).find(p => p.name === name && p.period === period);
+    }
+
+    function updateLinks(isYearly) {
+      const suffix = isYearly ? '-yearly' : '-monthly';
+      subscribeLinks.forEach(link => {
+        const plan = link.dataset.plan;
+        if (plan) {
+          link.href = `/subscribe?plan=${plan}${suffix}`;
+        }
+      });
+    }
+
+    function showMonthly() {
+      // Update buttons
+      monthlyBtn?.classList.add('bg-background', 'shadow-sm');
+      monthlyBtn?.classList.remove('text-muted-foreground');
+      yearlyBtn?.classList.remove('bg-background', 'shadow-sm');
+      yearlyBtn?.classList.add('text-muted-foreground');
+
+      const basicPlan = getPlan('Basic', 'monthly');
+      const proPlan = getPlan('Pro', 'monthly');
+      const maxPlan = getPlan('Max', 'monthly');
+
+      // Update Basic
+      if (basicPrice) basicPrice.textContent = basicPlan ? `$${basicPlan.amount}` : '$29';
+      if (basicPeriod) basicPeriod.textContent = 'per month';
+      basicYearly?.classList.add('hidden');
+
+      // Update Pro
+      if (proPrice) proPrice.textContent = proPlan ? `$${proPlan.amount}` : '$59';
+      if (proPeriod) proPeriod.textContent = 'per month';
+      proYearly?.classList.add('hidden');
+
+      // Update Max
+      if (maxPrice) maxPrice.textContent = maxPlan ? `$${maxPlan.amount}` : '$89';
+      if (maxPeriod) maxPeriod.textContent = 'per month';
+      maxYearly?.classList.add('hidden');
+
+      // Update links
+      updateLinks(false);
+    }
+
+    function showYearly() {
+      // Update buttons
+      yearlyBtn?.classList.add('bg-background', 'shadow-sm');
+      yearlyBtn?.classList.remove('text-muted-foreground');
+      monthlyBtn?.classList.remove('bg-background', 'shadow-sm');
+      monthlyBtn?.classList.add('text-muted-foreground');
+
+      const basicPlan = getPlan('Basic', 'yearly');
+      const proPlan = getPlan('Pro', 'yearly');
+      const maxPlan = getPlan('Max', 'yearly');
+
+      // Update Basic - show yearly pricing
+      if (basicPrice) basicPrice.textContent = basicPlan ? `$${basicPlan.amount}` : '$290';
+      if (basicPeriod) basicPeriod.textContent = 'per year';
+      basicYearly?.classList.remove('hidden');
+
+      // Update Pro - show yearly pricing
+      if (proPrice) proPrice.textContent = proPlan ? `$${proPlan.amount}` : '$590';
+      if (proPeriod) proPeriod.textContent = 'per year';
+      proYearly?.classList.remove('hidden');
+
+      // Update Max - show yearly pricing
+      if (maxPrice) maxPrice.textContent = maxPlan ? `$${maxPlan.amount}` : '$890';
+      if (maxPeriod) maxPeriod.textContent = 'per year';
+      maxYearly?.classList.remove('hidden');
+
+      // Update links
+      updateLinks(true);
+    }
+
+    // Initialize with monthly prices
+    showMonthly();
+
+    monthlyBtn?.addEventListener('click', showMonthly);
+    yearlyBtn?.addEventListener('click', showYearly);
   }
-  
-  function showMonthly() {
-    // Update buttons
-    monthlyBtn?.classList.add('bg-background', 'shadow-sm');
-    monthlyBtn?.classList.remove('text-muted-foreground');
-    yearlyBtn?.classList.remove('bg-background', 'shadow-sm');
-    yearlyBtn?.classList.add('text-muted-foreground');
-    
-    // Update Basic
-    if (basicPrice) basicPrice.textContent = '$29';
-    if (basicPeriod) basicPeriod.textContent = 'per month';
-    basicYearly?.classList.add('hidden');
 
-    // Update Pro
-    if (proPrice) proPrice.textContent = '$59';
-    if (proPeriod) proPeriod.textContent = 'per month';
-    proYearly?.classList.add('hidden');
-
-    // Update Max
-    if (maxPrice) maxPrice.textContent = '$89';
-    if (maxPeriod) maxPeriod.textContent = 'per month';
-    maxYearly?.classList.add('hidden');
-    
-    // Update links
-    updateLinks(false);
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPricing);
+  } else {
+    initPricing();
   }
-  
-  function showYearly() {
-    // Update buttons
-    yearlyBtn?.classList.add('bg-background', 'shadow-sm');
-    yearlyBtn?.classList.remove('text-muted-foreground');
-    monthlyBtn?.classList.remove('bg-background', 'shadow-sm');
-    monthlyBtn?.classList.add('text-muted-foreground');
-    
-    // Update Basic - show yearly pricing
-    if (basicPrice) basicPrice.textContent = '$290';
-    if (basicPeriod) basicPeriod.textContent = 'per year';
-    basicYearly?.classList.remove('hidden');
-
-    // Update Pro - show yearly pricing
-    if (proPrice) proPrice.textContent = '$590';
-    if (proPeriod) proPeriod.textContent = 'per year';
-    proYearly?.classList.remove('hidden');
-
-    // Update Max - show yearly pricing
-    if (maxPrice) maxPrice.textContent = '$890';
-    if (maxPeriod) maxPeriod.textContent = 'per year';
-    maxYearly?.classList.remove('hidden');
-    
-    // Update links
-    updateLinks(true);
-  }
-  
-  monthlyBtn?.addEventListener('click', showMonthly);
-  yearlyBtn?.addEventListener('click', showYearly);
 </script>

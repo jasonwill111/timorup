@@ -1,0 +1,11 @@
+{
+  "id": "FS-003",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:13.303Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-003",
+  "linkedIncrements": [
+    "0003-deps-cleanup-react-removal"
+  ]
+}
