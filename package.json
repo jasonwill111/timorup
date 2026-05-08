@@ -4,8 +4,8 @@
   "description": "Business Directory Platform for Timor-Leste",
   "type": "module",
   "scripts": {
-    "dev": "wrangler types && astro build && wrangler dev --port 8787",
-    "dev:local": "wrangler types && astro build && wrangler dev --local --port 8787",
+    "dev": "wrangler types && astro build && wrangler dev --remote --port 8787",
+    "dev:local": "wrangler types && astro build && wrangler dev --port 8787",
     "build": "astro build && cp public/_routes.json dist/_routes.json",
     "preview": "astro preview",
     "preview:cf": "wrangler dev ./dist",
@@ -24,14 +24,13 @@
     "db:push": "drizzle-kit push",
     "db:push:remote": "drizzle-kit push --remote",
     "db:studio": "drizzle-kit studio",
-    "db:setup-local": "npx wrangler d1 execute timorlist-db --remote --command \"SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL AND name NOT LIKE '_cf_%'\" --json 2>/dev/null | npx wrangler d1 execute timorlist-db --local --file=/dev/stdin --persist-to=.wrangler/state || echo 'Setup local D1 from remote schema'",
-    "db:seed": "node scripts/generate-seed.js > src/db/seed.sql && npx wrangler d1 execute timorlist-db --remote --file=src/db/seed.sql && rm src/db/seed.sql",
+    "db:setup-local": "wrangler d1 execute timorlist-db --remote --command \"SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL AND name NOT LIKE '_cf_%'\" --json 2>/dev/null | wrangler d1 execute timorlist-db --local --file=/dev/stdin --persist-to=.wrangler/state || echo 'Setup local D1 from remote schema'",
+    "db:seed": "node scripts/generate-seed.js > src/db/seed.sql && wrangler d1 execute timorlist-db --remote --file=src/db/seed.sql && rm src/db/seed.sql",
     "db:seed:dry": "node scripts/generate-seed.js",
     "deploy": "echo '❌ Deploy is CI/CD only. Use: git push' && exit 1",
     "deploy:dry": "USE_CLOUDFLARE=1 wrangler deploy --dry-run",
     "wrangler": "wrangler",
-    "prepare": "husky",
-    "dev:remote": "wrangler types && astro build && wrangler dev --remote --port 8787"
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.3.0",
