@@ -120,15 +120,21 @@ const totalPages = Math.ceil(total / limit);
 <AdminLayout title="Media Library">
   <div class="p-6">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-      <div>
-        <h1 class="text-2xl font-bold">Media Library</h1>
-        <p class="text-muted-foreground text-sm mt-1">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+      <div class="min-w-0">
+        <h1 class="text-xl md:text-2xl font-bold truncate">Media Library</h1>
+        <p class="text-muted-foreground text-xs md:text-sm">
           {total} files • {totalSizeMB} MB total
         </p>
       </div>
-      <div class="flex gap-2">
-        <a href="/admin/media/cleanup" class="px-4 py-2 border rounded-lg hover:bg-muted text-sm">
+      <div class="flex gap-2 flex-shrink-0">
+        <button form="upload-form" type="submit" class="text-xs px-2 py-1 h-7 border rounded-lg hover:bg-muted flex items-center gap-1 md:text-sm md:px-4 md:h-9">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload
+        </button>
+        <a href="/admin/media/cleanup" class="text-xs px-2 py-1 h-7 border rounded-lg hover:bg-muted flex items-center gap-1 md:text-sm md:px-4 md:h-9">
           🧹 Cleanup
         </a>
       </div>
