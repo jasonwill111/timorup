@@ -604,15 +604,15 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
       generatedSku = {
         title,
-        description,
         serviceType,
+        skuDescription: description,
         priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [],
       };
 
       document.getElementById('preview-sku-title')!.textContent = generatedSku.title;
       document.getElementById('preview-sku-type')!.textContent = generatedSku.serviceType;
       document.getElementById('preview-sku-price')!.textContent = generatedSku.priceFields.map((p: any) => `${p.label}: $${p.value}${p.unit}`).join(', ');
-      document.getElementById('preview-sku-desc')!.textContent = generatedSku.description;
+      document.getElementById('preview-sku-desc')!.textContent = generatedSku.skuDescription;
 
       document.getElementById('sku-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
@@ -770,12 +770,11 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       const aiData = result.object?.data || {};
       generatedLanding = {
         hero: aiData.hero || { title: title, subtitle: description },
-        description: aiData.description || '',
+        landingDescription: aiData.description || '',
         features: aiData.features || [],
         cta: aiData.cta || {},
         type,
         title,
-        description,
         prompt,
       };
 
@@ -784,6 +783,8 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
       const featuresEl = document.getElementById('preview-landing-features')!;
       featuresEl.innerHTML = (generatedLanding.features || []).map((f: any) => `<li><strong>${f.title}</strong>: ${f.description}</li>`).join('') || '<li>No features generated</li>';
+
+      document.getElementById('preview-landing-desc')!.textContent = generatedLanding.landingDescription;
 
       document.getElementById('landing-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }

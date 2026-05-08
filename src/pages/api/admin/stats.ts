@@ -110,6 +110,20 @@ export async function GET({ request }: { request: Request }) {
       });
     }
 
+    // Get last 6 months new users for chart
+    const monthlyUsers: number[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+
+      const monthNewUsers = await db.select({ count: sql`count(*)` })
+        .from(users)
+        .where(sql`${users.createdAt} >= ${monthStart.toISOString()} AND ${users.createdAt} <= ${monthEnd.toISOString()}`)
+        .get();
+
+      monthlyUsers.push(Number(monthNewUsers?.count) || 0);
+    }
+
     return new Response(JSON.stringify({
       success: true,
       data: {
@@ -128,7 +142,8 @@ export async function GET({ request }: { request: Request }) {
           newSubscriptions: mtdNewSubscriptions,
           newUsers: mtdNewUsers
         },
-        monthly: monthlyData
+        monthly: monthlyData,
+        monthlyUsers
       }
     }), {
       status: 200,

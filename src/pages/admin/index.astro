@@ -29,7 +29,112 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       window.location.href = '/admin/login?redirect=/admin';
     }
   }
+
+  // Render revenue bar chart
+  function renderRevenueChart(monthlyData: { month: string; revenue: number }[]) {
+    const chart = document.getElementById('revenue-chart');
+    if (!chart) return;
+
+    const maxRevenue = Math.max(...monthlyData.map(m => m.revenue), 1);
+    const chartHeight = 120;
+
+    chart.innerHTML = monthlyData.map(m => {
+      const heightPercent = (m.revenue / maxRevenue) * 100;
+      const heightPx = Math.max((heightPercent / 100) * chartHeight, 4);
+      return `
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <div class="w-full bg-gradient-to-t from-amber-400 to-amber-300 rounded-t transition-all hover:opacity-80 cursor-help relative group" style="height: ${heightPx}px">
+            <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10">
+              $${m.revenue}
+            </div>
+          </div>
+          <span class="text-xs text-muted-foreground">${m.month}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render SVG line chart
+  function renderLineChart(svgId: string, data: number[], labels: string[], color: string) {
+    const svg = document.getElementById(svgId) as unknown as SVGSVGElement;
+    if (!svg) return;
+
+    const width = svg.clientWidth || 400;
+    const height = svg.clientHeight || 128;
+    const padding = { top: 10, right: 10, bottom: 30, left: 10 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    const maxVal = Math.max(...data, 1);
+    const minVal = 0;
+    const range = maxVal - minVal || 1;
+
+    // Create points
+    const points = data.map((val, i) => ({
+      x: padding.left + (i / (data.length - 1)) * chartWidth,
+      y: padding.top + chartHeight - ((val - minVal) / range) * chartHeight
+    }));
+
+    // Create path
+    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+    // Create area path
+    const areaD = pathD + ` L ${points[points.length - 1].x} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="${svgId}-gradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaD}" fill="url(#${svgId}-gradient)"/>
+      <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${points.map((p, i) => `
+        <circle cx="${p.x}" cy="${p.y}" r="4" fill="${color}">
+          <title>${labels[i]}: ${data[i]}</title>
+        </circle>
+        <text x="${p.x}" y="${height - 8}" text-anchor="middle" class="fill-muted-foreground text-xs">${labels[i]}</text>
+      `).join('')}
+    `;
+  }
+
+  // Load dashboard stats
+  async function loadStats() {
+    try {
+      const res = await authFetch('/api/admin/stats');
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('stat-users')!.textContent = String(data.data.totalUsers);
+        document.getElementById('stat-businesses')!.textContent = String(data.data.totalBusinesses - data.data.totalNonProfits);
+        document.getElementById('stat-nonprofits')!.textContent = String(data.data.totalNonProfits);
+        document.getElementById('stat-products')!.textContent = String(data.data.totalProducts);
+        document.getElementById('stat-categories')!.textContent = String(data.data.totalCategories);
+
+        if (data.data.mtd) {
+          document.getElementById('mtd-revenue')!.textContent = '$' + String(data.data.mtd.revenue || 0);
+          document.getElementById('mtd-subs')!.textContent = String(data.data.mtd.newSubscriptions || 0);
+          document.getElementById('mtd-users')!.textContent = String(data.data.mtd.newUsers || 0);
+        }
+
+        document.getElementById('stat-expiring')!.textContent = String(data.data.expiringSoon || 0);
+
+        if (data.data.monthly && data.data.monthly.length > 0) {
+          renderRevenueChart(data.data.monthly);
+          renderLineChart('subscriptions-svg', data.data.monthly.map((m: any) => m.subscriptions), data.data.monthly.map((m: any) => m.month), '#8b5cf6');
+          const usersData = data.data.monthlyUsers || data.data.monthly.map((m: any) => 0);
+          renderLineChart('users-svg', usersData, data.data.monthly.map((m: any) => m.month), '#3b82f6');
+        }
+      }
+    } catch (err) {
+      console.error('Error loading stats:', err);
+    }
+  }
+
+  // Initialize
   checkAuth();
+  loadStats();
 </script>
   <div class="container py-4 px-2 md:py-6 max-w-7xl">
     <!-- Page Header -->
@@ -38,69 +143,52 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       <p class="text-xs md:text-sm text-muted-foreground">Overview of your platform</p>
     </div>
 
-    <!-- Stats Cards - 3x3 Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+    <!-- Stats Cards - Total Counts (Cumulative) -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-4">
       <!-- Users -->
-      <a href="/admin/users" class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-2xl md:text-3xl font-bold text-blue-700 dark:text-blue-300" id="stat-users">-</p>
-            <p class="text-xs text-blue-600 dark:text-blue-400">Users</p>
-          </div>
+      <a href="/admin/users" class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800 rounded-xl p-3 border hover:shadow-md transition-shadow cursor-pointer">
+        <div class="text-center">
+          <p class="text-2xl md:text-3xl font-bold text-blue-700 dark:text-blue-300" id="stat-users">-</p>
+          <p class="text-xs text-blue-600 dark:text-blue-400">Users</p>
         </div>
       </a>
 
       <!-- Businesses -->
-      <a href="/admin/businesses?type=business" class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/50 dark:to-emerald-900/50 border-emerald-200 dark:border-emerald-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300" id="stat-businesses">-</p>
-            <p class="text-xs text-emerald-600 dark:text-emerald-400">Businesses</p>
-          </div>
+      <a href="/admin/businesses?type=business" class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/50 dark:to-emerald-900/50 border-emerald-200 dark:border-emerald-800 rounded-xl p-3 border hover:shadow-md transition-shadow cursor-pointer">
+        <div class="text-center">
+          <p class="text-2xl md:text-3xl font-bold text-emerald-700 dark:text-emerald-300" id="stat-businesses">-</p>
+          <p class="text-xs text-emerald-600 dark:text-emerald-400">Businesses</p>
         </div>
       </a>
 
       <!-- Non-Profits -->
-      <a href="/admin/businesses?type=nonprofit" class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950/50 dark:to-teal-900/50 border-teal-200 dark:border-teal-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-2xl md:text-3xl font-bold text-teal-700 dark:text-teal-300" id="stat-nonprofits">-</p>
-            <p class="text-xs text-teal-600 dark:text-teal-400">Non-Profits</p>
-          </div>
+      <a href="/admin/businesses?type=nonprofit" class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950/50 dark:to-teal-900/50 border-teal-200 dark:border-teal-800 rounded-xl p-3 border hover:shadow-md transition-shadow cursor-pointer">
+        <div class="text-center">
+          <p class="text-2xl md:text-3xl font-bold text-teal-700 dark:text-teal-300" id="stat-nonprofits">-</p>
+          <p class="text-xs text-teal-600 dark:text-teal-400">Non-Profits</p>
         </div>
       </a>
 
-      <!-- Subscriptions -->
-      <a href="/admin/subscriptions" class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 border-purple-200 dark:border-purple-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-2xl md:text-3xl font-bold text-purple-700 dark:text-purple-300" id="stat-subscriptions">-</p>
-            <p class="text-xs text-purple-600 dark:text-purple-400">Subscriptions</p>
-          </div>
+      <!-- Products -->
+      <a href="/admin/skus" class="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-950/50 dark:to-rose-900/50 border-rose-200 dark:border-rose-800 rounded-xl p-3 border hover:shadow-md transition-shadow cursor-pointer">
+        <div class="text-center">
+          <p class="text-2xl md:text-3xl font-bold text-rose-700 dark:text-rose-300" id="stat-products">-</p>
+          <p class="text-xs text-rose-600 dark:text-rose-400">Products</p>
         </div>
       </a>
 
-      <!-- Revenue -->
+      <!-- Categories -->
+      <a href="/admin/categories" class="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950/50 dark:to-cyan-900/50 border-cyan-200 dark:border-cyan-800 rounded-xl p-3 border hover:shadow-md transition-shadow cursor-pointer">
+        <div class="text-center">
+          <p class="text-2xl md:text-3xl font-bold text-cyan-700 dark:text-cyan-300" id="stat-categories">-</p>
+          <p class="text-xs text-cyan-600 dark:text-cyan-400">Categories</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- MTD Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <!-- MTD Revenue -->
       <div class="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/50 border-amber-200 dark:border-amber-800 rounded-xl p-4 border">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
@@ -109,88 +197,79 @@ import AdminLayout from '@layouts/AdminLayout.astro';
             </svg>
           </div>
           <div>
-            <p class="text-2xl md:text-3xl font-bold text-amber-700 dark:text-amber-300" id="stat-revenue">$0</p>
-            <p class="text-xs text-amber-600 dark:text-amber-400">Revenue</p>
+            <p class="text-2xl md:text-3xl font-bold text-amber-700 dark:text-amber-300" id="mtd-revenue">$0</p>
+            <p class="text-xs text-amber-600 dark:text-amber-400">MTD Revenue</p>
           </div>
         </div>
       </div>
 
-      <!-- Products -->
-      <a href="/admin/skus" class="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-950/50 dark:to-rose-900/50 border-rose-200 dark:border-rose-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
+      <!-- MTD Subscriptions -->
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 border-purple-200 dark:border-purple-800 rounded-xl p-4 border">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-rose-500 rounded-lg flex items-center justify-center">
+          <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
           </div>
           <div>
-            <p class="text-2xl md:text-3xl font-bold text-rose-700 dark:text-rose-300" id="stat-products">-</p>
-            <p class="text-xs text-rose-600 dark:text-rose-400">Products</p>
+            <p class="text-2xl md:text-3xl font-bold text-purple-700 dark:text-purple-300" id="mtd-subs">0</p>
+            <p class="text-xs text-purple-600 dark:text-purple-400">MTD Subscriptions</p>
           </div>
         </div>
-      </a>
+      </div>
 
-      <!-- Categories -->
-      <a href="/admin/categories" class="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950/50 dark:to-cyan-900/50 border-cyan-200 dark:border-cyan-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
+      <!-- MTD New Users -->
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800 rounded-xl p-4 border">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center">
+          <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
             </svg>
           </div>
           <div>
-            <p class="text-2xl md:text-3xl font-bold text-cyan-700 dark:text-cyan-300" id="stat-categories">-</p>
-            <p class="text-xs text-cyan-600 dark:text-cyan-400">Categories</p>
+            <p class="text-2xl md:text-3xl font-bold text-blue-700 dark:text-blue-300" id="mtd-users">0</p>
+            <p class="text-xs text-blue-600 dark:text-blue-400">MTD New Users</p>
           </div>
         </div>
-      </a>
+      </div>
 
-      <!-- Expiring Soon -->
-      <a href="/admin/subscriptions?filter=expiring" class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 border-orange-200 dark:border-orange-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
+      <!-- Expiring Soon (Alert) -->
+      <a href="/admin/subscriptions?filter=expiring" class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/50 dark:to-red-900/50 border-red-200 dark:border-red-800 rounded-xl p-4 border hover:shadow-md transition-shadow cursor-pointer">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+          <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center animate-pulse">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
           </div>
           <div>
-            <p class="text-2xl md:text-3xl font-bold text-orange-700 dark:text-orange-300" id="stat-expiring">0</p>
-            <p class="text-xs text-orange-600 dark:text-orange-400">Expiring Soon</p>
+            <p class="text-2xl md:text-3xl font-bold text-red-700 dark:text-red-300" id="stat-expiring">0</p>
+            <p class="text-xs text-red-600 dark:text-red-400">Expiring Soon</p>
           </div>
         </div>
       </a>
     </div>
 
-    <!-- MTD Stats -->
-    <div class="bg-card border rounded-xl p-4 mb-6">
-      <h3 class="font-semibold mb-3">Month to Date</h3>
-      <div class="grid grid-cols-3 gap-4">
-        <div class="text-center p-3 bg-muted/30 rounded-lg">
-          <p class="text-xl md:text-2xl font-bold text-amber-600" id="mtd-revenue">$0</p>
-          <p class="text-xs text-muted-foreground">MTD Revenue</p>
-        </div>
-        <div class="text-center p-3 bg-muted/30 rounded-lg">
-          <p class="text-xl md:text-2xl font-bold text-purple-600" id="mtd-subs">0</p>
-          <p class="text-xs text-muted-foreground">New Subs</p>
-        </div>
-        <div class="text-center p-3 bg-muted/30 rounded-lg">
-          <p class="text-xl md:text-2xl font-bold text-blue-600" id="mtd-users">0</p>
-          <p class="text-xs text-muted-foreground">New Users</p>
+    <!-- Charts Section -->
+    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mb-6">
+      <!-- Revenue Bar Chart -->
+      <div class="bg-card border rounded-xl p-4">
+        <h3 class="font-semibold mb-2">Revenue (6 Months)</h3>
+        <div id="revenue-chart" class="flex items-end justify-between gap-1 h-32"></div>
+      </div>
+
+      <!-- Subscriptions Line Chart -->
+      <div class="bg-card border rounded-xl p-4">
+        <h3 class="font-semibold mb-2">New Subscriptions (6 Months)</h3>
+        <div id="subscriptions-chart" class="h-32 relative">
+          <svg class="w-full h-full" id="subscriptions-svg"></svg>
         </div>
       </div>
     </div>
 
-    <!-- Monthly Revenue Chart -->
     <div class="bg-card border rounded-xl p-4 mb-6">
-      <h3 class="font-semibold mb-4">Revenue (Last 6 Months)</h3>
-      <div id="monthly-chart" class="flex items-end justify-between gap-2 h-32">
-        <div class="flex-1 flex flex-col items-center gap-1">
-          <div class="w-full bg-amber-200 rounded-t h-1" data-height="10"></div>
-          <span class="text-xs text-muted-foreground">Loading...</span>
-        </div>
-      </div>
-      <div class="flex justify-between mt-2 text-xs text-muted-foreground">
-        <span>Subs count shown below bars</span>
+      <h3 class="font-semibold mb-2">New Users (6 Months)</h3>
+      <div id="users-chart" class="h-32 relative">
+        <svg class="w-full h-full" id="users-svg"></svg>
       </div>
     </div>
 
@@ -287,13 +366,13 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     }
   }
 
-  // Render monthly revenue bar chart
-  function renderMonthlyChart(monthlyData: { month: string; revenue: number; subscriptions: number }[]) {
-    const chart = document.getElementById('monthly-chart');
+  // Render revenue bar chart
+  function renderRevenueChart(monthlyData: { month: string; revenue: number }[]) {
+    const chart = document.getElementById('revenue-chart');
     if (!chart) return;
 
     const maxRevenue = Math.max(...monthlyData.map(m => m.revenue), 1);
-    const chartHeight = 120; // pixels
+    const chartHeight = 120;
 
     chart.innerHTML = monthlyData.map(m => {
       const heightPercent = (m.revenue / maxRevenue) * 100;
@@ -306,43 +385,57 @@ import AdminLayout from '@layouts/AdminLayout.astro';
             </div>
           </div>
           <span class="text-xs text-muted-foreground">${m.month}</span>
-          <span class="text-xs text-amber-600 font-medium">${m.subscriptions} subs</span>
         </div>
       `;
     }).join('');
   }
-  
-  // Load recent subscriptions (orders are now subscriptions)
-  async function loadOrders() {
-    try {
-      const res = await authFetch('/api/admin/subscriptions');
-      const data = await res.json();
 
-      const container = document.getElementById('orders-list');
-      if (!container) return;
+  // Render SVG line chart
+  function renderLineChart(svgId: string, data: number[], labels: string[], color: string) {
+    const svg = document.getElementById(svgId) as unknown as SVGSVGElement;
+    if (!svg) return;
 
-      if (!data.success || !data.subscriptions || data.subscriptions.length === 0) {
-        container.innerHTML = '<p class="text-center text-muted-foreground py-8 text-sm">No subscriptions yet</p>';
-        return;
-      }
+    const width = svg.clientWidth || 400;
+    const height = svg.clientHeight || 128;
+    const padding = { top: 10, right: 10, bottom: 30, left: 10 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
 
-      container.innerHTML = data.subscriptions.slice(0, 5).map((sub: any) => `
-        <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm">
-          <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">#${sub.id.slice(0, 8)}</p>
-            <p class="text-xs text-muted-foreground truncate">${sub.planType || 'Subscription'} - $${sub.amount}</p>
-          </div>
-          <div class="flex items-center gap-2 ml-2">
-            <span class="px-2 py-0.5 text-xs rounded-full ${sub.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${sub.status}</span>
-          </div>
-        </div>
-      `).join('');
-    } catch (err) {
-      console.error('Error loading subscriptions:', err);
-    }
+    const maxVal = Math.max(...data, 1);
+    const minVal = 0;
+    const range = maxVal - minVal || 1;
+
+    // Create points
+    const points = data.map((val, i) => ({
+      x: padding.left + (i / (data.length - 1)) * chartWidth,
+      y: padding.top + chartHeight - ((val - minVal) / range) * chartHeight
+    }));
+
+    // Create path
+    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+    // Create area path
+    const areaD = pathD + ` L ${points[points.length - 1].x} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="${svgId}-gradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Area fill -->
+      <path d="${areaD}" fill="url(#${svgId}-gradient)"/>
+      <!-- Line -->
+      <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Points and labels -->
+      ${points.map((p, i) => `
+        <circle cx="${p.x}" cy="${p.y}" r="4" fill="${color}" class="hover:r-6 transition-all cursor-pointer">
+          <title>${labels[i]}: ${data[i]}</title>
+        </circle>
+        <text x="${p.x}" y="${height - 8}" text-anchor="middle" class="fill-muted-foreground text-xs">${labels[i]}</text>
+      `).join('')}
+    `;
   }
-  
-  // Initialize
-  loadStats();
-  loadOrders();
-</script>
+
+  </script>
