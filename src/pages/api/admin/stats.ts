@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { users, businessPages, subscriptions, categories, products } from '@/db/schema';
+import { users, businessPages, orders, categories, products } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
@@ -30,14 +30,14 @@ export async function GET({ request }: { request: Request }) {
       .get();
     const liveBusinesses = Number(liveBusinessesResult?.count) || 0;
 
-    // Get total subscriptions
-    const subscriptionsResult = await db.select({ count: sql`count(*)` }).from(subscriptions).get();
+    // Get total subscriptions (using orders table - it stores subscription data)
+    const subscriptionsResult = await db.select({ count: sql`count(*)` }).from(orders).get();
     const totalSubscriptions = Number(subscriptionsResult?.count) || 0;
 
     // Get total revenue (sum of paid subscriptions)
     const revenueResult = await db.select({ total: sql`COALESCE(SUM(amount), 0)` })
-      .from(subscriptions)
-      .where(eq(subscriptions.status, 'paid'))
+      .from(orders)
+      .where(eq(orders.status, 'paid'))
       .get();
     const totalRevenue = Number(revenueResult?.total) || 0;
 
