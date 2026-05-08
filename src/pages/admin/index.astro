@@ -144,6 +144,21 @@ import AdminLayout from '@layouts/AdminLayout.astro';
           </div>
         </div>
       </div>
+
+      <!-- Expiring Soon -->
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 border-orange-200 dark:border-orange-800 rounded-xl p-4 border">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl md:text-3xl font-bold text-orange-700 dark:text-orange-300" id="stat-expiring">0</p>
+            <p class="text-xs text-orange-600 dark:text-orange-400">Expiring Soon</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Actions & Recent Activity -->
@@ -220,6 +235,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
         document.getElementById('stat-revenue')!.textContent = '$' + String(data.data.totalRevenue || 0);
         document.getElementById('stat-products')!.textContent = String(data.data.totalProducts);
         document.getElementById('stat-categories')!.textContent = String(data.data.totalCategories);
+        document.getElementById('stat-expiring')!.textContent = String(data.data.expiringSoon || 0);
       }
     } catch (err) {
       console.error('Error loading stats:', err);

@@ -48,6 +48,15 @@ export async function GET({ request }: { request: Request }) {
       .get();
     const totalRevenue = Number(revenueResult?.total) || 0;
 
+    // Get subscriptions expiring within 7 days
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    const expiringResult = await db.select({ count: sql`count(*)` })
+      .from(orders)
+      .where(sql`${orders.status} = 'active' AND ${orders.expiresAt} IS NOT NULL AND ${orders.expiresAt} <= ${sevenDaysFromNow.toISOString()}`)
+      .get();
+    const expiringSoon = Number(expiringResult?.count) || 0;
+
     // Get total products/SKUs
     const productsResult = await db.select({ count: sql`count(*)` }).from(products).get();
     const totalProducts = Number(productsResult?.count) || 0;
@@ -67,6 +76,7 @@ export async function GET({ request }: { request: Request }) {
         totalRevenue,
         totalProducts,
         totalCategories,
+        expiringSoon,
         pendingBusinesses: totalBusinesses - liveBusinesses
       }
     }), {
