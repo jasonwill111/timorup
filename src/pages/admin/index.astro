@@ -131,6 +131,39 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   // Initialize
   checkAuth();
   loadStats();
+  loadOrders();
+
+  // Load recent subscriptions
+  async function loadOrders() {
+    try {
+      const res = await authFetch('/api/admin/subscriptions');
+      const data = await res.json();
+
+      const container = document.getElementById('orders-list');
+      if (!container) return;
+
+      // API returns data as array directly, not data.subscriptions
+      const subs = data.success && Array.isArray(data.data) ? data.data : [];
+      if (subs.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-6 text-sm">No subscriptions yet</p>';
+        return;
+      }
+
+      container.innerHTML = subs.slice(0, 5).map((sub: any) => `
+        <div class="flex items-center justify-between p-2 border rounded text-sm">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">#${sub.id.slice(0, 8)}</p>
+            <p class="text-xs text-muted-foreground truncate">${sub.planType || 'Subscription'} - $${sub.amount}</p>
+          </div>
+          <span class="px-2 py-0.5 text-xs rounded-full ${sub.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'} ml-2">${sub.status}</span>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading subscriptions:', err);
+      const container = document.getElementById('orders-list');
+      if (container) container.innerHTML = '<p class="text-center text-muted-foreground py-6 text-sm">Failed to load</p>';
+    }
+  }
 </script>
   <div class="container py-4 px-2 md:py-6 max-w-7xl">
     <!-- Page Header -->
