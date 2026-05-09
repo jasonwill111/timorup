@@ -48,12 +48,12 @@ export async function GET({ request }: { request: Request }) {
       .get();
     const totalRevenue = Number(revenueResult?.total) || 0;
 
-    // Get subscriptions expiring within 7 days
-    const sevenDaysFromNow = new Date();
-    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    // Get subscriptions expiring within 7 days - use timestamp comparison
+    const now = Math.floor(Date.now() / 1000);
+    const sevenDaysLater = now + (7 * 24 * 60 * 60);
     const expiringResult = await db.select({ count: sql`count(*)` })
       .from(orders)
-      .where(sql`${orders.status} = 'active' AND ${orders.expiresAt} IS NOT NULL AND ${orders.expiresAt} <= ${sevenDaysFromNow.toISOString()}`)
+      .where(sql`status = 'active' AND expiry_date IS NOT NULL AND expiry_date > ${now} AND expiry_date <= ${sevenDaysLater}`)
       .get();
     const expiringSoon = Number(expiringResult?.count) || 0;
 
@@ -65,42 +65,57 @@ export async function GET({ request }: { request: Request }) {
     const categoriesResult = await db.select({ count: sql`count(*)` }).from(categories).get();
     const totalCategories = Number(categoriesResult?.count) || 0;
 
-    // Get MTD (Month to Date) stats
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    // Get MTD (Month to Date) stats - use timestamp comparison
+    const startOfMonthTimestamp = Math.floor(new Date().setDate(1) / 1000);
 
     const mtdRevenueResult = await db.select({ total: sql`COALESCE(SUM(amount), 0)` })
       .from(orders)
-      .where(sql`${orders.status} = 'paid' AND ${orders.paidAt} >= ${startOfMonth}`)
+      .where(sql`status = 'paid' AND paid_date >= ${startOfMonthTimestamp}`)
       .get();
     const mtdRevenue = Number(mtdRevenueResult?.total) || 0;
 
     const mtdNewSubscriptionsResult = await db.select({ count: sql`count(*)` })
       .from(orders)
-      .where(sql`${orders.paidAt} >= ${startOfMonth}`)
+      .where(sql`paid_date >= ${startOfMonthTimestamp}`)
       .get();
     const mtdNewSubscriptions = Number(mtdNewSubscriptionsResult?.count) || 0;
 
     const mtdNewUsersResult = await db.select({ count: sql`count(*)` })
       .from(users)
-      .where(sql`${users.createdAt} >= ${startOfMonth}`)
+      .where(sql`created_at >= ${startOfMonthTimestamp}`)
       .get();
     const mtdNewUsers = Number(mtdNewUsersResult?.count) || 0;
 
-    // Get last 6 months revenue for bar chart
+    // Get last 6 months data for charts
     const monthlyData: { month: string; revenue: number; subscriptions: number }[] = [];
+    const monthlyUsers: number[] = [];
+
     for (let i = 5; i >= 0; i--) {
-      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+      const monthStart = new Date();
+      monthStart.setMonth(monthStart.getMonth() - i);
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const monthStartTs = Math.floor(monthStart.getTime() / 1000);
+
+      const monthEnd = new Date(monthStart);
+      monthEnd.setMonth(monthEnd.getMonth() + 1);
+      monthEnd.setDate(0);
+      monthEnd.setHours(23, 59, 59, 999);
+      const monthEndTs = Math.floor(monthEnd.getTime() / 1000);
 
       const monthRevenue = await db.select({ total: sql`COALESCE(SUM(amount), 0)` })
         .from(orders)
-        .where(sql`${orders.status} = 'paid' AND ${orders.paidAt} >= ${monthStart.toISOString()} AND ${orders.paidAt} <= ${monthEnd.toISOString()}`)
+        .where(sql`status = 'paid' AND paid_date >= ${monthStartTs} AND paid_date <= ${monthEndTs}`)
         .get();
 
       const monthSubscriptions = await db.select({ count: sql`count(*)` })
         .from(orders)
-        .where(sql`${orders.paidAt} >= ${monthStart.toISOString()} AND ${orders.paidAt} <= ${monthEnd.toISOString()}`)
+        .where(sql`paid_date >= ${monthStartTs} AND paid_date <= ${monthEndTs}`)
+        .get();
+
+      const monthNewUsers = await db.select({ count: sql`count(*)` })
+        .from(users)
+        .where(sql`created_at >= ${monthStartTs} AND created_at <= ${monthEndTs}`)
         .get();
 
       monthlyData.push({
@@ -108,19 +123,6 @@ export async function GET({ request }: { request: Request }) {
         revenue: Number(monthRevenue?.total) || 0,
         subscriptions: Number(monthSubscriptions?.count) || 0
       });
-    }
-
-    // Get last 6 months new users for chart
-    const monthlyUsers: number[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-
-      const monthNewUsers = await db.select({ count: sql`count(*)` })
-        .from(users)
-        .where(sql`${users.createdAt} >= ${monthStart.toISOString()} AND ${users.createdAt} <= ${monthEnd.toISOString()}`)
-        .get();
-
       monthlyUsers.push(Number(monthNewUsers?.count) || 0);
     }
 
@@ -151,9 +153,10 @@ export async function GET({ request }: { request: Request }) {
     });
   } catch (error) {
     console.error('Admin stats error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({
       success: false,
-      error: { message: 'Failed to fetch stats' }
+      error: { message: 'Failed to fetch stats', details: message }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
