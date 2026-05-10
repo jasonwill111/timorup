@@ -4,19 +4,22 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { forgotPasswordSchema } from '@/lib/api-validation';
 
 export async function POST({ request }: { request: Request }) {
   const db = await getDb();
   try {
     const body = await request.json();
-    const { email } = body;
+    const result = forgotPasswordSchema.safeParse(body);
 
-    if (!email) {
+    if (!result.success) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'Email is required' }
+        error: { message: result.error.issues[0]?.message || 'Invalid input' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
+
+    const { email } = result.data;
 
     // Check if user exists
     const user = await db.select()

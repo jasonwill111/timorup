@@ -5,6 +5,7 @@ import { initAuth } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 import { users, sessions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { signInSchema } from '@/lib/api-validation';
 
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -40,14 +41,16 @@ export async function POST({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { email, password, rememberMe } = body;
+    const result = signInSchema.safeParse(body);
 
-    if (!email || !password) {
+    if (!result.success) {
       return new Response(JSON.stringify({
         success: false,
-        error: { code: 'INVALID_REQUEST', message: 'Email and password are required' }
+        error: { code: 'VALIDATION_ERROR', message: result.error.issues[0]?.message || 'Invalid input' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
+
+    const { email, password, rememberMe } = result.data;
 
     const db = await getDb();
 
@@ -57,15 +60,13 @@ export async function POST({ request }: { request: Request }) {
       .where(eq(users.email, email.toLowerCase()))
       .limit(1)
       .get();
-    console.log('[SignIn] existingUser:', existingUser ? `${existingUser.id}/${existingUser.role}` : 'null');
-
     // Step 2: Call better-auth to verify password and create session
-    const result = await authApi.signInEmail({
+    const sessionResult = await authApi.signInEmail({
       body: { email, password },
     });
 
-    const newUser = result.user;
-    const token = result.token;
+    const newUser = sessionResult.user;
+    const token = sessionResult.token;
 
     let userId: string;
     let userRole: string;
@@ -73,26 +74,15 @@ export async function POST({ request }: { request: Request }) {
     if (existingUser && newUser.id !== existingUser.id) {
       // better-auth created a NEW user instead of finding existing one
       // Fix: delete the new user, use existing user's session
-      console.log('[SignIn] better-auth created duplicate user. New:', newUser.id, 'Existing:', existingUser.id);
 
       // Delete the newly created (duplicate) user
       await db.delete(users).where(eq(users.id, newUser.id)).run();
 
-      // Get the session that better-auth just created
-      const session = await db.select()
-        .from(sessions)
+      // Update session to point to existing user
+      await db.update(sessions)
+        .set({ userId: existingUser.id })
         .where(and(eq(sessions.token, token!), eq(sessions.userId, newUser.id)))
-        .limit(1)
-        .get();
-
-      if (session) {
-        // Update session to point to existing user
-        await db.update(sessions)
-          .set({ userId: existingUser.id })
-          .where(eq(sessions.id, session.id))
-          .run();
-        console.log('[SignIn] Session updated from new user to existing user');
-      }
+        .run();
 
       userId = existingUser.id;
       userRole = existingUser.role || 'user';
@@ -105,8 +95,6 @@ export async function POST({ request }: { request: Request }) {
       userId = newUser.id;
       userRole = 'user';
     }
-
-    console.log('[SignIn] Sign in successful, userId:', userId, ', role:', userRole);
 
     const maxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7;
     const isProduction = process.env.NODE_ENV === 'production';

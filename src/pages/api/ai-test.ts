@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { agents } from '@/mastra/agents'
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth'
+import { aiGenerateSchema } from '@/lib/api-validation'
 
 export const prerender = false
 
@@ -9,17 +10,19 @@ export const POST: APIRoute = async ({ request }) => {
   if (!user) return unauthorizedResponse()
 
   try {
-    const { message } = await request.json()
+    const body = await request.json()
+    const result = aiGenerateSchema.safeParse(body)
 
-    if (!message) {
-      return new Response(JSON.stringify({ error: 'Message required' }), {
+    if (!result.success) {
+      return new Response(JSON.stringify({ error: result.error.issues[0]?.message || 'Invalid prompt' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       })
     }
 
+    const { prompt } = result.data
     const agent = agents.listingCreator
-    const response = await agent.generate(message)
+    const response = await agent.generate(prompt)
 
     return new Response(JSON.stringify({
       success: true,

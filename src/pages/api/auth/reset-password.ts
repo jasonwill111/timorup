@@ -1,17 +1,21 @@
 // Auth API - Reset Password
 export const prerender = false;
 
+import { resetPasswordSchema } from '@/lib/api-validation';
+
 export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
-    const { token, password } = body;
+    const result = resetPasswordSchema.safeParse(body);
 
-    if (!token || !password) {
+    if (!result.success) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'Token and password are required' }
+        error: { message: result.error.issues[0]?.message || 'Invalid input' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
+
+    const { token, password } = result.data;
 
     // In real app, validate token and update password
     // For demo, just return success

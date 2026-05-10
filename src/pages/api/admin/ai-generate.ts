@@ -3,6 +3,7 @@ export const prerender = false;
 
 import { agents } from '@/mastra/agents';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
+import { aiGenerateSchema } from '@/lib/api-validation';
 
 const AI_TIMEOUT = 60000;
 
@@ -52,15 +53,20 @@ export async function POST({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   try {
-    const body: GenerationRequest = await request.json();
-    const { type, data, stream } = body;
+    const parsed = await request.json();
+    const parseResult = aiGenerateSchema.safeParse(parsed);
 
-    if (!type || !data) {
-      return new Response(JSON.stringify({ error: 'Type and data required' }), {
+    if (!parseResult.success) {
+      return new Response(JSON.stringify({ error: parseResult.error.issues[0]?.message || 'Invalid prompt' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    const { prompt } = parseResult.data;
+    const type = 'listing'; // Default type for aiGenerateSchema
+    const data = { prompt };
+    const stream = body.stream;
 
     const agentMap = {
       listing: agents.listingCreator,
