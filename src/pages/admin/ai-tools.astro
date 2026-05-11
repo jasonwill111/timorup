@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import AdminLayout from '@layouts/AdminLayout.astro';
+import { actions } from 'astro:actions';
 ---
 
 <AdminLayout title="AI Tools">
@@ -387,6 +388,10 @@ import AdminLayout from '@layouts/AdminLayout.astro';
               <p id="preview-landing-hero-subtitle" class="text-sm"></p>
             </div>
             <div class="p-4 bg-muted rounded-lg">
+              <span class="text-xs text-muted-foreground">Description</span>
+              <p id="preview-landing-desc" class="text-sm"></p>
+            </div>
+            <div class="p-4 bg-muted rounded-lg">
               <span class="text-xs text-muted-foreground">Features</span>
               <ul id="preview-landing-features" class="text-sm list-disc pl-4"></ul>
             </div>
@@ -412,6 +417,51 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
+  import { actions } from 'astro:actions';
+
+  // AI Generator interfaces
+  interface PriceField {
+    label: string;
+    value: string;
+    unit: string;
+  }
+
+  interface GeneratedListing {
+    title: string;
+    entityType: string;
+    categoryId: string | null;
+    contactName: string | null;
+    contactNumber: string | null;
+    countryCode: string;
+    email: string | null;
+    address: string | null;
+    aboutUs: string | null;
+    tags: string[];
+  }
+
+  interface GeneratedSku {
+    title: string;
+    serviceType: string;
+    skuDescription: string;
+    priceFields: PriceField[];
+  }
+
+  interface GeneratedBlog {
+    title: string;
+    excerpt: string;
+    content: string;
+    tags: string[];
+    slug: string;
+    status: string;
+  }
+
+  interface GeneratedLanding {
+    heroTitle: string;
+    heroSubtitle: string;
+    features: string[];
+    ctaText: string;
+  }
+
   // Tab switching
   const tabBtns = document.querySelectorAll('.tab-btn');
   const sections = {
@@ -438,7 +488,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   });
 
   // ============== LISTING GENERATOR ==============
-  let generatedListing: any = null;
+  let generatedListing: GeneratedListing | null = null;
 
   document.getElementById('listing-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -460,22 +510,19 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
 
     try {
-      const res = await fetch('/api/admin/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'listing',
-          data: { title, entityType, categoryId, contactName, phone, email, address, about, tags }
-        }),
+      const result = await actions.admin.aiGenerate({
+        type: 'listing',
+        data: { title, entityType, categoryId, contactName, phone, email, address, about, tags }
       });
-      const result = await res.json();
 
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Generation failed');
+      // Astro Actions wraps result in data property
+      const actionResult = (result as any).data || result;
+      if (!actionResult.success) {
+        throw new Error(actionResult.error?.message || 'Generation failed');
       }
 
       // Use AI structured output
-      const aiData = result.object?.data || {};
+      const aiData = actionResult.object || {};
       generatedListing = {
         ...aiData,
         title: aiData.title || title,
@@ -498,9 +545,13 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
       document.getElementById('listing-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
-    } catch (err: any) {
-      console.error('Listing generation error:', err);
-      alert('Failed to generate listing: ' + (err.message || 'Unknown error'));
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('Listing generation error:', error);
+      const errorMsg = error.message?.includes('permission') || error.message?.includes('unauthorized')
+        ? 'MiniMax API权限被拒绝。请检查API密钥和配额。'
+        : 'Failed to generate listing: ' + (error.message || 'Unknown error');
+      alert(errorMsg);
       if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
       document.getElementById('listing-empty')?.classList.remove('hidden');
     } finally {
@@ -556,16 +607,11 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (!generatedListing) return;
 
     try {
-      const res = await fetch('/api/admin/listings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(generatedListing),
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Listing created! ID: ' + data.data?.id);
+      const result = await actions.admin.listings.create(generatedListing);
+      if (result.success) {
+        alert('Listing created! ID: ' + result.data?.id);
       } else {
-        alert('Failed to save: ' + (data.error?.message || 'Unknown error'));
+        alert('Failed to save: ' + (result.error?.message || 'Unknown error'));
       }
     } catch (err) {
       alert('Failed to save listing');
@@ -573,7 +619,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   });
 
   // ============== SKU GENERATOR ==============
-  let generatedSku: any = null;
+  let generatedSku: GeneratedSku | null = null;
 
   document.getElementById('sku-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -592,33 +638,39 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
 
     try {
-      const res = await fetch('/api/admin/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'sku',
-          data: { title, serviceType, description, priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [] }
-        }),
+      const result = await actions.admin.aiGenerate({
+        type: 'sku',
+        data: { title, serviceType, description, priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [] }
       });
-      const result = await res.json();
 
+      // Astro Actions wraps result in data property
+      const actionResult = (result as any).data || result;
+      if (!actionResult.success) {
+        throw new Error(actionResult.error?.message || 'Generation failed');
+      }
+
+      const aiData = actionResult.object || {};
       generatedSku = {
-        title,
-        serviceType,
-        skuDescription: description,
-        priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [],
+        title: aiData.title || title,
+        serviceType: aiData.serviceType || serviceType,
+        skuDescription: aiData.description || description,
+        priceFields: aiData.priceFields || (priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : []),
       };
 
       document.getElementById('preview-sku-title')!.textContent = generatedSku.title;
       document.getElementById('preview-sku-type')!.textContent = generatedSku.serviceType;
-      document.getElementById('preview-sku-price')!.textContent = generatedSku.priceFields.map((p: any) => `${p.label}: $${p.value}${p.unit}`).join(', ');
+      document.getElementById('preview-sku-price')!.textContent = generatedSku.priceFields.map((p: PriceField) => `${p.label}: $${p.value}${p.unit}`).join(', ');
       document.getElementById('preview-sku-desc')!.textContent = generatedSku.skuDescription;
 
       document.getElementById('sku-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
-    } catch (err: any) {
-      console.error('SKU generation error:', err);
-      alert('Failed to generate SKU: ' + (err.message || 'Unknown error'));
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('SKU generation error:', error);
+      const errorMsg = error.message?.includes('permission') || error.message?.includes('unauthorized')
+        ? 'MiniMax API权限被拒绝。请检查API密钥和配额。'
+        : 'Failed to generate SKU: ' + (error.message || 'Unknown error');
+      alert(errorMsg);
       if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
       document.getElementById('sku-empty')?.classList.remove('hidden');
     } finally {
@@ -634,7 +686,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   });
 
   // ============== BLOG GENERATOR ==============
-  let generatedBlog: any = null;
+  let generatedBlog: GeneratedBlog | null = null;
 
   document.getElementById('blog-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -651,22 +703,23 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
 
     try {
-      const res = await fetch('/api/admin/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'blog',
-          data: { topic, type, length, prompt }
-        }),
+      const result = await actions.admin.aiGenerate({
+        type: 'blog',
+        data: { topic, type, length, prompt }
       });
-      const result = await res.json();
 
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Generation failed');
+      console.log('[Blog] Action result:', JSON.stringify(result));
+
+      // Astro Actions wraps result in data property
+      const actionResult = (result as any).data || result;
+      if (!actionResult.success) {
+        const errMsg = actionResult.error?.message || 'Generation failed';
+        console.error('[Blog] Action failed:', errMsg);
+        throw new Error(errMsg);
       }
 
-      // Use AI structured output
-      const aiData = result.object?.data || {};
+      // Use AI structured output - object is directly in actionResult
+      const aiData = actionResult.object || {};
       generatedBlog = {
         title: aiData.title || topic,
         excerpt: aiData.excerpt || '',
@@ -685,9 +738,13 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
       document.getElementById('blog-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
-    } catch (err: any) {
-      console.error('Blog generation error:', err);
-      alert('Failed to generate blog: ' + (err.message || 'Unknown error'));
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('Blog generation error:', error);
+      const errorMsg = error.message?.includes('permission') || error.message?.includes('unauthorized')
+        ? 'MiniMax API权限被拒绝。请检查API密钥和配额。'
+        : 'Failed to generate blog: ' + (error.message || 'Unknown error');
+      alert(errorMsg);
       if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
       document.getElementById('blog-empty')?.classList.remove('hidden');
     } finally {
@@ -735,7 +792,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
   });
 
   // ============== LANDING PAGE GENERATOR ==============
-  let generatedLanding: any = null;
+  let generatedLanding: GeneratedLanding | null = null;
 
   document.getElementById('landing-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -752,22 +809,19 @@ import AdminLayout from '@layouts/AdminLayout.astro';
     if (statusEl) { statusEl.textContent = 'Generating...'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-yellow-100'; }
 
     try {
-      const res = await fetch('/api/admin/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'landing',
-          data: { title, type, description, prompt }
-        }),
+      const result = await actions.admin.aiGenerate({
+        type: 'landing',
+        data: { title, type, description, prompt }
       });
-      const result = await res.json();
 
-      if (!result.success) {
-        throw new Error(result.error?.message || 'Generation failed');
+      // Astro Actions wraps result in data property
+      const actionResult = (result as any).data || result;
+      if (!actionResult.success) {
+        throw new Error(actionResult.error?.message || 'Generation failed');
       }
 
       // Use AI structured output
-      const aiData = result.object?.data || {};
+      const aiData = actionResult.object || {};
       generatedLanding = {
         hero: aiData.hero || { title: title, subtitle: description },
         landingDescription: aiData.description || '',
@@ -782,15 +836,19 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       document.getElementById('preview-landing-hero-subtitle')!.textContent = generatedLanding.hero?.subtitle || description;
 
       const featuresEl = document.getElementById('preview-landing-features')!;
-      featuresEl.innerHTML = (generatedLanding.features || []).map((f: any) => `<li><strong>${f.title}</strong>: ${f.description}</li>`).join('') || '<li>No features generated</li>';
+      featuresEl.innerHTML = (generatedLanding.features || []).map((f: GeneratedSku) => `<li><strong>${f.title}</strong>: ${f.description}</li>`).join('') || '<li>No features generated</li>';
 
       document.getElementById('preview-landing-desc')!.textContent = generatedLanding.landingDescription;
 
       document.getElementById('landing-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
-    } catch (err: any) {
-      console.error('Landing page generation error:', err);
-      alert('Failed to generate landing page: ' + (err.message || 'Unknown error'));
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('Landing page generation error:', error);
+      const errorMsg = error.message?.includes('permission') || error.message?.includes('unauthorized')
+        ? 'MiniMax API权限被拒绝。请检查API密钥和配额。'
+        : 'Failed to generate landing page: ' + (error.message || 'Unknown error');
+      alert(errorMsg);
       if (statusEl) { statusEl.textContent = 'Error'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-red-100'; }
       document.getElementById('landing-empty')?.classList.remove('hidden');
     } finally {
@@ -827,7 +885,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
               <p>${generatedLanding.hero?.subtitle || generatedLanding.description || ''}</p>
             </div>
             <div class="features">
-              ${(generatedLanding.features || []).map((f: any) => `
+              ${(generatedLanding.features || []).map((f: GeneratedSku) => `
                 <div class="feature">
                   <h3>${f.icon || ''} ${f.title || ''}</h3>
                   <p>${f.description || ''}</p>
