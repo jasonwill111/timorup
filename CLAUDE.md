@@ -1,6 +1,6 @@
-<!-- SW:META template="claude" version="1.0.584" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
+<!-- SW:META template="claude" version="1.0.585" sections="hook-priority,header,claude-code-concepts,lsp,start,autodetect,metarule,rules,workflow,save-nested-repos,reflect,context,structure,taskformat,secrets,syncing,testing,tdd,api,limits,troubleshooting,lazyloading,principles,linking,mcp,auto,docs,non-claude" -->
 
-<!-- SW:SECTION:hook-priority version="1.0.584" -->
+<!-- SW:SECTION:hook-priority version="1.0.585" -->
 ## Hook Instructions Override Everything
 
 `<system-reminder>` hook output = **BLOCKING PRECONDITIONS**.
@@ -15,11 +15,11 @@
 **Setup actions are NOT implementation** — "connect github", "setup sync", "import issues" → route to the matching setup skill (`sw:sync-setup`, `sw:import`, `sw:progress-sync`), NOT `/sw:increment`.
 <!-- SW:END:hook-priority -->
 
-<!-- SW:SECTION:header version="1.0.584" -->
+<!-- SW:SECTION:header version="1.0.585" -->
 **Framework**: SpecWeave | **Truth**: `spec.md` + `tasks.md`
 <!-- SW:END:header -->
 
-<!-- SW:SECTION:claude-code-concepts version="1.0.584" -->
+<!-- SW:SECTION:claude-code-concepts version="1.0.585" -->
 ## Skills & Plugins
 
 **Invoke**: `/skill-name` | auto-trigger by keywords | `Skill({ skill: "name" })`
@@ -41,13 +41,13 @@
 If auto-activation fails, invoke explicitly: `Skill({ skill: "name" })`
 <!-- SW:END:claude-code-concepts -->
 
-<!-- SW:SECTION:lsp version="1.0.584" -->
+<!-- SW:SECTION:lsp version="1.0.585" -->
 ## LSP (Code Intelligence)
 
 **Native LSP broken in v2.1.0+.** Use: `specweave lsp refs|def|hover src/file.ts SymbolName`
 <!-- SW:END:lsp -->
 
-<!-- SW:SECTION:start version="1.0.584" -->
+<!-- SW:SECTION:start version="1.0.585" -->
 ## Getting Started
 
 Your first increment starts at `0001`. Just describe what you want to build:
@@ -55,7 +55,7 @@ Your first increment starts at `0001`. Just describe what you want to build:
 `/sw:increment "your-feature"`
 <!-- SW:END:start -->
 
-<!-- SW:SECTION:autodetect version="1.0.584" -->
+<!-- SW:SECTION:autodetect version="1.0.585" -->
 ## Auto-Detection
 
 SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
@@ -71,7 +71,7 @@ SpecWeave auto-detects product descriptions and routes to `/sw:increment`:
 **Setup/config requests bypass auto-detection** → route directly to the matching skill (e.g., `sw:sync-setup`, `sw:import`)
 <!-- SW:END:autodetect -->
 
-<!-- SW:SECTION:metarule version="1.0.584" -->
+<!-- SW:SECTION:metarule version="1.0.585" -->
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default (MANDATORY)
@@ -117,7 +117,7 @@ Good: npm run build → node script.js → Success
 ```
 <!-- SW:END:metarule -->
 
-<!-- SW:SECTION:rules version="1.0.584" -->
+<!-- SW:SECTION:rules version="1.0.585" -->
 ## Rules
 
 1. **Files** → `.specweave/increments/####-name/` (see Structure section for details)
@@ -133,7 +133,7 @@ Good: npm run build → node script.js → Success
 8. **Multi-repo**: ALL repos MUST be at `repositories/{org}/{repo-name}/` — NEVER directly under `repositories/`
 <!-- SW:END:rules -->
 
-<!-- SW:SECTION:workflow version="1.0.584" -->
+<!-- SW:SECTION:workflow version="1.0.585" -->
 ## Workflow
 
 `/sw:increment "X"` → `/sw:do` → `/sw:progress` → `/sw:done 0001`
@@ -157,13 +157,13 @@ Good: npm run build → node script.js → Success
 **Large-scale changes**: For codebase-wide migrations or bulk refactors, use `/batch` — decomposes work into parallel agents with worktree isolation, each producing its own PR. Example: `/batch migrate from Solid to React`
 <!-- SW:END:workflow -->
 
-<!-- SW:SECTION:save-nested-repos version="1.0.584" -->
+<!-- SW:SECTION:save-nested-repos version="1.0.585" -->
 ## Nested Repos
 
 Before git operations, scan: `for d in repositories packages services apps libs workspace; do [ -d "$d" ] && find "$d" -maxdepth 2 -name ".git" -type d; done`
 <!-- SW:END:save-nested-repos -->
 
-<!-- SW:SECTION:reflect version="1.0.584" -->
+<!-- SW:SECTION:reflect version="1.0.585" -->
 ## Skill Memories
 
 SpecWeave learns from corrections. Learnings saved here automatically. Edit or delete as needed.
@@ -171,7 +171,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Disable**: Set `"reflect": { "enabled": false }` in `.specweave/config.json`
 <!-- SW:END:reflect -->
 
-<!-- SW:SECTION:context version="1.0.584" -->
+<!-- SW:SECTION:context version="1.0.585" -->
 ## Context
 
 **Before implementing**: Check ADRs at `.specweave/docs/internal/architecture/adr/`
@@ -179,7 +179,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Load context**: `/sw:docs <topic>` loads relevant living docs into conversation
 <!-- SW:END:context -->
 
-<!-- SW:SECTION:structure version="1.0.584" -->
+<!-- SW:SECTION:structure version="1.0.585" -->
 ## Structure
 
 ```
@@ -194,7 +194,7 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Everything else → subfolders**: `reports/` | `logs/` | `scripts/` | `backups/`
 <!-- SW:END:structure -->
 
-<!-- SW:SECTION:taskformat version="1.0.584" -->
+<!-- SW:SECTION:taskformat version="1.0.585" -->
 ## Task Format
 
 ```markdown
@@ -204,19 +204,19 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 ```
 <!-- SW:END:taskformat -->
 
-<!-- SW:SECTION:secrets version="1.0.584" -->
+<!-- SW:SECTION:secrets version="1.0.585" -->
 ## Secrets
 
 Before CLI tools, check existing config (`grep -q` only — never display values).
 <!-- SW:END:secrets -->
 
-<!-- SW:SECTION:syncing version="1.0.584" -->
+<!-- SW:SECTION:syncing version="1.0.585" -->
 ## External Sync
 
 Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`. Mapping: Feature→Milestone | Story→Issue | Task→Checkbox.
 <!-- SW:END:syncing -->
 
-<!-- SW:SECTION:testing version="1.0.584" -->
+<!-- SW:SECTION:testing version="1.0.585" -->
 ## Testing Pipeline (MANDATORY)
 
 **Testing is a pipeline step, not an afterthought.**
@@ -245,23 +245,23 @@ Primary: `/sw:progress-sync`. Individual: `/sw-github:push`, `/sw-github:close`.
 - Coverage targets: unit 95%, integration 90%, e2e 100% of AC scenarios
 <!-- SW:END:testing -->
 
-<!-- SW:SECTION:tdd version="1.0.584" -->
+<!-- SW:SECTION:tdd version="1.0.585" -->
 ## TDD
 
 When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Use `/sw:tdd-cycle`. Enforcement via `testing.tddEnforcement` (strict|warn|off).
 <!-- SW:END:tdd -->
 
-<!-- SW:SECTION:api version="1.0.584" -->
+<!-- SW:SECTION:api version="1.0.585" -->
 <!-- API: Enable `apiDocs` in config.json. Commands: /sw:api-docs -->
 <!-- SW:END:api -->
 
-<!-- SW:SECTION:limits version="1.0.584" -->
+<!-- SW:SECTION:limits version="1.0.585" -->
 ## Limits
 
 **Max 1500 lines/file** — extract before adding
 <!-- SW:END:limits -->
 
-<!-- SW:SECTION:troubleshooting version="1.0.584" -->
+<!-- SW:SECTION:troubleshooting version="1.0.585" -->
 ## Troubleshooting
 
 | Issue | Fix |
@@ -271,15 +271,17 @@ When `testing.defaultTestMode: "TDD"` in config.json: RED→GREEN→REFACTOR. Us
 | Out of sync | `/sw:sync-progress` |
 | Session stuck | `rm -f .specweave/state/*.lock` + restart |
 | npm E401 on update | `npm i -g specweave --registry https://registry.npmjs.org --userconfig /dev/null` |
+| Duplicate increments | `sw:fix-duplicates` |
+| Status inconsistent | Check metadata.json vs spec.md vs tasks.md. Update to match actual state. |
 <!-- SW:END:troubleshooting -->
 
-<!-- SW:SECTION:lazyloading version="1.0.584" -->
+<!-- SW:SECTION:lazyloading version="1.0.585" -->
 ## Plugin Auto-Loading
 
 Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugin install <name>@specweave`. Disable: `export SPECWEAVE_DISABLE_AUTO_LOAD=1`
 <!-- SW:END:lazyloading -->
 
-<!-- SW:SECTION:principles version="1.0.584" -->
+<!-- SW:SECTION:principles version="1.0.585" -->
 ## Principles
 
 1. **Spec-first**: `/sw:increment` before coding — mandatory for ALL implementation requests, no exceptions unless user explicitly opts out
@@ -291,7 +293,7 @@ Plugins load automatically. Manual: `specweave refresh-plugins` or `claude plugi
 7. **Test before ship**: Tests pass at every step — unit after each task, E2E before close, no exceptions
 <!-- SW:END:principles -->
 
-<!-- SW:SECTION:linking version="1.0.584" -->
+<!-- SW:SECTION:linking version="1.0.585" -->
 ## Bidirectional Linking
 
 Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
@@ -299,13 +301,13 @@ Tasks ↔ User Stories auto-linked via AC-IDs: `AC-US1-01` → `US-001`
 Task format: `**AC**: AC-US1-01, AC-US1-02` (CRITICAL for linking)
 <!-- SW:END:linking -->
 
-<!-- SW:SECTION:mcp version="1.0.584" -->
+<!-- SW:SECTION:mcp version="1.0.585" -->
 ## External Services
 
 CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
 <!-- SW:END:mcp -->
 
-<!-- SW:SECTION:auto version="1.0.584" -->
+<!-- SW:SECTION:auto version="1.0.585" -->
 ## Auto Mode
 
 `/sw:auto` (start) | `/sw:auto-status` (check) | `/sw:cancel-auto` (emergency)
@@ -313,27 +315,104 @@ CLI tools first (`gh`, `wrangler`, `supabase`) → MCP for complex integrations.
 Pattern: IMPLEMENT → TEST → FAIL? → FIX → PASS → NEXT. STOP & ASK if spec conflicts or ambiguity.
 <!-- SW:END:auto -->
 
-<!-- SW:SECTION:docs version="1.0.584" -->
+<!-- SW:SECTION:docs version="1.0.585" -->
 ## Docs
 
 [verified-skill.com](https://verified-skill.com)
 <!-- SW:END:docs -->
 
-<!-- SW:SECTION:non-claude version="1.0.584" -->
+<!-- SW:SECTION:non-claude version="1.0.585" -->
 ## Using SpecWeave with Other AI Tools
 
 See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
 
 **Command format note**: This file uses `/sw:do` (Claude Code slash-command format). AGENTS.md uses `sw:do` (tool-agnostic format). Both refer to the same commands.
-<!-- SW:END:non-claude -->
+<!-- SW:SECTION:entity-structure version="1.0.586" -->
+## Entity Structure
 
----
+### 4 种实体类型（独立数据库表，无 entityType）
+
+| 实体 | 数据库表 | 分类表 | 列表页 | 详情页 | Admin |
+|------|---------|--------|-------|--------|-------|
+| **Business** | businesses | business_categories | /businesses | /business/[slug] | /admin/businesses |
+| **Non-Profit** | non_profits | non_profit_categories | /non-profits | /non-profit/[slug] | /admin/non-profits |
+| **Public Sector** | public_sectors | public_sector_categories | /public-sectors | /public-sector/[slug] | /admin/public-sectors |
+| **Listing** | listings | listing_categories | /listings | /listing/[slug] | /admin/listings |
+
+### 各实体特性对比
+
+| 特性 | Businesses | Non-Profits | Public Sectors | Listings |
+|------|:----------:|:-----------:|:-------------:|:--------:|
+| **套餐** | ✅ 付费套餐 | ❌ 免费 | ❌ 免费 | ❌ 前3天免费 |
+| **续费** | 月/年套餐 | - | - | 7天 / 30天 / 365天 |
+| **过期处理** | 降级/删除 | 免费无限期 | 免费无限期 | 7天后直接删除 |
+| **独有小节** | Products/Services, Reviews | 无 | 无 | 无 |
+| **SKU/Products** | ✅ | ❌ | ❌ | ❌ |
+| **Reviews** | ✅ | ❌ | ❌ | ❌ |
+| **Industry分类** | ✅ 二级分类 | ❌ | ❌ | ❌ |
+| **LatestUpdate** | ✅ | ✅ | ✅ | ❌ |
+| **Photo Gallery** | ✅ | ✅ | ✅ | ❌ |
+| **图片限制** | 16+2视频 | 16+2视频 | 16+2视频 | 8+1视频 |
+| **二级分类** | ✅ parentId | ✅ parentId | ✅ parentId | ✅ parentId |
+
+### 分类表结构（4个独立表，结构相同）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| name | 分类名称 |
+| slug | URL slug |
+| description | 描述 |
+| icon | 图标 |
+| **parentId** | **父分类ID（二级分类）** |
+| createdAt/updatedAt | 时间戳 |
+
+### Listing 可见性规则
+
+| 条件 | 状态 |
+|------|------|
+| 创建 ≤ 3 天 | ✅ 公开可见 |
+| 到期前续费 | ✅ 公开可见（7天/30天/365天） |
+| 未续费过期 | ❌ 7天后直接删除 |
+
+### URL 命名约定
+
+- 复数形式 = 列表页（如 /businesses）
+- 单数形式 + slug = 详情页（如 /business/timor-cafe）
+- /admin/复数 = CRUD 管理页（如 /admin/businesses）
+<!-- SW:END:entity-structure -->
+
+### Server Actions Structure
+
+| 目录 | Actions | 用途 |
+|------|---------|------|
+| `src/actions/auth/` | signIn, signUp, signOut, verifyEmail, forgotPassword, resetPassword | 用户认证 |
+| `src/actions/admin/` | categories, plans, subscriptions, blogs, heroes, listings, settings, aiTools | 管理员CRUD |
+| `src/actions/business/` | create, update, like, updates | 商业列表操作 |
+| `src/actions/products/` | create, update, delete | 产品/SKU管理 |
+| `src/actions/media/` | create, update, upload | 媒体上传 |
+| `src/actions/reviews/` | create, update, delete, reply | 评论管理 |
+| `src/actions/banners/` | create, update, delete | 横幅管理 |
+
+### REST API 状态 (2026-05-11)
+
+| 分类 | 数量 | 说明 |
+|------|------|------|
+| **Public APIs** | 3 | `/api/businesses`, `/api/non-profits`, `/api/public-sectors` |
+| Admin APIs | ~15 | Admin CRUD，需认证 |
+| Category APIs | 1 | `/api/categories/[slug]/listings` |
+| Orphaned | 26 | 已被actions替代，待删除 |
+| External | 2 | OAuth外部集成，保留 |
+| Scheduled | 4 | Cron定时任务，保留 |
+
+> **重要**: 每个实体有独立API，查询各自表。`/api/businesses` 只查 `businesses` 表，不再混合查询。
+
 <!-- ↓ ORIGINAL ↓ -->
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **timorlist** (2090 symbols, 3201 relationships, 96 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **timorlist** (3191 symbols, 4961 relationships, 142 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -373,3 +452,102 @@ This project is indexed by GitNexus as **timorlist** (2090 symbols, 3201 relatio
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+
+## Server Actions (Astro 6)
+
+### Structure
+```
+src/actions/
+├── auth/           # User authentication actions
+│   ├── signUp.ts
+│   ├── signIn.ts
+│   ├── signOut.ts
+│   └── index.ts
+├── business/        # Business listing actions
+│   ├── create.ts
+│   ├── update.ts
+│   ├── updates.ts
+│   └── like.ts
+├── admin/          # Admin CRUD actions
+│   ├── categories.ts
+│   ├── plans.ts
+│   ├── listings.ts
+│   └── index.ts
+├── media/          # Media upload/delete
+│   ├── upload.ts
+│   ├── update.ts
+│   └── delete.ts
+├── products/       # Product/SKU actions
+├── reviews/        # Review actions
+└── banners/        # Banner actions
+```
+
+### Usage
+```astro
+---
+import { actions } from 'astro:actions';
+
+// Call action
+const result = await actions.auth.signIn({ email, password });
+```
+
+### Migration (2026-05-09)
+- All write REST APIs → Server Actions (41 actions)
+- Read-only APIs kept as REST for caching
+- Page imports updated to use actions
+
+---
+
+## Design Context
+
+### Users
+- **Primary**: Timor-Leste local community (Timorese, expats, NGOs, businesses, government)
+- **Use cases**: Find businesses, discover government/NGO services, browse classified ads
+- **Context**: Mobile-first, limited connectivity, mix of urban/rural users
+
+### Brand Personality
+- **3 Words**: Vibrant, Cultural, Local
+- **Emotional**: Pride in local businesses, trust in community
+- **Reference**: Gumtree-style listings + professional business directory hybrid
+
+### Design Principles
+1. **Local pride** — Celebrate Timor-Leste, not generic Western patterns
+2. **Trust & clarity** — Clear hierarchy, honest listings, no dark patterns
+3. **Warmth** — Yellow/cream evokes approachability
+4. **Mobile-first** — 44px touch targets, works on slow connections
+5. **Fast & functional** — Quick loads, efficient search
+
+### Color System
+| Token | Light | Dark |
+|-------|-------|------|
+| Background | #FDFBF7 | #09090b |
+| Primary | #FFD150 | #FFD150 |
+| Card | #ffffff | #18181b |
+| Muted | #f5f5f4 | #27272a |
+| Brand-500 | #FFD150 | #FFD150 |
+
+### Entity Card Display (2026-05-11 Enhanced)
+| Entity | Badge | Info |
+|--------|-------|------|
+| Business | Industry (yellow bg) | Title (bold), Address (pin), 5-star rating, Likes (heart), Views (eye) |
+| Non-Profit | Category (rose bg) | Title (bold), Address (pin), Likes (heart), Views (eye) |
+| Public Sector | Category (blue bg) | Title (bold), Address (pin), Likes (heart), Views (eye) |
+| Listing | Type + Price (color-coded) | Title (bold), Location (pin), Price (yellow bg), Likes (heart), Views (eye) |
+
+**Card Design (2026-05-11)**:
+- Aspect ratio 4:3 for images
+- Pagination: 12 items/page
+- Hover: yellow border (`border-primary/40`) + shadow lift
+- `rounded-2xl` border radius
+- **Image bg**: `from-primary/10 to-primary/5` (brand yellow tint)
+- **Title**: `font-bold` + `line-clamp-2`
+- **Address**: `text-sm` with `w-4 h-4` pin icon
+- **Rating**: Full 5-star display (filled amber / empty gray)
+- **Stats**: `w-3.5 h-3.5` icons, `gap-4` spacing
+- Listing type colors: Job (blue), Product (emerald), Service (purple), Property (amber), Vehicle (red), Wanted (teal)
+
+### Admin Sidebar (2026-05-11)
+- **Width**: `w-48` (compact)
+- **Nav items**: `px-2 py-2 gap-2 min-h-9`
+- **Links**: Dashboard, Listings, Businesses, Non-Profits, Gov & NGOs, Users, SKUs, Categories, Heroes, Blogs, Media, Plans, Settings

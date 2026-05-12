@@ -101,6 +101,8 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
 </Layout>
 
 <script>
+  import { actions } from 'astro:actions';
+
   const form = document.getElementById('register-form');
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
   const btnText = document.getElementById('submit-btn-text');
@@ -142,13 +144,12 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const res = await fetch('/api/auth/sign-up', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+      const result = await actions.auth.signUp({
+        email: data.email as string,
+        password: data.password as string,
+        name: data.name as string
       });
 
-      const result = await res.json();
       setLoading(false);
 
       if (result.success) {

@@ -2,10 +2,11 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { media, businessPages, plans } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { media, businessPages } from '@/db/schema';
+import { eq, and, count } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
+import { getPlanLimits } from '@/lib/subscription';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -28,23 +29,7 @@ const MAX_VIDEO_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
-const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1 };
-
-async function getPlanLimits(planType: string | null): Promise<{ maxImages: number; maxVideos: number }> {
-  if (!planType) return DEFAULT_LIMITS;
-
-  const db = await getDb();
-  const plan = await db.select({
-    maxImages: plans.maxImages,
-    maxVideos: plans.maxVideos,
-  })
-    .from(plans)
-    .where(eq(plans.id, planType))
-    .limit(1)
-    .get();
-
-  return plan ? { maxImages: plan.maxImages, maxVideos: plan.maxVideos } : DEFAULT_LIMITS;
-}
+const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1, maxBusinessImages: 16, maxBusinessVideos: 2 };
 
 async function getCurrentUser(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';
@@ -79,7 +64,7 @@ export async function GET({ request }: { request: Request }) {
     const category = url.searchParams.get('category');
     const id = url.pathname.split('/').pop();
     const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
     const offset = (page - 1) * limit;
 
     if (id && id !== 'media') {
@@ -96,40 +81,40 @@ export async function GET({ request }: { request: Request }) {
       });
     }
 
-    // Build query with filters
-    const allMedia = await db.select().from(media);
-
-    // Apply filters
-    let filtered = allMedia;
+    // Build SQL WHERE conditions
+    const conditions = [];
     if (businessId) {
-      filtered = filtered.filter(m => m.businessId === businessId);
+      conditions.push(eq(media.businessId, businessId));
     } else if (userId) {
-      filtered = filtered.filter(m => m.createdById === userId);
+      conditions.push(eq(media.createdById, userId));
     }
     if (entityType) {
-      filtered = filtered.filter(m => m.entityType === entityType);
+      conditions.push(eq(media.entityType, entityType));
     }
     if (entityId) {
-      filtered = filtered.filter(m => m.entityId === entityId);
+      conditions.push(eq(media.entityId, entityId));
     }
     if (category) {
-      filtered = filtered.filter(m => m.category === category);
+      conditions.push(eq(media.category, category));
     }
 
-    // Sort by createdAt desc
-    filtered.sort((a, b) => {
-      const aTime = a.createdAt?.getTime() || 0;
-      const bTime = b.createdAt?.getTime() || 0;
-      return bTime - aTime;
-    });
+    // Get total count with WHERE
+    const countResult = await db.select({ count: count() })
+      .from(media)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .get();
+    const total = countResult?.count || 0;
 
-    // Paginate
-    const total = filtered.length;
-    const paginated = filtered.slice(offset, offset + limit);
+    // Query with WHERE + pagination
+    let query = db.select().from(media);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    const allMedia = await query.limit(limit).offset(offset).all();
 
     return new Response(JSON.stringify({
       success: true,
-      data: paginated,
+      data: allMedia,
       total,
       page,
       limit,
@@ -192,29 +177,52 @@ export async function POST({ request }: { request: Request }) {
       }
 
       if (businessId) {
-        const [business] = await db.select({ planType: businessPages.planType })
+        const [business] = await db.select({ planType: businessPages.planType, ownerId: businessPages.ownerId })
           .from(businessPages)
           .where(eq(businessPages.id, businessId))
           .limit(1);
-        const limits = await getPlanLimits(business?.planType || null);
 
-        const imageCount = await db.select({ count: sql<number>`count(*)` })
-          .from(media)
-          .where(and(eq(media.businessId, businessId), eq(media.type, 'image')));
-        const videoCount = await db.select({ count: sql<number>`count(*)` })
-          .from(media)
-          .where(and(eq(media.businessId, businessId), eq(media.type, 'video')));
-
-        if (isImage && (imageCount[0]?.count || 0) >= limits.maxImages) {
+        if (!business) {
           return new Response(JSON.stringify({
             success: false,
-            error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxImages} images allowed` }
+            error: { code: 'NOT_FOUND', message: 'Business not found' }
+          }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // Verify ownership or admin
+        const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+        if (business.ownerId !== user.id && !isAdmin) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: { code: 'FORBIDDEN', message: 'Access denied to this business' }
+          }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        const limits = await getPlanLimits(business?.planType || null) || DEFAULT_LIMITS;
+
+        // Count current images/videos for this business
+        const imageCountResult = await db.select({ count: count() })
+          .from(media)
+          .where(and(eq(media.businessId, businessId), eq(media.type, 'image')))
+          .get();
+        const videoCountResult = await db.select({ count: count() })
+          .from(media)
+          .where(and(eq(media.businessId, businessId), eq(media.type, 'video')))
+          .get();
+
+        const imageCount = imageCountResult?.count || 0;
+        const videoCount = videoCountResult?.count || 0;
+
+        if (isImage && imageCount >= limits.maxBusinessImages) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessImages} images allowed for this business` }
           }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
-        if (isVideo && (videoCount[0]?.count || 0) >= limits.maxVideos) {
+        if (isVideo && videoCount >= limits.maxBusinessVideos) {
           return new Response(JSON.stringify({
             success: false,
-            error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxVideos} video allowed` }
+            error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessVideos} videos allowed for this business` }
           }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
       }

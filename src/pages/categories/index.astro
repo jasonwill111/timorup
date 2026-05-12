@@ -1,10 +1,10 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
 import { getDb } from '@/lib/db';
-import { categories, businessPages } from '@/db/schema';
+import { categories, businesses, nonProfits, publicSectors } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 
 const db = await getDb();
@@ -15,31 +15,60 @@ const categoriesData = await db.select().from(categories).all();
 
 const categoriesWithListings = await Promise.all(
   categoriesData.map(async (cat) => {
-    const listings = await db
+    // Query all three tables
+    const bizListings = await db
       .select({
-        id: businessPages.id,
-        title: businessPages.title,
-        slug: businessPages.slug,
-        entityType: businessPages.entityType,
-        profileImageId: businessPages.profileImageId,
-        address: businessPages.address,
-        tags: businessPages.tags,
+        id: businesses.id,
+        title: businesses.title,
+        slug: businesses.slug,
+        entityType: businesses.entityType,
+        profileImageId: businesses.profileImageId,
+        address: businesses.address,
+        tags: businesses.tags,
       })
-      .from(businessPages)
-      .where(eq(businessPages.categoryId, cat.id))
-      .orderBy(desc(businessPages.likes))
-      .limit(PAGE_SIZE);
+      .from(businesses)
+      .where(eq(businesses.categoryId, cat.id))
+      .orderBy(desc(businesses.likes));
 
-    const countResult = await db
-      .select({ count: count() })
-      .from(businessPages)
-      .where(eq(businessPages.categoryId, cat.id))
-      .get();
+    const npListings = await db
+      .select({
+        id: nonProfits.id,
+        title: nonProfits.title,
+        slug: nonProfits.slug,
+        entityType: nonProfits.entityType,
+        profileImageId: nonProfits.profileImageId,
+        address: nonProfits.address,
+        tags: nonProfits.tags,
+      })
+      .from(nonProfits)
+      .where(eq(nonProfits.categoryId, cat.id))
+      .orderBy(desc(nonProfits.likes));
+
+    const psListings = await db
+      .select({
+        id: publicSectors.id,
+        title: publicSectors.title,
+        slug: publicSectors.slug,
+        entityType: publicSectors.entityType,
+        profileImageId: publicSectors.profileImageId,
+        address: publicSectors.address,
+        tags: publicSectors.tags,
+      })
+      .from(publicSectors)
+      .where(eq(publicSectors.categoryId, cat.id))
+      .orderBy(desc(publicSectors.likes));
+
+    // Combine and sort by likes
+    const allListings = [...bizListings, ...npListings, ...psListings]
+      .sort((a, b) => b.likes - a.likes)
+      .slice(0, PAGE_SIZE);
+
+    const totalCount = bizListings.length + npListings.length + psListings.length;
 
     return {
       ...cat,
-      listings,
-      totalCount: countResult?.count || 0
+      listings: allListings,
+      totalCount
     };
   })
 );
@@ -66,6 +95,7 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
     name: c.name,
     icon: c.icon?.replace('emoji:', '') || c.icon,
     description: c.description,
+    entityType: c.entityType,
     listings: c.listings.map(l => ({
       id: l.id,
       title: l.title,
@@ -114,10 +144,10 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
         Businesses
       </button>
       <button
-        data-filter="organization"
+        data-filter="nonprofit"
         class="filter-tab px-4 py-2 border-b-2 border-transparent text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
       >
-        Organizations
+        Non-profits
       </button>
     </div>
 
@@ -148,21 +178,39 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
     )}
   </div>
 
-  <script define:vars={{ categoriesJson, PAGE_SIZE }}>
-    const categories = JSON.parse(categoriesJson);
+  <!-- Embed data for client-side filtering -->
+  <script is:inline>
+    window.__CATEGORIES_DATA__ = JSON.parse(`${categoriesJson}`);
+    window.__PAGE_SIZE__ = PAGE_SIZE;
+  </script>
+
+  <script is:inline>
+    const PAGE_SIZE = window.__PAGE_SIZE__;
+    const categories = window.__CATEGORIES_DATA__;
     let currentFilter = 'all';
     let visibleCounts = {};
     const container = document.getElementById('categories-container');
 
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     const getUrl = (item) => {
-      return item.entityType === 'organization'
-        ? `/organization/${item.slug}`
+      return item.entityType === 'nonprofit'
+        ? `/non-profit/${item.slug}`
         : `/business/${item.slug}`;
     };
 
     const renderCategory = (cat, filter = 'all', searchTerm = '', activeTag = null) => {
       let filteredListings = cat.listings.filter(l => {
-        const matchesType = filter === 'all' || l.entityType === filter;
+        const filterToEntity = filter === 'organization' ? 'nonprofit' : filter;
+        const matchesType = filter === 'all' || l.entityType === filterToEntity;
         const matchesSearch = !searchTerm || l.title.toLowerCase().includes(searchTerm);
         const matchesTag = !activeTag || (l.tags && l.tags.includes(activeTag));
         return matchesType && matchesSearch && matchesTag;
@@ -181,7 +229,7 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
               <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-lg">
                 ${cat.icon || cat.name.charAt(0)}
               </div>
-              <h2 class="text-lg font-semibold">${cat.name}</h2>
+              <h2 class="text-lg font-semibold">${escapeHtml(cat.name)}</h2>
             </div>
             <span class="text-xs text-muted-foreground">
               ${filteredListings.length} / ${cat.totalCount}
@@ -194,8 +242,8 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
                 All
               </button>
               ${cat.tags.map(tag => `
-                <button class="tag-filter px-2 py-0.5 text-[10px] rounded-full border transition-colors cursor-pointer ${activeTag === tag ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted/80'}" data-category="${cat.id}" data-tag="${tag}">
-                  ${tag}
+                <button class="tag-filter px-2 py-0.5 text-[10px] rounded-full border transition-colors cursor-pointer ${activeTag === tag ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted hover:bg-muted/80'}" data-category="${cat.id}" data-tag="${escapeHtml(tag)}">
+                  ${escapeHtml(tag)}
                 </button>
               `).join('')}
             </div>
@@ -206,12 +254,12 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
               <a href="${getUrl(item)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer">
                 <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative">
                   ${item.profileImageId
-                    ? `<img src="/api/media/${item.profileImageId}" alt="${item.title}" class="w-full h-full object-cover" />`
-                    : `<div class="absolute inset-0 flex items-center justify-center text-xl font-bold text-amber-500/40">${item.title.charAt(0)}</div>`
+                    ? `<img src="/api/media/${item.profileImageId}" alt="${escapeHtml(item.title)}" class="w-full h-full object-cover" />`
+                    : `<div class="absolute inset-0 flex items-center justify-center text-xl font-bold text-amber-500/40">${escapeHtml(item.title.charAt(0))}</div>`
                   }
                 </div>
                 <div class="p-1.5">
-                  <h3 class="font-medium text-[11px] truncate group-hover:text-primary transition-colors leading-tight">${item.title}</h3>
+                  <h3 class="font-medium text-[11px] truncate group-hover:text-primary transition-colors leading-tight">${escapeHtml(item.title)}</h3>
                 </div>
               </a>
             `).join('')}
@@ -240,13 +288,18 @@ const categoriesJson = JSON.stringify(sortedCategories.map(c => {
 
       const filteredCategories = categories.filter(cat => {
         const matchesSearch = !searchTerm || cat.name.toLowerCase().includes(searchTerm);
+        // Filter by category entity_type first
+        const matchesCategoryType = currentFilter === 'all' ||
+          (currentFilter === 'business' && cat.entityType === 'business') ||
+          (currentFilter === 'nonprofit' && cat.entityType === 'nonprofit');
         const hasListings = cat.listings.some(l => {
-          const matchesType = currentFilter === 'all' || l.entityType === currentFilter;
+          const filterToEntity = currentFilter;
+          const matchesType = currentFilter === 'all' || l.entityType === filterToEntity;
           const matchesSearch = !searchTerm || l.title.toLowerCase().includes(searchTerm);
           const matchesTag = !activeTags[cat.id] || (l.tags && l.tags.includes(activeTags[cat.id]));
           return matchesType && matchesSearch && matchesTag;
         });
-        return matchesSearch && hasListings;
+        return matchesSearch && matchesCategoryType && hasListings;
       });
 
       container.innerHTML = filteredCategories.map(cat => renderCategory(cat, currentFilter, searchTerm, activeTags[cat.id])).join('');

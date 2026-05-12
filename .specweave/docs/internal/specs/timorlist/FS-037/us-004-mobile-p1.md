@@ -2,7 +2,7 @@
 id: US-004
 feature: FS-037
 title: "功能页面Mobile适配 (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-08
 tldr: "**As a** admin."
@@ -21,8 +21,8 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US4-01**: `admin/ai-tools.astro` - 表单响应式，卡片单列
-- [ ] **AC-US4-02**: `admin/media.astro` - 网格在mobile缩小或单列
+- [x] **AC-US4-01**: `admin/ai-tools.astro` - grid `grid-cols-1 lg:grid-cols-2` ✅
+- [x] **AC-US4-02**: `admin/media.astro` - grid `grid-cols-2 md:grid-cols-4` ✅
 
 ---
 

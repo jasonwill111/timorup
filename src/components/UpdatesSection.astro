@@ -15,6 +15,8 @@ interface Props {
 
 const { updates = [], slug, isOwner = false } = Astro.props;
 
+import { actions } from 'astro:actions';
+
 // Parse SKU mentions: @SKU-XXX -> link
 // Parse hashtags: #tag -> link
 function parseContent(content: string): string {
@@ -236,14 +238,10 @@ function formatRelativeTime(date: Date | null): string {
       formData.append('file', file);
 
       try {
-        const resp = await fetch('/api/media/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        const data = await resp.json();
+        const res = await actions.media.uploadMedia(formData);
 
-        if (data.success) {
-          selectedImages.push(data.id);
+        if (res.success) {
+          selectedImages.push(res.data.id);
           renderImagePreviews();
         }
       } catch (err) {
@@ -281,15 +279,13 @@ function formatRelativeTime(date: Date | null): string {
     errorDiv?.classList.add('hidden');
 
     try {
-      const resp = await fetch(`/api/businesses/${slug}/updates`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, images: selectedImages }),
+      const result = await actions.business.createUpdate({
+        slug,
+        content,
+        images: selectedImages,
       });
 
-      const data = await resp.json();
-
-      if (data.success) {
+      if (result.success) {
         modal?.classList.add('hidden');
         modal?.classList.remove('flex');
         form.reset();
@@ -298,7 +294,7 @@ function formatRelativeTime(date: Date | null): string {
         // Reload page to show new update
         window.location.reload();
       } else {
-        errorDiv.textContent = data.error;
+        errorDiv.textContent = result.error?.message || 'Failed to post update';
         errorDiv.classList.remove('hidden');
       }
     } catch (err) {
@@ -314,8 +310,12 @@ function formatRelativeTime(date: Date | null): string {
       const updateId = btn.dataset.updateId;
 
       try {
-        await fetch(`/api/businesses/${slug}/updates?id=${updateId}`, { method: 'DELETE' });
-        window.location.reload();
+        const result = await actions.business.deleteUpdate({ slug, id: updateId! });
+        if (result.success) {
+          window.location.reload();
+        } else {
+          alert(result.error?.message || 'Failed to delete');
+        }
       } catch (err) {
         alert('Failed to delete');
       }

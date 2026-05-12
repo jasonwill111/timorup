@@ -9,6 +9,7 @@ import CardHeader from '../../components/ui/CardHeader.astro';
 import CardTitle from '../../components/ui/CardTitle.astro';
 import CardDescription from '../../components/ui/CardDescription.astro';
 import CardContent from '../../components/ui/CardContent.astro';
+import { actions } from 'astro:actions';
 
 // Check auth via session cookie
 const cookieHeader = Astro.request.headers.get('cookie') || '';
@@ -23,7 +24,7 @@ try {
   if (tokenMatch) {
     const { getDb } = await import('@/lib/db');
     const db = await getDb();
-    const { sessions, users, businessPages, categories } = await import('@/db/schema');
+    const { sessions, users, businesses, nonProfits, publicSectors } = await import('@/db/schema');
     const { eq } = await import('drizzle-orm');
 
     // Find session by token
@@ -50,16 +51,34 @@ try {
         if (userRecord) {
           user = { id: userRecord.id };
 
-          // Get existing listing
-          const existing = await db.select()
-            .from(businessPages)
-            .where(eq(businessPages.ownerId, user.id))
+          // Check if user already has any listing (business, non-profit, or public sector)
+          const existingBusiness = await db.select()
+            .from(businesses)
+            .where(eq(businesses.ownerId, user.id))
             .limit(1)
             .get();
 
+          const existingNonProfit = existingBusiness ? null : await db.select()
+            .from(nonProfits)
+            .where(eq(nonProfits.ownerId, user.id))
+            .limit(1)
+            .get();
+
+          const existingPublicSector = existingBusiness || existingNonProfit ? null : await db.select()
+            .from(publicSectors)
+            .where(eq(publicSectors.ownerId, user.id))
+            .limit(1)
+            .get();
+
+          const existing = existingBusiness || existingNonProfit || existingPublicSector;
+
           if (existing) {
             hasExistingListing = true;
-            existingListing = existing;
+            existingListing = {
+              title: existing.title,
+              slug: existing.slug,
+              entityType: existingBusiness ? 'business' : existingNonProfit ? 'nonprofit' : 'public_sector'
+            };
           }
         }
       }
@@ -574,12 +593,7 @@ try {
         }
       }
 
-      const res = await fetch('/api/businesses/create', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await res.json();
+      const result = await actions.business.create(formData);
 
       if (result.success && result.data?.slug) {
         // Non-profits go live immediately, businesses need subscription

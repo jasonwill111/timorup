@@ -169,15 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
     textReveal(heroTitle, 0.3);
   }
 
-  // Card hover effects
-  addHoverLift('.listing-card, .product-card, .business-card');
-  addCardGlow('.listing-card, .product-card, .business-card');
+  // Card hover effects - all entity cards
+  addHoverLift('.listing-card, .product-card, .business-card, .entity-card');
+  addCardGlow('.listing-card, .product-card, .business-card, .entity-card');
 
   // Form elements
   staggerFadeIn('form', 'input, select, textarea, button', 0.1);
 
-  // Listings/products staggered entrance
-  staggerFadeIn('.grid', '.listing-card, .product-card', 0.15);
+  // Listings/products/entities staggered entrance
+  staggerFadeIn('.grid', '.listing-card, .product-card, .entity-card, .bg-card a', 0.08);
 
   // Stats counter animation
   const statNumbers = document.querySelectorAll('[data-count]');
@@ -203,9 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
     slideInRight('.header-right-section', 0.15);
   }, 200);
 
-  // Entrance animations
+  // Entrance animations for list pages
   setTimeout(() => {
-    fadeInUp('.listing-card', 0.2);
+    fadeInUp('.listing-card', 0.1);
+    fadeInUp('a[href^="/business/"]', 0.08);
+    fadeInUp('a[href^="/non-profit/"]', 0.08);
+    fadeInUp('a[href^="/public-sector/"]', 0.08);
+    fadeInUp('a[href^="/listing/"]', 0.08);
     scaleIn('.filter-select', 0.1);
   }, 100);
 });

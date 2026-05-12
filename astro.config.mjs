@@ -39,16 +39,15 @@ export default defineConfig({
         '@': new URL('./src', import.meta.url).pathname,
       },
     },
+    optimizeDeps: {
+      exclude: ['@astrojs/cloudflare', 'better-auth', '@better-auth/drizzle-adapter'],
+    },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
-      optimizeDeps: {
-        include: [],
-      },
       build: {
         sourcemap: true,
         minify: false,
       },
-      cache: false,
     } : {
       build: {
         cssMinify: true,

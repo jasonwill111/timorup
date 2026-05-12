@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from '@/layouts/Layout.astro';
 import Button from '@/components/ui/Button.astro';
+import { actions } from 'astro:actions';
 import Card from '@/components/ui/Card.astro';
 import CardHeader from '@/components/ui/CardHeader.astro';
 import CardTitle from '@/components/ui/CardTitle.astro';
@@ -484,7 +485,7 @@ import CardContent from '@/components/ui/CardContent.astro';
         const isVideo = VIDEO_TYPES.includes(file.type);
 
         if (!isImage && !isVideo) {
-          console.log('Unsupported file type:', file.type);
+          // Skip unsupported file types silently
           continue;
         }
 
@@ -536,18 +537,14 @@ import CardContent from '@/components/ui/CardContent.astro';
           const formData = new FormData();
           formData.append('file', fileToUpload);
 
-          const res = await fetch('/api/media/upload', {
-            method: 'POST',
-            body: formData,
-          });
+          const res = await actions.media.uploadMedia(formData);
 
-          const result = await res.json();
-          if (result.success && result.data?.id) {
-            galleryMediaIds.push(result.data.id);
-            addPreview(result.data.id, result.data.url, isVideo ? 'video' : 'image');
+          if (res.success && res.data?.id) {
+            galleryMediaIds.push(res.data.id);
+            addPreview(res.data.id, res.data.url, isVideo ? 'video' : 'image');
             mediaIdsInput.value = JSON.stringify(galleryMediaIds);
           } else {
-            alert(result.error?.message || 'Upload failed');
+            alert(res.error?.message || 'Upload failed');
           }
         } catch (err) {
           console.error('Upload error:', err);
@@ -1040,8 +1037,8 @@ import CardContent from '@/components/ui/CardContent.astro';
     const formData = new FormData(e.target as HTMLFormElement);
 
     const data: Record<string, unknown> = {
+      slug: businessSlug,
       title: formData.get('title'),
-      slug: formData.get('slug'),
       categoryId: formData.get('categoryId'),
       contactName: formData.get('contactName'),
       contactNumber: formData.get('contactNumber'),
@@ -1087,13 +1084,7 @@ import CardContent from '@/components/ui/CardContent.astro';
     }
 
     try {
-      const res = await fetch(`/api/businesses/${businessSlug}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
+      const result = await actions.business.update(data as Parameters<typeof actions.business.update>[0]);
 
       if (result.success) {
         window.location.href = `/business/${data.slug}`;

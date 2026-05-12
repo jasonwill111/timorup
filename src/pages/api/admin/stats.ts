@@ -2,8 +2,8 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { users, businessPages, orders, categories, products } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { users, orders, categories, products, businesses, nonProfits, publicSectors, listings } from '@/db/schema';
+import { eq, sql, or } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function GET({ request }: { request: Request }) {
@@ -19,23 +19,28 @@ export async function GET({ request }: { request: Request }) {
     const usersResult = await db.select({ count: sql`count(*)` }).from(users).get();
     const totalUsers = Number(usersResult?.count) || 0;
 
-    // Get total businesses
-    const businessesResult = await db.select({ count: sql`count(*)` }).from(businessPages).get();
+    // Get total businesses (only from businesses table, not nonprofits/public sectors)
+    const businessesResult = await db.select({ count: sql`count(*)` }).from(businesses).get();
     const totalBusinesses = Number(businessesResult?.count) || 0;
 
     // Get live businesses
     const liveBusinessesResult = await db.select({ count: sql`count(*)` })
-      .from(businessPages)
-      .where(eq(businessPages.status, 'live'))
+      .from(businesses)
+      .where(eq(businesses.status, 'live'))
       .get();
     const liveBusinesses = Number(liveBusinessesResult?.count) || 0;
 
-    // Get non-profit businesses count
-    const nonProfitsResult = await db.select({ count: sql`count(*)` })
-      .from(businessPages)
-      .where(eq(businessPages.entityType, 'nonprofit'))
-      .get();
+    // Get non-profit count
+    const nonProfitsResult = await db.select({ count: sql`count(*)` }).from(nonProfits).get();
     const totalNonProfits = Number(nonProfitsResult?.count) || 0;
+
+    // Get public sectors count
+    const publicSectorsResult = await db.select({ count: sql`count(*)` }).from(publicSectors).get();
+    const totalPublicSectors = Number(publicSectorsResult?.count) || 0;
+
+    // Get listings count
+    const listingsResult = await db.select({ count: sql`count(*)` }).from(listings).get();
+    const totalListings = Number(listingsResult?.count) || 0;
 
     // Get total subscriptions (using orders table - it stores subscription data)
     const subscriptionsResult = await db.select({ count: sql`count(*)` }).from(orders).get();
@@ -61,7 +66,7 @@ export async function GET({ request }: { request: Request }) {
     const productsResult = await db.select({ count: sql`count(*)` }).from(products).get();
     const totalProducts = Number(productsResult?.count) || 0;
 
-    // Get categories count
+    // Get categories count (business categories only for now)
     const categoriesResult = await db.select({ count: sql`count(*)` }).from(categories).get();
     const totalCategories = Number(categoriesResult?.count) || 0;
 
@@ -132,6 +137,8 @@ export async function GET({ request }: { request: Request }) {
         totalUsers,
         totalBusinesses,
         totalNonProfits,
+        totalPublicSectors,
+        totalListings,
         liveBusinesses,
         totalSubscriptions,
         totalRevenue,

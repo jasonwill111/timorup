@@ -61,10 +61,6 @@ function wrapDbForD1(db: DrizzleDbWrapper): DrizzleDbWrapper {
 
 // Factory function to create auth instance with given db
 export function createAuth(db: DrizzleDbWrapper) {
-  console.log('[Auth] Creating auth instance');
-  console.log('[Auth] DB type:', db?.constructor?.name || typeof db);
-  console.log('[Auth] Schema tables:', Object.keys({ user: users, session: sessions, account: accounts, verification: verifications }).join(', '));
-
   // Wrap db to convert Date objects to timestamps for D1
   const wrappedDb = wrapDbForD1(db);
 
@@ -166,12 +162,6 @@ let _initAuth: BetterAuthInstance | null = null;
 export async function initAuth() {
   if (!_initAuth) {
     const db = await getDb();
-    console.log('[initAuth] Got DB:', typeof db);
-    console.log('[initAuth] DB has insert:', typeof db?.insert);
-    console.log('[initAuth] DB has select:', typeof db?.select);
-    console.log('[initAuth] DB has query:', typeof db?.query);
-    console.log('[initAuth] DB._ type:', typeof db?._);
-    console.log('[initAuth] DB.constructor:', db?.constructor?.name);
     _initAuth = createAuth(db);
   }
   return _initAuth;

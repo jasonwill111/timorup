@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '@/lib/db';
-import { categories, businessPages } from '@/db/schema';
+import { categories, businesses, nonProfits, publicSectors } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { PaginationSchema } from '@/lib/validation';
 
@@ -29,39 +29,67 @@ export const GET: APIRoute = async ({ params, url }) => {
     });
   }
 
-  // Build query - fetch more to filter by type
-  const fetchLimit = entityType ? limit * 3 : limit;
-  let query = db
+  // Query all three tables
+  const bizListings = entityType && entityType !== 'business' ? [] : await db
     .select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      entityType: businessPages.entityType,
-      profileImageId: businessPages.profileImageId,
-      address: businessPages.address,
-      tags: businessPages.tags,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      entityType: businesses.entityType,
+      profileImageId: businesses.profileImageId,
+      address: businesses.address,
+      tags: businesses.tags,
+      likes: businesses.likes,
     })
-    .from(businessPages)
-    .where(eq(businessPages.categoryId, category.id))
-    .orderBy(desc(businessPages.likes))
-    .limit(fetchLimit)
-    .offset(offset);
+    .from(businesses)
+    .where(eq(businesses.categoryId, category.id))
+    .orderBy(desc(businesses.likes));
 
-  let listings = await query.all();
+  const npListings = entityType && entityType !== 'nonprofit' ? [] : await db
+    .select({
+      id: nonProfits.id,
+      title: nonProfits.title,
+      slug: nonProfits.slug,
+      entityType: nonProfits.entityType,
+      profileImageId: nonProfits.profileImageId,
+      address: nonProfits.address,
+      tags: nonProfits.tags,
+      likes: nonProfits.likes,
+    })
+    .from(nonProfits)
+    .where(eq(nonProfits.categoryId, category.id))
+    .orderBy(desc(nonProfits.likes));
 
-  // Filter by entity type if specified
-  if (entityType) {
-    listings = listings.filter(l => l.entityType === entityType).slice(0, limit);
-  }
+  const psListings = entityType && entityType !== 'public_sector' ? [] : await db
+    .select({
+      id: publicSectors.id,
+      title: publicSectors.title,
+      slug: publicSectors.slug,
+      entityType: publicSectors.entityType,
+      profileImageId: publicSectors.profileImageId,
+      address: publicSectors.address,
+      tags: publicSectors.tags,
+      likes: publicSectors.likes,
+    })
+    .from(publicSectors)
+    .where(eq(publicSectors.categoryId, category.id))
+    .orderBy(desc(publicSectors.likes));
+
+  // Combine and sort by likes
+  let allListings = [...bizListings, ...npListings, ...psListings]
+    .sort((a, b) => b.likes - a.likes);
+
+  // Apply pagination
+  allListings = allListings.slice(offset, offset + limit);
 
   return new Response(JSON.stringify({
     category: category.slug,
-    listings: listings.map(l => ({
+    listings: allListings.map(l => ({
       ...l,
       tags: l.tags ? JSON.parse(l.tags) : []
     })),
     page,
-    hasMore: listings.length === limit
+    hasMore: allListings.length === limit
   }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }

@@ -6,6 +6,7 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
 import { getDb } from '@/lib/db';
 import { media, sessions, users } from '@/db/schema';
 import { eq, like, sql, desc, isNull } from 'drizzle-orm';
+import { actions } from 'astro:actions';
 
 // Check admin auth using direct DB query
 const cookieHeader = Astro.request.headers.get('cookie') || '';
@@ -292,6 +293,8 @@ const totalPages = Math.ceil(total / limit);
 </AdminLayout>
 
 <script>
+  import { actions } from 'astro:actions';
+
   // Copy URL to clipboard
   document.querySelectorAll('.copy-url').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -312,14 +315,13 @@ const totalPages = Math.ceil(total / limit);
       if (!confirm('Delete this media? This cannot be undone.')) return;
 
       try {
-        const resp = await fetch(`/api/media/${id}`, { method: 'DELETE' });
-        const data = await resp.json();
+        const result = await actions.media.deleteMedia({ id: id! });
 
-        if (data.success) {
+        if (result.success) {
           // Remove from DOM
           btn.closest('.bg-card')?.remove();
         } else {
-          alert(data.error || 'Failed to delete');
+          alert(result.error?.message || 'Failed to delete');
         }
       } catch (err) {
         alert('Failed to delete');

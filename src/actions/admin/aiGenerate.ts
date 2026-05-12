@@ -47,13 +47,20 @@ export const aiGenerate = defineAction({
     switch (input.type) {
       case 'listing': {
         const title = String(data.title ?? '');
-        userMessage = `Create a listing for "${title}" (${data.entityType || 'business'}).
-Contact: ${data.contactName || 'N/A'}
-Phone: ${data.phone || 'N/A'}
-Email: ${data.email || 'N/A'}
-Address: ${data.address || 'N/A'}
-About: ${data.about || 'N/A'}
-Tags: ${Array.isArray(data.tags) ? data.tags.join(', ') : data.tags || 'N/A'}
+        const entityType = String(data.entityType ?? 'business');
+        const contactName = String(data.contactName ?? '');
+        const phone = String(data.phone ?? '');
+        const email = String(data.email ?? '');
+        const address = String(data.address ?? '');
+        const about = String(data.about ?? '');
+        const tags = Array.isArray(data.tags) ? data.tags : String(data.tags ?? '').split(',');
+        userMessage = `Create a listing for "${title}" (${entityType}).
+Contact: ${contactName || 'N/A'}
+Phone: ${phone || 'N/A'}
+Email: ${email || 'N/A'}
+Address: ${address || 'N/A'}
+About: ${about || 'N/A'}
+Tags: ${Array.isArray(tags) ? tags.join(', ') : tags || 'N/A'}
 
 IMPORTANT: Return ONLY valid JSON. Format:
 {
@@ -72,9 +79,15 @@ IMPORTANT: Return ONLY valid JSON. Format:
       }
       case 'sku': {
         const skuTitle = String(data.title ?? '');
+        const skuDesc = String(data.description ?? '');
+        const priceVal = String(data.priceValue ?? 'N/A');
+        const priceFields = Array.isArray(data.priceFields) ? data.priceFields : [];
+        const priceInfo = priceFields.length > 0
+          ? priceFields.map((p: any) => `${p.label}: ${p.value} ${p.unit || ''}`).join(', ')
+          : `Price: ${priceVal}`;
         userMessage = `Create a ${data.serviceType || 'product'} called "${skuTitle}".
-Description: ${data.description || 'N/A'}
-Price: ${data.priceValue || 'N/A'}
+Description: ${skuDesc}
+${priceInfo}
 
 IMPORTANT: Return ONLY valid JSON. Format:
 {

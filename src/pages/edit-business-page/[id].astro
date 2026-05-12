@@ -4,6 +4,7 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
+import { actions } from 'astro:actions';
 
 import Card from '../../components/ui/Card.astro'
 import CardHeader from '../../components/ui/CardHeader.astro'
@@ -296,8 +297,8 @@ import CardContent from '../../components/ui/CardContent.astro'
     formData.append('file', fileToUpload);
 
     try {
-      const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
-      const data = await res.json();
+      const res = await actions.media.uploadMedia(formData);
+      const data = res;
 
       if (data.success && data.data?.id) {
         const preview = document.getElementById(previewId) as HTMLImageElement;
@@ -409,8 +410,8 @@ import CardContent from '../../components/ui/CardContent.astro'
     
     const formData = new FormData(form);
     const data = {
+      slug: formData.get('slug') as string,
       title: formData.get('title'),
-      slug: formData.get('slug'),
       categoryId: formData.get('categoryId'),
       contactName: formData.get('contactName'),
       contactNumber: formData.get('contactNumber'),
@@ -421,13 +422,7 @@ import CardContent from '../../components/ui/CardContent.astro'
     };
 
     try {
-      const response = await fetch(`/api/businesses/${businessId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      
-      const result = await response.json();
+      const result = await actions.business.update(data as Parameters<typeof actions.business.update>[0]);
       
       if (result.success) {
         toast.success('Business updated successfully!');

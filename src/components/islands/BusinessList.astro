@@ -1,169 +1,77 @@
 ---
-// Server Island: Paginated business list with server-side filtering
-// Cache: 2 minutes
+// Server Island: Businesses list
 import { getDb } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
-import { eq, desc, asc, sql } from 'drizzle-orm';
-import BusinessCard from '@/components/business/BusinessCard.astro';
+import { businesses } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 const db = await getDb();
-
-// URL params for filtering/pagination
 const searchParams = Astro.url.searchParams;
 const page = Math.max(1, Number(searchParams.get('page') || 1));
-const categorySlug = searchParams.get('category') || '';
-const sortBy = searchParams.get('sort') || 'popular';
 const search = searchParams.get('q') || '';
 const PAGE_SIZE = 24;
 const OFFSET = (page - 1) * PAGE_SIZE;
 
-// Build where conditions
-const conditions = [eq(businessPages.status, 'live')];
+// Query published businesses
+const conditions = [eq(businesses.status, 'published')];
 
-// Exclude organizations from main listing
-conditions.push(sql`${businessPages.entityType} != 'organization'`);
-
-// Category filter
-let categoryId: string | null = null;
-if (categorySlug) {
-  const catResult = await db.select({ id: categories.id })
-    .from(categories)
-    .where(eq(categories.slug, categorySlug))
-    .limit(1);
-  if (catResult.length > 0) {
-    categoryId = catResult[0].id;
-    conditions.push(eq(businessPages.categoryId, categoryId));
-  }
-}
+let allBusinesses = await db.select()
+  .from(businesses)
+  .where(eq(businesses.status, 'published'))
+  .orderBy(desc(businesses.createdAt))
+  .all();
 
 // Search filter
 if (search) {
-  conditions.push(
-    sql`(${businessPages.title} LIKE ${'%' + search + '%'})`
+  allBusinesses = allBusinesses.filter(b =>
+    b.title.toLowerCase().includes(search.toLowerCase()) ||
+    (b.aboutUs && b.aboutUs.toLowerCase().includes(search.toLowerCase()))
   );
 }
 
-// Fetch businesses with pagination
-let orderBy;
-switch (sortBy) {
-  case 'recent':
-    orderBy = desc(businessPages.createdAt);
-    break;
-  case 'name':
-    orderBy = asc(businessPages.title);
-    break;
-  default: // popular
-    orderBy = desc(businessPages.likes);
-}
-
-const businessesResult = await db.select({
-  id: businessPages.id,
-  title: businessPages.title,
-  slug: businessPages.slug,
-  tags: businessPages.tags,
-  likes: businessPages.likes,
-  saves: businessPages.saves,
-  address: businessPages.address,
-  categoryId: businessPages.categoryId,
-  entityType: businessPages.entityType,
-  profileImageId: businessPages.profileImageId,
-})
-.from(businessPages)
-.where(eq(businessPages.status, 'live'))
-.orderBy(orderBy)
-.limit(PAGE_SIZE)
-.offset(OFFSET);
-
-// Count total
-const countResult = await db.select({ count: sql`count(*)` })
-  .from(businessPages)
-  .where(eq(businessPages.status, 'live'));
-
-const totalCount = Number(countResult[0]?.count) || 0;
-const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-
-// Build category map for display
-const categoryIds = [...new Set(businessesResult.map(b => b.categoryId).filter(Boolean))];
-const cats = categoryIds.length > 0
-  ? await db.select({ id: categories.id, name: categories.name }).from(categories)
-  : [];
-const categoryMap: Record<string, string> = {};
-cats.forEach(c => { categoryMap[c.id] = c.name; });
-
-// Map businesses for display
-const businesses = businessesResult.map(b => ({
-  id: b.id,
-  title: b.title,
-  slug: b.slug,
-  category: categoryMap[b.categoryId || ''] || 'Business',
-  rating: 0,
-  reviews: 0,
-  likes: b.likes || 0,
-  location: b.address?.split(',')[0] || 'Dili',
-  tags: b.tags ? JSON.parse(b.tags) : [],
-  thumbnail: b.profileImageId ? `/api/media/${b.profileImageId}` : null,
-}));
+// Pagination
+const total = allBusinesses.length;
+const paginated = allBusinesses.slice(OFFSET, OFFSET + PAGE_SIZE);
+const totalPages = Math.ceil(total / PAGE_SIZE);
 ---
 
-<!-- Results count -->
-<div class="mb-4 text-sm text-muted-foreground">
-  Showing {businesses.length > 0 ? OFFSET + 1 : 0}-{Math.min(OFFSET + businesses.length, totalCount)} of {totalCount} businesses
-</div>
+{paginated.length > 0 ? (
+  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {paginated.map(business => (
+      <a
+        href={`/business/${business.slug}`}
+        class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-200 overflow-hidden"
+      >
+        <div class="aspect-square bg-muted flex items-center justify-center">
+          <svg class="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-1 4h1m-1 4h1"/>
+          </svg>
+        </div>
+        <div class="p-3">
+          <h3 class="font-semibold text-sm truncate">{business.title}</h3>
+          {business.address && (
+            <p class="text-xs text-muted-foreground truncate">{business.address.split(',')[0]}</p>
+          )}
+          {business.industry && (
+            <span class="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary capitalize">{business.industry}</span>
+          )}
+        </div>
+      </a>
+    ))}
+  </div>
+) : (
+  <div class="text-center py-12 text-muted-foreground">
+    No businesses found
+  </div>
+)}
 
-<!-- Businesses Grid -->
-<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4" id="businesses-grid">
-  {businesses.length > 0 ? businesses.map((business) => (
-    <BusinessCard
-      title={business.title}
-      slug={business.slug}
-      category={business.category}
-      thumbnail={business.thumbnail}
-      rating={business.rating}
-      likes={business.likes}
-      reviews={business.reviews}
-      location={business.location}
-      tag={business.tags?.[0]}
-      type={business.entityType}
-    />
-  )) : (
-    <div class="col-span-full text-center py-12">
-      <p class="text-lg text-muted-foreground">No businesses found</p>
-      <p class="text-sm text-muted-foreground mt-1">
-        {categorySlug ? 'Try a different category.' : 'Be the first to add your business!'}
-      </p>
-    </div>
-  )}
-</div>
-
-<!-- Pagination -->
 {totalPages > 1 && (
-  <nav class="flex justify-center gap-2 mt-8" aria-label="Pagination">
+  <div class="flex justify-center gap-2 mt-8">
     {page > 1 && (
-      <a
-        href={`/businesses?page=${page - 1}&category=${categorySlug}&sort=${sortBy}`}
-        class="px-3 py-2 rounded-md border hover:bg-muted transition-colors"
-      >
-        Previous
-      </a>
+      <a href={`/businesses?page=${page - 1}`} class="px-4 py-2 border rounded">Previous</a>
     )}
-    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-      const pageNum = i + 1;
-      return (
-        <a
-          href={`/businesses?page=${pageNum}&category=${categorySlug}&sort=${sortBy}`}
-          class={`px-3 py-2 rounded-md border ${pageNum === page ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
-        >
-          {pageNum}
-        </a>
-      );
-    })}
+    <span class="px-4 py-2">Page {page} of {totalPages}</span>
     {page < totalPages && (
-      <a
-        href={`/businesses?page=${page + 1}&category=${categorySlug}&sort=${sortBy}`}
-        class="px-3 py-2 rounded-md border hover:bg-muted transition-colors"
-      >
-        Next
-      </a>
+      <a href={`/businesses?page=${page + 1}`} class="px-4 py-2 border rounded">Next</a>
     )}
-  </nav>
+  </div>
 )}

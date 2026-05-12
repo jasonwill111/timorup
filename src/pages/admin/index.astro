@@ -5,6 +5,20 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
 <AdminLayout title="Dashboard">
 <script>
+  // Type definitions for API data
+  interface MonthlyData {
+    month: string;
+    revenue: number;
+    subscriptions: number;
+  }
+
+  interface Subscription {
+    id: string;
+    planType: string;
+    amount: number;
+    status: string;
+  }
+
   // Auth fetch helper
   async function authFetch(url, options = {}) {
     return fetch(url, {
@@ -118,9 +132,9 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 
         if (data.data.monthly && data.data.monthly.length > 0) {
           renderRevenueChart(data.data.monthly);
-          renderLineChart('subscriptions-svg', data.data.monthly.map((m: any) => m.subscriptions), data.data.monthly.map((m: any) => m.month), '#8b5cf6');
-          const usersData = data.data.monthlyUsers || data.data.monthly.map((m: any) => 0);
-          renderLineChart('users-svg', usersData, data.data.monthly.map((m: any) => m.month), '#3b82f6');
+          renderLineChart('subscriptions-svg', data.data.monthly.map((m: MonthlyData) => m.subscriptions), data.data.monthly.map((m: MonthlyData) => m.month), '#8b5cf6');
+          const usersData = data.data.monthlyUsers || data.data.monthly.map((m: MonthlyData) => 0);
+          renderLineChart('users-svg', usersData, data.data.monthly.map((m: MonthlyData) => m.month), '#3b82f6');
         }
       }
     } catch (err) {
@@ -149,7 +163,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
         return;
       }
 
-      container.innerHTML = subs.slice(0, 5).map((sub: any) => `
+      container.innerHTML = subs.slice(0, 5).map((sub: Subscription) => `
         <div class="flex items-center justify-between p-2 border rounded text-sm">
           <div class="min-w-0 flex-1">
             <p class="font-medium truncate">#${sub.id.slice(0, 8)}</p>

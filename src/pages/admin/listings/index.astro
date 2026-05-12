@@ -1,5 +1,5 @@
 ---
-// Admin listing management page - API driven
+// Admin listing management page - API driven (listings table)
 export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
@@ -11,9 +11,9 @@ import Button from '../../../components/ui/Button.astro';
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold">Listing Management</h1>
-        <p class="text-sm text-muted-foreground">Manage all listings (businesses, government, nonprofits)</p>
+        <p class="text-sm text-muted-foreground">Manage classified listings</p>
       </div>
-      <a href="/admin/listingss/new">
+      <a href="/admin/listings/new">
         <Button>
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -24,18 +24,22 @@ import Button from '../../../components/ui/Button.astro';
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-card rounded-lg border p-4">
         <div class="text-2xl font-bold" id="stat-total">-</div>
-        <div class="text-xs text-muted-foreground">Total Listings</div>
+        <div class="text-xs text-muted-foreground">Total</div>
       </div>
       <div class="bg-card rounded-lg border p-4">
-        <div class="text-2xl font-bold text-blue-600" id="stat-businesses">-</div>
-        <div class="text-xs text-muted-foreground">Businesses</div>
+        <div class="text-2xl font-bold text-green-600" id="stat-published">-</div>
+        <div class="text-xs text-muted-foreground">Published</div>
       </div>
       <div class="bg-card rounded-lg border p-4">
-        <div class="text-2xl font-bold text-purple-600" id="stat-nonprofit">-</div>
-        <div class="text-xs text-muted-foreground">Gov/NGOs</div>
+        <div class="text-2xl font-bold text-gray-600" id="stat-draft">-</div>
+        <div class="text-xs text-muted-foreground">Draft</div>
+      </div>
+      <div class="bg-card rounded-lg border p-4">
+        <div class="text-2xl font-bold text-red-600" id="stat-expired">-</div>
+        <div class="text-xs text-muted-foreground">Expired</div>
       </div>
     </div>
 
@@ -43,15 +47,17 @@ import Button from '../../../components/ui/Button.astro';
     <div class="flex flex-wrap gap-4 mb-6">
       <select id="filter-type" class="h-10 px-3 rounded-md border border-input bg-background">
         <option value="">All Types</option>
-        <option value="business">Businesses</option>
-        <option value="nonprofit">Gov/NGOs</option>
+        <option value="product">Product</option>
+        <option value="vehicle">Vehicle</option>
+        <option value="property">Property</option>
+        <option value="job">Job</option>
+        <option value="service">Service</option>
+        <option value="wanted">Wanted</option>
       </select>
       <select id="filter-status" class="h-10 px-3 rounded-md border border-input bg-background">
         <option value="">All Status</option>
         <option value="draft">Draft</option>
-        <option value="live">Live</option>
-        <option value="paid">Paid</option>
-        <option value="expired">Expired</option>
+        <option value="published">Published</option>
       </select>
       <input
         id="search"
@@ -69,7 +75,7 @@ import Button from '../../../components/ui/Button.astro';
             <th class="text-left px-4 py-3 text-sm font-medium">Title</th>
             <th class="text-left px-4 py-3 text-sm font-medium">Type</th>
             <th class="text-left px-4 py-3 text-sm font-medium">Status</th>
-            <th class="text-left px-4 py-3 text-sm font-medium">Likes</th>
+            <th class="text-left px-4 py-3 text-sm font-medium">Price</th>
             <th class="text-right px-4 py-3 text-sm font-medium">Actions</th>
           </tr>
         </thead>
@@ -108,11 +114,11 @@ import Button from '../../../components/ui/Button.astro';
     id: string;
     title: string;
     slug: string;
-    entityType: string;
+    listingType: string;
     status: string;
-    likes: number;
-    ratingAverage: number | null;
-    publishDate: string | null;
+    price: string | null;
+    createdAt: number;
+    expiresAt: number | null;
   }
 
   let listings: Listing[] = [];
@@ -124,38 +130,40 @@ import Button from '../../../components/ui/Button.astro';
   const noResults = document.getElementById('no-results') as HTMLDivElement;
 
   const typeColors: Record<string, string> = {
-    business: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    nonprofit: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    product: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    vehicle: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    property: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    job: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    service: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+    wanted: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   };
 
   const statusColors: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-    live: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    paid: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    expired: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    published: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   };
 
   const typeLabels: Record<string, string> = {
-    business: 'Business',
-    nonprofit: 'Non-Profit',
+    product: 'Product',
+    vehicle: 'Vehicle',
+    property: 'Property',
+    job: 'Job',
+    service: 'Service',
+    wanted: 'Wanted',
   };
 
   async function loadListings() {
-    const type = typeFilter?.value || '';
-    const status = statusFilter?.value || '';
-
-    const params = new URLSearchParams();
-    if (type) params.set('entityType', type);
-    if (status) params.set('status', status);
-
     try {
-      const res = await fetch(`/api/admin/listing?${params}`);
+      const res = await authFetch('/api/admin/listing');
       const data = await res.json();
 
       if (data.success) {
-        listings = data.data;
+        listings = data.data || [];
         updateStats();
         renderListings();
+      } else {
+        console.error('API error:', data.error);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">Failed to load listings</td></tr>';
       }
     } catch (err) {
       console.error('Failed to load listings:', err);
@@ -164,21 +172,29 @@ import Button from '../../../components/ui/Button.astro';
   }
 
   function updateStats() {
+    const now = Date.now() / 1000;
     const total = listings.length;
-    const businesses = listings.filter(l => l.entityType === 'business').length;
-    const nonprofit = listings.filter(l => l.entityType === 'nonprofit').length;
+    const published = listings.filter(l => l.status === 'published').length;
+    const draft = listings.filter(l => l.status === 'draft').length;
+    const expired = listings.filter(l => l.expiresAt && l.expiresAt < now).length;
 
     document.getElementById('stat-total')!.textContent = String(total);
-    document.getElementById('stat-businesses')!.textContent = String(businesses);
-    document.getElementById('stat-nonprofit')!.textContent = String(nonprofit);
+    document.getElementById('stat-published')!.textContent = String(published);
+    document.getElementById('stat-draft')!.textContent = String(draft);
+    document.getElementById('stat-expired')!.textContent = String(expired);
   }
 
   function renderListings() {
     const search = searchInput?.value.toLowerCase() || '';
+    const type = typeFilter?.value || '';
+    const status = statusFilter?.value || '';
 
-    const filtered = listings.filter(l =>
-      (!search || l.title.toLowerCase().includes(search))
-    );
+    const filtered = listings.filter(l => {
+      if (search && !l.title.toLowerCase().includes(search)) return false;
+      if (type && l.listingType !== type) return false;
+      if (status && l.status !== status) return false;
+      return true;
+    });
 
     if (filtered.length === 0) {
       tbody.innerHTML = '';
@@ -193,15 +209,12 @@ import Button from '../../../components/ui/Button.astro';
         <td class="px-4 py-3">
           <div class="font-medium">${escapeHtml(listing.title)}</div>
           <div class="text-xs text-muted-foreground">
-            ${listing.publishDate
-              ? `Published ${new Date(listing.publishDate).toLocaleDateString()}`
-              : 'Not published'
-            }
+            Created ${formatDate(listing.createdAt)}
           </div>
         </td>
         <td class="px-4 py-3">
-          <span class="px-2 py-0.5 text-xs rounded-full ${typeColors[listing.entityType] || typeColors.business}">
-            ${typeLabels[listing.entityType] || listing.entityType}
+          <span class="px-2 py-0.5 text-xs rounded-full ${typeColors[listing.listingType] || typeColors.product}">
+            ${typeLabels[listing.listingType] || listing.listingType}
           </span>
         </td>
         <td class="px-4 py-3">
@@ -210,23 +223,75 @@ import Button from '../../../components/ui/Button.astro';
           </span>
         </td>
         <td class="px-4 py-3">
-          ${listing.ratingAverage && listing.ratingAverage > 0
-            ? `<span class="text-sm">${listing.ratingAverage.toFixed(1)} ★</span>`
-            : '-'
-          }
+          ${listing.price || '-'}
         </td>
         <td class="px-4 py-3 text-right">
           <div class="flex items-center justify-end gap-2">
-            <a href="/admin/listingss/${listing.id}/edit" class="text-sm text-primary hover:underline">
+            <button
+              data-id="${listing.id}"
+              class="edit-listing text-sm text-primary hover:underline"
+            >
               Edit
-            </a>
-            <a href="/business/${listing.slug}" target="_blank" class="text-sm text-muted-foreground hover:text-foreground">
+            </button>
+            <button
+              data-id="${listing.id}"
+              data-status="${listing.status}"
+              class="toggle-status text-sm text-primary hover:underline"
+            >
+              ${listing.status === 'published' ? 'Unpublish' : 'Publish'}
+            </button>
+            <button
+              data-id="${listing.id}"
+              class="delete-listing text-sm text-red-500 hover:underline"
+            >
+              Delete
+            </button>
+            <a href="/listing/${listing.slug}" target="_blank" class="text-sm text-muted-foreground hover:text-foreground">
               View →
             </a>
           </div>
         </td>
       </tr>
     `).join('');
+
+    // Add event listeners for buttons
+    tbody.querySelectorAll('.toggle-status').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = (e.target as HTMLElement).dataset.id!;
+        const currentStatus = (e.target as HTMLElement).dataset.status!;
+        const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+
+        try {
+          const res = await authFetch('/api/admin/listing', {
+            method: 'PUT',
+            body: JSON.stringify({ id, status: newStatus }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            loadListings();
+          }
+        } catch (err) {
+          console.error('Failed to toggle status:', err);
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.delete-listing').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = (e.target as HTMLElement).dataset.id!;
+        if (!confirm('Delete this listing?')) return;
+
+        try {
+          const res = await authFetch('/api/admin/listing?id=' + id, { method: 'DELETE' });
+          const data = await res.json();
+          if (data.success) {
+            loadListings();
+          }
+        } catch (err) {
+          console.error('Failed to delete:', err);
+        }
+      });
+    });
   }
 
   function escapeHtml(str: string) {
@@ -235,10 +300,39 @@ import Button from '../../../components/ui/Button.astro';
     return div.innerHTML;
   }
 
+  function formatDate(value: string | number | null | undefined): string {
+    if (!value) return '-';
+    try {
+      // Handle Unix timestamp (number) or ISO string
+      const date = typeof value === 'number'
+        ? new Date(value * 1000)
+        : new Date(value);
+      if (isNaN(date.getTime())) return '-';
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return '-';
+    }
+  }
+
   // Event listeners
-  typeFilter?.addEventListener('change', loadListings);
-  statusFilter?.addEventListener('change', loadListings);
+  typeFilter?.addEventListener('change', renderListings);
+  statusFilter?.addEventListener('change', renderListings);
   searchInput?.addEventListener('input', renderListings);
+
+  // Edit button handler
+  tbody?.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest('.edit-listing') as HTMLButtonElement | null;
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    if (!id) return;
+
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+
+    alert('Edit functionality: Redirect to /admin/listings/edit/' + id);
+    // TODO: Implement full edit page redirect or inline edit modal
+  });
 
   // Init
   loadListings();

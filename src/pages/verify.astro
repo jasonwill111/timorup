@@ -36,13 +36,13 @@ import CardFooter from '../components/ui/CardFooter.astro';
 
 <script>
   import { toast } from '../stores/toast';
+  import { actions } from 'astro:actions';
 
   const statusContainer = document.getElementById('verification-status');
 
   async function verifyEmail() {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
-    const type = urlParams.get('type');
 
     if (!token) {
       showError('Invalid verification link. Please request a new verification email.');
@@ -50,23 +50,15 @@ import CardFooter from '../components/ui/CardFooter.astro';
     }
 
     try {
-      const response = await fetch('/api/auth/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, type }),
-      });
+      const result = await actions.auth.verifyEmail({ token });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (result.success) {
         showSuccess('Email verified successfully! Redirecting to login...');
         setTimeout(() => {
           window.location.href = '/login?verified=true';
         }, 2000);
       } else {
-        showError(data.error?.message || 'Verification failed. Please try again.');
+        showError(result.error?.message || 'Verification failed. Please try again.');
       }
     } catch (error) {
       console.error('Verification error:', error);

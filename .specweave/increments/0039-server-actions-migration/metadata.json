@@ -1,0 +1,18 @@
+{
+  "id": "0039-server-actions-migration",
+  "status": "active",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-09",
+  "lastActivity": "2026-05-11",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "note": "Actions created (70 files) but REST APIs still active. 15 endpoints need migration, 26 orphaned endpoints to delete.",
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}

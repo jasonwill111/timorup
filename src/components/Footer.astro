@@ -34,7 +34,7 @@ const currentYear = new Date().getFullYear();
           </a>
         </div>
       </div>
-      
+
       <!-- Quick Links -->
       <div>
         <h3 class="font-semibold mb-4">Quick Links</h3>
@@ -55,6 +55,11 @@ const currentYear = new Date().getFullYear();
             </a>
           </li>
           <li>
+            <a href="/blog" class="text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
+              Blog
+            </a>
+          </li>
+          <li>
             <a href="/listings/create" class="text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
               Add Your Business
             </a>
@@ -67,27 +72,26 @@ const currentYear = new Date().getFullYear();
         </ul>
       </div>
 
-      <!-- Contact -->
+      <!-- Company -->
       <div>
-        <h3 class="font-semibold mb-4">Contact</h3>
-        <ul class="space-y-2 text-sm text-muted-foreground">
-          <li>Dili, Timor-Leste</li>
+        <h3 class="font-semibold mb-4">Company</h3>
+        <ul class="space-y-2">
           <li>
-            <a href="mailto:contact@timorlist.com" class="hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
-              contact@timorlist.com
+            <a href="/about" class="text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
+              About Us
             </a>
           </li>
           <li>
-            <a href="tel:+670" class="hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
-              +670
+            <a href="/contact" class="text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded">
+              Contact
             </a>
           </li>
         </ul>
       </div>
     </div>
-    
-    <div class="border-t mt-2 pt-2 flex flex-col md:flex-row justify-between items-center gap-4">
-      <p class="text-sm text-muted-foreground my-0 py-0">
+
+    <div class="border-t mt-6 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-sm text-muted-foreground">
         &copy; {currentYear} TimorList. All rights reserved.
       </p>
       <div class="flex gap-4">

@@ -17,8 +17,7 @@ export async function getDb() {
   try {
     const { env } = await import('cloudflare:workers');
     if (env.DB) {
-      _db = drizzle(env.DB, { schema, casing: 'snake_case' });
-      console.log('[getDb] Drizzle/D1 initialized');
+      _db = drizzle(env.DB, { schema });
     }
   } catch (e) {
     console.error('[getDb] Failed to initialize:', e);
@@ -31,8 +30,7 @@ export async function getDb() {
  * Initialize DB with a D1Database instance (for middleware)
  */
 export function initDb(d1Db: D1Database) {
-  _db = drizzle(d1Db, { schema, casing: 'snake_case' });
-  console.log('[getDb] Drizzle/D1 initialized with provided binding');
+  _db = drizzle(d1Db, { schema });
   return _db;
 }
 

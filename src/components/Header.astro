@@ -8,6 +8,7 @@ interface Props {
 const { currentPath = '/' } = Astro.props;
 
 const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'));
+const urlParams = new URL(Astro.request.url).searchParams;
 ---
 
 <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -22,29 +23,44 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       </a>
 
       <!-- Desktop Navigation - ALL buttons 44px height -->
-      <nav class="hidden md:flex items-center gap-1">
+      <nav class="hidden md:flex items-center gap-0.5">
+        <a
+          href="/businesses"
+          class:list={[
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
+            currentPath.startsWith('/businesses') || currentPath.startsWith('/business/') ? "text-primary" : "text-muted-foreground"
+          ]}
+        >
+          Businesses
+        </a>
         <a
           href="/listings"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
-            currentPath.startsWith('/listings') ? "text-primary" : "text-muted-foreground"
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
+            currentPath.startsWith('/listings') || currentPath.startsWith('/listing/') ? "text-primary" : "text-muted-foreground"
           ]}
         >
-          Directory
+          Listings
         </a>
-        <a
-          href="/products-services"
-          class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
-            currentPath.startsWith('/products-services') ? "text-primary" : "text-muted-foreground"
-          ]}
-        >
-          Products & Services
-        </a>
+        <!-- Dropdown: Govs & NGOs -->
+        <div class="relative group">
+          <button class="text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center text-muted-foreground hover:text-primary">
+            Govs & NGOs
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <!-- Hover bridge: invisible area to prevent dropdown from disappearing when mouse moves down -->
+          <div class="absolute left-0 right-0 h-3 -mb-2 -mt-1 cursor-default"></div>
+          <div class="hidden group-hover:block absolute left-0 mt-2 w-44 bg-background border rounded-lg shadow-lg py-1 z-50">
+            <a href="/public-sectors" class="block px-4 py-2.5 text-sm hover:bg-muted">Public Sectors</a>
+            <a href="/non-profits" class="block px-4 py-2.5 text-sm hover:bg-muted">Non-Profits</a>
+          </div>
+        </div>
         <a
           href="/pricing"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
             currentPath === '/pricing' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -53,7 +69,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         <a
           href="/faq"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-3 h-10 flex items-center",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
             currentPath === '/faq' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -61,7 +77,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
         </a>
         <a
           href="/listings/create"
-          class="text-sm font-medium bg-primary text-primary-foreground px-4 h-10 rounded-md hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center"
+          class="text-sm font-medium bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center ml-1"
         >
           + Create
         </a>
@@ -115,8 +131,14 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       <a href="/businesses" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Businesses
       </a>
-      <a href="/categories" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/categories') ? "bg-muted text-primary" : "text-muted-foreground"]}>
-        Categories
+      <a href="/listings" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/listings') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+        Listings
+      </a>
+      <a href="/public-sectors" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/public-sectors') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+        Public Sectors
+      </a>
+      <a href="/non-profits" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/non-profits') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+        Non-Profits
       </a>
       <a href="/pricing" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath === '/pricing' ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Pricing
@@ -124,7 +146,10 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
       <a href="/faq" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath === '/faq' ? "bg-muted text-primary" : "text-muted-foreground"]}>
         FAQ
       </a>
-      <div id="mobile-auth" class="border-t pt-2 mt-2">
+      <a href="/listings/create" class:list={["block px-3 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center", currentPath === '/listings/create' ? "bg-primary/90" : ""]}>
+        + Create Listing
+      </a>
+      <div id="mobile-auth" class="border-t pt-2 mt-2 space-y-2">
         {isLoggedIn ? (
           <>
             <a href="/account" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">My Account</a>
@@ -132,8 +157,8 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
           </>
         ) : (
           <>
-            <a href="/login" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">Log in</a>
-            <a href="/register" class="block px-3 py-2 rounded-lg text-sm font-medium bg-brand-500 text-white text-center">Sign Up</a>
+            <a href="/login" class="block px-3 py-2 rounded-lg text-sm font-medium text-center border border-primary text-primary hover:bg-primary/5">Log in</a>
+            <a href="/register" class="block px-3 py-2 rounded-lg text-sm font-medium text-center bg-primary text-primary-foreground">Sign Up</a>
           </>
         )}
       </div>
@@ -142,6 +167,8 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
 </header>
 
 <script>
+  import { actions } from 'astro:actions';
+
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
 
@@ -150,7 +177,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
   });
 
   document.getElementById('mobile-logout')?.addEventListener('click', async () => {
-    try { await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' }); }
+    try { await actions.auth.signOut(); }
     catch (e) { console.error('Logout error:', e); }
     finally {
       sessionStorage.removeItem('userId');
@@ -186,7 +213,7 @@ const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('use
             document.getElementById('avatar-dropdown')?.classList.toggle('hidden');
           });
           document.getElementById('logout-btn')?.addEventListener('click', async () => {
-            try { await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' }); }
+            try { await actions.auth.signOut(); }
             catch (e) { console.error('Logout error:', e); }
             finally {
               localStorage.removeItem('userId');

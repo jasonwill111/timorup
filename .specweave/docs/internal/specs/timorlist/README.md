@@ -2,6 +2,10 @@
 
 Feature specifications for **timorlist**.
 
+## Core Architecture
+
+- [Entity Tables Migration](entity-tables-migration.md) — 4 separate entity tables, independent APIs, UI/UX updates (2026-05-11)
+
 ## Features
 
 Features are organized by ID: `FS-XXX/`
@@ -26,10 +30,18 @@ sw:sync-docs 0001
 
 ## Active Features
 
-- [FS-021: Admin SKUs TipTap Editor](FS-021/FEATURE.md)
-- [FS-022: Admin Media Upload UI](FS-022/FEATURE.md)
-- [FS-028: Media Upload Optimization](FS-028/FEATURE.md)
+- [FS-037: Admin Mobile UI Adaptation](FS-037/FEATURE.md)
+- [FS-038: Admin Dashboard Enhancement](FS-038/FEATURE.md)
+- [FS-039: Server Actions Migration](FS-039/FEATURE.md)
+- [FS-040: Query Layer Migration & Nanostores](FS-040/FEATURE.md)
+- [FS-041: TypeScript Type Safety & Console Cleanup](FS-041/FEATURE.md)
+- [FS-042: Listing Schema & Plans](FS-042/FEATURE.md)
+- [FS-043: Listing Frontend Routes](FS-043/FEATURE.md)
+- [FS-044: Listing Admin Pages](FS-044/FEATURE.md)
+- [FS-045: Header and Pricing Updates](FS-045/FEATURE.md)
+- [FS-046: Account Page Updates](FS-046/FEATURE.md)
+- [FS-047: Entity Detail Pages](FS-047/FEATURE.md)
 
 ---
 
-Last updated: 2026-03-22
+Last updated: 2026-05-11

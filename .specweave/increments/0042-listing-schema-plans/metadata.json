@@ -1,0 +1,18 @@
+{
+  "id": "0042-listing-schema-plans",
+  "status": "in_progress",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-10T09:36:48.843Z",
+  "lastActivity": "2026-05-11",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "note": "4/12 tasks completed. Personal listing routes, plan selection, trial conversion, expiry handling pending.",
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}

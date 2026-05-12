@@ -13,20 +13,20 @@ import BusinessSidebar from '../../components/islands/BusinessSidebar.astro';
 import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
 import { getDb } from '@/lib/db';
 const db = await getDb();
-import { businessPages, categories, reviews, media, businessUpdates } from '@/db/schema';
+import { businesses, categories, reviews, media, businessUpdates } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const { slug } = Astro.params;
 const siteUrl = import.meta.env.SITE || 'https://timorlist.com';
 const canonicalUrl = `${siteUrl}/business/${slug}`;
 
-// SSR: Load business data
+// SSR: Load business data from businesses table
 const business = await db.select()
-  .from(businessPages)
-  .where(eq(businessPages.slug, slug ?? ''))
+  .from(businesses)
+  .where(eq(businesses.slug, slug ?? ''))
   .get();
 
-if (!business || business.entityType !== 'business') {
+if (!business) {
   return Astro.redirect('/businesses');
 }
 

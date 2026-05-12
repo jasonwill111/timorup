@@ -2,8 +2,8 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
-import { eq, like, desc, sql, or, and, asc } from 'drizzle-orm';
+import { businesses, categories } from '@/db/schema';
+import { eq, like, and, or } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
 import { PaginationSchema } from '@/lib/validation';
 
@@ -18,13 +18,11 @@ function getClientIP(request: Request): string {
          'unknown';
 }
 
-// Cache TTL (shorter for list endpoints - 30 seconds)
-const CACHE_TTL_LIST = 30;
+const CACHE_TTL = 30;
 
 async function getCachedResponse(cacheKey: string): Promise<Response | null> {
   try {
-    const cache = caches.default;
-    return await cache.match(cacheKey);
+    return await caches.default.match(cacheKey);
   } catch {
     return null;
   }
@@ -32,7 +30,6 @@ async function getCachedResponse(cacheKey: string): Promise<Response | null> {
 
 async function cacheResponse(cacheKey: string, response: Response, ttl: number): Promise<void> {
   try {
-    const cache = caches.default;
     const clonedResponse = new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
@@ -41,7 +38,7 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
         'Cache-Control': `public, max-age=${ttl}`,
       },
     });
-    await cache.put(cacheKey, clonedResponse);
+    await caches.default.put(cacheKey, clonedResponse);
   } catch {
     // Cache API not available locally
   }
@@ -50,9 +47,8 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
 
-  // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`list:${clientIP}`);
+  const rateLimit = checkRateLimit(`businesses:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({
@@ -68,10 +64,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     });
   }
 
-  // Build cache key from query params
   const cacheKey = `/api/businesses${url.search}`;
-
-  // Check cache (only for non-search queries to keep results fresh)
   const hasSearch = url.searchParams.get('search');
   if (!hasSearch) {
     const cachedResponse = await getCachedResponse(cacheKey);
@@ -89,111 +82,106 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       limit: url.searchParams.get('limit') || '12',
     });
     const offset = (page - 1) * limit;
-    const type = url.searchParams.get('type') || ''; // 'business' | 'non-profit'
-    const organizationType = url.searchParams.get('organizationType') || ''; // 'government' | 'ngo'
 
-    // Build query conditions
-    const conditions = [eq(businessPages.status, 'live')];
-
-    // Filter by entity type (accept both 'nonprofit' and 'non-profit')
-    if (type === 'nonprofit' || type === 'non-profit') {
-      conditions.push(eq(businessPages.entityType, 'nonprofit'));
-    } else if (type === 'business') {
-      conditions.push(eq(businessPages.entityType, 'business'));
-    } else if (type === 'organization') {
-      // Legacy type - return empty (old data needs migration)
-      conditions.push(eq(businessPages.entityType, '__nonexistent__'));
-    }
-    // Otherwise return all types
-
-    // Filter by organization type (only if type=organization or no type filter)
-    if (organizationType) {
-      conditions.push(eq(businessPages.organizationType, organizationType));
-    }
-
-    if (search) {
-      conditions.push(or(
-        like(businessPages.title, `%${search}%`),
-        like(businessPages.aboutUs, `%${search}%`),
-        like(businessPages.tags, `%${search}%`)
-      ));
-    }
-
-    // Get category by slug
+    let categoryId = '';
     if (category) {
       const cat = await db.select()
         .from(categories)
         .where(eq(categories.slug, category))
         .limit(1)
         .all();
-
       if (cat.length > 0) {
-        conditions.push(eq(businessPages.categoryId, cat[0].id));
+        categoryId = cat[0].id;
       }
     }
 
-    // Build order by
-    let orderBy;
-    switch (sort) {
-      case 'popular':
-        orderBy = desc(sql`(likes * 3 + saves * 1 + views * 0.01)`);
-        break;
-      case 'rating':
-        orderBy = desc(businessPages.ratingAverage);
-        break;
-      case 'name':
-        orderBy = asc(businessPages.title);
-        break;
-      default: // recent
-        orderBy = desc(businessPages.createdAt);
+    // Build conditions - include both 'live' and 'published' status
+    const conditions = [
+      or(
+        eq(businesses.status, 'live'),
+        eq(businesses.status, 'published')
+      ) as any
+    ];
+
+    if (search) {
+      conditions.push(
+        or(
+          like(businesses.title, `%${search}%`),
+          like(businesses.aboutUs, `%${search}%`),
+          like(businesses.tags, `%${search}%`)
+        ) as any
+      );
     }
 
-    // Get businesses
-    const allBusinesses = await db.select()
-      .from(businessPages)
-      .where(and(...conditions))
-      .orderBy(orderBy)
-      .limit(limit)
-      .offset(offset)
-      .all();
+    if (categoryId) {
+      conditions.push(eq(businesses.categoryId, categoryId) as any);
+    }
 
-    // Get total count
-    const totalResult = await db.select({ count: sql<number>`count(*)` })
-      .from(businessPages)
-      .where(and(...conditions))
-      .get();
-    const total = Number(totalResult?.count) || 0;
+    let results = await db.select({
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      profileImageId: businesses.profileImageId,
+      address: businesses.address,
+      tags: businesses.tags,
+      likes: businesses.likes,
+      saves: businesses.saves,
+      views: businesses.views,
+      ratingAverage: businesses.ratingAverage,
+      ratingCount: businesses.ratingCount,
+      createdAt: businesses.createdAt,
+    })
+    .from(businesses)
+    .where(and(...conditions))
+    .all();
 
-    // Get category names
-    const categoryMap = new Map<string, typeof categories.$inferSelect>();
+    switch (sort) {
+      case 'popular':
+        results.sort((a, b) => {
+          const scoreA = (a.likes || 0) * 3 + (a.saves || 0) * 1 + (a.views || 0) * 0.01;
+          const scoreB = (b.likes || 0) * 3 + (b.saves || 0) * 1 + (b.views || 0) * 0.01;
+          return scoreB - scoreA;
+        });
+        break;
+      case 'rating':
+        results.sort((a, b) => (b.ratingAverage || 0) - (a.ratingAverage || 0));
+        break;
+      case 'name':
+        results.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      default:
+        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    const paginated = results.slice(offset, offset + limit);
+    const total = results.length;
+
+    const categoryMap = new Map<string, string>();
     const allCategories = await db.select().from(categories).all();
-    allCategories.forEach((cat) => categoryMap.set(cat.id, cat));
+    allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
-    // Add category name to businesses
-    const businessesWithCategory = allBusinesses.map((biz) => ({
+    const responseData = paginated.map((biz) => ({
       ...biz,
-      categoryName: categoryMap.get(biz.categoryId)?.name || 'Business',
+      tags: biz.tags ? JSON.parse(biz.tags) : [],
+      categoryName: categoryMap.get(biz.categoryId) || 'Business',
     }));
 
     const response = new Response(JSON.stringify({
       success: true,
-      data: businessesWithCategory,
+      data: responseData,
       pagination: {
         page,
         limit,
-        total: total,
+        total,
         totalPages: Math.ceil(total / limit),
       }
     }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
 
-    // Cache non-search responses for 30 seconds
     if (!hasSearch) {
-      await cacheResponse(cacheKey, response, CACHE_TTL_LIST);
+      await cacheResponse(cacheKey, response, CACHE_TTL);
     }
 
     return response;
@@ -203,9 +191,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       error: { message: getErrorMessage(error) }
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

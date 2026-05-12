@@ -19,6 +19,19 @@ export { plans };
 import { landingPages } from './landing-pages';
 export { landingPages };
 
+// Re-export new entity tables
+import { businesses } from './businesses';
+export { businesses };
+
+import { listings } from './listings';
+export { listings };
+
+import { publicSectors } from './public-sectors';
+export { publicSectors };
+
+import { nonProfits } from './non-profits';
+export { nonProfits };
+
 // Users table
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -34,22 +47,64 @@ export const users = sqliteTable('users', {
   roleIdx: index('users_role_idx').on(users.role),
 }));
 
-// Categories table - use string reference to avoid circular
-// entityType: 'business' | 'nonprofit' | null (null = all types)
-export const categories = sqliteTable('categories', {
+// Business Categories table
+export const businessCategories = sqliteTable('business_categories', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
-  icon: text('icon').default(''), // 'emoji:🍽️' or 'lucide:utensils' or ''
+  icon: text('icon').default(''),
   parentId: text('parent_id'),
-  entityType: text('entity_type').default('business'), // 'business' | 'nonprofit' | null (all types)
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (categories) => ({
-  parentIdx: index('categories_parent_idx').on(categories.parentId),
-  entityTypeIdx: index('categories_entity_type_idx').on(categories.entityType),
+}, (table) => ({
+  parentIdx: index('bc_parent_idx').on(table.parentId),
 }));
+
+// Non-Profit Categories table
+export const nonProfitCategories = sqliteTable('non_profit_categories', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  icon: text('icon').default(''),
+  parentId: text('parent_id'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}, (table) => ({
+  parentIdx: index('npc_parent_idx').on(table.parentId),
+}));
+
+// Public Sector Categories table
+export const publicSectorCategories = sqliteTable('public_sector_categories', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  icon: text('icon').default(''),
+  parentId: text('parent_id'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}, (table) => ({
+  parentIdx: index('psc_parent_idx').on(table.parentId),
+}));
+
+// Listing Categories table
+export const listingCategories = sqliteTable('listing_categories', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  icon: text('icon').default(''),
+  parentId: text('parent_id'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}, (table) => ({
+  parentIdx: index('lc_parent_idx').on(table.parentId),
+}));
+
+// Alias for backwards compatibility
+export const categories = businessCategories;
 
 // Media table
 export const media = sqliteTable('media', {

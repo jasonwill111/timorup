@@ -1,6 +1,7 @@
 ---
 import '../styles/globals.css';
 import ToastContainer from '../components/ui/ToastContainer.astro';
+import { actions } from 'astro:actions';
 
 interface Props {
   title: string;
@@ -59,7 +60,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="md:hidden fixed inset-0 z-40 hidden">
       <div id="mobile-menu-backdrop" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
-      <div id="mobile-menu-panel" class="absolute left-0 top-0 h-full w-64 bg-card border-r pt-14 -translate-x-full transition-transform duration-200 ease-out">
+      <div id="mobile-menu-panel" class="absolute left-0 top-0 h-full w-56 bg-card border-r pt-14 -translate-x-full transition-transform duration-200 ease-out">
         <nav class="p-4 space-y-1">
           <a href="/admin" class="nav-item" data-section="dashboard">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,9 +85,27 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
           </a>
           <a href="/admin/listings" class="nav-item" data-section="listing">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
             </svg>
             <span>Listings</span>
+          </a>
+          <a href="/admin/businesses" class="nav-item" data-section="businesses">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <span>Businesses</span>
+          </a>
+          <a href="/admin/non-profits" class="nav-item" data-section="non-profits">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+            <span>Non-Profits</span>
+          </a>
+          <a href="/admin/public-sectors" class="nav-item" data-section="public-sectors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1"/>
+            </svg>
+            <span>Gov & NGOs</span>
           </a>
           <a href="/admin/ai-tools" class="nav-item" data-section="ai-tools">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +176,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     </div>
 
     <!-- Desktop Sidebar -->
-    <aside class="hidden md:flex fixed left-0 top-0 h-full w-56 bg-card border-r flex-col z-40">
+    <aside class="hidden md:flex fixed left-0 top-0 h-full w-48 bg-card border-r flex-col z-40">
       <!-- Logo + User Info -->
       <div class="p-4 border-b flex items-center justify-between">
         <a href="/admin" class="flex items-center gap-2 min-w-0">
@@ -190,9 +209,27 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
         
         <a href="/admin/listings" class="nav-item" data-section="listing">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
           </svg>
           <span>Listings</span>
+        </a>
+        <a href="/admin/businesses" class="nav-item" data-section="businesses">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+          <span>Businesses</span>
+        </a>
+        <a href="/admin/non-profits" class="nav-item" data-section="non-profits">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+          <span>Non-Profits</span>
+        </a>
+        <a href="/admin/public-sectors" class="nav-item" data-section="public-sectors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
+          </svg>
+          <span>Gov & NGOs</span>
         </a>
         <a href="/admin/ai-tools" class="nav-item" data-section="ai-tools">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,7 +335,7 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
 <style>
   @reference "../styles/globals.css";
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-3 min-h-11 rounded-lg text-sm text-muted-foreground transition-colors;
+    @apply flex items-center gap-2 px-2 py-2 min-h-9 rounded-lg text-sm text-muted-foreground transition-colors;
   }
   .nav-item:hover {
     @apply bg-muted text-foreground;

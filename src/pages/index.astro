@@ -8,78 +8,122 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
 ---
 
 <Layout title="TimorList - Business Directory for Timor-Leste">
-  <!-- Hero - shorter on mobile -->
-  <div class="relative h-[240px] sm:h-[300px] md:h-[400px] lg:h-[500px] bg-gradient-to-br from-amber-400 via-orange-400 to-amber-500 overflow-hidden">
-    <div class="absolute inset-0 opacity-30">
-      <div class="absolute top-4 sm:top-10 left-4 sm:left-10 w-16 sm:w-32 h-16 sm:h-32 bg-white/20 rounded-full blur-2xl"></div>
-      <div class="absolute bottom-4 sm:bottom-10 right-4 sm:right-10 w-24 sm:w-48 h-24 sm:h-48 bg-white/20 rounded-full blur-3xl"></div>
+  <!-- Hero - Brand Yellow Theme -->
+  <div class="relative h-[240px] sm:h-[300px] md:h-[400px] lg:h-[480px] bg-gradient-to-br from-brand-500 via-brand-400 to-amber-400 overflow-hidden">
+    <!-- Decorative elements -->
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute top-8 sm:top-16 left-[10%] w-32 sm:w-64 h-32 sm:h-64 bg-white/30 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-12 sm:bottom-20 right-[15%] w-40 sm:w-80 h-40 sm:h-80 bg-white/20 rounded-full blur-3xl"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/10 rounded-full"></div>
     </div>
+    <!-- Geometric shapes -->
+    <div class="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 border-t-4 border-r-4 border-white/20 rounded-bl-full"></div>
+    <div class="absolute bottom-20 left-8 w-16 h-16 sm:w-24 sm:h-24 border-b-4 border-l-4 border-white/10 rounded-tr-full"></div>
+
     <div class="relative z-10 h-full flex items-center justify-center">
       <div class="text-center text-white max-w-3xl px-4">
-        <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-2 sm:mb-4 drop-shadow-lg">TimorList</h1>
-        <p class="text-sm sm:text-lg md:text-xl mb-4 sm:mb-6 opacity-90">Discover Local Businesses in Timor-Leste</p>
-        <div class="flex gap-3 sm:gap-4 justify-center flex-wrap">
-          <a href="/listings">
-            <Button size="lg" variant="default" class="bg-white text-amber-600 hover:bg-amber-50 font-semibold shadow-lg">Browse Directory</Button>
+        <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold mb-3 sm:mb-4 drop-shadow-lg" style="font-family: var(--font-oswald), sans-serif;">TimorList</h1>
+        <p class="text-base sm:text-lg md:text-2xl mb-5 sm:mb-8 opacity-95 font-light">Discover Local Businesses in Timor-Leste</p>
+        <div class="flex gap-4 sm:gap-6 justify-center flex-wrap">
+          <a href="/businesses">
+            <Button size="lg" variant="default" class="bg-white text-brand-700 hover:bg-brand-50 font-semibold shadow-xl px-8 py-3 transition-all hover:scale-105">Browse Directory</Button>
           </a>
           <a href="/listings/create">
-            <Button size="lg" variant="ghost" class="text-white border-2 border-white/60 hover:bg-white/10 hover:border-white font-semibold">List Your Business</Button>
+            <Button size="lg" variant="ghost" class="text-white border-2 border-white/70 hover:bg-white/20 hover:border-white font-semibold px-6 py-3 transition-all">List Your Business</Button>
           </a>
         </div>
       </div>
     </div>
+    <!-- Wave divider -->
     <div class="absolute bottom-0 left-0 right-0">
-      <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-10 sm:h-16">
-        <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
+      <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-12 sm:h-20 text-background">
+        <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="currentColor"/>
       </svg>
     </div>
   </div>
 
-  <div class="container py-6 sm:py-12">
+  <div class="container py-8 sm:py-12">
+    <!-- Explore by Type - 4 Entity Cards -->
+    <section class="mb-10 sm:mb-14">
+      <h2 class="text-xl sm:text-2xl font-bold mb-6 text-center">Explore Timor-Leste</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Businesses -->
+        <a href="/businesses" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-400 to-amber-400 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+          <div class="relative z-10">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Businesses</h3>
+            <p class="text-white/80 text-sm">Restaurants, shops, hotels & more</p>
+          </div>
+        </a>
+        <!-- Listings -->
+        <a href="/listings" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+          <div class="relative z-10">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Listings</h3>
+            <p class="text-white/80 text-sm">Jobs, vehicles, property & services</p>
+          </div>
+        </a>
+        <!-- Non-Profits -->
+        <a href="/non-profits" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+          <div class="relative z-10">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Non-Profits</h3>
+            <p class="text-white/80 text-sm">NGOs & charitable organizations</p>
+          </div>
+        </a>
+        <!-- Public Sectors -->
+        <a href="/public-sectors" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+          <div class="relative z-10">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3"/></svg>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Public Sectors</h3>
+            <p class="text-white/80 text-sm">Government ministries & agencies</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
     <!-- Server Island: Dynamic content with skeleton fallback -->
     <HomepageContent server:defer>
       <!-- Fallback -->
-      <div slot="fallback" class="space-y-8">
-        <!-- Featured Businesses Skeleton -->
-        <section class="mb-6 sm:mb-12">
-          <div class="flex items-center justify-between mb-4 sm:mb-6">
-            <div class="h-6 sm:h-8 w-40 bg-muted rounded animate-pulse"></div>
-            <div class="h-4 w-16 bg-muted rounded animate-pulse"></div>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-            {[...Array(8)].map(() => (
-              <div class="bg-card rounded-lg border p-3">
-                <div class="aspect-square bg-muted rounded mb-3 animate-pulse"></div>
-                <div class="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse"></div>
-                <div class="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
-              </div>
-            ))}
-          </div>
-        </section>
-        <!-- Featured Products Skeleton -->
-        <section class="mb-6 sm:mb-12">
+      <div slot="fallback" class="space-y-10">
+        <!-- Featured Listings Skeleton -->
+        <section>
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="h-6 sm:h-8 w-48 bg-muted rounded animate-pulse"></div>
-            <div class="h-4 w-16 bg-muted rounded animate-pulse"></div>
+            <div class="h-4 w-20 bg-muted rounded animate-pulse"></div>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-            {[...Array(8)].map(() => (
-              <div class="bg-card rounded-lg border p-3">
-                <div class="aspect-square bg-muted rounded mb-3 animate-pulse"></div>
-                <div class="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse"></div>
-                <div class="h-3 bg-muted rounded w-1/3 animate-pulse"></div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {[...Array(10)].map(() => (
+              <div class="bg-card rounded-xl border border-border/50 shadow-sm">
+                <div class="aspect-square bg-gradient-to-br from-muted to-muted/80 animate-pulse"></div>
+                <div class="p-3 space-y-2">
+                  <div class="h-4 bg-muted rounded w-3/4 animate-pulse"></div>
+                  <div class="h-3 bg-muted rounded w-1/2 animate-pulse"></div>
+                </div>
               </div>
             ))}
           </div>
         </section>
         <!-- Categories Skeleton -->
-        <section class="mb-6 sm:mb-12">
-          <div class="h-6 sm:h-8 w-48 bg-muted rounded animate-pulse mb-4 sm:mb-6"></div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        <section>
+          <div class="h-6 sm:h-8 w-40 bg-muted rounded animate-pulse mb-6"></div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
             {[...Array(8)].map(() => (
-              <div class="p-4 text-center border rounded-xl">
-                <div class="h-8 w-8 mx-auto mb-2 bg-muted rounded animate-pulse"></div>
-                <div class="h-4 w-16 mx-auto bg-muted rounded animate-pulse"></div>
+              <div class="p-4 text-center bg-card rounded-xl border border-border/50">
+                <div class="w-10 h-10 mx-auto mb-3 bg-muted rounded-lg animate-pulse"></div>
+                <div class="h-3 w-16 mx-auto bg-muted rounded animate-pulse"></div>
               </div>
             ))}
           </div>
@@ -87,12 +131,12 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
       </div>
     </HomepageContent>
 
-    <!-- CTA -->
-    <section class="text-center py-12 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl">
-      <h2 class="text-2xl font-bold mb-4">Ready to Grow Your Business?</h2>
-      <p class="text-muted-foreground mb-6 max-w-xl mx-auto">Join thousands of businesses in Timor-Leste and reach more customers today.</p>
-      <a href="/listings/create">
-        <Button size="lg" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">Create Your Business Page</Button>
+    <!-- CTA - Brand Yellow -->
+    <section class="text-center py-12 sm:py-16 bg-gradient-to-br from-brand-50 via-amber-50/50 to-background dark:from-brand-900/20 dark:via-amber-900/10 dark:to-background rounded-3xl border border-brand-100 dark:border-brand-800/30 my-8 sm:my-12">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-3 text-foreground">Ready to Grow Your Business?</h2>
+      <p class="text-muted-foreground mb-8 max-w-xl mx-auto px-4">Join thousands of businesses in Timor-Leste and reach more customers today.</p>
+      <a href="/listings/create" class="inline-block">
+        <Button size="lg" class="bg-gradient-to-r from-brand-500 to-amber-400 hover:from-brand-600 hover:to-amber-500 text-brand-foreground shadow-lg shadow-brand-500/25 px-8 py-3 transition-all hover:scale-105 font-semibold">Create Your Business Page</Button>
       </a>
     </section>
   </div>

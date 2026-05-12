@@ -44,25 +44,11 @@ export async function GET({ request }: { request: Request }) {
                 emailVerified: user.emailVerified ?? false,
                 image: user.image ?? null,
                 role: user.role ?? 'user',
-                createdAt: user.createdAt ?
-                  (typeof user.createdAt === 'number' ? new Date(user.createdAt * 1000).toISOString() : user.createdAt.toISOString())
-                  : null,
-                updatedAt: user.updatedAt ?
-                  (typeof user.updatedAt === 'number' ? new Date(user.updatedAt * 1000).toISOString() : user.updatedAt.toISOString())
-                  : null,
               },
               session: {
                 id: session.id,
                 expiresAt: new Date(expiresAtMs).toISOString(),
                 token: session.token,
-                createdAt: session.createdAt ?
-                  (typeof session.createdAt === 'number' ? new Date(session.createdAt * 1000).toISOString() : session.createdAt.toISOString())
-                  : null,
-                updatedAt: session.updatedAt ?
-                  (typeof session.updatedAt === 'number' ? new Date(session.updatedAt * 1000).toISOString() : session.updatedAt.toISOString())
-                  : null,
-                ipAddress: session.ipAddress,
-                userAgent: session.userAgent,
                 userId: session.userId,
               }
             }), {

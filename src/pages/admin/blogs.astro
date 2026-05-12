@@ -2,6 +2,7 @@
 export const prerender = false;
 import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
+import { actions } from 'astro:actions';
 ---
 
 <AdminLayout title="Blog Posts">
@@ -172,6 +173,8 @@ import Button from '@components/ui/Button.astro';
 <link rel="stylesheet" href="https://unpkg.com/@tiptap/core@3.22.3/dist/tiptap.min.css" />
 
 <script>
+  import { actions } from 'astro:actions';
+
   // ── TipTap Editor Helper ─────────────────────────────────────────────────────
   // Using dynamic import to avoid SSR build issues
   async function initTipTapEditor(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
@@ -300,26 +303,25 @@ import Button from '@components/ui/Button.astro';
       }
     }
 
-    const formData = new FormData();
-    formData.append('file', fileToUpload);
-
     try {
-      const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
-      const data = await res.json();
+      const result = await actions.media.uploadMedia({
+        file: fileToUpload,
+        entityType: 'blog',
+      });
 
-      if (data.success && data.data?.id) {
+      if (result.success && result.data?.id) {
         if (type === 'featured') {
-          featuredImageId = data.data.id;
+          featuredImageId = result.data.id;
           const hiddenInput = document.getElementById('featured-image-id') as HTMLInputElement;
-          if (hiddenInput) hiddenInput.value = data.data.id;
-          document.getElementById('featured-preview-img')!.src = data.data.url;
+          if (hiddenInput) hiddenInput.value = result.data.id;
+          document.getElementById('featured-preview-img')!.src = result.data.url;
           document.getElementById('featured-image-preview')!.classList.remove('hidden');
           document.getElementById('featured-image-upload')!.classList.add('hidden');
         } else {
-          thumbnailId = data.data.id;
+          thumbnailId = result.data.id;
           const hiddenInput = document.getElementById('thumbnail-id') as HTMLInputElement;
-          if (hiddenInput) hiddenInput.value = data.data.id;
-          document.getElementById('thumbnail-preview-img')!.src = data.data.url;
+          if (hiddenInput) hiddenInput.value = result.data.id;
+          document.getElementById('thumbnail-preview-img')!.src = result.data.url;
           document.getElementById('thumbnail-preview')!.classList.remove('hidden');
           document.getElementById('thumbnail-upload')!.classList.add('hidden');
         }
@@ -372,14 +374,9 @@ import Button from '@components/ui/Button.astro';
 
   // ── Fetch posts ─────────────────────────────────────────────────────────────
   async function fetchPosts() {
-    const params = new URLSearchParams({ limit: '100' });
-    if (statusFilter.value) params.set('status', statusFilter.value);
-    if (searchInput.value) params.set('search', searchInput.value);
-
     try {
-      const res = await fetch(`/api/admin/blogs?${params}`);
-      const data = await res.json();
-      posts = data.success ? data.data : [];
+      const res = await fetch("/api/admin/blogs", { credentials: "include" }); const result = await res.json();;
+      posts = result.success ? result.data : [];
       renderList();
     } catch {
       listEl.innerHTML = '<p class="text-center text-red-500 py-8">Failed to load posts</p>';
@@ -488,19 +485,17 @@ import Button from '@components/ui/Button.astro';
     };
 
     try {
-      const url = id ? `/api/admin/blogs/${id}` : '/api/admin/blogs';
-      const method = id ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.success) {
+      let result;
+      if (id) {
+        result = await actions.admin.blogs.update(payload);
+      } else {
+        result = await actions.admin.blogs.create(payload);
+      }
+      if (result.success) {
         closeModal();
         fetchPosts();
       } else {
-        alert(data.error?.message || 'Save failed');
+        alert(result.error?.message || 'Save failed');
       }
     } catch {
       alert('Save failed');
@@ -511,13 +506,12 @@ import Button from '@components/ui/Button.astro';
   async function handleDelete() {
     if (!deleteTargetId) return;
     try {
-      const res = await fetch(`/api/admin/blogs/${deleteTargetId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
+      const result = await actions.admin.blogs.delete({ id: deleteTargetId });
+      if (result.success) {
         closeDeleteModal();
         fetchPosts();
       } else {
-        alert(data.error?.message || 'Delete failed');
+        alert(result.error?.message || 'Delete failed');
       }
     } catch {
       alert('Delete failed');

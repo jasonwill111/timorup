@@ -328,12 +328,50 @@ See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
 <!-- SW:END:non-claude -->
 
 ---
+---
+## Entity Structure
+
+### 4 种实体类型（独立数据库表）
+
+| 实体 | 数据库表 | 分类表 | 列表页 | 详情页 | Admin |
+|------|---------|--------|-------|--------|-------|
+| **Business** | businesses | business_categories | /businesses | /business/[slug] | /admin/businesses |
+| **Non-Profit** | non_profits | non_profit_categories | /non-profits | /non-profit/[slug] | /admin/non-profits |
+| **Public Sector** | public_sectors | public_sector_categories | /public-sectors | /public-sector/[slug] | /admin/public-sectors |
+| **Listing** | listings | listing_categories | /listings | /listing/[slug] | /admin/listings |
+
+### 各实体特性
+
+| 特性 | Businesses | Non-Profits | Public Sectors | Listings |
+|------|-----------|--------------|-----------------|----------|
+| SKU/Products | ✅ | ❌ | ❌ | ❌ |
+| Reviews | ✅ | ❌ | ❌ | ❌ |
+| Industry | ✅ | ❌ | ❌ | ❌ |
+| LatestUpdate | ✅ | ✅ | ✅ | ❌ |
+| Photo Gallery | ✅ | ✅ | ✅ | ❌ |
+| 图片限制 | 16+2视频 | 16+2视频 | 16+2视频 | 8+1视频 |
+| 订阅过期 | ✅ | ✅ | ✅ | ✅ (3天) |
+
+### Listing 可见性规则
+
+| 条件 | 状态 |
+|------|------|
+| 创建 ≤ 3 天 | ✅ 公开可见 |
+| 创建 > 3 天 + 已付费 + Admin 确认 | ✅ 公开可见 |
+| 创建 > 3 天 + 未付费/过期 | ❌ 7 天后删除 |
+
+### URL 命名约定
+
+- 复数形式 = 列表页（如 /businesses）
+- 单数形式 + slug = 详情页（如 /business/timor-cafe）
+- /admin/复数 = CRUD 管理页（如 /admin/businesses）
+
 <!-- ↓ ORIGINAL ↓ -->
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **timorlist** (1906 symbols, 2950 relationships, 90 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **timorlist** (3192 symbols, 4963 relationships, 142 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -373,3 +411,47 @@ This project is indexed by GitNexus as **timorlist** (1906 symbols, 2950 relatio
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+
+## Server Actions (Astro 6)
+
+### Structure
+```
+src/actions/
+├── auth/           # User authentication actions
+│   ├── signUp.ts
+│   ├── signIn.ts
+│   ├── signOut.ts
+│   └── index.ts
+├── business/        # Business listing actions
+│   ├── create.ts
+│   ├── update.ts
+│   ├── updates.ts
+│   └── like.ts
+├── admin/          # Admin CRUD actions
+│   ├── categories.ts
+│   ├── plans.ts
+│   ├── listings.ts
+│   └── index.ts
+├── media/          # Media upload/delete
+│   ├── upload.ts
+│   ├── update.ts
+│   └── delete.ts
+├── products/       # Product/SKU actions
+├── reviews/        # Review actions
+└── banners/        # Banner actions
+```
+
+### Usage
+```astro
+---
+import { actions } from 'astro:actions';
+
+// Call action
+const result = await actions.auth.signIn({ email, password });
+```
+
+### Migration (2026-05-09)
+- All write REST APIs → Server Actions (41 actions)
+- Read-only APIs kept as REST for caching
+- Page imports updated to use actions

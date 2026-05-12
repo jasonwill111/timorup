@@ -2,7 +2,7 @@
 id: US-001
 feature: FS-037
 title: "Admin子页面Mobile Audit (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-08
 tldr: "**As a** admin user."
@@ -21,8 +21,8 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: 列出所有需要适配的admin子页面清单(13个页面)
-- [ ] **AC-US1-02**: 识别每个页面的mobile问题类型
+- [x] **AC-US1-01**: 列出所有需要适配的admin子页面清单(13个页面)
+- [x] **AC-US1-02**: 识别每个页面的mobile问题类型
 
 ---
 

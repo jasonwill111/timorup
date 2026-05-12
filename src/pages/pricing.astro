@@ -2,13 +2,12 @@
 export const prerender = true;
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
-import Card from '../components/ui/Card.astro'
-
-import CardDescription from '../components/ui/CardDescription.astro'
-import CardContent from '../components/ui/CardContent.astro'
-import CardFooter from '../components/ui/CardFooter.astro'
-import CardHeader from '../components/ui/CardHeader.astro'
-import CardTitle from '../components/ui/CardTitle.astro'
+import Card from '../components/ui/Card.astro';
+import CardContent from '../components/ui/CardContent.astro';
+import CardDescription from '../components/ui/CardDescription.astro';
+import CardFooter from '../components/ui/CardFooter.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
 ---
 
 <Layout title="Pricing - TimorList">
@@ -16,10 +15,10 @@ import CardTitle from '../components/ui/CardTitle.astro'
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
       <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-        Choose the plan that works best for your business. All plans include a 3-day free trial.
+        Choose the plan that fits your business size. All plans include a 3-day free trial.
       </p>
     </div>
-    
+
     <!-- Billing Toggle -->
     <div class="flex justify-center mb-8">
       <div class="bg-muted p-1 rounded-lg flex">
@@ -31,7 +30,7 @@ import CardTitle from '../components/ui/CardTitle.astro'
         </button>
       </div>
     </div>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
       <!-- Basic Plan -->
       <Card>
@@ -40,59 +39,39 @@ import CardTitle from '../components/ui/CardTitle.astro'
           <CardDescription>For small businesses</CardDescription>
         </CardHeader>
         <CardContent class="text-center">
-          <div id="basic-price" class="text-5xl font-bold mb-1">$29<span class="text-lg text-muted-foreground">/mo</span></div>
-          <p id="basic-yearly" class="text-lg font-semibold text-green-600 dark:text-green-400 mb-6">
-            $290/year
+          <div id="basic-price" class="text-5xl font-bold mb-2">$29<span class="text-lg text-muted-foreground">/mo</span></div>
+          <p id="basic-yearly" class="text-sm font-medium text-green-600 dark:text-green-400 mb-4 hidden">
+            $290/year (save $58)
           </p>
-          
-          <ul class="text-left space-y-3">
+
+          <div class="bg-muted/50 rounded-lg p-3 mb-4">
+            <span class="text-lg">Up to <strong class="font-bold text-primary">10</strong> products/services</span>
+          </div>
+
+          <ul class="text-left space-y-2 text-sm">
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               Business page with full details
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              Up to <strong>10 products/services</strong>
+              Photo gallery & map
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              5 images per product
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              1 video per product
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              Photo gallery
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              Contact information
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              Map integration
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               Customer reviews
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Customer support
             </li>
           </ul>
         </CardContent>
@@ -102,7 +81,7 @@ import CardTitle from '../components/ui/CardTitle.astro'
           </a>
         </CardFooter>
       </Card>
-      
+
       <!-- Pro Plan -->
       <Card class="border-2 border-primary relative">
         <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white px-3 py-1 text-sm font-medium rounded-full">
@@ -113,41 +92,27 @@ import CardTitle from '../components/ui/CardTitle.astro'
           <CardDescription>For growing businesses</CardDescription>
         </CardHeader>
         <CardContent class="text-center">
-          <div id="pro-price" class="text-5xl font-bold mb-1">$59<span class="text-lg text-muted-foreground">/mo</span></div>
-          <p id="pro-yearly" class="text-lg font-semibold text-green-600 dark:text-green-400 mb-6">
-            $590/year
+          <div id="pro-price" class="text-5xl font-bold mb-2">$59<span class="text-lg text-muted-foreground">/mo</span></div>
+          <p id="pro-yearly" class="text-sm font-medium text-green-600 dark:text-green-400 mb-4 hidden">
+            $590/year (save $118)
           </p>
-          
-          <ul class="text-left space-y-3">
+
+          <div class="bg-primary/10 dark:bg-primary/20 rounded-lg p-3 mb-4">
+            <span class="text-lg">Up to <strong class="font-bold text-primary">30</strong> products/services</span>
+          </div>
+
+          <ul class="text-left space-y-2 text-sm">
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               Everything in Basic
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              Up to <strong>30 products/services</strong>
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              5 images per product
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              1 video per product
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              Priority support
+              Customer support
             </li>
           </ul>
         </CardContent>
@@ -157,7 +122,7 @@ import CardTitle from '../components/ui/CardTitle.astro'
           </a>
         </CardFooter>
       </Card>
-      
+
       <!-- Max Plan -->
       <Card class="border-2 border-amber-500 relative">
         <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-3 py-1 text-sm font-medium rounded-full">
@@ -168,41 +133,27 @@ import CardTitle from '../components/ui/CardTitle.astro'
           <CardDescription>For large businesses</CardDescription>
         </CardHeader>
         <CardContent class="text-center">
-          <div id="max-price" class="text-5xl font-bold mb-1">$89<span class="text-lg text-muted-foreground">/mo</span></div>
-          <p id="max-yearly" class="text-lg font-semibold text-green-600 dark:text-green-400 mb-6">
-            $890/year
+          <div id="max-price" class="text-5xl font-bold mb-2">$89<span class="text-lg text-muted-foreground">/mo</span></div>
+          <p id="max-yearly" class="text-sm font-medium text-green-600 dark:text-green-400 mb-4 hidden">
+            $890/year (save $178)
           </p>
-          
-          <ul class="text-left space-y-3">
+
+          <div class="bg-amber-500/10 rounded-lg p-3 mb-4">
+            <span class="text-lg">Up to <strong class="font-bold text-amber-600">60</strong> products/services</span>
+          </div>
+
+          <ul class="text-left space-y-2 text-sm">
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               Everything in Pro
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              Up to <strong>60 products/services</strong>
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              5 images per product
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              1 video per product
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              Dedicated support
+              Customer support
             </li>
           </ul>
         </CardContent>
@@ -213,16 +164,20 @@ import CardTitle from '../components/ui/CardTitle.astro'
         </CardFooter>
       </Card>
     </div>
-    
-    <div class="text-center mt-12">
-      <p class="text-muted-foreground mb-4">Prefer annual billing? Save with yearly plans!</p>
-      <div class="flex justify-center gap-4 flex-wrap">
-        <a href="/subscribe?plan=basic-yearly" data-plan="basic-yearly" class="text-amber-600 hover:text-amber-700 yearly-link">Basic Yearly ($390)</a>
-        <a href="/subscribe?plan=pro-yearly" data-plan="pro-yearly" class="text-amber-600 hover:text-amber-700 yearly-link">Pro Yearly ($690)</a>
-        <a href="/subscribe?plan=max-yearly" data-plan="max-yearly" class="text-amber-600 hover:text-amber-700 yearly-link">Max Yearly ($990)</a>
+
+    <!-- Feature comparison note -->
+    <div class="mt-12 text-center">
+      <div class="bg-muted/30 rounded-lg p-6 max-w-2xl mx-auto">
+        <h3 class="font-semibold mb-2">All Plans Include:</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+          <div>5 images per product</div>
+          <div>1 video per product</div>
+          <div>16 page images</div>
+          <div>2 page videos</div>
+        </div>
       </div>
     </div>
-    
+
     <div class="text-center mt-8">
       <p class="text-muted-foreground">
         Questions? <a href="mailto:contact@timorlist.com" class="text-amber-600 hover:text-amber-700">Contact us</a>
@@ -232,34 +187,18 @@ import CardTitle from '../components/ui/CardTitle.astro'
 </Layout>
 
 <script>
-  // Fetch plans from API and update UI
   async function initPricing() {
     const monthlyBtn = document.getElementById('monthly-btn');
     const yearlyBtn = document.getElementById('yearly-btn');
-
-    const basicPrice = document.getElementById('basic-price');
-    const basicPeriod = document.getElementById('basic-period');
-    const basicYearly = document.getElementById('basic-yearly');
-
-    const proPrice = document.getElementById('pro-price');
-    const proPeriod = document.getElementById('pro-period');
-    const proYearly = document.getElementById('pro-yearly');
-
-    const maxPrice = document.getElementById('max-price');
-    const maxPeriod = document.getElementById('max-period');
-    const maxYearly = document.getElementById('max-yearly');
-
-    // Get all subscribe links
     const subscribeLinks = document.querySelectorAll('.subscribe-link');
-    const yearlyLinks = document.querySelectorAll('.yearly-link');
 
-    // Fetch plans from API
-    let plans = {};
+    let plans: Record<string, { amount: number; name: string; period: string }> = {};
+
     try {
       const res = await fetch('/api/plans');
       const data = await res.json();
       if (data.success && data.data) {
-        data.data.forEach(plan => {
+        data.data.forEach((plan: { id: string; amount: number; name: string; period: string }) => {
           plans[plan.id] = plan;
         });
       }
@@ -267,89 +206,67 @@ import CardTitle from '../components/ui/CardTitle.astro'
       console.error('Failed to fetch plans:', e);
     }
 
-    // Helper to get plan by name and period
-    function getPlan(name, period) {
+    function getPlan(name: string, period: string) {
       return Object.values(plans).find(p => p.name === name && p.period === period);
     }
 
-    function updateLinks(isYearly) {
-      const suffix = isYearly ? '-yearly' : '-monthly';
-      subscribeLinks.forEach(link => {
-        const plan = link.dataset.plan;
-        if (plan) {
-          link.href = `/subscribe?plan=${plan}${suffix}`;
-        }
-      });
-    }
-
     function showMonthly() {
-      // Update buttons
       monthlyBtn?.classList.add('bg-background', 'shadow-sm');
       monthlyBtn?.classList.remove('text-muted-foreground');
       yearlyBtn?.classList.remove('bg-background', 'shadow-sm');
       yearlyBtn?.classList.add('text-muted-foreground');
 
-      const basicPlan = getPlan('Basic', 'monthly');
-      const proPlan = getPlan('Pro', 'monthly');
-      const maxPlan = getPlan('Max', 'monthly');
+      const basic = getPlan('Basic', 'monthly');
+      const pro = getPlan('Pro', 'monthly');
+      const max = getPlan('Max', 'monthly');
 
-      // Update Basic
-      if (basicPrice) basicPrice.textContent = basicPlan ? `$${basicPlan.amount}` : '$29';
-      if (basicPeriod) basicPeriod.textContent = 'per month';
-      basicYearly?.classList.add('hidden');
+      const basicPrice = document.getElementById('basic-price');
+      const proPrice = document.getElementById('pro-price');
+      const maxPrice = document.getElementById('max-price');
 
-      // Update Pro
-      if (proPrice) proPrice.textContent = proPlan ? `$${proPlan.amount}` : '$59';
-      if (proPeriod) proPeriod.textContent = 'per month';
-      proYearly?.classList.add('hidden');
+      if (basicPrice) basicPrice.innerHTML = `$${basic?.amount || 29}<span class="text-lg text-muted-foreground">/mo</span>`;
+      if (proPrice) proPrice.innerHTML = `$${pro?.amount || 59}<span class="text-lg text-muted-foreground">/mo</span>`;
+      if (maxPrice) maxPrice.innerHTML = `$${max?.amount || 89}<span class="text-lg text-muted-foreground">/mo</span>`;
 
-      // Update Max
-      if (maxPrice) maxPrice.textContent = maxPlan ? `$${maxPlan.amount}` : '$89';
-      if (maxPeriod) maxPeriod.textContent = 'per month';
-      maxYearly?.classList.add('hidden');
+      document.querySelectorAll('[id$="-yearly"]').forEach(el => el.classList.add('hidden'));
 
-      // Update links
-      updateLinks(false);
+      subscribeLinks.forEach(link => {
+        const plan = (link as HTMLAnchorElement).dataset.plan;
+        if (plan) link.setAttribute('href', `/subscribe?plan=${plan}-monthly`);
+      });
     }
 
     function showYearly() {
-      // Update buttons
       yearlyBtn?.classList.add('bg-background', 'shadow-sm');
       yearlyBtn?.classList.remove('text-muted-foreground');
       monthlyBtn?.classList.remove('bg-background', 'shadow-sm');
       monthlyBtn?.classList.add('text-muted-foreground');
 
-      const basicPlan = getPlan('Basic', 'yearly');
-      const proPlan = getPlan('Pro', 'yearly');
-      const maxPlan = getPlan('Max', 'yearly');
+      const basic = getPlan('Basic', 'yearly');
+      const pro = getPlan('Pro', 'yearly');
+      const max = getPlan('Max', 'yearly');
 
-      // Update Basic - show yearly pricing
-      if (basicPrice) basicPrice.textContent = basicPlan ? `$${basicPlan.amount}` : '$290';
-      if (basicPeriod) basicPeriod.textContent = 'per year';
-      basicYearly?.classList.remove('hidden');
+      const basicPrice = document.getElementById('basic-price');
+      const proPrice = document.getElementById('pro-price');
+      const maxPrice = document.getElementById('max-price');
 
-      // Update Pro - show yearly pricing
-      if (proPrice) proPrice.textContent = proPlan ? `$${proPlan.amount}` : '$590';
-      if (proPeriod) proPeriod.textContent = 'per year';
-      proYearly?.classList.remove('hidden');
+      if (basicPrice) basicPrice.innerHTML = `$${basic?.amount || 290}<span class="text-lg text-muted-foreground">/yr</span>`;
+      if (proPrice) proPrice.innerHTML = `$${pro?.amount || 590}<span class="text-lg text-muted-foreground">/yr</span>`;
+      if (maxPrice) maxPrice.innerHTML = `$${max?.amount || 890}<span class="text-lg text-muted-foreground">/yr</span>`;
 
-      // Update Max - show yearly pricing
-      if (maxPrice) maxPrice.textContent = maxPlan ? `$${maxPlan.amount}` : '$890';
-      if (maxPeriod) maxPeriod.textContent = 'per year';
-      maxYearly?.classList.remove('hidden');
+      document.querySelectorAll('[id$="-yearly"]').forEach(el => el.classList.remove('hidden'));
 
-      // Update links
-      updateLinks(true);
+      subscribeLinks.forEach(link => {
+        const plan = (link as HTMLAnchorElement).dataset.plan;
+        if (plan) link.setAttribute('href', `/subscribe?plan=${plan}-yearly`);
+      });
     }
 
-    // Initialize with monthly prices
     showMonthly();
-
     monthlyBtn?.addEventListener('click', showMonthly);
     yearlyBtn?.addEventListener('click', showYearly);
   }
 
-  // Run on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPricing);
   } else {

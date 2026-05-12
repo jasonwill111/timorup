@@ -5,26 +5,39 @@ import { getDb } from '@/lib/db';
 import { businessPages, blogPosts, landingPages } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
+import { slugCheckSchema } from '@/lib/api-validation';
 
 export async function GET({ request }: { request: Request }) {
   const user = await getAdminUser(request);
   if (!user) return unauthorizedResponse();
 
   const url = new URL(request.url);
-  const slug = url.searchParams.get('slug');
-  const type = url.searchParams.get('type') || 'listing'; // listing, blog, landing
+  const queryParams = Object.fromEntries(url.searchParams);
 
-  if (!slug) {
-    return new Response(JSON.stringify({ error: 'slug required' }), {
+  // Validate query params with Zod
+  const result = slugCheckSchema.safeParse({
+    slug: queryParams.slug,
+    excludeId: queryParams.excludeId ? parseInt(queryParams.excludeId) : undefined,
+  });
+
+  if (!result.success) {
+    return new Response(JSON.stringify({ error: result.error.issues[0]?.message || 'Invalid slug' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
     });
   }
 
+  const { slug, excludeId } = result.data;
+
   const db = await getDb();
   let exists = false;
-  let table: any;
-  let slugField: any;
+
+  // Type-safe table selection using union type
+  type TableType = typeof businessPages | typeof blogPosts | typeof landingPages;
+  type SlugFieldType = typeof businessPages.slug | typeof blogPosts.slug | typeof landingPages.slug;
+
+  let table: TableType;
+  let slugField: SlugFieldType;
 
   switch (type) {
     case 'blog':

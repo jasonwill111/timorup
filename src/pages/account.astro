@@ -26,8 +26,8 @@ try {
   if (tokenMatch) {
     const { getDb } = await import('@/lib/db');
     const db = await getDb();
-    const { sessions, users, businessPages, orders, reviews, products, savedItems } = await import('@/db/schema');
-    const { eq, and, desc, sql, inArray } = await import('drizzle-orm');
+    const { sessions, users, businesses, nonProfits, publicSectors, orders, reviews, products, savedItems } = await import('@/db/schema');
+    const { eq, and, desc, sql, inArray, or } = await import('drizzle-orm');
 
     const session = await db.select()
       .from(sessions)
@@ -47,23 +47,62 @@ try {
       if (userRecord) {
         user = { id: userRecord.id, name: userRecord.name || '', email: userRecord.email };
 
-        // Get user's all pages (business/government/nonprofit)
-        const pages = await db.select({
-          id: businessPages.id,
-          title: businessPages.title,
-          slug: businessPages.slug,
-          entityType: businessPages.entityType,
-          planType: businessPages.planType,
-          expiryDate: businessPages.expiryDate,
+        // Get user's all pages from all three tables
+        const allPages: typeof userPages = [];
+
+        // Query businesses
+        const bizPages = await db.select({
+          id: businesses.id,
+          title: businesses.title,
+          slug: businesses.slug,
+          entityType: businesses.entityType,
+          planType: businesses.planType,
+          expiryDate: businesses.expiryDate,
         })
-        .from(businessPages)
-        .where(eq(businessPages.ownerId, user.id))
-        .orderBy(desc(businessPages.createdAt));
+        .from(businesses)
+        .where(eq(businesses.ownerId, user.id))
+        .orderBy(desc(businesses.createdAt));
+        allPages.push(...bizPages);
 
-        userPages = pages;
+        // Query non-profits
+        const npPages = await db.select({
+          id: nonProfits.id,
+          title: nonProfits.title,
+          slug: nonProfits.slug,
+          entityType: nonProfits.entityType,
+          planType: nonProfits.planType,
+          expiryDate: nonProfits.expiryDate,
+        })
+        .from(nonProfits)
+        .where(eq(nonProfits.ownerId, user.id))
+        .orderBy(desc(nonProfits.createdAt));
+        allPages.push(...npPages);
 
-        if (pages.length > 0) {
-          const firstPage = pages[0];
+        // Query public sectors
+        const psPages = await db.select({
+          id: publicSectors.id,
+          title: publicSectors.title,
+          slug: publicSectors.slug,
+          entityType: publicSectors.entityType,
+          planType: publicSectors.planType,
+          expiryDate: publicSectors.expiryDate,
+        })
+        .from(publicSectors)
+        .where(eq(publicSectors.ownerId, user.id))
+        .orderBy(desc(publicSectors.createdAt));
+        allPages.push(...psPages);
+
+        // Sort by createdAt descending
+        allPages.sort((a, b) => {
+          const aTime = a.expiryDate ? new Date(a.expiryDate).getTime() : 0;
+          const bTime = b.expiryDate ? new Date(b.expiryDate).getTime() : 0;
+          return bTime - aTime;
+        });
+
+        userPages = allPages;
+
+        if (userPages.length > 0) {
+          const firstPage = userPages[0];
 
           // Get reviews for the first page
           const reviewsList = await db.select()
@@ -127,12 +166,12 @@ try {
           .where(inArray(products.id, skuIds));
 
           const businessIds = [...new Set(skuProducts.map(p => p.businessPageId))];
-          const businesses = businessIds.length > 0
-            ? await db.select({ id: businessPages.id, title: businessPages.title, slug: businessPages.slug })
-                .from(businessPages)
-                .where(inArray(businessPages.id, businessIds))
+          const businessList = businessIds.length > 0
+            ? await db.select({ id: businesses.id, title: businesses.title, slug: businesses.slug })
+                .from(businesses)
+                .where(inArray(businesses.id, businessIds))
             : [];
-          const businessMap = new Map(businesses.map(b => [b.id, b]));
+          const businessMap = new Map(businessList.map(b => [b.id, b]));
 
           savedSkus = skuProducts.map(p => ({
             id: p.id,
@@ -142,7 +181,7 @@ try {
           }));
         }
 
-        // Get saved Pages
+        // Get saved Pages (savedItems with itemType='page' may point to any table)
         const savedPageRecords = await db.select()
           .from(savedItems)
           .where(and(
@@ -152,15 +191,16 @@ try {
           .orderBy(desc(savedItems.createdAt));
 
         if (savedPageRecords.length > 0) {
+          // Try to find saved pages in businesses table (most common case)
           const pageIds = savedPageRecords.map(s => s.itemId);
           const savedPageList = await db.select({
-            id: businessPages.id,
-            title: businessPages.title,
-            entityType: businessPages.entityType,
-            slug: businessPages.slug,
+            id: businesses.id,
+            title: businesses.title,
+            entityType: businesses.entityType,
+            slug: businesses.slug,
           })
-          .from(businessPages)
-          .where(inArray(businessPages.id, pageIds));
+          .from(businesses)
+          .where(inArray(businesses.id, pageIds));
 
           savedPages = savedPageList;
           }
@@ -188,6 +228,7 @@ const entityLabels: Record<string, string> = {
   business: 'Business',
   government: 'Government',
   nonprofit: 'Non-Profit',
+  personal: 'Personal',
 };
 ---
 
@@ -231,10 +272,10 @@ const entityLabels: Record<string, string> = {
                       <CardDescription>Created on {page.createdAt ? new Date(page.createdAt).toLocaleDateString() : ''}</CardDescription>
                     </div>
                     <div class="flex gap-2">
-                      <a href={`/business/${page.slug}`}>
+                      <a href={page.entityType === 'business' ? `/business/${page.slug}` : page.entityType === 'nonprofit' ? `/non-profit/${page.slug}` : `/public-sector/${page.slug}`}>
                         <Button variant="outline" size="sm">View</Button>
                       </a>
-                      <a href={`/business/${page.slug}/edit`}>
+                      <a href={page.entityType === 'business' ? `/business/${page.slug}/edit` : `#`}>
                         <Button size="sm">Edit</Button>
                       </a>
                     </div>

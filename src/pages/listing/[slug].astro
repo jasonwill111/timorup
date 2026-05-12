@@ -1,0 +1,101 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { getDb } from '@/lib/db';
+import { listings } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/404');
+
+const db = await getDb();
+const listing = await db.select().from(listings).where(eq(listings.slug, slug)).get();
+if (!listing) return Astro.redirect('/listings');
+
+const waNumber = listing.contactNumber?.replace(/\D/g, '') || '';
+const waLink = listing.contactNumber
+  ? `https://wa.me/${listing.countryCode?.replace('+', '') as string}${waNumber}?text=${encodeURIComponent('Hi, I saw your listing: ' + listing.title)}`
+  : '';
+
+const shareUrl = `${import.meta.env.SITE || 'https://timorlist.com'}/listing/${listing.slug}`;
+---
+
+<Layout title={`${listing.title} - TimorList`} description={listing.description?.slice(0,160)}>
+  <div class="bg-background min-h-screen">
+    <div class="container py-8 max-w-4xl mx-auto">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary capitalize">{listing.listingType}</span>
+        {listing.condition && <span class="text-sm px-3 py-1 rounded-full bg-muted capitalize">{listing.condition}</span>}
+      </div>
+
+      <h1 class="text-2xl sm:text-3xl font-bold mb-2">{listing.title}</h1>
+      {listing.location && <p class="text-muted-foreground mb-4 flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        {listing.location}
+      </p>}
+
+      {listing.price && <div class="mb-6 pb-6 border-b">
+        <span class="text-3xl sm:text-4xl font-bold text-primary">{listing.price}</span>
+      </div>}
+
+      <div class="flex flex-wrap items-center gap-3 mb-6 pb-6 border-b">
+        <span class="text-sm text-muted-foreground">{listing.views || 0} views</span>
+        <span class="text-sm text-muted-foreground">{listing.likes || 0} likes</span>
+        <span class="text-sm text-muted-foreground">{listing.saves || 0} saves</span>
+        <div class="flex-1"></div>
+        <button class="px-3 py-2 rounded-lg border hover:bg-muted flex items-center gap-1">Save</button>
+        <button onclick={`navigator.clipboard.writeText('${shareUrl}'); alert('Link copied!')`} class="px-3 py-2 rounded-lg border hover:bg-muted flex items-center gap-1">Share</button>
+      </div>
+
+      {listing.imageIds && JSON.parse(listing.imageIds).length > 0 && (
+        <div class="mb-8">
+          {JSON.parse(listing.imageIds).length === 1 ? (
+            <img src={`/api/media/${JSON.parse(listing.imageIds)[0]}`} alt={listing.title} class="w-full max-h-96 object-cover rounded-lg" />
+          ) : (
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {JSON.parse(listing.imageIds).slice(0,6).map((imgId, i) => (
+                <img src={`/api/media/${imgId}`} alt={`${listing.title} ${i + 1}`} class={`w-full h-48 sm:h-64 object-cover rounded-lg ${i === 0 && JSON.parse(listing.imageIds).length > 1 ? 'col-span-2 sm:col-span-2' : ''}`} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {listing.description && (
+        <div class="mb-8">
+          <h2 class="text-xl font-semibold mb-3">Description</h2>
+          <p class="whitespace-pre-wrap">{listing.description}</p>
+        </div>
+      )}
+
+      {listing.tags && JSON.parse(listing.tags).length > 0 && (
+        <div class="mb-8">
+          <h2 class="text-xl font-semibold mb-3">Tags</h2>
+          <div class="flex flex-wrap gap-2">
+            {JSON.parse(listing.tags).map((tag: string) => <span class="text-sm px-3 py-1 rounded-full bg-muted">{tag}</span>)}
+          </div>
+        </div>
+      )}
+
+      <div class="bg-card border rounded-xl p-6">
+        <h2 class="text-xl font-semibold mb-4">Contact Seller</h2>
+        {listing.contactName && <p class="mb-3"><strong>Name:</strong> {listing.contactName}</p>}
+        <div class="flex flex-wrap gap-3">
+          {waLink && (
+            <a href={waLink} target="_blank" class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+              WhatsApp
+            </a>
+          )}
+          {listing.contactNumber && (
+            <a href={`tel:${listing.countryCode}${listing.contactNumber}`} class="px-4 py-2 bg-primary text-white rounded-lg">Call</a>
+          )}
+          {listing.email && (
+            <a href={`mailto:${listing.email}`} class="px-4 py-2 border rounded-lg hover:bg-muted">Email</a>
+          )}
+        </div>
+      </div>
+
+      <p class="text-sm text-muted-foreground mt-6">Posted {listing.createdAt ? new Date(listing.createdAt * 1000).toLocaleDateString() : 'recently'}</p>
+    </div>
+  </div>
+</Layout>

@@ -8,7 +8,7 @@ import Card from '@components/ui/Card.astro';
 import CardContent from '@components/ui/CardContent.astro';
 import { Share2, ArrowLeft, ChevronLeft, ChevronRight, ArrowRight } from '@lucide/astro';
 import { getDb } from '@/lib/db';
-import { products, productImages, businessPages, categories } from '@/db/schema';
+import { products, productImages, businesses, categories } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 const db = await getDb();
@@ -31,8 +31,8 @@ if (!product) {
   return Astro.redirect('/businesses');
 }
 
-// Load business info
-const business = await db.select().from(businessPages).where(eq(businessPages.id, product.businessPageId)).get();
+// Load business info from businesses table
+const business = await db.select().from(businesses).where(eq(businesses.id, product.businessPageId)).get();
 
 // Redirect if business slug mismatch
 if (!business || business.slug !== slug) {

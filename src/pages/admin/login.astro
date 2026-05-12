@@ -116,37 +116,35 @@ import '../../styles/globals.css';
     e.preventDefault();
 
     const formData = new FormData(form);
-    const email = formData.get('email');
-    const password = formData.get('password');
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
     try {
-      // First sign in via better-auth (sets httpOnly cookie)
-      const signInRes = await fetch('/api/auth/sign-in', {
+      // Use REST API instead of Astro actions
+      const res = await fetch('/api/auth/sign-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        credentials: 'include'
       });
 
-      const signInData = await signInRes.json();
+      const data = await res.json();
 
-      if (!signInData.user) {
-        errorMsg!.textContent = 'Invalid email or password';
+      if (!res.ok || !data.success) {
+        errorMsg!.textContent = data.error?.message || 'Invalid email or password';
         errorMsg!.classList.remove('hidden');
         return;
       }
 
-      // Then check admin role via session API
-      const sessionRes = await fetch('/api/auth/session');
-      const sessionData = await sessionRes.json();
-
-      if (!sessionData.user || !['admin', 'super_admin', 'editor'].includes(sessionData.user.role)) {
+      // Check admin role
+      if (!['admin', 'super_admin', 'editor'].includes(data.user?.role)) {
         errorMsg!.textContent = 'Access denied. Admin role required.';
         errorMsg!.classList.remove('hidden');
         return;
       }
 
       // Store user info and redirect
-      localStorage.setItem('adminUser', JSON.stringify(sessionData.user));
+      localStorage.setItem('adminUser', JSON.stringify(data.user));
       window.location.href = '/admin';
     } catch (err) {
       errorMsg!.textContent = 'An error occurred. Please try again.';

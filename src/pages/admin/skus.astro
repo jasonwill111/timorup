@@ -4,20 +4,18 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
 import { getDb } from '@/lib/db';
 const db = await getDb();
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { SKU_SERVICE_TYPES, SPECIFICATION_FIELDS } from '@/lib/constants';
 
 // Get all businesses for dropdown
-const businesses = await db.select({
-  id: businessPages.id,
-  title: businessPages.title,
-  entityType: businessPages.entityType,
-}).from(businessPages).all();
+const allBusinesses = await db.select({
+  id: businesses.id,
+  title: businesses.title,
+}).from(businesses).all();
 
-const businessOptions = businesses.map(b => ({
+const businessOptions = allBusinesses.map(b => ({
   value: b.id,
   label: b.title,
-  type: b.entityType,
 }));
 
 const businessOptionsJson = JSON.stringify(businessOptions);
@@ -196,6 +194,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   import StarterKit from '@tiptap/starter-kit';
   import Underline from '@tiptap/extension-underline';
   import Placeholder from '@tiptap/extension-placeholder';
+  import { actions } from 'astro:actions';
 
   // Read business options from hidden JSON element
   const businessDataEl = document.getElementById('business-data');
@@ -267,12 +266,9 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         }
       }
 
-      const formData = new FormData();
-      formData.append('file', fileToUpload);
-
       try {
-        const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
-        const data = await res.json();
+        const result = await actions.media.uploadMedia({ file: fileToUpload, category: 'sku' });
+        const data = { success: result.success, data: result.data };
 
         if (data.success && data.data?.id) {
           skuMediaIds.push(data.data.id);
@@ -629,7 +625,9 @@ const businessOptionsJson = JSON.stringify(businessOptions);
           const unit = fields[0].unit ? ` / ${fields[0].unit.replace('/', '')}` : '';
           priceDisplay = `$${fields[0].value}${unit}`;
         }
-      } catch {}
+      } catch (e) {
+        // ignore
+      }
 
       return `
         <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm hover:bg-muted/30">
@@ -681,15 +679,18 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       let priceFields = [];
       try {
         priceFields = data.priceFields ? JSON.parse(data.priceFields) : [];
-      } catch {}
+      } catch (e) {
+        // ignore
+      }
       renderPriceFields(data.serviceType || 'product', priceFields);
 
       // Parse and render specification fields
       let specifications = {};
       try {
         specifications = data.specifications ? JSON.parse(data.specifications) : {};
-      } catch {}
-      renderSpecificationFields(data.serviceType || 'product', specifications);
+      } catch (e) {
+        // ignore
+      }
 
       // Initialize editor with existing content
       initEditor(data.description || '');

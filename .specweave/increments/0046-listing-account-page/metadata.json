@@ -1,0 +1,19 @@
+{
+  "id": "0046-listing-account-page",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-10T10:12:07.303Z",
+  "lastActivity": "2026-05-10T10:17:10.763Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-10T10:17:10.692Z",
+  "approvedAt": "2026-05-10T10:17:10.763Z"
+}

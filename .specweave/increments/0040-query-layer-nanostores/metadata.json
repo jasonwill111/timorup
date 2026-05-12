@@ -1,0 +1,19 @@
+{
+  "id": "0040-query-layer-nanostores",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-10T00:59:57.226Z",
+  "lastActivity": "2026-05-10T02:07:04.934Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-10T02:05:27.010Z",
+  "approvedAt": "2026-05-10T02:07:04.934Z"
+}

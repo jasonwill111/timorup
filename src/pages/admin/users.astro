@@ -2,6 +2,7 @@
 export const prerender = false;
 import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
+import { actions } from 'astro:actions';
 ---
 
 <AdminLayout title="Users">
@@ -92,6 +93,7 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  import { actions } from 'astro:actions';
   import { toast } from '../../stores/toast';
 
   let allUsers: UserData = [];
@@ -236,11 +238,13 @@ import Button from '@components/ui/Button.astro';
   // Delete user
   async function deleteUser(id: string) {
     if (!confirm('Delete this user and all their data? This action cannot be undone.')) return;
-    
+
     try {
+      const result = await actions.admin.setUserRole({ userId: id, role: 'user' }).catch(() => null);
+      // Use direct API for delete since no delete action exists
       const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      
+
       if (data.success) {
         toast.success('User deleted');
         loadUsers();
@@ -280,7 +284,7 @@ import Button from '@components/ui/Button.astro';
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
 
-    const userId = formData.get('id');
+    const userId = formData.get('id') as string;
     const userData = {
       name: String(formData.get('name') || ''),
       email: String(formData.get('email') || ''),
@@ -299,15 +303,20 @@ import Button from '@components/ui/Button.astro';
 
       const data = await res.json();
 
-      // If role changed and user is super_admin, also update role via dedicated API
+      // If role changed and user is super_admin, use actions to update role
       if (data.success && userData.role !== originalRole && currentUserRole === 'super_admin') {
-        const roleRes = await authFetch(`/api/admin/users/${userId}/role`, {
-          method: 'PATCH',
-          body: JSON.stringify({ role: userData.role }),
-        });
-        const roleData = await roleRes.json();
-        if (!roleData.success) {
-          toast.error(roleData.error?.message || 'Failed to update role');
+        try {
+          const roleResult = await actions.admin.setUserRole({
+            userId,
+            role: userData.role as 'user' | 'editor' | 'admin' | 'super_admin',
+          });
+          if (!roleResult.success) {
+            toast.error(roleResult.error?.message || 'Failed to update role');
+            return;
+          }
+        } catch (err) {
+          console.error('Error updating role:', err);
+          toast.error('Failed to update role');
           return;
         }
       }

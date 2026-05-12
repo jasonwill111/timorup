@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq, lt, and } from 'drizzle-orm';
 import { calculateGracePeriodEnd } from '@/lib/subscription';
 
@@ -23,12 +23,12 @@ export async function GET({ request }: { params: Record<string, string>; request
   const nowTimestamp = Math.floor(now.getTime() / 1000);
 
   try {
-    // Find active subscriptions that have passed expiry date
+    // Find active subscriptions that have passed expiry date (businesses only)
     const expiredSubscriptions = await db.select()
-      .from(businessPages)
+      .from(businesses)
       .where(and(
-        eq(businessPages.subscriptionStatus, 'active'),
-        lt(businessPages.expiryDate, nowTimestamp)
+        eq(businesses.subscriptionStatus, 'active'),
+        lt(businesses.expiryDate, nowTimestamp)
       ))
       .all();
 
@@ -45,17 +45,16 @@ export async function GET({ request }: { params: Record<string, string>; request
         const expiryTimestamp = listing.expiryDate as number;
         const gracePeriodEnd = calculateGracePeriodEnd(expiryTimestamp);
 
-        await db.update(businessPages)
+        await db.update(businesses)
           .set({
             subscriptionStatus: 'expired',
             gracePeriodEndDate: gracePeriodEnd,
             updatedAt: new Date(),
           })
-          .where(eq(businessPages.id, listing.id))
+          .where(eq(businesses.id, listing.id))
           .run();
 
         results.markedExpired.push(listing.id);
-        console.log(`[Mark Expired] Listing ${listing.id} (${listing.title}) expired, grace until ${new Date(gracePeriodEnd * 1000).toISOString()}`);
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
         results.failed.push({ id: listing.id, error });
@@ -63,7 +62,7 @@ export async function GET({ request }: { params: Record<string, string>; request
       }
     }
 
-    console.log(`[Mark Expired] Summary: ${results.markedExpired.length} listings marked expired, ${results.failed.length} failures`);
+    console.log(`[Mark Expired] Summary: ${results.markedExpired.length} businesses marked expired, ${results.failed.length} failures`);
 
     return new Response(JSON.stringify({
       success: true,

@@ -1,0 +1,175 @@
+---
+export const prerender = true;
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Contact Us - TimorList"
+  description="Get in touch with TimorList. We'd love to hear from you about listings, partnerships, or general inquiries."
+>
+  <div class="container py-12 max-w-4xl">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold mb-4">Get in Touch</h1>
+      <p class="text-lg text-muted-foreground">
+        Have a question or want to work together? We'd love to hear from you.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-12">
+      <!-- Contact Form -->
+      <div class="bg-card border rounded-2xl p-8">
+        <h2 class="text-xl font-bold mb-6">Send us a Message</h2>
+        <form id="contact-form" class="space-y-4">
+          <div>
+            <label for="name" class="block text-sm font-medium mb-1">Name *</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              class="w-full px-4 py-2 border rounded-lg bg-background"
+              placeholder="Your name"
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium mb-1">Email *</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="w-full px-4 py-2 border rounded-lg bg-background"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label for="subject" class="block text-sm font-medium mb-1">Subject *</label>
+            <select
+              id="subject"
+              name="subject"
+              required
+              class="w-full px-4 py-2 border rounded-lg bg-background"
+            >
+              <option value="">Select a topic</option>
+              <option value="listing">Listing Inquiry</option>
+              <option value="support">Technical Support</option>
+              <option value="partnership">Partnership Opportunity</option>
+              <option value="feedback">Feedback</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="message" class="block text-sm font-medium mb-1">Message *</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              required
+              class="w-full px-4 py-2 border rounded-lg bg-background resize-none"
+              placeholder="How can we help you?"
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Send Message
+          </button>
+        </form>
+        <p id="form-status" class="mt-4 text-center text-sm hidden"></p>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="space-y-6">
+        <div class="bg-card border rounded-xl p-6">
+          <h3 class="font-bold mb-4">Email Us</h3>
+          <div class="space-y-3">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-primary mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <div>
+                <p class="font-medium">General Inquiries</p>
+                <a href="mailto:hello@timbiz.com" class="text-primary hover:underline">hello@timbiz.com</a>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-primary mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <div>
+                <p class="font-medium">Support</p>
+                <a href="mailto:support@timbiz.com" class="text-primary hover:underline">support@timbiz.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-card border rounded-xl p-6">
+          <h3 class="font-bold mb-4">Location</h3>
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-primary mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <div>
+              <p>Dili, Timor-Leste</p>
+              <p class="text-sm text-muted-foreground">Serving all 12 municipalities</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-card border rounded-xl p-6">
+          <h3 class="font-bold mb-4">Response Time</h3>
+          <p class="text-muted-foreground">
+            We typically respond within 24 hours on business days. For urgent matters, please include "URGENT" in your subject line.
+          </p>
+        </div>
+
+        <!-- Social Links -->
+        <div class="bg-card border rounded-xl p-6">
+          <h3 class="font-bold mb-4">Follow Us</h3>
+          <div class="flex gap-4">
+            <a href="#" class="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors" aria-label="Facebook">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.5h-4.33C10.24.5,9.5,3.44,9.5,5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4Z"/>
+              </svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors" aria-label="Instagram">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12,2.16c3.2,0,3.58,0,4.85.07,3.25.15,4.77,1.69,4.92,4.92.06,1.27.07,1.65.07,4.85s0,3.58-.07,4.85c-.15,3.23-1.66,4.77-4.92,4.92-1.27.06-1.65.07-4.85.07s-3.58,0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s0-3.58.07-4.85C2.38,3.92,3.9,2.38,7.15,2.23,8.42,2.18,8.8,2.16,12,2.16ZM12,0C8.74,0,8.33,0,7.05.07c-4.27.2-6.78,2.71-7,7C0,8.33,0,8.74,0,12s0,3.67.07,4.95c.2,4.27,2.71,6.78,7,7C8.33,24,8.74,24,12,24s3.67,0,4.95-.07c4.27-.2,6.78-2.71,7-7C24,15.67,24,15.26,24,12s0-3.67-.07-4.95c-.2-4.27-2.71-6.78-7-7C15.67,0,15.26,0,12,0Zm0,5.84A6.16,6.16,0,1,0,18.16,12,6.16,6.16,0,0,0,12,5.84ZM12,16a4,4,0,1,1,4-4A4,4,0,0,1,12,16ZM18.41,6.69a1.44,1.44,0,1,0,1.44,1.44A1.44,1.44,0,0,0,18.41,6.69Z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const status = document.getElementById('form-status');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!status) return;
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    // Show sending state
+    status.textContent = 'Sending...';
+    status.classList.remove('hidden', 'text-green-600', 'text-red-600');
+    status.classList.add('text-muted-foreground');
+
+    // Simulate form submission (in production, this would send to an API)
+    setTimeout(() => {
+      status.textContent = 'Thank you for your message! We will get back to you soon.';
+      status.classList.remove('text-muted-foreground');
+      status.classList.add('text-green-600');
+      form.reset();
+    }, 1500);
+  });
+</script>

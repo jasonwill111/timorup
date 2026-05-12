@@ -2,6 +2,7 @@
 export const prerender = false;
 import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
+import { actions } from 'astro:actions';
 ---
 
 <AdminLayout title="Hero Sections">
@@ -83,6 +84,7 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  import { actions } from 'astro:actions';
   import { toast } from '../../stores/toast';
   
   let isEditMode = false;
@@ -96,19 +98,17 @@ import Button from '@components/ui/Button.astro';
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('folder', 'hero');
+    // Use Server Action for media upload
+    const result = await actions.media.upload({ file, category: 'hero' });
 
-    const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (data.success && data.data?.id) {
-      heroImageId = data.data.id;
-      (document.getElementById('hero-image') as HTMLInputElement).value = data.data.id;
-      (document.getElementById('hero-preview-img') as HTMLImageElement).src = data.data.url;
+    if (result.success && result.data?.id) {
+      heroImageId = result.data.id;
+      (document.getElementById('hero-image') as HTMLInputElement).value = result.data.id;
+      (document.getElementById('hero-preview-img') as HTMLImageElement).src = result.data.url;
       document.getElementById('hero-image-preview')?.classList.remove('hidden');
       document.getElementById('hero-image-upload')?.classList.add('hidden');
+    } else {
+      toast.error(result.error?.message || 'Failed to upload image');
     }
     (e.target as HTMLInputElement).value = '';
   });
@@ -122,18 +122,18 @@ import Button from '@components/ui/Button.astro';
   // Load heroes
   async function loadHeroes() {
     try {
-      const res = await fetch('/api/banners');
-      const data = await res.json();
-      
+      const res = await fetch("/api/admin/heroes", { credentials: "include" }); const result = await res.json();;
+
       const container = document.getElementById('heroes-list');
       if (!container) return;
-      
-      if (!data.success || data.data.length === 0) {
+
+      if (!result.success || !result.data || result.data.length === 0) {
         container.innerHTML = '<p class="text-center text-muted-foreground py-8">No heroes yet. Click "+ Add Hero" to create one.</p>';
         return;
       }
-      
-      container.innerHTML = data.data.map((hero: HeroData) => `
+
+      const data = result.data;
+      container.innerHTML = data.map((hero: HeroData) => `
         <div class="flex items-center gap-3 p-3 border rounded text-sm">
           <div class="w-16 h-10 bg-muted rounded overflow-hidden flex-shrink-0">
             ${hero.imageId ? `<img src="${hero.imageId}" alt="${hero.title}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='📷'"` : '<div class="w-full h-full flex items-center justify-center text-xs">📷</div>'}
@@ -178,15 +178,14 @@ import Button from '@components/ui/Button.astro';
   // Edit hero
   window.editHero = async function(id: string) {
     try {
-      const res = await fetch('/api/banners');
-      const data = await res.json();
-      
-      if (!data.success) {
+      const result = await actions.banners.list();
+
+      if (!result.success) {
         toast.error('Failed to load hero data');
         return;
       }
-      
-      const hero = data.data.find((h: HeroData) => h.id === id);
+
+      const hero = result.data?.find((h: HeroData) => h.id === id);
       if (!hero) {
         toast.error('Hero not found');
         return;
@@ -226,16 +225,15 @@ import Button from '@components/ui/Button.astro';
   // Delete hero
   window.deleteHero = async function(id: string) {
     if (!confirm('Delete this hero?')) return;
-    
+
     try {
-      const res = await fetch(`/api/banners/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      
-      if (data.success) {
+      const result = await actions.admin.heroes.delete({ id });
+
+      if (result.success) {
         toast.success('Hero deleted');
         loadHeroes();
       } else {
-        toast.error(data.error?.message || 'Failed to delete hero');
+        toast.error(result.error?.message || 'Failed to delete hero');
       }
     } catch (err) {
       console.error('Error deleting hero:', err);
@@ -288,32 +286,29 @@ import Button from '@components/ui/Button.astro';
       title: String(formData.get('title') || ''),
       description: String(formData.get('description') || ''),
       imageId: String(formData.get('imageId') || ''),
-      externalUrl: String(formData.get('externalUrl') || ''),
-      linkedBusinessPageId: String(formData.get('linkedBusinessPageId') || '') || null,
+      ctaText: String(formData.get('ctaText') || ''),
+      ctaLink: String(formData.get('ctaLink') || ''),
       isActive: (document.getElementById('hero-active') as HTMLInputElement).checked,
     };
-    
+
     const heroId = formData.get('id');
-    const url = heroId ? `/api/banners/${heroId}` : '/api/banners';
-    const method = heroId ? 'PUT' : 'POST';
-    
+
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(heroData),
-      });
-      
-      const data = await res.json();
-      
-      if (data.success) {
+      let result;
+      if (heroId) {
+        result = await actions.admin.heroes.update({ id: heroId as string, ...heroData });
+      } else {
+        result = await actions.admin.heroes.create(heroData);
+      }
+
+      if (result.success) {
         toast.success(isEditMode ? 'Hero updated!' : 'Hero created!');
         modal?.classList.add('hidden');
         modal?.classList.remove('flex');
         (e.target as HTMLFormElement).reset();
         loadHeroes();
       } else {
-        toast.error(data.error?.message || 'Failed to save hero');
+        toast.error(result.error?.message || 'Failed to save hero');
       }
     } catch (err) {
       console.error('Error saving hero:', err);

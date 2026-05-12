@@ -1,0 +1,116 @@
+---
+export const prerender = true;
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="About TimorList - Timor-Leste Business Directory"
+  description="Learn about TimorList, Timor-Leste's premier business directory. Discover local businesses, connect with communities, and explore opportunities in East Timor."
+>
+  <div class="container py-12 max-w-4xl">
+    <!-- Hero Section -->
+    <div class="text-center mb-16">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">
+        Connecting Timor-Leste, <span class="text-primary">One Business at a Time</span>
+      </h1>
+      <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+        TimorList is the premier business directory for Timor-Leste, helping locals and visitors discover quality businesses across the country.
+      </p>
+    </div>
+
+    <!-- Mission -->
+    <div class="bg-card border rounded-2xl p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-4">Our Mission</h2>
+      <p class="text-muted-foreground leading-relaxed">
+        We believe in the power of local businesses to build stronger communities. TimorList exists to bridge the gap between businesses and customers, making it easier for everyone in Timor-Leste to discover and support local enterprises. From traditional markets in Dili to emerging businesses in the municipalities, we're here to shine a spotlight on the entrepreneurial spirit of our nation.
+      </p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+      <div class="bg-card border rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-primary mb-2">500+</div>
+        <div class="text-sm text-muted-foreground">Local Businesses</div>
+      </div>
+      <div class="bg-card border rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-primary mb-2">50+</div>
+        <div class="text-sm text-muted-foreground">Categories</div>
+      </div>
+      <div class="bg-card border rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-primary mb-2">12</div>
+        <div class="text-sm text-muted-foreground">Municipalities</div>
+      </div>
+      <div class="bg-card border rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-primary mb-2">10K+</div>
+        <div class="text-sm text-muted-foreground">Monthly Visitors</div>
+      </div>
+    </div>
+
+    <!-- What We Offer -->
+    <div class="mb-12">
+      <h2 class="text-2xl font-bold mb-6 text-center">What We Offer</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-card border rounded-xl p-6">
+          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h3 class="font-bold mb-2">Easy Discovery</h3>
+          <p class="text-sm text-muted-foreground">
+            Search and browse businesses by category, location, or keyword. Find exactly what you need, when you need it.
+          </p>
+        </div>
+        <div class="bg-card border rounded-xl p-6">
+          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="font-bold mb-2">Verified Listings</h3>
+          <p class="text-sm text-muted-foreground">
+            We verify business information to ensure accuracy. Trust that the details you find are current and reliable.
+          </p>
+        </div>
+        <div class="bg-card border rounded-xl p-6">
+          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+          </div>
+          <h3 class="font-bold mb-2">Reviews & Ratings</h3>
+          <p class="text-sm text-muted-foreground">
+            Read honest reviews from other customers. Share your own experiences to help the community make informed choices.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 text-center">
+      <h2 class="text-2xl font-bold mb-4">List Your Business Today</h2>
+      <p class="text-muted-foreground mb-6 max-w-lg mx-auto">
+        Join hundreds of businesses already showcasing their products and services on TimorList. It's free to get started!
+      </p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/pricing" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+          View Plans
+        </a>
+        <a href="/businesses" class="inline-flex items-center justify-center px-6 py-3 border border-input bg-background font-semibold rounded-lg hover:bg-muted transition-colors">
+          Browse Businesses
+        </a>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="mt-12 text-center">
+      <h3 class="font-bold mb-2">Get in Touch</h3>
+      <p class="text-sm text-muted-foreground">
+        Questions or suggestions? We'd love to hear from you.
+      </p>
+      <p class="text-sm mt-2">
+        <a href="mailto:hello@timbiz.com" class="text-primary hover:underline">hello@timbiz.com</a>
+      </p>
+    </div>
+  </div>
+</Layout>

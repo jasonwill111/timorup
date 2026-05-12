@@ -54,10 +54,7 @@ export const onRequest: ScheduledHandler = async (context) => {
       }
     }
 
-    console.log(`[Cleanup-Orphan-Media] Found ${orphans.length} potential orphan records to verify`);
-
     if (orphans.length === 0) {
-      console.log(`[Cleanup-Orphan-Media] No orphan records found. Exiting.`);
       return new Response(JSON.stringify({
         success: true,
         message: 'No orphan records found',
@@ -67,13 +64,11 @@ export const onRequest: ScheduledHandler = async (context) => {
 
     // Note: We delete orphan R2 files to reduce storage costs
     // D1 records are kept for audit trail (no cost impact)
-    console.log(`[Cleanup-Orphan-Media] Found ${orphans.length} orphan records, deleting R2 files...`);
-
+    // Proceed with deletion (summary logged at end)
     let deletedCount = 0;
     for (const o of orphans) {
       try {
         await deleteFromR2(o.url);
-        console.log(`[Cleanup-Orphan-Media] Deleted R2: ${o.url}`);
         deletedCount++;
       } catch (error) {
         console.error(`[Cleanup-Orphan-Media] Failed to delete ${o.url}:`, error);

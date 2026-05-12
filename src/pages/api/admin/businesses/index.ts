@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq, desc, sql, like, and, or } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
@@ -32,53 +32,52 @@ export async function GET({ request }: { request: Request }) {
     let whereConditions = [];
     if (search) {
       whereConditions.push(or(
-        like(businessPages.title, `%${search}%`),
-        like(businessPages.description, `%${search}%`)
+        like(businesses.title, `%${search}%`),
+        like(businesses.aboutUs, `%${search}%`)
       ));
     }
     if (status) {
-      whereConditions.push(eq(businessPages.status, status));
+      whereConditions.push(eq(businesses.status, status));
     }
     if (planType) {
-      whereConditions.push(eq(businessPages.planType, planType));
+      whereConditions.push(eq(businesses.planType, planType));
     }
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-    const businesses = await db.select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      entityType: businessPages.entityType,
-      status: businessPages.status,
-      planType: businessPages.planType,
-      ownerId: businessPages.ownerId,
-      categoryId: businessPages.categoryId,
-      contactName: businessPages.contactName,
-      email: businessPages.email,
-      ratingAverage: businessPages.ratingAverage,
-      ratingCount: businessPages.ratingCount,
-      views: businessPages.views,
-      likes: businessPages.likes,
-      saves: businessPages.saves,
-      createdAt: businessPages.publishDate,
+    const result = await db.select({
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      status: businesses.status,
+      planType: businesses.planType,
+      ownerId: businesses.ownerId,
+      categoryId: businesses.categoryId,
+      contactName: businesses.contactName,
+      email: businesses.email,
+      ratingAverage: businesses.ratingAverage,
+      ratingCount: businesses.ratingCount,
+      views: businesses.views,
+      likes: businesses.likes,
+      saves: businesses.saves,
+      createdAt: businesses.publishDate,
     })
-    .from(businessPages)
+    .from(businesses)
     .where(whereClause)
-    .orderBy(desc(businessPages.createdAt))
+    .orderBy(desc(businesses.createdAt))
     .limit(limit)
     .offset(offset)
     .all();
 
     const countResult = await db.select({ count: sql<number>`count(*)` })
-      .from(businessPages)
+      .from(businesses)
       .where(whereClause)
       .get();
     const total = Number(countResult?.count) || 0;
 
     return new Response(JSON.stringify({
       success: true,
-      data: businesses,
+      data: result,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
     }), {
       status: 200,

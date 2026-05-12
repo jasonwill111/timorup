@@ -6,30 +6,17 @@ import { reviews, businessPages, users } from '@/db/schema';
 import { eq, desc, sql, like, and, or, gte, lte } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
-async function requireAdminAuth(request: Request) {
-  const adminUser = await getAdminUser(request);
-  if (!adminUser) {
-    return { authorized: false, error: unauthorizedResponse() };
-  }
-  return { authorized: true, user: adminUser };
-}
-
-async function isAdmin(request: Request): Promise<boolean> {
-  const result = await requireAdminAuth(request);
-  return result.authorized;
-}
-
 // GET - List all reviews (admin only)
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
   try {
-    // Check admin
-    const admin = await isAdmin(request);
-    if (!admin) {
+    // Check admin - return 401 for unauthorized
+    const adminUser = await getAdminUser(request);
+    if (!adminUser) {
       return new Response(JSON.stringify({
         success: false,
-        error: { code: 'FORBIDDEN', message: 'Admin access required' }
-      }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+        error: { code: 'UNAUTHORIZED', message: 'Admin access required' }
+      }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
     // Parse query params

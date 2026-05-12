@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-037
 title: "Dashboard & Settings Mobile适配 (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-08
 tldr: "**As a** admin."
@@ -21,8 +21,8 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: `admin/index.astro` - 卡片网格在mobile单列显示
-- [ ] **AC-US2-02**: `admin/settings.astro` - 表单全宽，按钮不重叠
+- [x] **AC-US2-01**: `admin/index.astro` - 卡片网格`grid-cols-2 md:grid-cols-4` ✅
+- [x] **AC-US2-02**: `admin/settings.astro` - 表单`grid-cols-1 md:grid-cols-2` ✅
 
 ---
 

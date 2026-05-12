@@ -32,25 +32,56 @@ export async function getPlanSkuLimit(planType: string | null): Promise<number> 
   return planByTier?.skuLimit ?? 0;
 }
 
+export interface PlanLimits {
+  skuLimit: number;
+  maxImages: number; // per SKU
+  maxVideos: number; // per SKU
+  maxBusinessImages: number; // business page level
+  maxBusinessVideos: number; // business page level
+}
+
 /**
  * Get plan limits from DB
+ * Handles both full plan ID (e.g., "pro-monthly") and tier name (e.g., "pro")
  */
-export async function getPlanLimits(planType: string | null): Promise<{ skuLimit: number; maxImages: number; maxVideos: number } | null> {
+export async function getPlanLimits(planType: string | null): Promise<PlanLimits | null> {
   if (!planType) return null;
 
   const db = await getDb();
 
+  // Try exact match first
   const plan = await db.select({
     skuLimit: plans.skuLimit,
     maxImages: plans.maxImages,
     maxVideos: plans.maxVideos,
+    maxBusinessImages: plans.maxBusinessImages,
+    maxBusinessVideos: plans.maxBusinessVideos,
   })
     .from(plans)
     .where(eq(plans.id, planType))
     .limit(1)
     .get();
 
-  return plan || null;
+  if (plan) return plan;
+
+  // Fallback: try to match by tier name (e.g., "pro" -> "Pro")
+  // Get the tier part (e.g., "pro" from "pro-monthly")
+  const tier = planType.split('-')[0];
+  const capitalizedTier = tier.charAt(0).toUpperCase() + tier.slice(1);
+
+  const planByTier = await db.select({
+    skuLimit: plans.skuLimit,
+    maxImages: plans.maxImages,
+    maxVideos: plans.maxVideos,
+    maxBusinessImages: plans.maxBusinessImages,
+    maxBusinessVideos: plans.maxBusinessVideos,
+  })
+    .from(plans)
+    .where(eq(plans.name, capitalizedTier))
+    .limit(1)
+    .get();
+
+  return planByTier || null;
 }
 
 export type SubscriptionStatus = 'none' | 'active' | 'expired' | 'cancelled';

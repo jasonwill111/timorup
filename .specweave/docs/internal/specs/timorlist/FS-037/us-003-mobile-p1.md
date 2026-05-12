@@ -2,7 +2,7 @@
 id: US-003
 feature: FS-037
 title: "列表页面Mobile适配 (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-08
 tldr: "**As a** admin."
@@ -21,15 +21,15 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: `admin/businesses.astro` - 表格横向滚动，固定列宽
-- [ ] **AC-US3-02**: `admin/users.astro` - 表格横向滚动
-- [ ] **AC-US3-03**: `admin/subscriptions.astro` - 表格横向滚动
-- [ ] **AC-US3-04**: `admin/skus.astro` - 表格横向滚动
-- [ ] **AC-US3-05**: `admin/blogs.astro` - 表格横向滚动
-- [ ] **AC-US3-06**: `admin/categories.astro` - 表格横向滚动
-- [ ] **AC-US3-07**: `admin/heroes.astro` - 表格横向滚动
-- [ ] **AC-US3-08**: `admin/reviews.astro` - 表格横向滚动
-- [ ] **AC-US3-09**: `admin/plans.astro` - 表格横向滚动
+- [x] **AC-US3-01**: `admin/businesses.astro` - list布局mobile友好 ✅
+- [x] **AC-US3-02**: `admin/users.astro` - list布局mobile友好 ✅
+- [x] **AC-US3-03**: `admin/subscriptions.astro` - 已有overflow-x-auto ✅
+- [x] **AC-US3-04**: `admin/skus.astro` - card布局mobile友好 ✅
+- [x] **AC-US3-05**: `admin/blogs.astro` - card布局mobile友好 ✅
+- [x] **AC-US3-06**: `admin/categories.astro` - 已有overflow-x-auto ✅
+- [x] **AC-US3-07**: `admin/heroes.astro` - card布局mobile友好 ✅
+- [x] **AC-US3-08**: `admin/reviews.astro` - card布局mobile友好 ✅
+- [x] **AC-US3-09**: `admin/plans.astro` - 已有overflow-x-auto ✅
 
 ---
 

@@ -44,6 +44,7 @@
     "@libsql/isomorphic-fetch": "^0.3.1",
     "@lucide/astro": "^1.14.0",
     "@mastra/core": "^1.32.1",
+    "@mastra/deployer-cloudflare": "^1.1.32",
     "@tailwindcss/vite": "^4.2.4",
     "@tiptap/core": "^3.22.5",
     "@tiptap/extension-link": "^3.22.5",

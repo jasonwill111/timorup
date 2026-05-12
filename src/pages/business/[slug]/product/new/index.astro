@@ -12,6 +12,7 @@ import CardHeader from '@/components/ui/CardHeader.astro'
 import CardTitle from '@/components/ui/CardTitle.astro'
 import CardDescription from '@/components/ui/CardDescription.astro'
 import CardContent from '@/components/ui/CardContent.astro'
+import { actions } from 'astro:actions'
 ---
 
 <Layout title="Add Product - TimorList">
@@ -334,32 +335,24 @@ import CardContent from '@/components/ui/CardContent.astro'
     }
 
     try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: currentUser.id,
-          businessPageId: currentBusiness.id,
-          title,
-          price,
-          description,
-          images: uploadedImages
-        }),
+      const result = await actions.products.createProduct({
+        businessPageId: currentBusiness.id,
+        title,
+        price,
+        description,
       });
-      
-      const data = await res.json();
-      
-      if (data.success) {
+
+      if (result.success) {
         // Redirect to products page
         window.location.href = `/business/${slug}/products`;
       } else {
         // Check for specific error codes
-        if (data.error?.code === 'SKU_LIMIT_REACHED') {
+        if (result.error?.code === 'SKU_LIMIT_REACHED' || result.error?.code === 'SKU_NOT_ALLOWED') {
           loading?.classList.add('hidden');
           content?.classList.add('hidden');
           skuLimit?.classList.remove('hidden');
         } else {
-          showError(data.error?.message || 'Failed to create product');
+          showError(result.error?.message || 'Failed to create product');
         }
       }
     } catch (err) {
@@ -466,16 +459,11 @@ import CardContent from '@/components/ui/CardContent.astro'
       formData.append('file', fileToUpload);
 
       try {
-        const res = await fetch('/api/media/upload', {
-          method: 'POST',
-          body: formData,
-        });
+        const res = await actions.media.uploadMedia(formData);
 
-        const data = await res.json();
-
-        if (data.success) {
-          uploadedImages.push(data.data.id);
-          renderImagePreview(data.data.id, file);
+        if (res.success) {
+          uploadedImages.push(res.data.id);
+          renderImagePreview(res.data.id, file);
         }
       } catch (err) {
         console.error('Error uploading image:', err);

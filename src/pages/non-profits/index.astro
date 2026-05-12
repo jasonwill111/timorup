@@ -1,0 +1,186 @@
+---
+// Non-Profits list with category filters + pagination
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { getDb } from '@/lib/db';
+import { nonProfits, nonProfitCategories } from '@/db/schema';
+import { desc, or } from 'drizzle-orm';
+
+const db = await getDb();
+const searchParams = Astro.url.searchParams;
+const search = searchParams.get('q') || '';
+const parentCat = searchParams.get('parent') || '';
+const childCat = searchParams.get('child') || '';
+const page = parseInt(searchParams.get('page') || '1', 10);
+const LIMIT = 12;
+const offset = (page - 1) * LIMIT;
+
+// Get categories
+let parentCats: any[] = [];
+let getChildren = (pid: string) => [];
+let categoryMap: Record<string, string> = {};
+try {
+  const allCats = await db.select().from(nonProfitCategories).all();
+  parentCats = allCats.filter((c: any) => !c.parentId);
+  getChildren = (pid: string) => allCats.filter((c: any) => c.parentId === pid);
+  allCats.forEach((c: any) => categoryMap[c.id] = c.name);
+} catch (e) { console.log('Categories error:', e); }
+
+// Get all matching entities
+let allEntities: any[] = [];
+try {
+  const searchLower = search.toLowerCase();
+  allEntities = await db.select()
+    .from(nonProfits)
+    .orderBy(desc(nonProfits.createdAt))
+    .all();
+
+  allEntities = allEntities.filter((e: any) => {
+    const statusOk = e.status === 'live' || e.status === 'published';
+    const searchMatch = !search ||
+      e.title?.toLowerCase().includes(searchLower) ||
+      e.aboutUs?.toLowerCase().includes(searchLower);
+    const catMatch = !childCat || e.categoryId === childCat;
+    if (parentCat && !childCat) {
+      const childIds = getChildren(parentCat).map((c: any) => c.id);
+      if (childIds.length > 0 && !childIds.includes(e.categoryId)) return false;
+    }
+    return statusOk && searchMatch && catMatch;
+  });
+} catch (e) { console.log('Query error:', e); allEntities = []; }
+
+// Pagination
+const total = allEntities.length;
+const totalPages = Math.ceil(total / LIMIT);
+const entities = allEntities.slice(offset, offset + LIMIT);
+
+// Build URL helper
+const buildUrl = (params: Record<string, string>) => {
+  const p = new URLSearchParams();
+  if (search) p.set('q', search);
+  if (parentCat) p.set('parent', parentCat);
+  if (childCat) p.set('child', childCat);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) p.set(k, v);
+  });
+  return `/non-profits?${p.toString()}`;
+};
+---
+
+<Layout title="Non-Profits - TimorList">
+  <div class="container py-4 sm:py-8">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold">Non-Profits</h1>
+      <span class="text-sm text-muted-foreground">{total} total</span>
+    </div>
+
+    {/* Search + Filters */}
+    <form method="GET" action="/non-profits" class="bg-card rounded-2xl border border-border/50 p-4 mb-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input name="q" type="search" placeholder="Search non-profits..." value={search}
+            class="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+        </div>
+        <div class="flex gap-2">
+          <select name="parent" onchange="this.form.submit()"
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            <option value="">All Categories</option>
+            {parentCats.map(p => <option value={p.id} selected={parentCat===p.id}>{p.name}</option>)}
+          </select>
+          <select name="child" onchange="this.form.submit()"
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            <option value="">Subcategory</option>
+            {getChildren(parentCat).map(c => <option value={c.id} selected={childCat===c.id}>{c.name}</option>)}
+          </select>
+        </div>
+      </div>
+    </form>
+
+    {/* Results */}
+    {entities.length > 0 ? (
+      <>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {entities.map(e => (
+            <a href={`/non-profit/${e.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
+              {/* Image/Icon Area */}
+              <div class="aspect-[4/3] bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 relative overflow-hidden">
+                {e.profileImageId ? (
+                  <img src={`/api/media/${e.profileImageId}`} alt={e.title} class="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-rose-400/60 dark:text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                  </div>
+                )}
+                {/* Category Badge */}
+                {e.categoryId && categoryMap[e.categoryId] && (
+                  <span class="absolute top-3 left-3 text-xs px-3 py-1.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300 font-semibold shadow-md">
+                    {categoryMap[e.categoryId]}
+                  </span>
+                )}
+              </div>
+              {/* Content */}
+              <div class="p-4 space-y-3">
+                <h3 class="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">{e.title}</h3>
+                {e.address && (
+                  <p class="text-sm text-muted-foreground flex items-start gap-2">
+                    <svg class="w-4 h-4 mt-0.5 shrink-0 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="truncate">{e.address.split(',')[0]}</span>
+                  </p>
+                )}
+                {/* Stats Row */}
+                <div class="flex items-center gap-4 pt-2 border-t border-border/50">
+                  {/* Likes */}
+                  {e.likes > 0 && (
+                    <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                      <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                      {e.likes}
+                    </span>
+                  )}
+                  {/* Views */}
+                  <span class="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    {e.views > 999 ? `${(e.views/1000).toFixed(1)}k` : e.views}
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
+            <a href={buildUrl({ page: String(page - 1) })}
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1 ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+              ← Prev
+            </a>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const p = i + 1;
+              return (
+                <a href={buildUrl({ page: String(p) })}
+                   class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", p === page ? "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary cursor-pointer"]}>
+                  {p}
+                </a>
+              );
+            })}
+            <a href={buildUrl({ page: String(page + 1) })}
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+              Next →
+            </a>
+          </nav>
+        )}
+      </>
+    ) : (
+      <div class="text-center py-16">
+        <svg class="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+        <h3 class="text-lg font-medium mb-2">No non-profits found</h3>
+        <p class="text-muted-foreground">Try adjusting your search or filters</p>
+      </div>
+    )}
+  </div>
+</Layout>

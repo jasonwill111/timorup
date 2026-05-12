@@ -1,0 +1,18 @@
+{
+  "id": "0044-listing-admin-pages",
+  "status": "in_progress",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-10T10:01:32.038Z",
+  "lastActivity": "2026-05-11",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "note": "Needs verification - check what was actually implemented.",
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}

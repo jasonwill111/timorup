@@ -1,164 +1,201 @@
 ---
-// Local Directory - SSR
+// Listings list with category filters + pagination
 export const prerender = false;
-
 import Layout from '../../layouts/Layout.astro';
-import Input from '../../components/ui/Input.astro';
 import { getDb } from '@/lib/db';
-import { categories } from '@/db/schema';
-import { INDUSTRIES } from '@/lib/constants';
-import ListingContent from '../../components/islands/ListingContent.astro';
+import { listings, listingCategories } from '@/db/schema';
+import { eq, desc, or } from 'drizzle-orm';
 
-// Get categories for static filter options
 const db = await getDb();
-const allCategories = await db.select().from(categories).all();
-const categoryJson = JSON.stringify(allCategories);
+const searchParams = Astro.url.searchParams;
+const search = searchParams.get('q') || '';
+const parentCat = searchParams.get('parent') || '';
+const childCat = searchParams.get('child') || '';
+const page = parseInt(searchParams.get('page') || '1', 10);
+const LIMIT = 12;
+const offset = (page - 1) * LIMIT;
 
-// Get current params for type tabs
-const type = Astro.url.searchParams.get('type') || 'business';
-const industry = Astro.url.searchParams.get('industry') || '';
-const category = Astro.url.searchParams.get('category') || '';
+// Get categories
+let parentCats: any[] = [];
+let getChildren = (pid: string) => [];
+let categoryMap: Record<string, string> = {};
+try {
+  const allCats = await db.select().from(listingCategories).all();
+  parentCats = allCats.filter((c: any) => !c.parentId);
+  getChildren = (pid: string) => allCats.filter((c: any) => c.parentId === pid);
+  allCats.forEach((c: any) => categoryMap[c.id] = c.name);
+} catch (e) { console.log('Categories error:', e); }
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "TimorList Local Directory",
-  "description": `Browse ${type === 'business' ? 'businesses' : 'non-profit organizations'} in Timor-Leste.`,
-  "url": `https://timorlist.com/listings?type=${type}`,
+// Get all matching entities
+let allEntities: any[] = [];
+try {
+  const searchLower = search.toLowerCase();
+  allEntities = await db.select()
+    .from(listings)
+    .orderBy(desc(listings.createdAt))
+    .all();
+
+  allEntities = allEntities.filter((e: any) => {
+    const statusOk = e.status === 'live' || e.status === 'published';
+    const searchMatch = !search ||
+      e.title?.toLowerCase().includes(searchLower) ||
+      e.description?.toLowerCase().includes(searchLower);
+    const catMatch = !childCat || e.categoryId === childCat;
+    if (parentCat && !childCat) {
+      const childIds = getChildren(parentCat).map((c: any) => c.id);
+      if (childIds.length > 0 && !childIds.includes(e.categoryId)) return false;
+    }
+    return statusOk && searchMatch && catMatch;
+  });
+} catch (e) { console.log('Query error:', e); allEntities = []; }
+
+// Pagination
+const total = allEntities.length;
+const totalPages = Math.ceil(total / LIMIT);
+const entities = allEntities.slice(offset, offset + LIMIT);
+
+// Build URL helper
+const buildUrl = (params: Record<string, string>) => {
+  const p = new URLSearchParams();
+  if (search) p.set('q', search);
+  if (parentCat) p.set('parent', parentCat);
+  if (childCat) p.set('child', childCat);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) p.set(k, v);
+  });
+  return `/listings?${p.toString()}`;
+};
+
+// Listing type icons and colors
+const typeConfig: Record<string, { icon: string; color: string; bg: string }> = {
+  job: { icon: 'M21 13.255A23.931 23.931 0 0112 21l-4-1 4 1 4-1 11.731a23.945 23.945 0 01-4 11l1 4 1 4 1z', color: 'text-blue-600', bg: 'bg-blue-100' },
+  product: { icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10m-8 10l8 4m0-14l-8-4m8 4l-8 4', color: 'text-emerald-600', bg: 'bg-emerald-100' },
+  service: { icon: 'M21 16V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8m18 0v-8a2 2 0 00-2-2H5a2 2 0 00-2 2v8m18 0v-8m0-8h.01M21 12l-9-9m9 9l-9-9m9 9l9 9', color: 'text-purple-600', bg: 'bg-purple-100' },
+  property: { icon: 'M3 12l2-2m0 0l7-7 7 7m-7-7v18', color: 'text-amber-600', bg: 'bg-amber-100' },
+  vehicle: { icon: 'M8 17h.01M16 17h.01M9 17H7a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v2m0 8v2m-8-6v4m0-4v2m0 6v4m4-8v4m4-4v2m0 6v4M5 21h14a2 2 0 002-2H7a2 2 0 00-2-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2z', color: 'text-red-600', bg: 'bg-red-100' },
+  wanted: { icon: 'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 01-2 2h14a2 2 0 012 2z', color: 'text-teal-600', bg: 'bg-teal-100' },
 };
 ---
 
-<Layout
-  title="Local Directory - TimorList"
-  description="Browse businesses and non-profit organizations in Timor-Leste"
-  structuredData={structuredData}
->
+<Layout title="Listings - TimorList">
   <div class="container py-4 sm:py-8">
-    <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Local Directory</h1>
-
-    <!-- Type Tabs - improved visibility -->
-    <div class="flex gap-1 sm:gap-2 mb-4 sm:mb-6 p-1 bg-muted/50 rounded-xl sm:rounded-lg sm:bg-transparent sm:border-b sm:border-border sm:p-0 overflow-x-auto">
-      <a
-        href="/listings?type=business"
-        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'business' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
-      >
-        <span class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-          </svg>
-          Businesses
-        </span>
-      </a>
-      <a
-        href="/listings?type=non-profit"
-        class={`px-4 py-2.5 sm:py-2 rounded-lg sm:rounded-none sm:border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${type === 'non-profit' ? 'bg-primary text-primary-foreground font-semibold sm:border-primary sm:bg-transparent sm:text-foreground sm:font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted sm:hover:bg-transparent border-transparent sm:border-transparent'}`}
-      >
-        <span class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-          </svg>
-          Non-Profit
-        </span>
-      </a>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold">Listings</h1>
+      <span class="text-sm text-muted-foreground">{total} total</span>
     </div>
 
-    <!-- Filters - improved visibility -->
-    <form id="filter-form" class="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 p-3 sm:p-4 bg-card border border-border rounded-xl">
-      <div class="relative flex-1 min-w-[140px]">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input
-          id="search"
-          name="search"
-          type="search"
-          placeholder="Search listings..."
-          value={Astro.url.searchParams.get('search') || ''}
-          class="w-full h-9 sm:h-10 pl-9 pr-3 rounded-lg border border-input bg-background text-xs sm:text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-        />
+    {/* Search + Filters */}
+    <form method="GET" action="/listings" class="bg-card rounded-2xl border border-border/50 p-4 mb-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input name="q" type="search" placeholder="Search listings..." value={search}
+            class="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+        </div>
+        <div class="flex gap-2">
+          <select name="parent" onchange="this.form.submit()"
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            <option value="">All Categories</option>
+            {parentCats.map(p => <option value={p.id} selected={parentCat===p.id}>{p.name}</option>)}
+          </select>
+          <select name="child" onchange="this.form.submit()"
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            <option value="">Subcategory</option>
+            {getChildren(parentCat).map(c => <option value={c.id} selected={childCat===c.id}>{c.name}</option>)}
+          </select>
+        </div>
       </div>
-
-      {(type === 'business') && (
-        <select id="industry-filter" name="industry" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
-          <option value="">All Industries</option>
-          {Object.entries(INDUSTRIES).map(([key, group]) => (
-            <optgroup label={group.label}>
-              {group.items.map(item => (
-                <option value={key}>
-                  {item}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-      )}
-
-      {(type === 'non-profit') && (
-        <select id="orgtype-filter" name="orgType" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
-          <option value="">All Non-Profits</option>
-          <option value="government">Government</option>
-          <option value="ngo">NGOs</option>
-        </select>
-      )}
-
-      <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-3 rounded-lg border border-input bg-background text-xs sm:text-sm cursor-pointer hover:border-primary/50 focus:ring-2 focus:ring-primary/50 transition-colors">
-        <option value="recent">Recent</option>
-        <option value="name">Name A-Z</option>
-        <option value="rating">Top Rated</option>
-        <option value="popular">Popular</option>
-      </select>
-
-      <input type="hidden" name="type" value={type} />
-      <input type="hidden" name="page" value="1" />
     </form>
 
-    <!-- Dynamic Content Island -->
-    <ListingContent server:defer initialType={type}>
-      <div slot="fallback">
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(8)].map(() => (
-            <div class="bg-muted rounded-xl animate-pulse h-56"></div>
-          ))}
+    {/* Results */}
+    {entities.length > 0 ? (
+      <>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {entities.map(e => {
+            const config = typeConfig[e.listingType] || typeConfig.product;
+            return (
+              <a href={`/listing/${e.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
+                {/* Type Badge + Price */}
+                <div class="absolute top-3 right-3 z-10 flex gap-2">
+                  {e.price && (
+                    <span class="text-sm font-bold px-3 py-1.5 rounded-full bg-primary text-primary-foreground shadow-md">
+                      {e.price}
+                    </span>
+                  )}
+                </div>
+                {/* Image/Icon Area */}
+                <div class="aspect-[4/3] bg-gradient-to-br from-primary/10 to-primary/5 relative overflow-hidden">
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-primary/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                    </svg>
+                  </div>
+                  {/* Type Badge */}
+                  <span class={`absolute top-3 left-3 text-xs px-3 py-1.5 rounded-full ${config.bg} ${config.color} font-semibold shadow-md capitalize`}>
+                    {e.listingType}
+                  </span>
+                </div>
+                {/* Content */}
+                <div class="p-4 space-y-3">
+                  <h3 class="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">{e.title}</h3>
+                  {e.location && (
+                    <p class="text-sm text-muted-foreground flex items-start gap-2">
+                      <svg class="w-4 h-4 mt-0.5 shrink-0 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      <span class="truncate">{e.location.split(',')[0]}</span>
+                    </p>
+                  )}
+                  {/* Stats Row */}
+                  <div class="flex items-center gap-4 pt-2 border-t border-border/50">
+                    {/* Likes */}
+                    {e.likes > 0 && (
+                      <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        {e.likes}
+                      </span>
+                    )}
+                    {/* Views */}
+                    <span class="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                      {e.views > 999 ? `${(e.views/1000).toFixed(1)}k` : e.views}
+                    </span>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
         </div>
-        <div class="flex justify-center gap-2 mt-8">
-          <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
-          <div class="h-9 px-4 bg-muted rounded animate-pulse"></div>
-          <div class="h-9 w-20 bg-muted rounded animate-pulse"></div>
-        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
+            <a href={buildUrl({ page: String(page - 1) })}
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1 ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+              ← Prev
+            </a>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const p = i + 1;
+              return (
+                <a href={buildUrl({ page: String(p) })}
+                   class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", p === page ? "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary cursor-pointer"]}>
+                  {p}
+                </a>
+              );
+            })}
+            <a href={buildUrl({ page: String(page + 1) })}
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+              Next →
+            </a>
+          </nav>
+        )}
+      </>
+    ) : (
+      <div class="text-center py-16">
+        <svg class="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+        </svg>
+        <h3 class="text-lg font-medium mb-2">No listings found</h3>
+        <p class="text-muted-foreground">Try adjusting your search or filters</p>
       </div>
-    </ListingContent>
+    )}
   </div>
 </Layout>
-
-<script define:vars={{ industry, category, type }}>
-  // Set initial values for selects
-  const industryFilter = document.getElementById('industry-filter');
-  const orgTypeFilter = document.getElementById('orgtype-filter');
-  const sortFilter = document.getElementById('sort-filter');
-
-  if (industryFilter) industryFilter.value = industry;
-
-  // Get orgType from URL for nonprofits
-  if (type === 'non-profit') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orgType = urlParams.get('orgType') || '';
-    if (orgTypeFilter) orgTypeFilter.value = orgType;
-  }
-
-  // Handle filter changes
-  const form = document.getElementById('filter-form');
-  const handleChange = () => {
-    const params = new URLSearchParams(window.location.search);
-    const formData = new FormData(form);
-
-    params.set('page', '1');
-    formData.forEach((value, key) => {
-      if (value) params.set(key, value);
-      else params.delete(key);
-    });
-
-    window.location.href = `/listings?${params.toString()}`;
-  };
-
-  form?.addEventListener('change', handleChange);
-</script>

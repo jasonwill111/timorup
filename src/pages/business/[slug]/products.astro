@@ -93,8 +93,13 @@ import CardContent from '../../../components/ui/CardContent.astro'
       <div id="products-section">
         <Card>
           <CardHeader>
-            <CardTitle>Your Products</CardTitle>
-            <CardDescription>Manage your products and services</CardDescription>
+            <div class="flex items-center justify-between">
+              <div>
+                <CardTitle>Your Products</CardTitle>
+                <CardDescription>Manage your products and services</CardDescription>
+              </div>
+              <div id="usage-indicator"></div>
+            </div>
           </CardHeader>
           <CardContent>
             <div id="products-loading" class="text-center py-8">
@@ -128,16 +133,26 @@ import CardContent from '../../../components/ui/CardContent.astro'
 <script>
   // Get slug from URL
   const slug = window.location.pathname.split('/').filter(s => s)[2];
-  
+
   const loading = document.getElementById('loading');
   const accessDenied = document.getElementById('access-denied');
   const notFound = document.getElementById('not-found');
   const content = document.getElementById('content');
-  
+
   let currentUser: ProductData = null;
   let currentBusiness: ProductData = null;
   let subscriptionStatus: ProductData = null;
-  
+
+  function escapeHtml(str: string | null | undefined): string {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // Get session
   async function getSession() {
     try {
@@ -231,7 +246,7 @@ import CardContent from '../../../components/ui/CardContent.astro'
     
     // Load subscription status
     subscriptionStatus = await loadSubscription(currentBusiness.id);
-    
+
     // Update UI
     document.title = `Manage Products - ${currentBusiness.title} - TimorList`;
     
@@ -257,12 +272,31 @@ import CardContent from '../../../components/ui/CardContent.astro'
     // Load products
     const products = await loadProducts(currentBusiness.id);
     displayProducts(products);
-    
+
+    // Show usage indicator
+    const limits = subscriptionStatus?.limits;
+    if (limits && limits.skuLimit) {
+      const usageEl = document.getElementById('usage-indicator');
+      if (usageEl) {
+        const used = products.length;
+        const total = limits.skuLimit;
+        const percent = Math.round((used / total) * 100);
+        usageEl.innerHTML = `
+          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Products: ${used}/${total}</span>
+            <div class="w-24 h-2 bg-muted rounded-full overflow-hidden">
+              <div class="h-full ${percent >= 90 ? 'bg-red-500' : percent >= 70 ? 'bg-amber-500' : 'bg-primary'}" style="width: ${percent}%"></div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
     // Show content
     loading?.classList.add('hidden');
     content?.classList.remove('hidden');
   }
-  
+
   // Display products
   function displayProducts(products: ProductData) {
     const loadingEl = document.getElementById('products-loading');
@@ -288,9 +322,9 @@ import CardContent from '../../../components/ui/CardContent.astro'
       
       card.innerHTML = `
         <div class="aspect-square bg-muted relative">
-          ${firstImage 
-            ? `<img src="${firstImage}" alt="${product.title}" class="w-full h-full object-cover" />`
-            : `<div class="flex items-center justify-center h-full text-4xl font-bold text-muted-foreground">${product.title.charAt(0)}</div>`
+          ${firstImage
+            ? `<img src="${firstImage}" alt="${escapeHtml(product.title)}" class="w-full h-full object-cover" />`
+            : `<div class="flex items-center justify-center h-full text-4xl font-bold text-muted-foreground">${escapeHtml(product.title.charAt(0))}</div>`
           }
           <div class="absolute top-2 right-2 flex gap-1">
             <a href="/business/${slug}/product/${product.id}/edit" class="p-1.5 bg-white dark:bg-gray-800 rounded-full shadow hover:bg-gray-100" title="Edit">
@@ -312,8 +346,8 @@ import CardContent from '../../../components/ui/CardContent.astro'
           </div>
         </div>
         <div class="p-3">
-          <h3 class="font-medium truncate">${product.title}</h3>
-          <p class="text-sm text-muted-foreground">${product.price}</p>
+          <h3 class="font-medium truncate">${escapeHtml(product.title)}</h3>
+          <p class="text-sm text-muted-foreground">${escapeHtml(product.price)}</p>
         </div>
       `;
       

@@ -1,0 +1,19 @@
+{
+  "id": "0041-type-safety-cleanup",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-10T01:00:09.030Z",
+  "lastActivity": "2026-05-10T02:58:56.928Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-10T02:57:46.712Z",
+  "approvedAt": "2026-05-10T02:58:56.928Z"
+}

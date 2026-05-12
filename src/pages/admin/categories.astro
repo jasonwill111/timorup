@@ -10,38 +10,31 @@ import Button from '@components/ui/Button.astro';
     <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div>
         <h1 class="text-xl md:text-2xl font-bold">Categories</h1>
-        <p class="text-sm text-muted-foreground">Manage categories by entity type (Business, Government, Non-Profit)</p>
+        <p class="text-sm text-muted-foreground">Manage categories for 4 entity types</p>
       </div>
       <Button id="add-category-btn" class="text-xs px-2 py-1 h-7 flex-shrink-0 whitespace-nowrap md:text-sm md:px-4 md:h-9">+ Add Category</Button>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4">
-      <div class="bg-card border rounded-lg p-3 text-center">
-        <p class="text-xl md:text-2xl font-bold" id="stat-total">-</p>
-        <p class="text-xs text-muted-foreground">Total</p>
-      </div>
-      <div class="bg-card border rounded-lg p-3 text-center">
-        <p class="text-xl md:text-2xl font-bold text-blue-600" id="stat-business">-</p>
-        <p class="text-xs text-muted-foreground">Business</p>
-      </div>
-      <div class="bg-card border rounded-lg p-3 text-center">
-        <p class="text-xl md:text-2xl font-bold text-purple-600" id="stat-nonprofit">-</p>
-        <p class="text-xs text-muted-foreground">Non-Profit</p>
-      </div>
+    <!-- Tabs -->
+    <div class="flex gap-1 mb-4 border-b">
+      <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent" data-table="business">Business</button>
+      <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent" data-table="non_profit">Non-Profit</button>
+      <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent" data-table="public_sector">Public Sector</button>
+      <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent" data-table="listing">Listing</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="bg-card border rounded-lg p-3 mb-4 text-center">
+      <p class="text-lg font-bold" id="stat-count">-</p>
+      <p class="text-xs text-muted-foreground">categories in <span id="current-table-name">Business</span></p>
     </div>
 
     <!-- Filter -->
     <div class="bg-card border rounded-lg p-3 mb-4">
       <div class="flex flex-col sm:flex-row gap-2">
-        <select id="entity-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
-          <option value="">All Types</option>
-          <option value="business">Business</option>
-          <option value="nonprofit">Non-Profit</option>
-        </select>
         <select id="level-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
           <option value="">All Levels</option>
-          <option value="parent">Industries (Top-level)</option>
+          <option value="parent">Parent (Top-level)</option>
           <option value="child">Sub-categories</option>
         </select>
         <select id="parent-filter" class="h-9 px-3 rounded-md border bg-background text-sm">
@@ -154,13 +147,47 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  import { actions } from 'astro:actions';
   import { badges } from '@/lib/badges';
   import { injectModal, createDeleteDialog, showModal, hideModal } from '@/lib/modal';
 
-  let categories: any[] = [];
-  let parentCategories: any[] = [];
+  interface Category {
+    id: string;
+    name: string;
+    slug: string;
+    entityType: string;
+    parentId: string | null;
+    icon: string | null;
+    image: string | null;
+    sortOrder: number;
+    description: string | null;
+    isActive: boolean;
+  }
+
+  let categories: Category[] = [];
+  let parentCategories: Category[] = [];
   let editingId: string | null = null;
   let catImageId: string | null = null;
+  let currentTable = 'business';
+  const TABLE_NAMES: Record<string, string> = {
+    business: 'Business',
+    non_profit: 'Non-Profit',
+    public_sector: 'Public Sector',
+    listing: 'Listing'
+  };
+
+  // Tab click handler
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTable = (btn as HTMLElement).dataset.table || 'business';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-primary', 'text-primary'));
+      btn.classList.add('border-primary', 'text-primary');
+      document.getElementById('current-table-name').textContent = TABLE_NAMES[currentTable];
+      loadCategories();
+    });
+  });
+  // Init first tab
+  document.querySelector('.tab-btn[data-table="business"]')?.classList.add('border-primary', 'text-primary');
 
   // Image upload handler
   document.getElementById('cat-image-upload')?.addEventListener('click', () => {
@@ -170,19 +197,21 @@ import Button from '@components/ui/Button.astro';
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('folder', 'category');
+    try {
+      const result = await actions.media.uploadMedia({
+        file,
+        category: 'category',
+      });
 
-    const res = await fetch('/api/media/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (data.success && data.data?.id) {
-      catImageId = data.data.id;
-      (document.getElementById('cat-image-id') as HTMLInputElement).value = data.data.id;
-      (document.getElementById('cat-preview-img') as HTMLImageElement).src = data.data.url;
-      document.getElementById('cat-image-preview')?.classList.remove('hidden');
-      document.getElementById('cat-image-upload')?.classList.add('hidden');
+      if (result.success && result.data?.id) {
+        catImageId = result.data.id;
+        (document.getElementById('cat-image-id') as HTMLInputElement).value = result.data.id;
+        (document.getElementById('cat-preview-img') as HTMLImageElement).src = result.data.url;
+        document.getElementById('cat-image-preview')?.classList.remove('hidden');
+        document.getElementById('cat-image-upload')?.classList.add('hidden');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
     }
     (e.target as HTMLInputElement).value = '';
   });
@@ -196,13 +225,10 @@ import Button from '@components/ui/Button.astro';
   // Load categories
   async function loadCategories() {
     try {
-      const res = await fetch('/api/admin/categories');
-      const data = await res.json();
-
-      if (data.success) {
-        categories = data.data;
-        // Filter parent categories for dropdown
-        parentCategories = categories.filter((c: any) => !c.parentId);
+      const res = await fetch(`/api/admin/categories?table=${currentTable}`, { credentials: "include" }); const result = await res.json();;
+      if (res.ok && result.success && result.data) {
+        categories = result.data;
+        parentCategories = categories.filter((c: Category) => !c.parentId);
         renderCategories();
         updateStats();
         updateParentDropdown();
@@ -215,25 +241,29 @@ import Button from '@components/ui/Button.astro';
 
   // Update stats
   function updateStats() {
-    const total = categories.length;
-    const parents = categories.filter((c: any) => !c.parentId).length;
-    const children = categories.filter((c: any) => c.parentId).length;
+    const count = categories.length;
+    document.getElementById('stat-count').textContent = String(count);
 
     const el = document.getElementById('stat-total');
     if (el) el.textContent = String(total);
-    const parentEl = document.getElementById('stat-parent');
-    if (parentEl) parentEl.textContent = String(parents);
-    const childEl = document.getElementById('stat-child');
-    if (childEl) childEl.textContent = String(children);
+    const businessEl = document.getElementById('stat-business');
+    if (businessEl) businessEl.textContent = String(businessCount);
+    const nonprofitEl = document.getElementById('stat-nonprofit');
+    if (nonprofitEl) nonprofitEl.textContent = String(nonprofitCount);
   }
 
-  // Update parent dropdown
-  function updateParentDropdown() {
+  // Update parent dropdown - filter by entity type
+  function updateParentDropdown(entityType?: string) {
     const select = document.getElementById('cat-parent') as HTMLSelectElement;
     const filterSelect = document.getElementById('parent-filter') as HTMLSelectElement;
 
-    const options = parentCategories.map((c: any) =>
-      `<option value="${c.id}">${c.icon ? c.icon + ' ' : ''}${c.name}</option>`
+    // Filter by entity type if specified
+    const filteredParents = entityType
+      ? parentCategories.filter((c: Category) => c.entityType === entityType)
+      : parentCategories;
+
+    const options = filteredParents.map((c: Category) =>
+      `<option value="${c.id}">${c.icon ? getIcon(c.icon) + ' ' : ''}${c.name}</option>`
     ).join('');
 
     if (select) {
@@ -244,10 +274,16 @@ import Button from '@components/ui/Button.astro';
     }
   }
 
+  // Get icon without prefix (strip "emoji:" if present)
+  function getIcon(icon: string | null): string {
+    if (!icon) return '';
+    return icon.replace(/^emoji:/, '');
+  }
+
   // Get parent name
   function getParentName(parentId: string | null): string {
     if (!parentId) return '-';
-    const parent = categories.find((c: any) => c.id === parentId);
+    const parent = categories.find((c: Category) => c.id === parentId);
     return parent ? parent.name : '-';
   }
 
@@ -256,11 +292,13 @@ import Button from '@components/ui/Button.astro';
     const container = document.getElementById('categories-list');
     if (!container) return;
 
+    const entityFilter = (document.getElementById('entity-filter') as HTMLSelectElement)?.value || '';
     const levelFilter = (document.getElementById('level-filter') as HTMLSelectElement)?.value || '';
     const parentFilter = (document.getElementById('parent-filter') as HTMLSelectElement)?.value || '';
     const search = (document.getElementById('search') as HTMLInputElement)?.value.toLowerCase() || '';
 
-    const filtered = categories.filter((cat: any) => {
+    const filtered = categories.filter((cat: Category) => {
+      const matchesEntity = !entityFilter || cat.entityType === entityFilter;
       const matchesLevel = !levelFilter ||
         (levelFilter === 'parent' && !cat.parentId) ||
         (levelFilter === 'child' && cat.parentId);
@@ -268,7 +306,7 @@ import Button from '@components/ui/Button.astro';
       const matchesSearch = !search ||
         (cat.name && cat.name.toLowerCase().includes(search)) ||
         (cat.slug && cat.slug.toLowerCase().includes(search));
-      return matchesLevel && matchesParent && matchesSearch;
+      return matchesEntity && matchesLevel && matchesParent && matchesSearch;
     });
 
     if (filtered.length === 0) {
@@ -276,11 +314,11 @@ import Button from '@components/ui/Button.astro';
       return;
     }
 
-    container.innerHTML = filtered.map((cat: any) => `
+    container.innerHTML = filtered.map((cat: Category) => `
       <tr class="border-t hover:bg-muted/50">
         <td class="p-3">
           <div class="flex items-center gap-2">
-            ${cat.icon ? `<span class="text-lg">${cat.icon}</span>` : ''}
+            ${cat.icon ? `<span class="text-lg">${getIcon(cat.icon)}</span>` : ''}
             <div>
               <span class="font-medium">${cat.name}</span>
               <p class="text-xs text-muted-foreground">/${cat.slug}</p>
@@ -288,9 +326,13 @@ import Button from '@components/ui/Button.astro';
           </div>
         </td>
         <td class="p-3 hidden md:table-cell">
-          ${cat.entityType === 'business'
+          ${currentTable === 'business'
             ? '<span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">Business</span>'
-            : '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800">Non-Profit</span>'
+            : currentTable === 'non_profit'
+              ? '<span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800">Non-Profit</span>'
+              : currentTable === 'public_sector'
+                ? '<span class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 text-cyan-800">Public Sector</span>'
+                : '<span class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">Listing</span>'
           }
         </td>
         <td class="p-3 hidden lg:table-cell">
@@ -375,7 +417,7 @@ import Button from '@components/ui/Button.astro';
 
   // Edit category
   (window as any).editCategory = function(id: string) {
-    const cat = categories.find((c: any) => c.id === id);
+    const cat = categories.find((c: Category) => c.id === id);
     if (!cat) return;
 
     editingId = id;
@@ -413,10 +455,10 @@ import Button from '@components/ui/Button.astro';
   document.getElementById('category-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const categoryData: any = {
+    const categoryData: Omit<Category, 'id'> = {
       name: (document.getElementById('cat-name') as HTMLInputElement)?.value,
       slug: (document.getElementById('cat-slug') as HTMLInputElement)?.value,
-      entityType: (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value,
+      entityType: (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value as 'business' | 'nonprofit',
       parentId: (document.getElementById('cat-parent') as HTMLSelectElement)?.value || null,
       icon: (document.getElementById('cat-icon') as HTMLInputElement)?.value || '',
       image: (document.getElementById('cat-image-id') as HTMLInputElement)?.value || '',
@@ -436,23 +478,19 @@ import Button from '@components/ui/Button.astro';
     }
 
     try {
-      const url = editingId ? `/api/admin/categories/${editingId}` : '/api/admin/categories';
-      const method = editingId ? 'PUT' : 'POST';
+      let result;
+      if (editingId) {
+        result = await actions.admin.categories.update({ id: editingId, ...categoryData });
+      } else {
+        result = await actions.admin.categories.create(categoryData);
+      }
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(categoryData),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
+      if (result.success) {
         showToast(editingId ? 'Category updated!' : 'Category created!');
         closeModalFn();
         loadCategories();
       } else {
-        showToast(data.error?.message || 'Failed to save', 'error');
+        showToast(result.error?.message || 'Failed to save', 'error');
       }
     } catch (err) {
       showToast('Error saving category', 'error');
@@ -472,13 +510,12 @@ import Button from '@components/ui/Button.astro';
   (deleteModal.querySelector('[data-confirm-btn]') as HTMLButtonElement)?.addEventListener('click', async () => {
     if (!deleteTargetId) return;
     try {
-      const res = await fetch(`/api/admin/categories/${deleteTargetId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
+      const result = await actions.admin.categories.delete({ id: deleteTargetId });
+      if (result.success) {
         showToast('Category deleted');
         loadCategories();
       } else {
-        showToast(data.error?.message || 'Failed to delete', 'error');
+        showToast(result.error?.message || 'Failed to delete', 'error');
       }
     } catch {
       showToast('Error deleting category', 'error');
@@ -488,7 +525,7 @@ import Button from '@components/ui/Button.astro';
   // Delete category
   (window as any).deleteCategory = function(id: string) {
     deleteTargetId = id;
-    const cat = categories.find((c: any) => c.id === id);
+    const cat = categories.find((c: Category) => c.id === id);
     const modal = document.getElementById('delete-category-dialog');
     if (modal) {
       const msgEl = modal.querySelector('.modal-body p');
@@ -501,6 +538,16 @@ import Button from '@components/ui/Button.astro';
   document.getElementById('level-filter')?.addEventListener('change', renderCategories);
   document.getElementById('parent-filter')?.addEventListener('change', renderCategories);
   document.getElementById('search')?.addEventListener('input', renderCategories);
+
+  // Entity type change - update parent dropdown to show only matching parents
+  document.getElementById('entity-filter')?.addEventListener('change', (e) => {
+    const entityType = (e.target as HTMLSelectElement).value;
+    // Reset parent filter when entity type changes - prevents stale selections
+    const parentFilterSelect = document.getElementById('parent-filter') as HTMLSelectElement;
+    if (parentFilterSelect) parentFilterSelect.value = '';
+    updateParentDropdown(entityType);
+    renderCategories(); // Re-render to apply entity type filter
+  });
 
   // Initialize
   loadCategories();

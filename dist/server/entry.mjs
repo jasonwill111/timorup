@@ -1,6 +1,6 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { w } from "./chunks/worker-entry_CzyD54M-.mjs";
+import { w } from "./chunks/worker-entry_CmJnBhdt.mjs";
 import "cloudflare:workers";
 export {
   w as default

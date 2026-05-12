@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessPages, products, orders } from '@/db/schema';
+import { businesses, products } from '@/db/schema';
 import { eq, lt, and, sql } from 'drizzle-orm';
 
 export async function GET({ request }: { params: Record<string, string>; request: Request }) {
@@ -22,14 +22,12 @@ export async function GET({ request }: { params: Record<string, string>; request
   const nowTimestamp = Math.floor(now.getTime() / 1000);
 
   try {
-    // Find listings past grace period
-    // - subscriptionStatus = 'expired'
-    // - gracePeriodEndDate < now
-    const expiredListings = await db.select()
-      .from(businessPages)
+    // Find businesses past grace period (businesses only)
+    const expiredBusinesses = await db.select()
+      .from(businesses)
       .where(and(
-        eq(businessPages.subscriptionStatus, 'expired'),
-        lt(businessPages.gracePeriodEndDate, nowTimestamp)
+        eq(businesses.subscriptionStatus, 'expired'),
+        lt(businesses.gracePeriodEndDate, nowTimestamp)
       ))
       .all();
 
@@ -43,44 +41,40 @@ export async function GET({ request }: { params: Record<string, string>; request
       totalSkusDeleted: 0,
     };
 
-    for (const listing of expiredListings) {
+    for (const business of expiredBusinesses) {
       try {
         // Count SKUs before deletion
         const skuCountResult = await db.select({ count: sql<number>`count(*)` })
           .from(products)
-          .where(eq(products.businessPageId, listing.id))
+          .where(eq(products.businessPageId, business.id))
           .get();
         const skuCount = Number(skuCountResult?.count) || 0;
 
         // Delete all SKUs for this listing
         await db.delete(products)
-          .where(eq(products.businessPageId, listing.id))
+          .where(eq(products.businessPageId, business.id))
           .run();
 
         results.totalSkusDeleted += skuCount;
 
-        // Delete the listing
-        await db.delete(businessPages)
-          .where(eq(businessPages.id, listing.id))
+        // Delete the business
+        await db.delete(businesses)
+          .where(eq(businesses.id, business.id))
           .run();
 
-        results.deleted.push(listing.id);
-        console.log(`[Cleanup] Deleted listing: ${listing.id} (${listing.title}), ${skuCount} SKUs`);
+        results.deleted.push(business.id);
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
-        results.failed.push({ id: listing.id, error });
-        console.error(`[Cleanup] Failed to delete listing ${listing.id}:`, error);
+        results.failed.push({ id: business.id, error });
+        console.error(`[Cleanup] Failed to delete business ${business.id}:`, error);
       }
     }
-
-    // Log cleanup summary
-    console.log(`[Cleanup] Summary: ${results.deleted.length} listings deleted, ${results.totalSkusDeleted} SKUs removed, ${results.failed.length} failures`);
 
     return new Response(JSON.stringify({
       success: true,
       data: {
         executedAt: now.toISOString(),
-        listingsFound: expiredListings.length,
+        businessesFound: expiredBusinesses.length,
         deleted: results.deleted.length,
         skusDeleted: results.totalSkusDeleted,
         failed: results.failed.length,

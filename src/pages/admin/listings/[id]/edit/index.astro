@@ -7,16 +7,16 @@ import Button from '../../../../../components/ui/Button.astro';
 import Input from '../../../../../components/ui/Input.astro';
 import Textarea from '../../../../../components/ui/Textarea.astro';
 import { db } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
+import { businesses, categories } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { ENTITY_TYPES, INDUSTRIES } from '@/lib/constants';
+import { INDUSTRIES } from '@/lib/constants';
 
 const { id } = Astro.params;
 
 const listing = await db
   .select()
-  .from(businessPages)
-  .where(eq(businessPages.id, id ?? ''))
+  .from(businesses)
+  .where(eq(businesses.id, id ?? ''))
   .get();
 
 if (!listing) {
@@ -48,20 +48,13 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
       <div class="bg-card rounded-lg border p-6">
         <h2 class="text-lg font-semibold mb-4">Listing Type</h2>
         <div class="flex items-center gap-4">
-          <span class="text-3xl">
-            {listing.entityType === 'business' ? '🏪' : '🏛️'}
-          </span>
+          <span class="text-3xl">🏪</span>
           <div>
-            <div class="font-medium">{ENTITY_TYPES.find(t => t.value === listing.entityType)?.label || listing.entityType}</div>
-            {listing.entityType === 'nonprofit' && listing.organizationType && (
-              <div class="text-xs text-muted-foreground">
-                ({listing.organizationType === 'government' ? 'Government Agency' : 'NGO'})
-              </div>
-            )}
+            <div class="font-medium">Business</div>
             <div class="text-xs text-muted-foreground">Type cannot be changed after creation</div>
           </div>
         </div>
-        <input type="hidden" name="entityType" value={listing.entityType} />
+        <input type="hidden" name="entityType" value="business" />
       </div>
 
       <!-- Basic Info -->
@@ -85,26 +78,24 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
               </select>
             </div>
 
-            {listing.entityType === 'business' && (
-              <div id="industry-field">
-                <label class="block text-sm font-medium mb-1">Industry</label>
-                <select name="industry" class="w-full h-10 px-3 rounded-md border border-input bg-background">
-                  <option value="">Select industry</option>
-                  {Object.entries(INDUSTRIES).map(([key, group]) => (
-                    <optgroup label={group.label}>
-                      {group.items.map(item => {
-                        const value = `${key}.${item.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-                        return (
-                          <option value={value} selected={listing.industry === value}>
-                            {item}
-                          </option>
-                        );
-                      })}
-                    </optgroup>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div id="industry-field">
+              <label class="block text-sm font-medium mb-1">Industry</label>
+              <select name="industry" class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                <option value="">Select industry</option>
+                {Object.entries(INDUSTRIES).map(([key, group]) => (
+                  <optgroup label={group.label}>
+                    {group.items.map(item => {
+                      const value = `${key}.${item.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                      return (
+                        <option value={value} selected={listing.industry === value}>
+                          {item}
+                        </option>
+                      );
+                    })}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>

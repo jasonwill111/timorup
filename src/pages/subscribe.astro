@@ -29,7 +29,7 @@ try {
   if (tokenMatch) {
     const { getDb } = await import('@/lib/db');
     const db = await getDb();
-    const { sessions, users, businessPages } = await import('@/db/schema');
+    const { sessions, users, businesses } = await import('@/db/schema');
     const { eq } = await import('drizzle-orm');
 
     const session = await db.select()
@@ -53,15 +53,15 @@ try {
         };
 
         const business = await db.select({
-          id: businessPages.id,
-          title: businessPages.title,
-          contactName: businessPages.contactName,
-          contactNumber: businessPages.contactNumber,
-          email: businessPages.email,
-          countryCode: businessPages.countryCode,
+          id: businesses.id,
+          title: businesses.title,
+          contactName: businesses.contactName,
+          contactNumber: businesses.contactNumber,
+          email: businesses.email,
+          countryCode: businesses.countryCode,
         })
-        .from(businessPages)
-        .where(eq(businessPages.ownerId, user.id))
+        .from(businesses)
+        .where(eq(businesses.ownerId, user.id))
         .limit(1)
         .get();
 
@@ -72,9 +72,6 @@ try {
 } catch (e) {
   console.error('Auth check failed:', e);
 }
-
-// Debug: log session check result
-console.log('[Subscribe] Auth check result:', { userId: user?.id, userName: user?.name });
 
 if (!user) {
   return Astro.redirect('/login?redirect=/subscribe');

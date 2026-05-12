@@ -3,7 +3,7 @@ export const prerender = false;
 
 import type { ScheduledHandler } from '@cloudflare/workers-types';
 import { getDb } from '@/lib/db';
-import { businessPages, media, products } from '@/db/schema';
+import { businesses, media, products } from '@/db/schema';
 import { lt, isNull, or, inArray } from 'drizzle-orm';
 import { env } from 'cloudflare:workers';
 
@@ -45,21 +45,19 @@ export const onRequest: ScheduledHandler = async (context) => {
   const now = Date.now();
   const cutoffDate = new Date(now - EXPIRY_GRACE_PERIOD_MS);
 
-  console.log(`[Cleanup] Starting expired business cleanup at ${new Date().toISOString()}`);
-  console.log(`[Cleanup] Cutoff date: ${cutoffDate.toISOString()}`);
+  console.log(`[Cleanup] Starting expired business cleanup`);
 
   try {
-    // Find businesses expired for 60+ days
+    // Find businesses expired for 60+ days (only from businesses table)
     const expiredBusinesses = await db
       .select({
-        id: businessPages.id,
-        slug: businessPages.slug,
-        entityType: businessPages.entityType,
-        ownerId: businessPages.ownerId,
+        id: businesses.id,
+        slug: businesses.slug,
+        ownerId: businesses.ownerId,
       })
-      .from(businessPages)
+      .from(businesses)
       .where(
-        lt(businessPages.expiryDate, cutoffDate)
+        lt(businesses.expiryDate, cutoffDate)
       )
       .all();
 
@@ -69,12 +67,9 @@ export const onRequest: ScheduledHandler = async (context) => {
 
     for (const business of expiredBusinesses) {
       try {
-        console.log(`[Cleanup] Processing business: ${business.id} (${business.slug})`);
-
-        // 1. Delete R2 folder based on entity type
-        const entityFolder = `${business.entityType || 'business'}/${business.id}`;
+        // 1. Delete R2 folder
+        const entityFolder = `business/${business.id}`;
         await deleteFolderFromR2(entityFolder);
-        console.log(`[Cleanup] Deleted R2 folder: ${entityFolder}`);
 
         // 2. Delete media records
         await db.delete(media).where(
@@ -84,15 +79,12 @@ export const onRequest: ScheduledHandler = async (context) => {
           )
         ).where((f) => f.sql`url LIKE ${`${entityFolder}/%`}`)
         .run();
-        console.log(`[Cleanup] Deleted media records for business ${business.id}`);
 
         // 3. Delete products
         await db.delete(products).where(inArray(products.businessPageId, [business.id])).run();
-        console.log(`[Cleanup] Deleted products for business ${business.id}`);
 
-        // 4. Delete business page
-        await db.delete(businessPages).where(inArray(businessPages.id, [business.id])).run();
-        console.log(`[Cleanup] Deleted business ${business.id}`);
+        // 4. Delete business
+        await db.delete(businesses).where(inArray(businesses.id, [business.id])).run();
 
         deletedCount++;
       } catch (error) {

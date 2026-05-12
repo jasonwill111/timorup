@@ -88,6 +88,38 @@ Enhanced admin dashboard with comprehensive stats cards, MTD metrics, interactiv
 
 ## Files Modified
 - `src/pages/admin/index.astro` - Dashboard page with stats and charts
-- `src/pages/admin/plans.astro` - Plans page with warning banner and RBAC
+- `src/pages/admin/plans.astro` - Plans page with warning banner, CRUD modals, RBAC
 - `src/pages/api/admin/stats.ts` - Stats API with MTD and monthly data
 - `src/pages/api/admin/subscriptions.ts` - Subscriptions API for recent activity
+- `src/pages/api/admin/plans/index.ts` - Create plan API with conflict detection
+- `src/pages/api/admin/plans/[id].ts` - Update/Delete plan API with protection
+- `src/pages/pricing.astro` - Simplified pricing page UI
+- `src/lib/subscription.ts` - Plan limits enforcement with tier fallback
+- `src/pages/api/media/index.ts` - Media upload with business limit enforcement
+- `src/db/schema/plans.ts` - Added maxBusinessImages, maxBusinessVideos fields
+- `src/db/migrations/0003_add_business_media_limits.sql` - Migration for new fields
+
+## Plans Data Model
+
+### Limits by Plan
+
+| Plan | SKU Limit | Images/SKU | Videos/SKU | Page Images | Page Videos |
+|------|-----------|------------|------------|-------------|-------------|
+| Basic | 10 | 5 | 1 | 16 | 2 |
+| Pro | 30 | 5 | 1 | 16 | 2 |
+| Max | 60 | 5 | 1 | 16 | 2 |
+
+### Database Fields (plans table)
+- `sku_limit` - Maximum products/services for the business
+- `max_images` - Images allowed per product (all plans: 5)
+- `max_videos` - Videos allowed per product (all plans: 1)
+- `max_business_images` - Business/Non-Profit page total images, includes gallery (all plans: 16)
+- `max_business_videos` - Business/Non-Profit page total videos, includes gallery (all plans: 2)
+
+### Enforcement Points
+1. **SKU Creation** - `canCreateSku()` in subscription.ts checks skuCount >= skuLimit
+2. **Media Upload** - media API checks maxBusinessImages/maxBusinessVideos
+3. **Plan Deletion** - API returns 409 if business uses the plan
+
+### Tier Name Fallback
+`getPlanLimits()` supports both full ID (`pro-monthly`) and tier name (`pro`) to handle legacy plan_type values in business_pages table.

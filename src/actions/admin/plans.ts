@@ -1,7 +1,8 @@
 // Astro Server Actions for Admin Plans Management
-import { defineAction, z } from 'astro:actions';
+import { defineAction } from 'astro:actions';
+import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { plans } from '@/db/schema';
+import { plans as plansTable } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 
@@ -20,14 +21,14 @@ const UpdatePlanSchema = z.object({
   sortOrder: z.coerce.number().int().optional(),
 });
 
-export const plans = {
+export const adminPlans = {
   // Get all plans (admin view - includes inactive)
   getAll: defineAction({
     handler: async () => {
       const db = await getDb();
       const allPlans = await db.select()
-        .from(plans)
-        .orderBy(asc(plans.sortOrder))
+        .from(plansTable)
+        .orderBy(asc(plansTable.sortOrder))
         .all();
 
       return allPlans.map(plan => ({
@@ -58,15 +59,15 @@ export const plans = {
         updatedAt: Math.floor(Date.now() / 1000),
       };
 
-      await db.update(plans)
+      await db.update(plansTable)
         .set(updateData)
-        .where(eq(plans.id, input.id))
+        .where(eq(plansTable.id, input.id))
         .run();
 
       // Fetch updated plan
       const updated = await db.select()
-        .from(plans)
-        .where(eq(plans.id, input.id))
+        .from(plansTable)
+        .where(eq(plansTable.id, input.id))
         .limit(1)
         .get();
 
@@ -85,9 +86,9 @@ export const plans = {
     handler: async () => {
       const db = await getDb();
       const activePlans = await db.select()
-        .from(plans)
-        .where(eq(plans.active, true))
-        .orderBy(asc(plans.sortOrder))
+        .from(plansTable)
+        .where(eq(plansTable.active, true))
+        .orderBy(asc(plansTable.sortOrder))
         .all();
 
       return activePlans.map(plan => ({

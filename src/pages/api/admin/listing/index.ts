@@ -1,228 +1,150 @@
-// Admin API - Listings Management
-import type { APIRoute } from 'astro';
+// Admin API - Listings Management (NEW listings table)
+export const prerender = false;
+
 import { getDb } from '@/lib/db';
-import { businessPages } from '@/db/schema';
-import { eq, and, like, or, inArray } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import { z } from 'zod';
+import { listings } from '@/db/schema';
+import { eq, desc, like, sql } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
-const createSchema = z.object({
-  entityType: z.enum(['business', 'government', 'nonprofit', 'non-profit']),
-  title: z.string().min(1, { error: 'Title is required' }),
-  slug: z.string().optional(),
-  categoryId: z.string().optional(),
-  industry: z.string().optional(),
-  contactName: z.string().optional(),
-  countryCode: z.string().default('+670'),
-  contactNumber: z.string().optional(),
-  email: z.email().optional().or(z.literal('')),
-  registrationUrl: z.string().optional().or(z.literal('')),
-  address: z.string().optional(),
-  aboutUs: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  yearOfEstablishment: z.number().optional(),
-  openingHours: z.record(z.string(), z.object({
-    open: z.string(),
-    close: z.string(),
-  })).optional(),
-  locationLat: z.number().optional(),
-  locationLng: z.number().optional(),
-  status: z.enum(['draft', 'live', 'suspended']).default('draft'),
-  ownerId: z.string().optional(),
-  bannerImageId: z.string().optional(),
-  profileImageId: z.string().optional(),
-  verifiedBadge: z.boolean().optional(),
-  socialLinks: z.object({
-    facebook: z.string().optional(),
-    instagram: z.string().optional(),
-    tiktok: z.string().optional(),
-  }).optional(),
-  photoGallery: z.array(z.string()).optional(),
-  planType: z.string().optional(),
-  expiryDate: z.number().optional(),
-});
+// GET - List listings with filters
+export async function GET({ request }: { request: Request }) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorizedResponse();
 
-const updateSchema = createSchema.partial();
+  const db = await getDb();
+  try {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const offset = (page - 1) * limit;
+    const search = url.searchParams.get('search') || '';
+    const status = url.searchParams.get('status') || '';
+    const listingType = url.searchParams.get('type') || '';
 
-function generateSlug(title: string): string {
-  const base = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-  return `${base}-${nanoid(6)}`;
+    // Build conditions
+    const conditions: any[] = [];
+    if (search) {
+      const pattern = `%${search}%`;
+      conditions.push(like(listings.title, pattern));
+    }
+    if (status) {
+      conditions.push(eq(listings.status, status));
+    }
+    if (listingType) {
+      conditions.push(eq(listings.listingType, listingType));
+    }
+
+    const where = conditions.length ? conditions : undefined;
+
+    const data = await db.select()
+      .from(listings)
+      .where(where)
+      .orderBy(desc(listings.createdAt))
+      .limit(limit)
+      .offset(offset)
+      .all();
+
+    const countResult = db.select({ count: sql`count(*)` }).from(listings).where(where).get();
+    const total = Number(countResult?.count) || 0;
+
+    return Response.json({
+      success: true,
+      data,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
+    }, { status: 200 });
+  } catch (error) {
+    return Response.json({
+      success: false,
+      error: { message: error instanceof Error ? error.message : String(error) }
+    }, { status: 500 });
+  }
 }
 
-export const GET: APIRoute = async ({ url, request }) => {
-  const user = await getAdminUser(request);
-  if (!user) return unauthorizedResponse();
-
-  const db = await getDb();
-  const entityType = url.searchParams.get('entityType');
-  const status = url.searchParams.get('status');
-  const search = url.searchParams.get('search');
-
-  let query = db.select().from(businessPages);
-  const conditions = [];
-
-  if (entityType) {
-    conditions.push(eq(businessPages.entityType, entityType));
-  }
-  if (status) {
-    conditions.push(eq(businessPages.status, status));
-  }
-  if (search) {
-    conditions.push(like(businessPages.title, `%${search}%`));
-  }
-
-  const listings = conditions.length > 0
-    ? await query.where(and(...conditions)).all()
-    : await query.all();
-
-  return new Response(JSON.stringify({ success: true, data: listings }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
-};
-
-export const POST: APIRoute = async ({ request }) => {
+// POST - Create listing
+export async function POST({ request }: { request: Request }) {
   const user = await getAdminUser(request);
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
   try {
     const body = await request.json();
-    const data = createSchema.parse(body);
+    const { title, slug, listingType, description, price, condition, location, contactName, contactNumber, email, status, categoryId } = body;
 
-    const slug = data.slug || generateSlug(data.title);
-    // Normalize entityType: 'non-profit' -> 'nonprofit'
-    const normalizedEntityType = data.entityType === 'non-profit' ? 'nonprofit' : data.entityType;
-
+    const id = `lst-${Date.now()}`;
     const newListing = {
-      id: nanoid(),
-      title: data.title,
-      slug,
-      ownerId: data.ownerId || user.id,
-      entityType: normalizedEntityType,
-      categoryId: data.categoryId || null,
-      industry: data.industry || null,
-      contactName: data.contactName || null,
-      countryCode: data.countryCode,
-      contactNumber: data.contactNumber || null,
-      email: data.email || null,
-      registrationUrl: data.registrationUrl || null,
-      address: data.address || null,
-      aboutUs: data.aboutUs || null,
-      tags: data.tags ? JSON.stringify(data.tags) : null,
-      yearOfEstablishment: data.yearOfEstablishment || null,
-      openingHours: data.openingHours ? JSON.stringify(data.openingHours) : null,
-      locationLat: data.locationLat || null,
-      locationLng: data.locationLng || null,
-      status: data.status,
-      bannerImageId: data.bannerImageId || null,
-      profileImageId: data.profileImageId || null,
-      verifiedBadge: data.verifiedBadge || false,
-      socialLinks: data.socialLinks ? JSON.stringify(data.socialLinks) : null,
-      photoGallery: data.photoGallery ? JSON.stringify(data.photoGallery) : null,
-      planType: data.planType || null,
-      expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
+      id,
+      title,
+      slug: slug || title.toLowerCase().replace(/\s+/g, '-'),
+      ownerId: user.id,
+      listingType: listingType || 'product',
+      status: status || 'draft',
+      description: description || '',
+      price: price || '',
+      condition: condition || '',
+      location: location || '',
+      contactName: contactName || '',
+      contactNumber: contactNumber || '',
+      email: email || '',
+      countryCode: '+670',
+      categoryId: categoryId || null,
+      likes: 0,
+      saves: 0,
+      views: 0,
+      createdAt: Math.floor(Date.now() / 1000),
+      updatedAt: Math.floor(Date.now() / 1000),
     };
 
-    await db.insert(businessPages).values(newListing);
+    await db.insert(listings).values(newListing).run();
 
-    return new Response(JSON.stringify({ id: newListing.id, slug }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return Response.json({ success: true, data: { id, ...newListing } }, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: 'Validation failed', details: error.errors }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    console.error('Error creating listing:', error);
-    return new Response(JSON.stringify({ error: 'Failed to create listing' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return Response.json({ success: false, error: { message: 'Failed to create listing' } }, { status: 500 });
   }
-};
+}
 
-export const PUT: APIRoute = async ({ request }) => {
+// PUT - Update listing
+export async function PUT({ request }: { request: Request }) {
   const user = await getAdminUser(request);
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
   try {
     const body = await request.json();
-    const { id, ...data } = body;
-    const validated = updateSchema.parse(data);
+    const { id, ...updates } = body;
 
-    const updateData: Record<string, unknown> = {};
-    if (validated.entityType !== undefined) updateData.entityType = validated.entityType;
-    if (validated.title !== undefined) updateData.title = validated.title;
-    if (validated.slug !== undefined) updateData.slug = validated.slug;
-    if (validated.categoryId !== undefined) updateData.categoryId = validated.categoryId;
-    if (validated.industry !== undefined) updateData.industry = validated.industry;
-    if (validated.contactName !== undefined) updateData.contactName = validated.contactName;
-    if (validated.countryCode !== undefined) updateData.countryCode = validated.countryCode;
-    if (validated.contactNumber !== undefined) updateData.contactNumber = validated.contactNumber;
-    if (validated.email !== undefined) updateData.email = validated.email;
-    if (validated.registrationUrl !== undefined) updateData.registrationUrl = validated.registrationUrl;
-    if (validated.address !== undefined) updateData.address = validated.address;
-    if (validated.aboutUs !== undefined) updateData.aboutUs = validated.aboutUs;
-    if (validated.tags !== undefined) updateData.tags = JSON.stringify(validated.tags);
-    if (validated.yearOfEstablishment !== undefined) updateData.yearOfEstablishment = validated.yearOfEstablishment;
-    if (validated.openingHours !== undefined) updateData.openingHours = JSON.stringify(validated.openingHours);
-    if (validated.locationLat !== undefined) updateData.locationLat = validated.locationLat;
-    if (validated.locationLng !== undefined) updateData.locationLng = validated.locationLng;
-    if (validated.status !== undefined) updateData.status = validated.status;
-    if (validated.bannerImageId !== undefined) updateData.bannerImageId = validated.bannerImageId;
-    if (validated.profileImageId !== undefined) updateData.profileImageId = validated.profileImageId;
-    if (validated.verifiedBadge !== undefined) updateData.verifiedBadge = validated.verifiedBadge;
-    if (validated.socialLinks !== undefined) updateData.socialLinks = JSON.stringify(validated.socialLinks);
-    if (validated.photoGallery !== undefined) updateData.photoGallery = JSON.stringify(validated.photoGallery);
-    if (validated.planType !== undefined) updateData.planType = validated.planType;
-    if (validated.expiryDate !== undefined) updateData.expiryDate = new Date(validated.expiryDate);
+    if (!id) {
+      return Response.json({ success: false, error: { message: 'ID required' } }, { status: 400 });
+    }
 
-    await db.update(businessPages)
-      .set(updateData)
-      .where(eq(businessPages.id, id))
-      .run();
+    const updated = await db.update(listings)
+      .set({ ...updates, updatedAt: Math.floor(Date.now() / 1000) })
+      .where(eq(listings.id, id))
+      .returning()
+      .get();
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return Response.json({ success: true, data: updated });
   } catch (error) {
-    console.error('Error updating listing:', error);
-    return new Response(JSON.stringify({ error: 'Failed to update listing' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return Response.json({ success: false, error: { message: 'Failed to update' } }, { status: 500 });
   }
-};
+}
 
-export const DELETE: APIRoute = async ({ request }) => {
+// DELETE - Delete listing
+export async function DELETE({ request }: { request: Request }) {
   const user = await getAdminUser(request);
   if (!user) return unauthorizedResponse();
 
-  const url = new URL(request.url);
-  const id = url.searchParams.get('id');
-
-  if (!id) {
-    return new Response(JSON.stringify({ error: 'ID required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
   const db = await getDb();
-  await db.delete(businessPages).where(eq(businessPages.id, id)).run();
+  try {
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');
 
-  return new Response(JSON.stringify({ success: true }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
-};
+    if (!id) {
+      return Response.json({ success: false, error: { message: 'ID required' } }, { status: 400 });
+    }
+
+    await db.delete(listings).where(eq(listings.id, id)).run();
+    return Response.json({ success: true });
+  } catch (error) {
+    return Response.json({ success: false, error: { message: 'Failed to delete' } }, { status: 500 });
+  }
+}
