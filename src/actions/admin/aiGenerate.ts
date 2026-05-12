@@ -45,8 +45,9 @@ export const aiGenerate = defineAction({
     let userMessage = '';
 
     switch (input.type) {
-      case 'listing':
-        userMessage = `Create a listing for "${data.title}" (${data.entityType || 'business'}).
+      case 'listing': {
+        const title = String(data.title ?? '');
+        userMessage = `Create a listing for "${title}" (${data.entityType || 'business'}).
 Contact: ${data.contactName || 'N/A'}
 Phone: ${data.phone || 'N/A'}
 Email: ${data.email || 'N/A'}
@@ -68,8 +69,10 @@ IMPORTANT: Return ONLY valid JSON. Format:
   "status": "draft"
 }`;
         break;
-      case 'sku':
-        userMessage = `Create a ${data.serviceType || 'product'} called "${data.title}".
+      }
+      case 'sku': {
+        const skuTitle = String(data.title ?? '');
+        userMessage = `Create a ${data.serviceType || 'product'} called "${skuTitle}".
 Description: ${data.description || 'N/A'}
 Price: ${data.priceValue || 'N/A'}
 
@@ -82,23 +85,21 @@ IMPORTANT: Return ONLY valid JSON. Format:
   "status": "draft"
 }`;
         break;
-      case 'blog':
-        userMessage = `Write a ${data.type || 'general'} article about "${data.topic}".
+      }
+      case 'blog': {
+        const topic = String(data.topic ?? '');
+        userMessage = `Write a ${data.type || 'general'} article about "${topic}".
 Length: ${data.length || 'medium'}
 Requirements: ${data.prompt || 'N/A'}
 
-IMPORTANT: Return ONLY valid JSON. Format:
-{
-  "title": "Article title",
-  "excerpt": "Short summary",
-  "content": "<p>HTML article content with h2, p, ul tags</p>",
-  "tags": ["tag1", "tag2"],
-  "slug": "url-friendly-slug",
-  "status": "draft"
-}`;
+Respond ONLY with a JSON object. No other text before or after.
+Example valid response: {"title":"My Article","excerpt":"A brief summary","content":"<p>Article body here</p>","tags":["tag1"],"slug":"my-article","status":"draft"}
+        `;
         break;
-      case 'landing':
-        userMessage = `Create a ${data.type || 'promotion'} landing page for "${data.title}".
+      }
+      case 'landing': {
+        const lpTitle = String(data.title ?? '');
+        userMessage = `Create a ${data.type || 'promotion'} landing page for "${lpTitle}".
 Description: ${data.description || 'N/A'}
 Requirements: ${data.prompt || 'N/A'}
 
@@ -110,6 +111,7 @@ IMPORTANT: Return ONLY valid JSON. Format:
   "cta": {"title": "CTA title", "description": "<p>CTA description</p>", "buttonText": "Sign Up"}
 }`;
         break;
+      }
     }
 
     // Direct MiniMax API call
@@ -128,7 +130,7 @@ IMPORTANT: Return ONLY valid JSON. Format:
         body: JSON.stringify({
           model: 'MiniMax-M2.7',
           messages: [{ role: 'user', content: userMessage }],
-          max_tokens: 2000,
+          max_tokens: 4000,
         }),
         signal: controller.signal,
       });
@@ -150,22 +152,29 @@ IMPORTANT: Return ONLY valid JSON. Format:
         return { success: false, error: { code: 'EMPTY_RESPONSE', message: 'AI returned empty response' } };
       }
 
-      // Try to parse as JSON
+      // Clean the response: remove think blocks, markdown code fences
+      let cleanedText = text
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/gi, '')
+        .trim();
+
+      // Try to parse as JSON - find JSON object bounds
       let parsed: Record<string, unknown>;
       try {
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
-          // If it has nested data structure, use that directly
-          if (parsed.data && typeof parsed.data === 'object') {
-            return { success: true, object: parsed.data as Record<string, unknown> };
-          }
+        // Find the first { and last } to extract JSON
+        const firstBrace = cleanedText.indexOf('{');
+        const lastBrace = cleanedText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          const jsonStr = cleanedText.substring(firstBrace, lastBrace + 1);
+          parsed = JSON.parse(jsonStr);
           return { success: true, object: parsed };
         }
-        // Not JSON - return as plain content
-        return { success: true, object: { title: data.topic as string, content: text, excerpt: text.substring(0, 200), tags: [], slug: '', status: 'draft' } };
+        // If no JSON found, return the whole text as content
+        return { success: true, object: { title: data.topic as string, content: cleanedText, excerpt: cleanedText.substring(0, 200), tags: [], slug: '', status: 'draft' } };
       } catch {
-        return { success: true, object: { title: data.topic as string, content: text, excerpt: text.substring(0, 200), tags: [], slug: '', status: 'draft' } };
+        // If parsing fails, return as plain content
+        return { success: true, object: { title: data.topic as string, content: cleanedText, excerpt: cleanedText.substring(0, 200), tags: [], slug: '', status: 'draft' } };
       }
 
     } catch (err) {
