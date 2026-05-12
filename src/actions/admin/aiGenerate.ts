@@ -157,7 +157,7 @@ IMPORTANT: Return ONLY valid JSON. Format:
       }
 
       const result = await response.json();
-      console.log('[AI] API Response received');
+      console.log('[AI] API Response received, content length:', result.choices?.[0]?.message?.content?.length || 0);
 
       const text = result.choices?.[0]?.message?.content || '';
 
@@ -181,6 +181,7 @@ IMPORTANT: Return ONLY valid JSON. Format:
         if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
           const jsonStr = cleanedText.substring(firstBrace, lastBrace + 1);
           parsed = JSON.parse(jsonStr);
+          console.log('[AI] Parsed JSON keys:', Object.keys(parsed));
           return { success: true, object: parsed };
         }
         // If no JSON found, return the whole text as content
