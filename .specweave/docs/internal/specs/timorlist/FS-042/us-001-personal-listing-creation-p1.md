@@ -4,7 +4,7 @@ feature: FS-042
 title: "Personal Listing Creation (P1)"
 status: not_started
 priority: P1
-created: 2026-05-10
+created: 2026-05-10T00:00:00.000Z
 tldr: "**As a** individual user."
 project: timorlist
 ---

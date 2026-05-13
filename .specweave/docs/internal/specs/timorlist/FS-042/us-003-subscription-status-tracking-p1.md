@@ -2,9 +2,9 @@
 id: US-003
 feature: FS-042
 title: "Subscription Status Tracking (P1)"
-status: not_started
+status: in_progress
 priority: P1
-created: 2026-05-10
+created: 2026-05-10T00:00:00.000Z
 tldr: "**As a** system."
 project: timorlist
 ---
@@ -21,7 +21,7 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: Subscription statuses: `trial`, `active`, `expired`, `cancelled`
+- [x] **AC-US3-01**: Subscription statuses: `trial`, `active`, `expired`, `cancelled`
 - [ ] **AC-US3-02**: Expired subscriptions block access to listing management
 - [ ] **AC-US3-03**: Payment completion transitions status from `trial` to `active`
 - [ ] **AC-US3-04**: Scheduled job marks expired subscriptions daily

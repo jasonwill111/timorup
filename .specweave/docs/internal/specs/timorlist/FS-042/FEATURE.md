@@ -2,10 +2,10 @@
 id: FS-042
 title: "Listing Schema and Plans"
 type: feature
-status: planning
+status: active
 priority: P1
-created: 2026-05-10
-lastUpdated: 2026-05-10
+created: 2026-05-10T00:00:00.000Z
+lastUpdated: 2026-05-13
 tldr: "New database schema for listings with personal subscription system."
 complexity: high
 stakeholder_relevant: true
@@ -16,7 +16,7 @@ stakeholder_relevant: true
 ## TL;DR
 
 **What**: New database schema for listings with personal subscription system.
-**Status**: planning | **Priority**: P1
+**Status**: active | **Priority**: P1
 **User Stories**: 4
 
 ![Listing Schema and Plans illustration](assets/feature-fs-042.jpg)
@@ -29,7 +29,7 @@ New database schema for listings with personal subscription system. Adds `entity
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0042-listing-schema-plans](../../../../../increments/0042-listing-schema-plans/spec.md) | ⏳ planning | 2026-05-10 |
+| [0042-listing-schema-plans](../../../../../increments/0042-listing-schema-plans/spec.md) | ⏳ active | 2026-05-10T00:00:00.000Z |
 
 ## User Stories
 

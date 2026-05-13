@@ -45,9 +45,10 @@ sw:sync-docs 0001
 - [FS-049: Admin Auth Cookie + Middleware](FS-049/FEATURE.md)
 - [FS-050: Rate Limiter KV Storage](FS-050/FEATURE.md)
 - [FS-051: Better Auth KV Session Cache](FS-051/FEATURE.md)
+- [FS-053: Motion Animations Enhancement](FS-053/FEATURE.md)
 - [FS-018: Address QA Concerns from 0015/0001](FS-018/FEATURE.md)
 - [FS-019: Project Tech Stack Knowledge Base](FS-019/FEATURE.md)
 
 ---
 
-Last updated: 2026-05-11
+Last updated: 2026-05-13

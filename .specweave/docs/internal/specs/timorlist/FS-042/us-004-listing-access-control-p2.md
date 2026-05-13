@@ -4,7 +4,7 @@ feature: FS-042
 title: "Listing Access Control (P2)"
 status: not_started
 priority: P1
-created: 2026-05-10
+created: 2026-05-10T00:00:00.000Z
 tldr: "**As a** visitor."
 project: timorlist
 ---
