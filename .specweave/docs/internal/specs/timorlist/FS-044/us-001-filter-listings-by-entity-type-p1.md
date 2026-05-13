@@ -2,7 +2,7 @@
 id: US-001
 feature: FS-044
 title: "Filter Listings by Entity Type (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-10T00:00:00.000Z
 tldr: "**As an** admin."
@@ -21,9 +21,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: Admin listings page shows entity type filter dropdown
-- [ ] **AC-US1-02**: Filter persists when navigating pages
-- [ ] **AC-US1-03**: Count shows per entity type
+- [x] **AC-US1-01**: Admin listings page shows entity type filter dropdown
+- [x] **AC-US1-02**: Filter persists when navigating pages
+- [x] **AC-US1-03**: Count shows per entity type
 
 ---
 

@@ -1,11 +1,12 @@
 {
   "id": "0018-qa-concerns-fix",
-  "status": "planning",
+  "status": "completed",
   "type": "feature",
   "created": "2026-04-30T01:49:03.326Z",
-  "lastActivity": "2026-04-30T01:49:03.326Z",
+  "lastActivity": "2026-05-13T14:29:53.396Z",
   "externalLinks": {},
   "priority": "medium",
   "testMode": "test-after",
-  "coverageTarget": 80
+  "coverageTarget": 80,
+  "approvedAt": "2026-05-13T14:29:53.396Z"
 }

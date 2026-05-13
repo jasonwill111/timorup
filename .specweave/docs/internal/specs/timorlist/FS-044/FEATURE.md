@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-05-10T00:00:00.000Z
-lastUpdated: 2026-05-10
+lastUpdated: 2026-05-13
 tldr: "Admin UI updates for managing listings with entityType filters."
 complexity: medium
 stakeholder_relevant: true
@@ -16,7 +16,7 @@ stakeholder_relevant: true
 ## TL;DR
 
 **What**: Admin UI updates for managing listings with entityType filters.
-**Status**: ready_for_review | **Priority**: P1
+**Status**: completed | **Priority**: P1
 **User Stories**: 2
 
 ![Listing Admin Pages illustration](assets/feature-fs-044.jpg)
@@ -29,7 +29,7 @@ Admin UI updates for managing listings with entityType filters.
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0044-listing-admin-pages](../../../../../increments/0044-listing-admin-pages/spec.md) | ⏳ ready_for_review | 2026-05-10T00:00:00.000Z |
+| [0044-listing-admin-pages](../../../../../increments/0044-listing-admin-pages/spec.md) | ✅ completed | 2026-05-10T00:00:00.000Z |
 
 ## User Stories
 

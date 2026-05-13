@@ -1,10 +1,10 @@
 ---
 increment: 0019-project-knowledge-base
-title: "Project Tech Stack Knowledge Base"
+title: Project Tech Stack Knowledge Base
 type: documentation
 priority: P2
 status: completed
-created: 2026-04-30
+created: 2026-04-30T00:00:00.000Z
 ---
 
 # Feature: Project Tech Stack Knowledge Base

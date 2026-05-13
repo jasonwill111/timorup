@@ -227,7 +227,7 @@ const mappedCategories = categoriesData;
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {featuredGovs.map((gov: BusinessListing) => (
-        <a href={`/business/${gov.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
+        <a href={`/business/${gov.slug}`} data-animate-card class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
           <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40">
             {gov.profileImageId ? (
               <img src={`/api/media/${gov.profileImageId}`} alt={gov.title} class="w-full h-full object-cover" loading="lazy" />
@@ -254,7 +254,7 @@ const mappedCategories = categoriesData;
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {featuredNgos.map((ngo: BusinessListing) => (
-        <a href={`/business/${ngo.slug}`} class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
+        <a href={`/business/${ngo.slug}`} data-animate-card class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
           <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40">
             {ngo.profileImageId ? (
               <img src={`/api/media/${ngo.profileImageId}`} alt={ngo.title} class="w-full h-full object-cover" loading="lazy" />
@@ -308,7 +308,7 @@ const mappedCategories = categoriesData;
   <h2 class="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Browse by Category</h2>
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
     {mappedCategories.map((cat: CategoryData) => (
-      <a href={`/listings?type=business&industry=${cat.slug}`} class="block cursor-pointer">
+      <a href={`/listings?type=business&industry=${cat.slug}`} data-animate-card class="block cursor-pointer">
         <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <div class="w-8 h-8 mx-auto mb-2 text-amber-500 flex items-center justify-center">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

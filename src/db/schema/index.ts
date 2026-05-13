@@ -144,32 +144,49 @@ export const listingCategories = sqliteTable("listing_categories", {
 
 // ============================================
 // Media
-// type = R2 path prefix (e.g., businesses/biz-123/profile)
-// typeId = entity ID
-// r2Key = full R2 key
+// R2 structure: /pages/, /general/, /businesses/{id}/, /listings/{id}/,
+//              /non-profits/{id}/, /public-sectors/{id}/, /blog/{id}/, /users/{id}/
+// r2Key format: {entityType}/{entityId}/{purpose}_{uuid}.{ext}
 // ============================================
 
 export const media = sqliteTable("media", {
   id: text().primaryKey().notNull(),
-  url: text().notNull(),
-  filename: text().notNull(),
-  mimeType: text("mime_type").notNull(),
-  size: integer().notNull(),
-  width: integer(),
-  height: integer(),
-  alt: text(),
-  type: text().notNull(),                    // R2 path prefix
-  typeId: text("type_id").notNull(),        // entity ID
-  hash: text().unique(),
-  r2Key: text("r2_key").notNull().unique(), // full R2 key
+  r2Key: text("r2_key").notNull().unique(),  // R2 storage path (e.g., businesses/biz-123/avatar_abc123.jpg)
+
+  // File info
+  filename: text().notNull(),                  // Original filename
+  mimeType: text("mime_type").notNull(),      // image/jpeg, video/mp4
+  size: integer().notNull(),                   // bytes
+  width: integer(),                            // Image width
+  height: integer(),                           // Image height
+
+  // Association
+  entityType: text("entity_type").notNull(),  // 'pages' | 'general' | 'businesses' | 'listings' | 'non-profits' | 'public-sectors' | 'blog' | 'users'
+  entityId: text("entity_id").notNull(),      // Entity ID
+
+  // Purpose
+  purpose: text().notNull(),                  // 'avatar' | 'banner' | 'cover' | 'gallery' | 'logo' | 'icon' | 'og-image' | 'content'
+
+  // Sorting (for gallery)
+  sortOrder: integer("sort_order").default(0),
+
+  // SEO
+  alt: text(),                                // Alt text for accessibility
+
+  // Audit
+  hash: text().unique(),                      // Content hash for deduplication
   createdById: text("created_by_id"),
   createdAt: integer("created_at"),
+
+  // Soft delete
+  deletedAt: integer("deleted_at"),            // null = active, timestamp = deleted
 },
 (table) => [
-  index("media_type_idx").on(table.type),
-  index("media_type_id_idx").on(table.typeId),
+  uniqueIndex("media_r2_key_idx").on(table.r2Key),
+  index("media_entity_idx").on(table.entityType, table.entityId),
+  index("media_purpose_idx").on(table.purpose),
   index("media_hash_idx").on(table.hash),
-  index("media_created_by_idx").on(table.createdById),
+  index("media_deleted_idx").on(table.deletedAt),
 ]);
 
 // ============================================

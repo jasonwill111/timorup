@@ -3,7 +3,7 @@ increment: 0044-listing-admin-pages
 title: Listing Admin Pages
 type: feature
 priority: P1
-status: ready_for_review
+status: completed
 created: 2026-05-10T00:00:00.000Z
 structure: user-stories
 test_mode: TDD
@@ -28,9 +28,9 @@ Admin UI updates for managing listings with entityType filters.
 **So that** I can manage business, nonprofit, and personal separately
 
 **Acceptance Criteria**:
-- [ ] **AC-US1-01**: Admin listings page shows entity type filter dropdown
-- [ ] **AC-US1-02**: Filter persists when navigating pages
-- [ ] **AC-US1-03**: Count shows per entity type
+- [x] **AC-US1-01**: Admin listings page shows entity type filter dropdown
+- [x] **AC-US1-02**: Filter persists when navigating pages
+- [x] **AC-US1-03**: Count shows per entity type
 
 ---
 
@@ -42,9 +42,9 @@ Admin UI updates for managing listings with entityType filters.
 **So that** I can approve or remove personal entries
 
 **Acceptance Criteria**:
-- [ ] **AC-US2-01**: Personal listings appear in admin listings
-- [ ] **AC-US2-02**: Can edit personal listing details
-- [ ] **AC-US2-03**: Can delete personal listings
+- [x] **AC-US2-01**: Personal listings appear in admin listings
+- [x] **AC-US2-02**: Can edit personal listing details
+- [x] **AC-US2-03**: Can delete personal listings
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 increment: 0018-qa-concerns-fix
-title: "Address QA Concerns from 0015/0001"
+title: Address QA Concerns from 0015/0001
 type: improvement
 priority: P2
 status: completed
-completed: 2026-04-30
-created: 2026-04-30
+completed: 2026-04-30T00:00:00.000Z
+created: 2026-04-30T00:00:00.000Z
 structure: user-stories
 test_mode: TDD
 coverage_target: 80

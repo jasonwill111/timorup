@@ -2,7 +2,7 @@ globalThis.process ??= {};
 globalThis.process.env ??= {};
 import { d as defineMiddleware, s as sequence } from "./chunks/params-and-props_l_NCm0sG.mjs";
 import "./chunks/transition_DPkj8D-u.mjs";
-import { getDb } from "./chunks/db_C4_9h44g.mjs";
+import { getDb } from "./chunks/db_BA4DSls1.mjs";
 let bindingsInitialized = false;
 const onRequest$1 = defineMiddleware(async (context, next) => {
   if (!bindingsInitialized) {

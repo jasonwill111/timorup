@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-044
 title: "Personal Listing Management (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-10T00:00:00.000Z
 tldr: "**As an** admin."
@@ -21,9 +21,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: Personal listings appear in admin listings
-- [ ] **AC-US2-02**: Can edit personal listing details
-- [ ] **AC-US2-03**: Can delete personal listings
+- [x] **AC-US2-01**: Personal listings appear in admin listings
+- [x] **AC-US2-02**: Can edit personal listing details
+- [x] **AC-US2-03**: Can delete personal listings
 
 ---
 

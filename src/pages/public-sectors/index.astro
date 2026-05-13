@@ -68,7 +68,7 @@ const buildUrl = (params: Record<string, string>) => {
 ---
 
 <Layout title="Public Sectors - TimorList">
-  <div class="container py-4 sm:py-8">
+  <div class="container py-4 sm:py-8" data-page-content>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl sm:text-3xl font-bold">Public Sectors</h1>
       <span class="text-sm text-muted-foreground">{total} total</span>
@@ -102,7 +102,7 @@ const buildUrl = (params: Record<string, string>) => {
       <>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {entities.map(e => (
-            <a href={`/public-sector/${e.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
+            <a href={`/public-sector/${e.slug}`} data-animate-card class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
               {/* Image/Icon Area */}
               <div class="aspect-[4/3] bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 relative overflow-hidden">
                 {e.profileImageId ? (

@@ -78,28 +78,30 @@ const typeConfig: Record<string, { icon: string; color: string; bg: string }> = 
 ---
 
 <Layout title="Listings - TimorList">
-  <div class="container py-4 sm:py-8">
+  <div class="container py-4 sm:py-8" data-page-content>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl sm:text-3xl font-bold">Listings</h1>
       <span class="text-sm text-muted-foreground">{total} total</span>
     </div>
 
     {/* Search + Filters */}
-    <form method="GET" action="/listings" class="bg-card rounded-2xl border border-border/50 p-4 mb-6 shadow-sm">
+    <form method="GET" action="/listings" class="bg-card rounded-2xl border border-border/50 p-4 mb-6 shadow-sm" data-animate-form>
       <div class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input name="q" type="search" placeholder="Search listings..." value={search}
-            class="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+            class="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200" />
         </div>
         <div class="flex gap-2">
           <select name="parent" onchange="this.form.submit()"
-            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            data-animate-select>
             <option value="">All Categories</option>
             {parentCats.map(p => <option value={p.id} selected={parentCat===p.id}>{p.name}</option>)}
           </select>
           <select name="child" onchange="this.form.submit()"
-            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            data-animate-select>
             <option value="">Subcategory</option>
             {getChildren(parentCat).map(c => <option value={c.id} selected={childCat===c.id}>{c.name}</option>)}
           </select>
@@ -114,7 +116,7 @@ const typeConfig: Record<string, { icon: string; color: string; bg: string }> = 
           {entities.map(e => {
             const config = typeConfig[e.listingType] || typeConfig.product;
             return (
-              <a href={`/listing/${e.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
+              <a href={`/listing/${e.slug}`} data-animate-card class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1">
                 {/* Type Badge + Price */}
                 <div class="absolute top-3 right-3 z-10 flex gap-2">
                   {e.price && (
