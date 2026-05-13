@@ -128,37 +128,37 @@ const urlParams = new URL(Astro.request.url).searchParams;
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden md:hidden border-t">
     <nav class="container max-w-6xl py-4 space-y-2">
-      <a href="/businesses" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+      <a href="/businesses" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Businesses
       </a>
-      <a href="/listings" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/listings') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+      <a href="/listings" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/listings') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Listings
       </a>
-      <a href="/public-sectors" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/public-sectors') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+      <a href="/public-sectors" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/public-sectors') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Public Sectors
       </a>
-      <a href="/non-profits" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath.startsWith('/non-profits') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+      <a href="/non-profits" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/non-profits') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Non-Profits
       </a>
-      <a href="/pricing" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath === '/pricing' ? "bg-muted text-primary" : "text-muted-foreground"]}>
+      <a href="/pricing" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath === '/pricing' ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Pricing
       </a>
-      <a href="/faq" class:list={["block px-3 py-2 rounded-lg text-sm font-medium", currentPath === '/faq' ? "bg-muted text-primary" : "text-muted-foreground"]}>
+      <a href="/faq" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath === '/faq' ? "bg-muted text-primary" : "text-muted-foreground"]}>
         FAQ
       </a>
-      <a href="/listings/create" class:list={["block px-3 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center", currentPath === '/listings/create' ? "bg-primary/90" : ""]}>
+      <a href="/listings/create" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium bg-primary text-primary-foreground text-center flex items-center justify-center", currentPath === '/listings/create' ? "bg-primary/90" : ""]}>
         + Create Listing
       </a>
       <div id="mobile-auth" class="border-t pt-2 mt-2 space-y-2">
         {isLoggedIn ? (
           <>
-            <a href="/account" class="block px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground">My Account</a>
-            <button id="mobile-logout" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-500">Log Out</button>
+            <a href="/account" class="block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium text-muted-foreground flex items-center">My Account</a>
+            <button id="mobile-logout" class="block w-full text-left px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium text-red-500 flex items-center">Log Out</button>
           </>
         ) : (
           <>
-            <a href="/login" class="block px-3 py-2 rounded-lg text-sm font-medium text-center border border-primary text-primary hover:bg-primary/5">Log in</a>
-            <a href="/register" class="block px-3 py-2 rounded-lg text-sm font-medium text-center bg-primary text-primary-foreground">Sign Up</a>
+            <a href="/login" class="block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium text-center border border-primary text-primary hover:bg-primary/5 flex items-center justify-center">Log in</a>
+            <a href="/register" class="block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium text-center bg-primary text-primary-foreground flex items-center justify-center">Sign Up</a>
           </>
         )}
       </div>
