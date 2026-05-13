@@ -31,7 +31,7 @@ const allProducts = await db
     priceUnit: products.priceUnit,
     priceFields: products.priceFields,
     serviceType: products.serviceType,
-    businessPageId: products.businessPageId,
+    businessId: products.businessId,
     createdAt: products.createdAt,
   })
   .from(products)
@@ -41,7 +41,7 @@ const allProducts = await db
 // Join with business data
 const productsWithBusiness = allProducts
   .map(p => {
-    const business = allBusinesses.find(b => b.id === p.businessPageId);
+    const business = allBusinesses.find(b => b.id === p.businessId);
     return {
       ...p,
       businessTitle: business?.title || 'Unknown',
@@ -189,7 +189,7 @@ const structuredData = {
     }
 
     if (businessId) {
-      filtered = filtered.filter(p => p.businessPageId === businessId);
+      filtered = filtered.filter(p => p.businessId === businessId);
     }
 
     if (sort === 'name') {
