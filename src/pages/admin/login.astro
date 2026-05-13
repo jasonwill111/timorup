@@ -144,7 +144,7 @@ import '../../styles/globals.css';
       }
 
       // Store user info and redirect
-      localStorage.setItem('adminUser', JSON.stringify(data.user));
+      // Note: Session cookie is set by Better Auth, no localStorage needed
       window.location.href = '/admin';
     } catch (err) {
       errorMsg!.textContent = 'An error occurred. Please try again.';

@@ -6,12 +6,13 @@ import Layout from '../../../../../layouts/Layout.astro';
 import Button from '../../../../../components/ui/Button.astro';
 import Input from '../../../../../components/ui/Input.astro';
 import Textarea from '../../../../../components/ui/Textarea.astro';
-import { db } from '@/lib/db';
-import { businesses, categories } from '@/db/schema';
+import { getDb } from '@/lib/db';
+import { businesses, businessCategories as categories } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { INDUSTRIES } from '@/lib/constants';
 
 const { id } = Astro.params;
+const db = await getDb();
 
 const listing = await db
   .select()

@@ -3,9 +3,12 @@ export const prerender = false;
 import AdminLayout from '@layouts/AdminLayout.astro';
 import Button from '@components/ui/Button.astro';
 import { actions } from 'astro:actions';
+
+const userId = Astro.locals.user?.id || 'system';
 ---
 
 <AdminLayout title="Blog Posts">
+  <span id="current-user-id" data-user-id={userId} class="hidden" aria-hidden="true"></span>
   <div class="container py-4 px-2 md:py-6">
     <!-- Page Header -->
     <div class="mb-4 md:mb-6 flex items-center justify-between">
@@ -520,12 +523,9 @@ import { actions } from 'astro:actions';
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
   function getCurrentUserId() {
-    try {
-      const user = JSON.parse(localStorage.getItem('adminUser') || '{}');
-      return user.id || 'system';
-    } catch {
-      return 'system';
-    }
+    // Server provides userId in data attribute
+    const el = document.getElementById('current-user-id');
+    return el?.dataset.userId || 'system';
   }
 
   function escapeHtml(str: string) {

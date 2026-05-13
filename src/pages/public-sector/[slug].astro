@@ -9,7 +9,7 @@ import MediaGallery from '../../components/ui/MediaGallery.astro';
 import UpdatesSection from '../../components/UpdatesSection.astro';
 import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
 import { getDb } from '@/lib/db';
-import { publicSectors, categories, media, businessUpdates } from '@/db/schema';
+import { publicSectors, publicSectorCategories, media, latestUpdates } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const db = await getDb();
@@ -29,7 +29,7 @@ if (!org) {
 }
 
 const category = org.categoryId
-  ? await db.select().from(categories).where(eq(categories.id, org.categoryId)).get()
+  ? await db.select().from(publicSectorCategories).where(eq(publicSectorCategories.id, org.categoryId)).get()
   : null;
 
 const tags = org.tags ? JSON.parse(org.tags) : [];
@@ -49,9 +49,9 @@ if (photoGallery.length > 0) {
 
 // Load business updates
 const updatesData = await db.select()
-  .from(businessUpdates)
-  .where(eq(businessUpdates.businessId, org.id))
-  .orderBy(desc(businessUpdates.createdAt))
+  .from(latestUpdates)
+  .where(eq(latestUpdates.businessId, org.id))
+  .orderBy(desc(latestUpdates.createdAt))
   .limit(4)
   .all();
 

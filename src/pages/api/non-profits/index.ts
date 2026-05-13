@@ -2,8 +2,8 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { nonProfits, categories } from '@/db/schema';
-import { eq, desc, like, and, or } from 'drizzle-orm';
+import { nonProfits, nonProfitCategories as categories } from '@/db/schema';
+import { eq, desc, like, and, or, type SQL } from 'drizzle-orm';
 import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
 import { PaginationSchema } from '@/lib/validation';
 
@@ -63,11 +63,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     }
 
     // Build conditions - include both 'live' and 'published' status
-    const conditions = [
+    const conditions: SQL[] = [
       or(
         eq(nonProfits.status, 'live'),
         eq(nonProfits.status, 'published')
-      ) as any
+      )!
+
     ];
 
     if (search) {
@@ -76,12 +77,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
           like(nonProfits.title, `%${search}%`),
           like(nonProfits.aboutUs, `%${search}%`),
           like(nonProfits.tags, `%${search}%`)
-        ) as any
+        )!
       );
     }
 
     if (categoryId) {
-      conditions.push(eq(nonProfits.categoryId, categoryId) as any);
+      conditions.push(eq(nonProfits.categoryId, categoryId));
     }
 
     // Query nonProfits table

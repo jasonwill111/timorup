@@ -9,6 +9,7 @@ interface Props {
 
 const { title } = Astro.props;
 const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
+const currentUser = Astro.locals.user;
 ---
 
 <!DOCTYPE html>
@@ -365,11 +366,14 @@ const fullTitle = title.includes('Admin') ? title : `${title} - Admin`;
     document.getElementById('admin-theme-toggle-desktop')?.addEventListener('click', toggleTheme);
     document.getElementById('admin-theme-toggle-mobile')?.addEventListener('click', toggleTheme);
 
-    // Logout
-    function handleLogout() {
+    // Logout - use Better Auth signOut
+    async function handleLogout() {
       if (confirm('Are you sure you want to log out?')) {
-        localStorage.removeItem('adminSession');
-        localStorage.removeItem('adminUser');
+        try {
+          await actions.auth.signOut();
+        } catch (e) {
+          console.error('Logout error:', e);
+        }
         window.location.href = '/admin/login';
       }
     }

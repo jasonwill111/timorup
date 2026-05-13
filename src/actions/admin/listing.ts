@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 
@@ -48,8 +48,8 @@ export const listing = {
     handler: async (input) => {
       const db = await getDb();
       const listing = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.id, input.id))
+        .from(businesses)
+        .where(eq(businesses.id, input.id))
         .limit(1)
         .get();
 
@@ -70,8 +70,8 @@ export const listing = {
       const { id, ...data } = input;
 
       const existing = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.id, id))
+        .from(businesses)
+        .where(eq(businesses.id, id))
         .limit(1)
         .get();
 
@@ -106,9 +106,9 @@ export const listing = {
       if (data.planType !== undefined) updateData.planType = data.planType;
       if (data.expiryDate !== undefined) updateData.expiryDate = data.expiryDate ? new Date(data.expiryDate) : null;
 
-      await db.update(businessPages)
+      await db.update(businesses)
         .set(updateData)
-        .where(eq(businessPages.id, id))
+        .where(eq(businesses.id, id))
         .run();
 
       return { success: true };
@@ -123,7 +123,7 @@ export const listing = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-      await db.delete(businessPages).where(eq(businessPages.id, input.id)).run();
+      await db.delete(businesses).where(eq(businesses.id, input.id)).run();
 
       return { success: true };
     },

@@ -1,7 +1,7 @@
 ---
 import Card from '../../components/ui/Card.astro';
 import { getDb } from '@/lib/db';
-import { products, productImages } from '@/db/schema';
+import { products } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 interface Props {
@@ -14,21 +14,11 @@ const db = await getDb();
 
 const businessProducts = await db.select()
   .from(products)
-  .where(eq(products.businessPageId, businessId))
+  .where(eq(products.businessId, businessId))
   .orderBy(desc(products.createdAt))
   .all();
 
-const productIds = businessProducts.map(p => p.id);
-const imagesMap = new Map<string, string[]>();
-
-if (productIds.length > 0) {
-  const images = await db.select().from(productImages).all();
-  images.filter(img => productIds.includes(img.productId)).forEach(img => {
-    const arr = imagesMap.get(img.productId) || [];
-    arr.push(img.mediaId);
-    imagesMap.set(img.productId, arr);
-  });
-}
+// Images are stored as JSON array in product.images field
 ---
 
 <Card>
@@ -40,8 +30,8 @@ if (productIds.length > 0) {
   {businessProducts.length > 0 ? (
     <div class="divide-y p-3">
       {businessProducts.map(product => {
-        const productImagesList = imagesMap.get(product.id) || [];
-        const firstImage = productImagesList[0];
+        const images = product.images ? JSON.parse(product.images) : [];
+        const firstImage = images[0];
         return (
           <a href={`/business/${slug}/product/${product.id}`} class="group flex items-center gap-4 p-3 hover:bg-muted/30 transition-colors -mx-3">
             <div class="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
@@ -60,8 +50,8 @@ if (productIds.length > 0) {
               )}
               <div class="flex items-center gap-3 mt-2">
                 {product.price && <span class="font-bold text-primary">{product.price}</span>}
-                {productImagesList.length > 1 && (
-                  <span class="text-[10px] text-muted-foreground">+{productImagesList.length - 1} photos</span>
+                {images.length > 1 && (
+                  <span class="text-[10px] text-muted-foreground">+{images.length - 1} photos</span>
                 )}
               </div>
             </div>

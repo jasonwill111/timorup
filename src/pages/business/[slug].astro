@@ -13,7 +13,7 @@ import BusinessSidebar from '../../components/islands/BusinessSidebar.astro';
 import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
 import { getDb } from '@/lib/db';
 const db = await getDb();
-import { businesses, categories, reviews, media, businessUpdates } from '@/db/schema';
+import { businesses, businessCategories, reviews, media, latestUpdates } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const { slug } = Astro.params;
@@ -74,7 +74,7 @@ const daysRemaining = gracePeriodEndDate
   : 0;
 
 const category = business.categoryId
-  ? await db.select().from(categories).where(eq(categories.id, business.categoryId)).get()
+  ? await db.select().from(businessCategories).where(eq(businessCategories.id, business.categoryId)).get()
   : null;
 
 const businessReviews = await db.select()
@@ -100,14 +100,14 @@ if (photoGallery.length > 0) {
 }
 
 // Load business updates
-const businessUpdatesData = await db.select()
-  .from(businessUpdates)
-  .where(eq(businessUpdates.businessId, business.id))
-  .orderBy(desc(businessUpdates.createdAt))
+const latestUpdatesData = await db.select()
+  .from(latestUpdates)
+  .where(eq(latestUpdates.businessId, business.id))
+  .orderBy(desc(latestUpdates.createdAt))
   .limit(4)
   .all();
 
-const updates = businessUpdatesData.map(u => ({
+const updates = latestUpdatesData.map(u => ({
   ...u,
   images: u.images ? JSON.parse(u.images) : [],
 }));

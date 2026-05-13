@@ -4,7 +4,7 @@ export const prerender = true;
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
 import { getDb } from '@/lib/db';
-import { products, businessPages } from '@/db/schema';
+import { products, businesses } from '@/db/schema';
 import { desc, eq } from 'drizzle-orm';
 
 const db = await getDb();
@@ -12,13 +12,13 @@ const db = await getDb();
 // Get all businesses for filter
 const allBusinesses = await db
   .select({
-    id: businessPages.id,
-    title: businessPages.title,
-    slug: businessPages.slug,
-    entityType: businessPages.entityType,
+    id: businesses.id,
+    title: businesses.title,
+    slug: businesses.slug,
+    entityType: businesses.entityType,
   })
-  .from(businessPages)
-  .where(eq(businessPages.status, 'live'))
+  .from(businesses)
+  .where(eq(businesses.status, 'live'))
   .all();
 
 // Get all products with business info

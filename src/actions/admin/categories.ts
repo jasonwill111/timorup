@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { categories } from '@/db/schema';
+import { businessCategories as categories } from '@/db/schema';
 import { eq, desc, or, isNull } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 

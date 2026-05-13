@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { products, businessPages } from '@/db/schema';
+import { products, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { canCreateSku, canEditBusiness } from '@/lib/subscription';
 import { getAdminUser } from '@/lib/admin-auth';
@@ -42,11 +42,11 @@ export const createProduct = defineAction({
     try {
       // Check business exists
       const business = await db.select({
-        id: businessPages.id,
-        entityType: businessPages.entityType,
+        id: businesses.id,
+        entityType: businesses.entityType,
       })
-      .from(businessPages)
-      .where(eq(businessPages.id, input.businessPageId))
+      .from(businesses)
+      .where(eq(businesses.id, input.businessPageId))
       .limit(1)
       .get();
 

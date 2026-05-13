@@ -8,7 +8,7 @@ import Card from '@components/ui/Card.astro';
 import CardContent from '@components/ui/CardContent.astro';
 import { Share2, ArrowLeft, ChevronLeft, ChevronRight, ArrowRight } from '@lucide/astro';
 import { getDb } from '@/lib/db';
-import { products, productImages, businesses, categories } from '@/db/schema';
+import { products, businesses, businessCategories as categories } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 const db = await getDb();
@@ -32,15 +32,15 @@ if (!product) {
 }
 
 // Load business info from businesses table
-const business = await db.select().from(businesses).where(eq(businesses.id, product.businessPageId)).get();
+const business = await db.select().from(businesses).where(eq(businesses.id, product.businessId)).get();
 
 // Redirect if business slug mismatch
 if (!business || business.slug !== slug) {
   return Astro.redirect(`/business/${business?.slug || ''}`);
 }
 
-// Load product images
-const images = await db.select().from(productImages).where(eq(productImages.productId, productId)).all();
+// Load product images from JSON array in product.images
+const images = product.images ? JSON.parse(product.images) : [];
 
 // Load category
 const category = business.categoryId
@@ -86,7 +86,7 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
     "name": product.title,
     "description": product.description,
     "url": canonicalUrl,
-    "image": images.map(img => `/api/media/${img.mediaId}`),
+    "image": images.map((id: string) => `/api/media/${id}`),
     "offers": product.price ? {
       "@type": "Offer",
       "price": product.price.replace(/[^0-9.]/g, ''),

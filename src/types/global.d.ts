@@ -4,12 +4,23 @@ declare global {
     authFetch: (url: string, options?: RequestInit) => Promise<Response>;
     editCategory: (id: string) => void;
     deleteCategory: (id: string) => Promise<void>;
-    editHero: (id: string) => Promise<void>;
+    editHero: (id: string) => void;
     deleteHero: (id: string) => Promise<void>;
     editSku: (id: string) => void;
     deleteSku: (id: string) => Promise<void>;
     editBlog: (id: string) => void;
     deleteBlog: (id: string) => Promise<void>;
+  }
+  namespace App {
+    interface Locals {
+      user: {
+        id: string;
+        email: string;
+        name: string | null;
+        role: string;
+      } | null;
+      isAdmin: boolean;
+    }
   }
 }
 

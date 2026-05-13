@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { reviews, businessPages } from '@/db/schema';
+import { reviews, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 
@@ -45,8 +45,8 @@ export const createReply = defineAction({
 
       // Check if user owns the business
       const business = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.id, review.businessPageId))
+        .from(businesses)
+        .where(eq(businesses.id, review.businessPageId))
         .limit(1)
         .get();
 
