@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 
@@ -61,8 +61,8 @@ export const update = defineAction({
 
       // Check ownership
       const existing = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.slug, input.slug))
+        .from(businesses)
+        .where(eq(businesses.slug, input.slug))
         .limit(1)
         .get();
 
@@ -91,7 +91,6 @@ export const update = defineAction({
       if (input.latitude !== undefined) updateValues.locationLat = input.latitude || null;
       if (input.longitude !== undefined) updateValues.locationLng = input.longitude || null;
       if (input.yearOfEstablishment !== undefined) updateValues.yearOfEstablishment = input.yearOfEstablishment || null;
-      if (input.latestUpdates !== undefined) updateValues.latestUpdates = input.latestUpdates || null;
       if (input.registrationUrl !== undefined) updateValues.registrationUrl = input.registrationUrl || null;
       if (input.bannerImageId !== undefined) updateValues.bannerImageId = input.bannerImageId || null;
       if (input.profileImageId !== undefined) updateValues.profileImageId = input.profileImageId || null;
@@ -100,17 +99,17 @@ export const update = defineAction({
 
       if (Object.keys(updateValues).length > 0) {
         updateValues.updatedAt = Math.floor(Date.now() / 1000);
-        await db.update(businessPages)
+        await db.update(businesses)
           .set(updateValues)
-          .where(eq(businessPages.slug, input.slug))
+          .where(eq(businesses.slug, input.slug))
           .run();
 
         await purgeCache(`/api/businesses/${input.slug}`);
       }
 
       const updated = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.slug, input.slug))
+        .from(businesses)
+        .where(eq(businesses.slug, input.slug))
         .limit(1)
         .get();
 

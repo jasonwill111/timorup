@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { reviews as reviewsTable, businessPages } from '@/db/schema';
+import { reviews as reviewsTable, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 
@@ -61,7 +61,7 @@ export const adminReviews = {
 
       if (!review) throw new Error('Review not found');
 
-      const businessPageId = review.businessPageId;
+      const businessId = review.businessId;
 
       // Delete the review
       await db.delete(reviewsTable)
@@ -71,7 +71,7 @@ export const adminReviews = {
       // Recalculate business rating
       const remainingReviews = await db.select()
         .from(reviewsTable)
-        .where(eq(reviewsTable.businessPageId, businessPageId));
+        .where(eq(reviewsTable.businessId, businessId));
 
       let newAvg = 0;
       let newCount = 0;
@@ -82,12 +82,12 @@ export const adminReviews = {
       }
 
       // Update business rating
-      await db.update(businessPages)
+      await db.update(businesses)
         .set({
           ratingAverage: newAvg,
           ratingCount: newCount,
         })
-        .where(eq(businessPages.id, businessPageId))
+        .where(eq(businesses.id, businessId))
         .run();
 
       return {

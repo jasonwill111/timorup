@@ -2,41 +2,41 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
+import { businesses, businessCategories } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export async function GET() {
   const db = await getDb();
   const featuredBusinesses = await db.select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      categoryId: businessPages.categoryId,
-      status: businessPages.status,
-      bannerImageId: businessPages.bannerImageId,
-      profileImageId: businessPages.profileImageId,
-      contactName: businessPages.contactName,
-      contactNumber: businessPages.contactNumber,
-      countryCode: businessPages.countryCode,
-      email: businessPages.email,
-      address: businessPages.address,
-      aboutUs: businessPages.aboutUs,
-      tags: businessPages.tags,
-      likes: businessPages.likes,
-      saves: businessPages.saves,
-      ratingAverage: businessPages.ratingAverage,
-      ratingCount: businessPages.ratingCount,
-      views: businessPages.views,
-      planType: businessPages.planType,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      categoryId: businesses.categoryId,
+      status: businesses.status,
+      bannerImageId: businesses.bannerImageId,
+      profileImageId: businesses.profileImageId,
+      contactName: businesses.contactName,
+      contactNumber: businesses.contactNumber,
+      countryCode: businesses.countryCode,
+      email: businesses.email,
+      address: businesses.address,
+      aboutUs: businesses.aboutUs,
+      tags: businesses.tags,
+      likes: businesses.likes,
+      saves: businesses.saves,
+      ratingAverage: businesses.ratingAverage,
+      ratingCount: businesses.ratingCount,
+      views: businesses.views,
+      planType: businesses.planType,
     })
-    .from(businessPages)
-    .where(eq(businessPages.status, 'live'))
+    .from(businesses)
+    .where(eq(businesses.status, 'live'))
     .orderBy(sql`(likes * 3 + saves * 1 + views * 0.01) DESC`)
     .limit(8);
 
   // Get category names
-  const categoryMap = new Map<string, typeof categories.$inferSelect>();
-  const allCategories = await db.select().from(categories);
+  const categoryMap = new Map<string, typeof businessCategories.$inferSelect>();
+  const allCategories = await db.select().from(businessCategories);
   allCategories.forEach((cat) => categoryMap.set(cat.id, cat));
 
   // Add category name to businesses

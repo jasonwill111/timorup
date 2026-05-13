@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { media, businessPages } from '@/db/schema';
+import { media, businesses } from '@/db/schema';
 import { eq, and, count } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
@@ -57,11 +57,9 @@ export async function GET({ request }: { request: Request }) {
       }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const businessId = url.searchParams.get('businessId');
+    const type = url.searchParams.get('type');
+    const typeId = url.searchParams.get('typeId');
     const userId = url.searchParams.get('userId');
-    const entityType = url.searchParams.get('entityType');
-    const entityId = url.searchParams.get('entityId');
-    const category = url.searchParams.get('category');
     const id = url.pathname.split('/').pop();
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
@@ -83,19 +81,14 @@ export async function GET({ request }: { request: Request }) {
 
     // Build SQL WHERE conditions
     const conditions = [];
-    if (businessId) {
-      conditions.push(eq(media.businessId, businessId));
-    } else if (userId) {
+    if (type) {
+      conditions.push(eq(media.type, type));
+    }
+    if (typeId) {
+      conditions.push(eq(media.typeId, typeId));
+    }
+    if (userId) {
       conditions.push(eq(media.createdById, userId));
-    }
-    if (entityType) {
-      conditions.push(eq(media.entityType, entityType));
-    }
-    if (entityId) {
-      conditions.push(eq(media.entityId, entityId));
-    }
-    if (category) {
-      conditions.push(eq(media.category, category));
     }
 
     // Get total count with WHERE
@@ -177,9 +170,9 @@ export async function POST({ request }: { request: Request }) {
       }
 
       if (businessId) {
-        const [business] = await db.select({ planType: businessPages.planType, ownerId: businessPages.ownerId })
-          .from(businessPages)
-          .where(eq(businessPages.id, businessId))
+        const [business] = await db.select({ planType: businesses.planType, ownerId: businesses.ownerId })
+          .from(businesses)
+          .where(eq(businesses.id, businessId))
           .limit(1);
 
         if (!business) {
@@ -203,11 +196,11 @@ export async function POST({ request }: { request: Request }) {
         // Count current images/videos for this business
         const imageCountResult = await db.select({ count: count() })
           .from(media)
-          .where(and(eq(media.businessId, businessId), eq(media.type, 'image')))
+          .where(and(eq(media.typeId, businessId), eq(media.mimeType, 'image')))
           .get();
         const videoCountResult = await db.select({ count: count() })
           .from(media)
-          .where(and(eq(media.businessId, businessId), eq(media.type, 'video')))
+          .where(and(eq(media.typeId, businessId), eq(media.mimeType, 'video')))
           .get();
 
         const imageCount = imageCountResult?.count || 0;
@@ -261,7 +254,7 @@ export async function POST({ request }: { request: Request }) {
         mimeType: file.type,
         size: file.size,
         type: isImage ? 'image' : 'video',
-        businessId: businessId || null,
+        typeId: businessId || null,
         createdById: user.id,
       }).returning();
 
@@ -305,7 +298,7 @@ export async function PUT({ request }: { request: Request }) {
     }
 
     const body = await request.json();
-    const { url: newUrl, width, height, alt, businessId } = body;
+    const { url: newUrl, width, height, alt, typeId } = body;
 
     const [existing] = await db.select().from(media).where(eq(media.id, id)).limit(1);
     if (!existing || existing.createdById !== user.id) {
@@ -321,7 +314,7 @@ export async function PUT({ request }: { request: Request }) {
         width: width || existing.width,
         height: height || existing.height,
         alt: alt || existing.alt,
-        businessId: businessId || existing.businessId,
+        typeId: typeId || existing.typeId,
       })
       .where(eq(media.id, id))
       .returning();

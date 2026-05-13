@@ -1,7 +1,7 @@
 ---
 // Server Island: Listing content with filtering and pagination
 import { getDb } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
+import { businesses, businessCategories } from '@/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { INDUSTRIES } from '@/lib/constants';
 import Avatar from '@/components/ui/Avatar.astro';
@@ -21,48 +21,34 @@ const page = parseInt(Astro.url.searchParams.get('page') || '1');
 const sort = Astro.url.searchParams.get('sort') || 'recent';
 
 // Build entity type filter
-const statusFilter = eq(businessPages.status, 'live');
+const statusFilter = eq(businesses.status, 'live');
 const organizationType = Astro.url.searchParams.get('orgType') || '';
-let entityFilter = null;
-
-if (type === 'business') {
-  entityFilter = eq(businessPages.entityType, 'business');
-} else if (type === 'non-profit') {
-  entityFilter = eq(businessPages.entityType, 'nonprofit');
-  // Add organization type filter if specified
-  if (organizationType) {
-    entityFilter = and(entityFilter, eq(businessPages.organizationType, organizationType));
-  }
-} else if (type === 'personal') {
-  entityFilter = eq(businessPages.entityType, 'personal');
-}
 
 // Combine filters
-const whereCondition = entityFilter ? and(statusFilter, entityFilter) : statusFilter;
+const whereCondition = statusFilter;
 
 // Get categories for filter
 const db = await getDb();
-const allCategories = await db.select().from(categories).all();
+const allCategories = await db.select().from(businessCategories).all();
 
 // Query listings with combined filter
 const allListings = await db
   .select({
-    id: businessPages.id,
-    title: businessPages.title,
-    slug: businessPages.slug,
-    entityType: businessPages.entityType,
-    organizationType: businessPages.organizationType,
-    industry: businessPages.industry,
-    categoryId: businessPages.categoryId,
-    profileImageId: businessPages.profileImageId,
-    address: businessPages.address,
-    ratingAverage: businessPages.ratingAverage,
-    likes: businessPages.likes,
-    createdAt: businessPages.createdAt,
+    id: businesses.id,
+    title: businesses.title,
+    slug: businesses.slug,
+    organizationType: businesses.organizationType,
+    industry: businesses.industry,
+    categoryId: businesses.categoryId,
+    profileImageId: businesses.profileImageId,
+    address: businesses.address,
+    ratingAverage: businesses.ratingAverage,
+    likes: businesses.likes,
+    createdAt: businesses.createdAt,
   })
-  .from(businessPages)
+  .from(businesses)
   .where(whereCondition)
-  .orderBy(desc(businessPages.createdAt))
+  .orderBy(desc(businesses.createdAt))
   .all();
 
 // Apply search/filter in memory

@@ -3,17 +3,17 @@
  * Centralized data access for reviews
  */
 import { getDb } from '@/lib/db';
-import { reviews, users, businessPages } from '@/db/schema';
+import { reviews, users, businesses } from '@/db/schema';
 import { eq, desc, and, count } from 'drizzle-orm';
 import { success, error, type Result } from './result';
 
 // Types
 export interface ReviewWithUser {
   id: string;
-  businessPageId: string;
+  businessId: string;
   userId: string;
   rating: number;
-  comment: string | null;
+  content: string | null;
   isEdited: boolean;
   reply: string | null;
   repliedAt: Date | null;
@@ -55,10 +55,10 @@ export async function getReviewsByBusinessId(
     const results = await db
       .select({
         id: reviews.id,
-        businessPageId: reviews.businessPageId,
+        businessId: reviews.businessId,
         userId: reviews.userId,
         rating: reviews.rating,
-        comment: reviews.comment,
+        content: reviews.content,
         isEdited: reviews.isEdited,
         reply: reviews.reply,
         repliedAt: reviews.repliedAt,
@@ -70,7 +70,7 @@ export async function getReviewsByBusinessId(
       })
       .from(reviews)
       .leftJoin(users, eq(reviews.userId, users.id))
-      .where(eq(reviews.businessPageId, businessId))
+      .where(eq(reviews.businessId, businessId))
       .orderBy(desc(reviews.createdAt))
       .limit(limit)
       .offset(offset)
@@ -80,7 +80,7 @@ export async function getReviewsByBusinessId(
     const countResult = await db
       .select({ count: count() })
       .from(reviews)
-      .where(eq(reviews.businessPageId, businessId))
+      .where(eq(reviews.businessId, businessId))
       .get();
 
     return success({
@@ -105,7 +105,7 @@ export async function getReviewStats(
     const allReviews = await db
       .select({ rating: reviews.rating })
       .from(reviews)
-      .where(eq(reviews.businessPageId, businessId))
+      .where(eq(reviews.businessId, businessId))
       .all();
 
     if (allReviews.length === 0) {
@@ -148,10 +148,10 @@ export async function getUserReviewForBusiness(
     const result = await db
       .select({
         id: reviews.id,
-        businessPageId: reviews.businessPageId,
+        businessId: reviews.businessId,
         userId: reviews.userId,
         rating: reviews.rating,
-        comment: reviews.comment,
+        content: reviews.content,
         isEdited: reviews.isEdited,
         reply: reviews.reply,
         repliedAt: reviews.repliedAt,
@@ -163,7 +163,7 @@ export async function getUserReviewForBusiness(
       })
       .from(reviews)
       .leftJoin(users, eq(reviews.userId, users.id))
-      .where(and(eq(reviews.userId, userId), eq(reviews.businessPageId, businessId)))
+      .where(and(eq(reviews.userId, userId), eq(reviews.businessId, businessId)))
       .limit(1)
       .get();
 
@@ -185,7 +185,7 @@ export async function hasUserReviewed(
     const existing = await db
       .select({ id: reviews.id })
       .from(reviews)
-      .where(and(eq(reviews.userId, userId), eq(reviews.businessPageId, businessId)))
+      .where(and(eq(reviews.userId, userId), eq(reviews.businessId, businessId)))
       .limit(1)
       .get();
 

@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { reviews, businessPages } from '@/db/schema';
+import { reviews, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
@@ -55,8 +55,8 @@ export async function POST({ request, params }: { request: Request; params: { id
 
     // Check if user owns the business
     const business = await db.select()
-      .from(businessPages)
-      .where(eq(businessPages.id, review.businessPageId))
+      .from(businesses)
+      .where(eq(businesses.id, review.businessId))
       .limit(1)
       .get();
 

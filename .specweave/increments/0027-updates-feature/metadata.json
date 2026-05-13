@@ -1,11 +1,15 @@
 {
   "id": "0027-updates-feature",
-  "status": "planning",
+  "name": "updates-feature",
+  "title": "Updates Feature",
+  "status": "completed",
   "type": "feature",
-  "created": "2026-05-07T02:13:00.109Z",
-  "lastActivity": "2026-05-07T02:13:00.109Z",
-  "externalLinks": {},
+  "project": "timorlist",
   "priority": "medium",
+  "created": "2026-05-07T02:13:00.109Z",
+  "updated": "2026-05-13T11:50:00.000Z",
+  "externalLinks": {},
+  "lastActivity": "2026-05-13T11:50:00.000Z",
   "testMode": "test-after",
   "coverageTarget": 80
 }

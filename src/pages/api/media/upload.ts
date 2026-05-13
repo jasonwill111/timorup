@@ -3,7 +3,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { media, businessPages, plans } from '@/db/schema';
+import { media, businesses } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
@@ -35,42 +35,21 @@ const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
 const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1 };
 
-// Build R2 key from upload parameters
+// Build R2 key from type and typeId
+// type = R2 path prefix (e.g., 'businesses/biz-123/profile')
 function buildR2Key(params: {
-  entityType: string;
-  entityId: string;
-  category: string;
+  type: string;
+  typeId: string;
   filename: string;
   timestamp: number;
   id: string;
 }): string {
-  const { entityType, entityId, category, filename, timestamp, id } = params;
+  const { type, typeId, filename, timestamp, id } = params;
 
-  // Sanitize filename - keep extension only
   const ext = filename.split('.').pop() || 'webp';
   const safeFilename = `${timestamp}-${id}.${ext}`;
 
-  if (entityType === 'general') {
-    return `general/${category}/${safeFilename}`;
-  }
-
-  if (entityType === 'business' || entityType === 'nonprofit') {
-    const folder = `listings/${entityType}/${entityId}`;
-
-    // SKU images get their own subfolder
-    if (category === 'sku') {
-      return `${folder}/sku-${entityId}/${safeFilename}`;
-    }
-
-    return `${folder}/${category}/${safeFilename}`;
-  }
-
-  if (entityType === 'blog') {
-    return `blogs/${entityId}/${safeFilename}`;
-  }
-
-  // pages
-  return `pages/${entityId}/${safeFilename}`;
+  return `${type}/${safeFilename}`;
 }
 
 async function getCurrentUser(request: Request) {
@@ -84,41 +63,6 @@ async function getCurrentUser(request: Request) {
     });
     return user;
   } catch { return null; }
-}
-
-async function getBusinessPlanLimits(businessId: string) {
-  const db = await getDb();
-  const [business] = await db.select({ planType: businessPages.planType })
-    .from(businessPages)
-    .where(eq(businessPages.id, businessId))
-    .limit(1);
-
-  if (!business?.planType) return DEFAULT_LIMITS;
-
-  const plan = await db.select({
-    maxImages: plans.maxImages,
-    maxVideos: plans.maxVideos,
-  })
-    .from(plans)
-    .where(eq(plans.id, business.planType))
-    .limit(1)
-    .get();
-
-  return plan ? { maxImages: plan.maxImages, maxVideos: plan.maxVideos } : DEFAULT_LIMITS;
-}
-
-async function countBusinessMedia(businessId: string) {
-  const db = await getDb();
-  const imageCount = await db.select({ count: sql<number>`count(*)` })
-    .from(media)
-    .where(and(eq(media.businessId, businessId), eq(media.type, 'image')));
-  const videoCount = await db.select({ count: sql<number>`count(*)` })
-    .from(media)
-    .where(and(eq(media.businessId, businessId), eq(media.type, 'video')));
-  return {
-    images: imageCount[0]?.count || 0,
-    videos: videoCount[0]?.count || 0,
-  };
 }
 
 export async function POST({ request }: { request: Request }) {
@@ -145,12 +89,18 @@ export async function POST({ request }: { request: Request }) {
     }
 
     // Get entity params from formData
-    const entityType = (body as Record<string, unknown>).entityType as string || 'general';
-    const entityId = (body as Record<string, unknown>).entityId as string || '';
-    const category = (body as Record<string, unknown>).category as string || 'gallery';
+    const type = (body as Record<string, unknown>).type as string;
+    const typeId = (body as Record<string, unknown>).typeId as string;
     const hash = (body as Record<string, unknown>).hash as string | undefined;
     const width = (body as Record<string, unknown>).width as number | undefined;
     const height = (body as Record<string, unknown>).height as number | undefined;
+
+    if (!type || !typeId) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { code: 'MISSING_PARAMS', message: 'type and typeId are required' }
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
 
     const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
     const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
@@ -190,6 +140,7 @@ export async function POST({ request }: { request: Request }) {
             mimeType: existing[0].mimeType,
             size: existing[0].size,
             type: existing[0].type,
+            typeId: existing[0].typeId,
           },
           isDuplicate: true,
         }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -198,9 +149,8 @@ export async function POST({ request }: { request: Request }) {
 
     // Build R2 key
     const r2Key = buildR2Key({
-      entityType,
-      entityId,
-      category,
+      type,
+      typeId,
       filename: file.name,
       timestamp,
       id,
@@ -220,36 +170,17 @@ export async function POST({ request }: { request: Request }) {
     }
 
     if (bucket) {
-      if (isImage) {
-        // Client should have already compressed to WebP
-        // Just upload the provided file
-        const buffer = Buffer.from(await file.arrayBuffer());
+      const buffer = Buffer.from(await file.arrayBuffer());
 
-        await bucket.put(r2Key, buffer, {
-          httpMetadata: {
-            contentType: 'image/webp',
-            cacheControl: 'public, max-age=31536000, immutable',
-          },
-        });
+      await bucket.put(r2Key, buffer, {
+        httpMetadata: {
+          contentType: file.type,
+          cacheControl: 'public, max-age=31536000, immutable',
+        },
+      });
 
-        finalUrl = `${getR2PublicUrl()}/${r2Key}`;
-        storedPath = r2Key;
-        finalMimeType = 'image/webp';
-        finalSize = buffer.length;
-      } else {
-        // Video - store as-is
-        const buffer = Buffer.from(await file.arrayBuffer());
-
-        await bucket.put(r2Key, buffer, {
-          httpMetadata: {
-            contentType: file.type,
-            cacheControl: 'public, max-age=31536000, immutable',
-          },
-        });
-
-        finalUrl = `${getR2PublicUrl()}/${r2Key}`;
-        storedPath = r2Key;
-      }
+      finalUrl = `${getR2PublicUrl()}/${r2Key}`;
+      storedPath = r2Key;
     } else {
       // Local dev without R2 - base64 inline
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -266,14 +197,10 @@ export async function POST({ request }: { request: Request }) {
       size: finalSize,
       width: width || null,
       height: height || null,
-      type: isImage ? 'image' : 'video',
-      businessId: entityId || null,
+      type: type,
+      typeId: typeId,
       createdById: user.id,
-      // New fields
       hash: hash || null,
-      entityType: entityType,
-      entityId: entityId || null,
-      category: category,
       r2Key: storedPath,
     }).returning();
 
@@ -285,7 +212,8 @@ export async function POST({ request }: { request: Request }) {
         filename: file.name,
         mimeType: finalMimeType,
         size: finalSize,
-        type: isImage ? 'image' : 'video',
+        type: created.type,
+        typeId: created.typeId,
         width: width || null,
         height: height || null,
       },

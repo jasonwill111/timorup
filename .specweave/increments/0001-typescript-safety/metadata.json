@@ -1,0 +1,16 @@
+{
+  "id": "0001-typescript-safety",
+  "name": "typescript-safety",
+  "title": "TypeScript Type Safety Fixes",
+  "description": "Fix as any casts, verify auth cookie config, improve test coverage, add error boundaries. Tech: Astro SSR + Cloudflare Workers + Drizzle ORM + Zod v4",
+  "type": "refactor",
+  "status": "completed",
+  "project": "timorlist",
+  "priority": "P1",
+  "created": "2026-05-13T11:15:00.000Z",
+  "updated": "2026-05-13T11:45:00.000Z",
+  "externalLinks": {},
+  "lastActivity": "2026-05-13T11:45:00.000Z",
+  "testMode": "test-after",
+  "coverageTarget": 80
+}

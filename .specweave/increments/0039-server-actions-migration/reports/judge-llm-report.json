@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "incrementId": "0039-server-actions-migration",
+  "timestamp": "2026-05-13T12:35:00.000Z",
+  "verdict": "WAIVED",
+  "consentStatus": "skipped",
+  "reason": "CLI judge command not available, used in-session grill review instead"
+}

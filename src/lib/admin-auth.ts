@@ -10,9 +10,10 @@ export interface AuthUser {
   role: 'user' | 'editor' | 'admin' | 'super_admin';
 }
 
-export async function getAdminUser(request: Request): Promise<AuthUser | null> {
+export async function getAdminUser(request?: Request): Promise<AuthUser | null> {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
+    // For Astro actions, request is passed via context
+    const cookieHeader = request?.headers.get('cookie') || '';
     const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
     if (!tokenMatch) return null;
 

@@ -2,9 +2,9 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businesses, categories } from '@/db/schema';
-import { eq, like, and, or } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { businesses, businessCategories } from '@/db/schema';
+import { eq, like, and, or, type SQL } from 'drizzle-orm';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { PaginationSchema } from '@/lib/validation';
 
 function getErrorMessage(error: unknown): string {
@@ -48,7 +48,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
 
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`businesses:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`businesses:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({
@@ -86,8 +86,8 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     let categoryId = '';
     if (category) {
       const cat = await db.select()
-        .from(categories)
-        .where(eq(categories.slug, category))
+        .from(businessCategories)
+        .where(eq(businessCategories.slug, category))
         .limit(1)
         .all();
       if (cat.length > 0) {
@@ -96,11 +96,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     }
 
     // Build conditions - include both 'live' and 'published' status
-    const conditions = [
+    const conditions: SQL[] = [
       or(
         eq(businesses.status, 'live'),
         eq(businesses.status, 'published')
-      ) as any
+      )!
+
     ];
 
     if (search) {
@@ -109,12 +110,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
           like(businesses.title, `%${search}%`),
           like(businesses.aboutUs, `%${search}%`),
           like(businesses.tags, `%${search}%`)
-        ) as any
+        )!
       );
     }
 
     if (categoryId) {
-      conditions.push(eq(businesses.categoryId, categoryId) as any);
+      conditions.push(eq(businesses.categoryId, categoryId));
     }
 
     let results = await db.select({
@@ -157,7 +158,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     const total = results.length;
 
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(categories).all();
+    const allCategories = await db.select().from(businessCategories).all();
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((biz) => ({

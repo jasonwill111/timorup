@@ -1,6 +1,6 @@
 // Subscription and SKU limit helper functions
 import { getDb } from './db';
-import { businessPages, products, plans } from '@/db/schema';
+import { businesses, products, plans } from '@/db/schema';
 import { eq, count, and, lt } from 'drizzle-orm';
 
 /**
@@ -107,8 +107,8 @@ export async function getSubscriptionInfo(businessId: string): Promise<Subscript
   const db = await getDb();
 
   const business = await db.select()
-    .from(businessPages)
-    .where(eq(businessPages.id, businessId))
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
     .limit(1)
     .get();
 
@@ -117,7 +117,7 @@ export async function getSubscriptionInfo(businessId: string): Promise<Subscript
   // Count SKUs for this business
   const skuResult = await db.select({ count: count() })
     .from(products)
-    .where(eq(products.businessPageId, businessId))
+    .where(eq(products.businessId, businessId))
     .get();
 
   const skuCount = skuResult?.count ?? 0;

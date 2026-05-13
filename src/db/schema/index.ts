@@ -1,559 +1,578 @@
-// Database schema for timorlist
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
-import { relations } from 'drizzle-orm/relations';
-import { sql } from 'drizzle-orm';
+/**
+ * Unified Database Schema
+ * timorlist & timorlist-ref
+ * Last updated: 2026-05-13
+ */
+import { sqliteTable, text, integer, real, index, uniqueIndex } from "drizzle-orm/sqlite-core"
+import { sql } from "drizzle-orm"
 
-// Re-export auth tables explicitly
-import { sessions, accounts, verifications } from './auth';
-export { sessions, accounts, verifications };
+// ============================================
+// Users & Auth
+// ============================================
 
-// Re-export blog tables
-import { blogPosts } from './blogs';
-export { blogPosts };
+export const users = sqliteTable("users", {
+  id: text().primaryKey().notNull(),
+  email: text().notNull().unique(),
+  emailVerified: integer("email_verified").default(0),
+  phone: text(),
+  name: text().notNull(),
+  image: text(),
+  role: text().default("user"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  index("users_role_idx").on(table.role),
+  uniqueIndex("users_email_unique").on(table.email),
+]);
 
-// Re-export plans table
-import { plans } from './plans';
-export { plans };
+export const sessions = sqliteTable("sessions", {
+  id: text().primaryKey().notNull(),
+  userId: text("user_id").notNull(),
+  token: text().notNull().unique(),
+  expiresAt: integer("expires_at").notNull(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  createdAt: integer("created_at"),
+},
+(table) => [
+  index("sessions_user_idx").on(table.userId),
+  uniqueIndex("sessions_token_unique").on(table.token),
+]);
 
-// Re-export landing pages table
-import { landingPages } from './landing-pages';
-export { landingPages };
+export const accounts = sqliteTable("accounts", {
+  id: text().primaryKey().notNull(),
+  userId: text("user_id").notNull(),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: integer("access_token_expires_at"),
+  refreshTokenExpiresAt: integer("refresh_token_expires_at"),
+  scope: text(),
+  password: text(),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  index("accounts_user_idx").on(table.userId),
+]);
 
-// Re-export new entity tables
-import { businesses } from './businesses';
-export { businesses };
+export const verifications = sqliteTable("verifications", {
+  id: text().primaryKey().notNull(),
+  identifier: text().notNull(),
+  value: text().notNull(),
+  expiresAt: integer("expires_at").notNull(),
+  createdAt: integer("created_at"),
+},
+(table) => [
+  index("verifications_expires_idx").on(table.expiresAt),
+]);
 
-import { listings } from './listings';
-export { listings };
+// ============================================
+// Categories (4 independent tables)
+// ============================================
 
-import { publicSectors } from './public-sectors';
-export { publicSectors };
+export const businessCategories = sqliteTable("business_categories", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  slug: text().notNull().unique(),
+  description: text(),
+  icon: text(),
+  parentId: text("parent_id"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active").default(true),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("business_categories_slug_idx").on(table.slug),
+  index("business_categories_parent_idx").on(table.parentId),
+]);
 
-import { nonProfits } from './non-profits';
-export { nonProfits };
+export const nonProfitCategories = sqliteTable("non_profit_categories", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  slug: text().notNull().unique(),
+  description: text(),
+  icon: text(),
+  parentId: text("parent_id"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active").default(true),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("non_profit_categories_slug_idx").on(table.slug),
+  index("non_profit_categories_parent_idx").on(table.parentId),
+]);
 
-// Users table
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  emailVerified: integer('email_verified').default(0),  // 0=false, 1=true
-  phone: text('phone'),
-  name: text('name').notNull(),
-  image: text('image'),
-  role: text('role').default('user'),
-  createdAt: integer('created_at'),
-  updatedAt: integer('updated_at'),
-}, (users) => ({
-  roleIdx: index('users_role_idx').on(users.role),
-}));
+export const publicSectorCategories = sqliteTable("public_sector_categories", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  slug: text().notNull().unique(),
+  description: text(),
+  icon: text(),
+  parentId: text("parent_id"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active").default(true),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("public_sector_categories_slug_idx").on(table.slug),
+  index("public_sector_categories_parent_idx").on(table.parentId),
+]);
 
-// Business Categories table
-export const businessCategories = sqliteTable('business_categories', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull().unique(),
-  description: text('description'),
-  icon: text('icon').default(''),
-  parentId: text('parent_id'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (table) => ({
-  parentIdx: index('bc_parent_idx').on(table.parentId),
-}));
+export const listingCategories = sqliteTable("listing_categories", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  slug: text().notNull().unique(),
+  description: text(),
+  icon: text(),
+  parentId: text("parent_id"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active").default(true),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("listing_categories_slug_idx").on(table.slug),
+  index("listing_categories_parent_idx").on(table.parentId),
+]);
 
-// Non-Profit Categories table
-export const nonProfitCategories = sqliteTable('non_profit_categories', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull().unique(),
-  description: text('description'),
-  icon: text('icon').default(''),
-  parentId: text('parent_id'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (table) => ({
-  parentIdx: index('npc_parent_idx').on(table.parentId),
-}));
+// ============================================
+// Media
+// type = R2 path prefix (e.g., businesses/biz-123/profile)
+// typeId = entity ID
+// r2Key = full R2 key
+// ============================================
 
-// Public Sector Categories table
-export const publicSectorCategories = sqliteTable('public_sector_categories', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull().unique(),
-  description: text('description'),
-  icon: text('icon').default(''),
-  parentId: text('parent_id'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (table) => ({
-  parentIdx: index('psc_parent_idx').on(table.parentId),
-}));
+export const media = sqliteTable("media", {
+  id: text().primaryKey().notNull(),
+  url: text().notNull(),
+  filename: text().notNull(),
+  mimeType: text("mime_type").notNull(),
+  size: integer().notNull(),
+  width: integer(),
+  height: integer(),
+  alt: text(),
+  type: text().notNull(),                    // R2 path prefix
+  typeId: text("type_id").notNull(),        // entity ID
+  hash: text().unique(),
+  r2Key: text("r2_key").notNull().unique(), // full R2 key
+  createdById: text("created_by_id"),
+  createdAt: integer("created_at"),
+},
+(table) => [
+  index("media_type_idx").on(table.type),
+  index("media_type_id_idx").on(table.typeId),
+  index("media_hash_idx").on(table.hash),
+  index("media_created_by_idx").on(table.createdById),
+]);
 
-// Listing Categories table
-export const listingCategories = sqliteTable('listing_categories', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  slug: text('slug').notNull().unique(),
-  description: text('description'),
-  icon: text('icon').default(''),
-  parentId: text('parent_id'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (table) => ({
-  parentIdx: index('lc_parent_idx').on(table.parentId),
-}));
+// ============================================
+// Entity Tables (4 independent tables)
+// ============================================
 
-// Alias for backwards compatibility
-export const categories = businessCategories;
+export const businesses = sqliteTable("businesses", {
+  id: text().primaryKey().notNull(),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  ownerId: text("owner_id").notNull(),
+  categoryId: text("category_id"),
+  status: text().default("draft"),
+  bannerImageId: text("banner_image_id"),
+  profileImageId: text("profile_image_id"),
+  contactName: text("contact_name"),
+  contactNumber: text("contact_number"),
+  countryCode: text("country_code").default("+670"),
+  yearOfEstablishment: integer("year_of_establishment"),
+  email: text(),
+  address: text(),
+  locationLat: real("location_lat"),
+  locationLng: real("location_lng"),
+  openingHours: text("opening_hours"),
+  aboutUs: text("about_us"),
+  latestUpdates: text("latest_updates"),
+  tags: text(),
+  industry: text(),
+  likes: integer().default(0),
+  saves: integer().default(0),
+  ratingAverage: real("rating_average").default(0),
+  ratingCount: integer("rating_count").default(0),
+  views: integer().default(0),
+  planType: text("plan_type"),
+  publishDate: integer("publish_date"),
+  expiryDate: integer("expiry_date"),
+  subscriptionStatus: text("subscription_status").default("none"),
+  subscriptionExpiresAt: integer("subscription_expires_at"),
+  trialStartedAt: integer("trial_started_at"),
+  gracePeriodEndDate: integer("grace_period_end_date"),
+  registrationUrl: text("registration_url"),
+  verifiedBadge: integer("verified_badge").default(false),
+  socialLinks: text("social_links"),
+  photoGallery: text("photo_gallery"),
+  latestUpdate: text("latest_update"),
+  latestUpdateImages: text("latest_update_images"),
+  latestUpdateDate: integer("latest_update_date"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("businesses_slug_idx").on(table.slug),
+  index("businesses_owner_idx").on(table.ownerId),
+  index("businesses_status_idx").on(table.status),
+  index("businesses_category_idx").on(table.categoryId),
+  index("businesses_subscription_status_idx").on(table.subscriptionStatus),
+]);
 
-// Media table
-export const media = sqliteTable('media', {
-  id: text('id').primaryKey(),
-  url: text('url').notNull(),
-  filename: text('filename').notNull(),
-  mimeType: text('mime_type').notNull(),
-  size: integer('size').notNull(),
-  width: integer('width'),
-  height: integer('height'),
-  alt: text('alt'),
-  type: text('type'),
-  businessId: text('business_id'),
-  createdById: text('created_by_id'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  // New fields for structured storage and deduplication
-  hash: text('hash').unique(),                    // SHA256 for deduplication
-  entityType: text('entity_type'),                 // 'business' | 'nonprofit' | 'blog' | 'page' | 'general'
-  entityId: text('entity_id'),                     // business_id / sku_id / blog_id
-  category: text('category'),                      // 'profile' | 'banner' | 'gallery' | 'sku' | 'updates' | 'hero'
-  r2Key: text('r2_key').unique(),                // Full R2 key path
-}, (media) => ({
-  businessIdx: index('media_business_idx').on(media.businessId),
-  creatorIdx: index('media_creator_idx').on(media.createdById),
-  hashIdx: index('media_hash_idx').on(media.hash),
-  entityIdx: index('media_entity_idx').on(media.entityType, media.entityId),
-}));
+export const nonProfits = sqliteTable("non_profits", {
+  id: text().primaryKey().notNull(),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  ownerId: text("owner_id").notNull(),
+  categoryId: text("category_id"),
+  status: text().default("draft"),
+  bannerImageId: text("banner_image_id"),
+  profileImageId: text("profile_image_id"),
+  contactName: text("contact_name"),
+  contactNumber: text("contact_number"),
+  countryCode: text("country_code").default("+670"),
+  yearOfEstablishment: integer("year_of_establishment"),
+  email: text(),
+  address: text(),
+  locationLat: real("location_lat"),
+  locationLng: real("location_lng"),
+  openingHours: text("opening_hours"),
+  aboutUs: text("about_us"),
+  latestUpdates: text("latest_updates"),
+  tags: text(),
+  likes: integer().default(0),
+  saves: integer().default(0),
+  ratingAverage: real("rating_average").default(0),
+  ratingCount: integer("rating_count").default(0),
+  views: integer().default(0),
+  planType: text("plan_type"),
+  publishDate: integer("publish_date"),
+  expiryDate: integer("expiry_date"),
+  subscriptionStatus: text("subscription_status").default("none"),
+  subscriptionExpiresAt: integer("subscription_expires_at"),
+  trialStartedAt: integer("trial_started_at"),
+  gracePeriodEndDate: integer("grace_period_end_date"),
+  registrationUrl: text("registration_url"),
+  verifiedBadge: integer("verified_badge").default(false),
+  socialLinks: text("social_links"),
+  photoGallery: text("photo_gallery"),
+  latestUpdate: text("latest_update"),
+  latestUpdateImages: text("latest_update_images"),
+  latestUpdateDate: integer("latest_update_date"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("non_profits_slug_idx").on(table.slug),
+  index("non_profits_owner_idx").on(table.ownerId),
+  index("non_profits_status_idx").on(table.status),
+  index("non_profits_category_idx").on(table.categoryId),
+]);
 
-// Business Pages table
-// Also used for organizations (gov, nonprofits) with entityType field
-export const businessPages = sqliteTable('business_pages', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  slug: text('slug').notNull().unique(),
-  ownerId: text('owner_id').notNull(),
-  categoryId: text('category_id'),
-  entityType: text('entity_type').default('business'), // 'business' | 'nonprofit'
-  organizationType: text('organization_type'), // 'government' | 'ngo' (only for nonprofit)
-  status: text('status').default('draft'),
-  bannerImageId: text('banner_image_id'),
-  profileImageId: text('profile_image_id'),
-  contactName: text('contact_name'),
-  contactNumber: text('contact_number'),
-  countryCode: text('country_code').default('+670'),
-  yearOfEstablishment: integer('year_of_establishment'),
-  email: text('email'),
-  address: text('address'),
-  locationLat: real('location_lat'),
-  locationLng: real('location_lng'),
-  openingHours: text('opening_hours'),
-  aboutUs: text('about_us'),
-  latestUpdates: text('latest_updates'),
-  tags: text('tags'),
-  // Industry for businesses (e.g., 'food.restaurants', 'retail.clothing')
-  industry: text('industry'),
-  likes: integer('likes').default(0),
-  saves: integer('saves').default(0),
-  ratingAverage: real('rating_average').default(0),
-  ratingCount: integer('rating_count').default(0),
-  views: integer('views').default(0),
-  planType: text('plan_type'),
-  publishDate: integer('publish_date', { mode: 'timestamp' }),
-  expiryDate: integer('expiry_date', { mode: 'timestamp' }),
-  // Subscription status for business listings
-  subscriptionStatus: text('subscription_status').default('none'), // 'none' | 'active' | 'expired' | 'cancelled'
-  gracePeriodEndDate: integer('grace_period_end_date'), // timestamp: expiry + 60 days
-  // Organization-specific fields
-  registrationUrl: text('registration_url'), // Link to official registration
-  verifiedBadge: integer('verified_badge', { mode: 'boolean' }).default(false),
-  // Social media links
-  socialLinks: text('social_links'), // JSON: { facebook, instagram, tiktok }
-  // Photo gallery (separate from banner/profile)
-  photoGallery: text('photo_gallery'), // JSON array of media IDs (max 6 images + 1 video)
-  // Latest update tracking (weekly limit)
-  latestUpdate: text('latest_update'), // Text content
-  latestUpdateImages: text('latest_update_images'), // JSON array of media IDs (max 3)
-  latestUpdateDate: integer('latest_update_date', { mode: 'timestamp' }),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (businessPages) => ({
-  ownerIdx: index('business_owner_idx').on(businessPages.ownerId),
-  statusIdx: index('business_status_idx').on(businessPages.status),
-  entityTypeIdx: index('business_entity_type_idx').on(businessPages.entityType),
-  categoryIdx: index('business_category_idx').on(businessPages.categoryId),
-}));
+export const publicSectors = sqliteTable("public_sectors", {
+  id: text().primaryKey().notNull(),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  ownerId: text("owner_id").notNull(),
+  categoryId: text("category_id"),
+  status: text().default("draft"),
+  bannerImageId: text("banner_image_id"),
+  profileImageId: text("profile_image_id"),
+  contactName: text("contact_name"),
+  contactNumber: text("contact_number"),
+  countryCode: text("country_code").default("+670"),
+  yearOfEstablishment: integer("year_of_establishment"),
+  email: text(),
+  address: text(),
+  locationLat: real("location_lat"),
+  locationLng: real("location_lng"),
+  openingHours: text("opening_hours"),
+  aboutUs: text("about_us"),
+  latestUpdates: text("latest_updates"),
+  tags: text(),
+  likes: integer().default(0),
+  saves: integer().default(0),
+  ratingAverage: real("rating_average").default(0),
+  ratingCount: integer("rating_count").default(0),
+  views: integer().default(0),
+  planType: text("plan_type"),
+  publishDate: integer("publish_date"),
+  expiryDate: integer("expiry_date"),
+  subscriptionStatus: text("subscription_status").default("none"),
+  subscriptionExpiresAt: integer("subscription_expires_at"),
+  trialStartedAt: integer("trial_started_at"),
+  gracePeriodEndDate: integer("grace_period_end_date"),
+  registrationUrl: text("registration_url"),
+  verifiedBadge: integer("verified_badge").default(false),
+  socialLinks: text("social_links"),
+  photoGallery: text("photo_gallery"),
+  latestUpdate: text("latest_update"),
+  latestUpdateImages: text("latest_update_images"),
+  latestUpdateDate: integer("latest_update_date"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("public_sectors_slug_idx").on(table.slug),
+  index("public_sectors_owner_idx").on(table.ownerId),
+  index("public_sectors_status_idx").on(table.status),
+  index("public_sectors_category_idx").on(table.categoryId),
+]);
 
-// Business Updates (News) - up to 4 updates per business/nonprofit
-export const businessUpdates = sqliteTable('business_updates', {
-  id: text('id').primaryKey(),
-  businessId: text('business_id').notNull(),  // FK to business_pages
-  content: text('content').notNull(),          // max 140 chars
-  images: text('images'),                      // JSON array of media IDs, max 4
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  postedDate: text('posted_date'),            // YYYY-MM-DD for daily limit
-}, (businessUpdates) => ({
-  businessIdx: index('updates_business_idx').on(businessUpdates.businessId),
-  createdAtIdx: index('updates_created_idx').on(businessUpdates.createdAt),
-}));
+export const listings = sqliteTable("listings", {
+  id: text().primaryKey().notNull(),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  ownerId: text("owner_id").notNull(),
+  categoryId: text("category_id"),                    // FK to listing_categories
+  listingType: text("listing_type").notNull(),        // FK to listing_categories (二级分类 slug)
+  status: text().default("draft"),
+  description: text().notNull(),
+  price: text(),
+  condition: text(),
+  location: text(),
+  locationLat: real("location_lat"),
+  locationLng: real("location_lng"),
+  contactName: text("contact_name"),
+  contactNumber: text("contact_number"),
+  countryCode: text("country_code").default("+670"),
+  email: text(),
+  imageIds: text("image_ids"),
+  tags: text(),
+  likes: integer().default(0),
+  saves: integer().default(0),
+  views: integer().default(0),
+  expiresAt: integer("expires_at"),
+  lastRenewedAt: integer("last_renewed_at"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("listings_slug_idx").on(table.slug),
+  index("listings_owner_idx").on(table.ownerId),
+  index("listings_status_idx").on(table.status),
+  index("listings_category_idx").on(table.categoryId),
+  index("listings_type_idx").on(table.listingType),
+]);
 
-// Products/SKUs table with flexible pricing
-export const products = sqliteTable('products', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  description: text('description'),
-  businessPageId: text('business_page_id').notNull(),
-  // Flexible pricing: JSON array of { label, value, unit }
-  // Example: [{ "label": "Hourly Rate", "value": "25.00", "unit": "/hour" }]
-  priceFields: text('price_fields'),
-  // Service type for determining available price units and UI
-  serviceType: text('service_type').default('product'), // 'product' | 'service' | 'rental' | 'food' | 'accommodation' | 'automotive' | 'healthcare' | 'education' | 'beauty' | 'event'
-  // Fallback single price (for simple products)
-  price: text('price'),
-  priceUnit: text('price_unit'),
-  // Industry-specific specifications (JSON)
-  // Structure depends on serviceType - see below
-  specifications: text('specifications'),
-  // Common fields
-  featured: integer('featured', { mode: 'boolean' }).default(false),
-  active: integer('active', { mode: 'boolean' }).default(true),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (products) => ({
-  businessIdx: index('products_business_idx').on(products.businessPageId),
-  activeIdx: index('products_active_idx').on(products.active),
-}));
+// ============================================
+// Latest Updates (for businesses/nonprofits/public_sectors)
+// type = entity type (businesses/nonprofits/public_sectors)
+// typeId = entity ID
+// ============================================
 
-// Product specifications by serviceType:
-//
-// serviceType: 'automotive' (Vehicle Sales/Rental)
-// {
-//   vehicleType: 'sedan' | 'suv' | 'motorcycle' | 'truck' | 'van' | 'pickup'
-//   brand: string
-//   model: string
-//   year: number
-//   mileage: number (km)
-//   fuelType: 'petrol' | 'diesel' | 'electric' | 'hybrid'
-//   transmission: 'manual' | 'automatic'
-//   color: string
-//   condition: 'new' | 'used' | 'certified'
-//   doors: number
-//   seats: number
-// }
-//
-// serviceType: 'food' (Restaurant/Food Service)
-// {
-//   cuisine: string[] (e.g., ['Indonesian', 'Chinese'])
-//   dietaryOptions: string[] (e.g., ['Halal', 'Vegetarian'])
-//   mealType: 'breakfast' | 'lunch' | 'dinner' | 'all_day'
-//   priceRange: '$' | '$$' | '$$$' | '$$$$'
-//   parking: boolean
-//   delivery: boolean
-//   takeaway: boolean
-//   reservation: boolean
-//   avgWaitTime: number (minutes)
-// }
-//
-// serviceType: 'accommodation' (Hotel/Homestay/Rental)
-// {
-//   roomType: 'single' | 'double' | 'twin' | 'suite' | 'dorm' | 'villa'
-//   maxGuests: number
-//   bedType: 'single' | 'double' | 'queen' | 'king'
-//   numBeds: number
-//   checkInTime: string (e.g., '14:00')
-//   checkOutTime: string (e.g., '12:00')
-//   roomSize: number (sqm)
-//   floor: number
-//   amenities: string[] (e.g., ['wifi', 'ac', 'pool', 'parking', 'breakfast'])
-// }
-//
-// serviceType: 'healthcare' (Clinic/Pharmacy)
-// {
-//   specialization: string (e.g., 'General', 'Dental', 'Eye')
-//   consultationType: 'in_person' | 'telemedicine'
-//   consultationDuration: number (minutes)
-//   acceptedInsurance: string[]
-//   emergencyService: boolean
-//   homeVisit: boolean
-// }
-//
-// serviceType: 'education' (School/Training/Tutoring)
-// {
-//   courseType: 'language' | 'vocational' | 'tutoring' | 'training' | 'workshop'
-//   subject: string
-//   duration: string (e.g., '2 hours', '3 months')
-//   schedule: 'weekday' | 'weekend' | 'evening' | 'flexible'
-//   level: 'beginner' | 'intermediate' | 'advanced' | 'all_levels'
-//   certificate: boolean
-//   classSize: number
-//   language: string
-// }
-//
-// serviceType: 'beauty' (Salon/Spa/Massage)
-// {
-//   serviceCategory: 'hair' | 'nail' | 'spa' | 'massage' | 'makeup' | 'tattoo'
-//   genderPreference: 'male' | 'female' | 'unisex'
-//   duration: number (minutes)
-//   advanceBooking: boolean
-//   homeService: boolean
-// }
-//
-// serviceType: 'event' (Photography/Catering/Events)
-// {
-//   eventType: 'photography' | 'catering' | 'decoration' | 'entertainment' | 'transport'
-//   coverage: string (e.g., 'East Timor', 'Dili only')
-//   minBooking: string (e.g., '2 hours', '1 day')
-//   teamIncluded: number
-//   equipment: string[]
-// }
-//
-// serviceType: 'service' (General Services)
-// {
-//   serviceCategory: 'repair' | 'cleaning' | 'delivery' | 'moving' | 'installation'
-//   coverage: string
-//   responseTime: string (e.g., 'Same day', '24 hours')
-//   warranty: string
-//   insured: boolean
-// }
-//
-// serviceType: 'rental' (Equipment/Property)
-// {
-//   rentalType: 'equipment' | 'vehicle' | 'property' | 'furniture'
-//   minRental: string (e.g., '1 day', '1 week')
-//   maxRental: string
-//   deposit: string
-//   delivery: boolean
-//   deliveryFee: string
-// }
+export const latestUpdates = sqliteTable("latest_updates", {
+  id: text().primaryKey().notNull(),
+  type: text().notNull(),                 // businesses / nonprofits / public_sectors
+  typeId: text("type_id").notNull(),    // entity ID
+  content: text().notNull(),
+  images: text(),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+  postedDate: text("posted_date"),
+},
+(table) => [
+  index("latest_updates_type_idx").on(table.type),
+  index("latest_updates_type_id_idx").on(table.typeId),
+  index("latest_updates_created_idx").on(table.createdAt),
+]);
 
-// Product Images table
-export const productImages = sqliteTable('product_images', {
-  id: text('id').primaryKey(),
-  productId: text('product_id').notNull(),
-  mediaId: text('media_id').notNull(),
-  position: integer('position').default(0),
-}, (productImages) => ({
-  productIdx: index('product_images_product_idx').on(productImages.productId),
-  mediaIdx: index('product_images_media_idx').on(productImages.mediaId),
-}));
+// ============================================
+// Products (for businesses)
+// ============================================
 
-// Reviews table
-export const reviews = sqliteTable('reviews', {
-  id: text('id').primaryKey(),
-  businessPageId: text('business_page_id').notNull(),
-  userId: text('user_id').notNull(),
-  rating: integer('rating').notNull(),
-  comment: text('comment'),
-  isEdited: integer('is_edited', { mode: 'boolean' }).default(false),
-  // Reply fields
-  reply: text('reply'),
-  repliedAt: integer('replied_at', { mode: 'timestamp' }),
-  repliedBy: text('replied_by'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (reviews) => ({
-  businessIdx: index('reviews_business_idx').on(reviews.businessPageId),
-  userIdx: index('reviews_user_idx').on(reviews.userId),
-}));
+export const products = sqliteTable("products", {
+  id: text().primaryKey().notNull(),
+  businessId: text("business_id").notNull(),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  description: text(),
+  priceFields: text("price_fields"),
+  serviceType: text("service_type").default("product"),
+  price: text(),
+  priceUnit: text("price_unit"),
+  specifications: text(),
+  images: text(),                          // JSON array of media IDs
+  featured: integer().default(false),
+  active: integer().default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  index("products_business_idx").on(table.businessId),
+  uniqueIndex("products_slug_idx").on(table.slug),
+  index("products_active_idx").on(table.active),
+]);
 
-// Orders table
-export const orders = sqliteTable('orders', {
-  id: text('id').primaryKey(),
-  businessPageId: text('business_page_id').notNull(),
-  userId: text('user_id').notNull(),
-  planType: text('plan_type').notNull(),
-  amount: integer('amount').notNull(),
-  status: text('status').default('unpaid'),
-  expiryDate: integer('expiry_date', { mode: 'timestamp' }),
-  paymentMethod: text('payment_method'),
-  paidDate: integer('paid_date', { mode: 'timestamp' }),
-  adminNotes: text('admin_notes'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (orders) => ({
-  businessIdx: index('orders_business_idx').on(orders.businessPageId),
-  userIdx: index('orders_user_idx').on(orders.userId),
-  statusIdx: index('orders_status_idx').on(orders.status),
-}));
+// ============================================
+// Reviews (for businesses)
+// ============================================
 
-// Ad Banners table
-export const adBanners = sqliteTable('ad_banners', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  description: text('description'),
-  imageId: text('image_id'),
-  linkedBusinessPageId: text('linked_business_page_id'),
-  externalUrl: text('external_url'),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  startDate: integer('start_date', { mode: 'timestamp' }),
-  endDate: integer('end_date', { mode: 'timestamp' }),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (adBanners) => ({
-  activeIdx: index('ad_banners_active_idx').on(adBanners.isActive),
-  dateRangeIdx: index('ad_banners_date_range_idx').on(adBanners.startDate, adBanners.endDate),
-}));
+export const reviews = sqliteTable("reviews", {
+  id: text().primaryKey().notNull(),
+  businessId: text("business_id").notNull(),
+  userId: text("user_id").notNull(),
+  rating: integer().notNull(),
+  title: text(),
+  content: text(),
+  reply: text(),
+  repliedAt: integer("replied_at"),
+  repliedBy: text("replied_by"),
+  isEdited: integer("is_edited").default(false),
+  status: text().default("pending"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  index("reviews_business_idx").on(table.businessId),
+  index("reviews_user_idx").on(table.userId),
+  index("reviews_status_idx").on(table.status),
+]);
 
-// Site Settings (global)
-export const siteSettings = sqliteTable('site_settings', {
-  id: text('id').primaryKey(),
-  key: text('key').notNull().unique(),
-  value: text('value'),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
+// ============================================
+// Orders (with type for different plans)
+// type = 'business_plan' / 'listing_plan' / etc.
+// typeId = entity ID
+// ============================================
 
-// Saved Items table (favorites/bookmarks for SKUs and Pages)
-export const savedItems = sqliteTable('saved_items', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull(),
-  // itemType: 'sku' for products, 'page' for business pages
-  itemType: text('item_type').notNull(), // 'sku' | 'page'
-  itemId: text('item_id').notNull(), // product id or business_page id
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (savedItems) => ({
-  userIdx: index('saved_items_user_idx').on(savedItems.userId),
-  itemIdx: index('saved_items_item_idx').on(savedItems.itemId),
-}));
+export const orders = sqliteTable("orders", {
+  id: text().primaryKey().notNull(),
+  type: text().notNull(),                 // business_plan, listing_plan, etc.
+  typeId: text("type_id").notNull(),    // entity ID
+  userId: text("user_id").notNull(),
+  planId: text("plan_id"),              // FK to plans table
+  amount: integer().notNull(),
+  status: text().default("unpaid"),
+  paymentMethod: text("payment_method"),
+  paidDate: integer("paid_date"),
+  expiryDate: integer("expiry_date"),
+  adminNotes: text("admin_notes"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  index("orders_type_idx").on(table.type),
+  index("orders_type_id_idx").on(table.typeId),
+  index("orders_user_idx").on(table.userId),
+  index("orders_status_idx").on(table.status),
+]);
 
-// Relations for better-auth (required for join queries)
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  sessions: many(sessions),
-}));
+// ============================================
+// Plans (Fee Types)
+// ============================================
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, {
-    fields: [accounts.userId],
-    references: [users.id],
-  }),
-}));
+export const plans = sqliteTable("plans", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  slug: text().notNull().unique(),
+  type: text().notNull(),                 // business_plan, listing_plan, etc.
+  description: text(),
+  price: real("price").notNull(),
+  currency: text("currency").default("USD"),
+  interval: text().default("monthly"),
+  features: text(),                      // JSON
+  limits: text(),                        // JSON
+  isActive: integer("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("plans_slug_idx").on(table.slug),
+  index("plans_type_idx").on(table.type),
+]);
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
-  }),
-}));
+// ============================================
+// Saved Items (bookmarks for businesses/listings)
+// type = 'businesses' | 'listings'
+// typeId = entity ID
+// ============================================
 
-// Business Pages relations
-export const businessPagesRelations = relations(businessPages, ({ one, many }) => ({
-  owner: one(users, {
-    fields: [businessPages.ownerId],
-    references: [users.id],
-  }),
-  category: one(categories, {
-    fields: [businessPages.categoryId],
-    references: [categories.id],
-  }),
-  products: many(products),
-  reviews: many(reviews),
-  orders: many(orders),
-  businessUpdates: many(businessUpdates),
-  media: many(media),
-}));
+export const savedItems = sqliteTable("saved_items", {
+  id: text().primaryKey().notNull(),
+  userId: text("user_id").notNull(),
+  type: text().notNull(),                // 'businesses' | 'listings'
+  typeId: text("type_id").notNull(),    // entity ID
+  createdAt: integer("created_at"),
+},
+(table) => [
+  index("saved_items_user_idx").on(table.userId),
+  index("saved_items_type_idx").on(table.type),
+  index("saved_items_type_id_idx").on(table.typeId),
+  uniqueIndex("saved_items_user_type_typeId_idx").on(table.userId, table.type, table.typeId),
+]);
 
-// Products relations
-export const productsRelations = relations(products, ({ one, many }) => ({
-  businessPage: one(businessPages, {
-    fields: [products.businessPageId],
-    references: [businessPages.id],
-  }),
-  images: many(productImages),
-}));
+// ============================================
+// Ad Banners
+// ============================================
 
-// Reviews relations
-export const reviewsRelations = relations(reviews, ({ one }) => ({
-  businessPage: one(businessPages, {
-    fields: [reviews.businessPageId],
-    references: [businessPages.id],
-  }),
-  user: one(users, {
-    fields: [reviews.userId],
-    references: [users.id],
-  }),
-}));
+export const adBanners = sqliteTable("ad_banners", {
+  id: text().primaryKey().notNull(),
+  title: text().notNull(),
+  description: text(),
+  imageId: text("image_id"),
+  linkedEntityType: text("linked_entity_type"),
+  linkedEntityId: text("linked_entity_id"),
+  externalUrl: text("external_url"),
+  isActive: integer("is_active").default(true),
+  startDate: integer("start_date"),
+  endDate: integer("end_date"),
+  position: text().default("homepage"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  index("ad_banners_active_idx").on(table.isActive),
+  index("ad_banners_date_range_idx").on(table.startDate, table.endDate),
+]);
 
-// Orders relations
-export const ordersRelations = relations(orders, ({ one }) => ({
-  businessPage: one(businessPages, {
-    fields: [orders.businessPageId],
-    references: [businessPages.id],
-  }),
-  user: one(users, {
-    fields: [orders.userId],
-    references: [users.id],
-  }),
-}));
+// ============================================
+// Blog Posts
+// ============================================
 
-// Product Images relations
-export const productImagesRelations = relations(productImages, ({ one }) => ({
-  product: one(products, {
-    fields: [productImages.productId],
-    references: [products.id],
-  }),
-  media: one(media, {
-    fields: [productImages.mediaId],
-    references: [media.id],
-  }),
-}));
+export const blogPosts = sqliteTable("blog_posts", {
+  id: text().primaryKey().notNull(),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  excerpt: text(),
+  content: text(),
+  coverImageId: text("cover_image_id"),
+  authorId: text("author_id").notNull(),
+  status: text().default("draft"),
+  tags: text(),
+  publishedAt: integer("published_at"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("blog_posts_slug_idx").on(table.slug),
+  index("blog_posts_status_idx").on(table.status),
+  index("blog_posts_author_idx").on(table.authorId),
+]);
 
-// Categories relations (self-referential)
-export const categoriesRelations = relations(categories, ({ one, many }) => ({
-  parent: one(categories, {
-    fields: [categories.parentId],
-    references: [categories.id],
-    relationName: 'parentChild',
-  }),
-  children: many(categories, { relationName: 'parentChild' }),
-  businessPages: many(businessPages),
-}));
+// ============================================
+// Site Settings
+// ============================================
 
-// Media relations
-export const mediaRelations = relations(media, ({ one }) => ({
-  business: one(businessPages, {
-    fields: [media.businessId],
-    references: [businessPages.id],
-  }),
-  uploader: one(users, {
-    fields: [media.createdById],
-    references: [users.id],
-  }),
-}));
-
-// Saved Items relations
-export const savedItemsRelations = relations(savedItems, ({ one }) => ({
-  user: one(users, {
-    fields: [savedItems.userId],
-    references: [users.id],
-  }),
-}));
-
-// Business Updates relations
-export const businessUpdatesRelations = relations(businessUpdates, ({ one }) => ({
-  businessPage: one(businessPages, {
-    fields: [businessUpdates.businessId],
-    references: [businessPages.id],
-  }),
-}));
-
-// Export type definitions
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
-export type Session = typeof sessions.$inferSelect;
-export type Account = typeof accounts.$inferSelect;
-export type Category = typeof categories.$inferSelect;
-export type Media = typeof media.$inferSelect;
-export type BusinessPage = typeof businessPages.$inferSelect;
-export type Product = typeof products.$inferSelect;
-export type ProductImage = typeof productImages.$inferSelect;
-export type Review = typeof reviews.$inferSelect;
-export type Order = typeof orders.$inferSelect;
-export type AdBanner = typeof adBanners.$inferSelect;
-export type SiteSetting = typeof siteSettings.$inferSelect;
+export const siteSettings = sqliteTable("site_settings", {
+  id: text().primaryKey().notNull(),
+  key: text().notNull().unique(),
+  value: text(),
+  type: text().default("string"),
+  description: text(),
+  isPublic: integer("is_public").default(false),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("site_settings_key_idx").on(table.key),
+]);

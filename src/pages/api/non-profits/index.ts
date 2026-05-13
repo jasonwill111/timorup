@@ -4,7 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { nonProfits, nonProfitCategories as categories } from '@/db/schema';
 import { eq, desc, like, and, or, type SQL } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { PaginationSchema } from '@/lib/validation';
 
 function getErrorMessage(error: unknown): string {
@@ -23,7 +23,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
   // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`nonprofits:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`nonprofits:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({

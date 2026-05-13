@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { media, businessPages, plans } from '@/db/schema';
+import { media, businesses } from '@/db/schema';
 import { eq, and, sql, count } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
@@ -29,53 +29,46 @@ function getR2PublicUrl(): string {
   return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
 }
 
+// Build R2 key from type and typeId
+// type = R2 path prefix (e.g., 'businesses/biz-123/profile')
+// typeId = entity ID
 function buildR2Key(params: {
-  entityType: string;
-  entityId: string;
-  category: string;
+  type: string;      // R2 path prefix
+  typeId: string;    // entity ID
   filename: string;
   timestamp: number;
   id: string;
 }): string {
-  const { entityType, entityId, category, filename, timestamp, id } = params;
+  const { type, typeId, filename, timestamp, id } = params;
   const ext = filename.split('.').pop() || 'webp';
   const safeFilename = `${timestamp}-${id}.${ext}`;
 
-  if (entityType === 'general') {
-    return `general/${category}/${safeFilename}`;
-  }
+  // type already contains the full path prefix
+  return `${type}/${safeFilename}`;
+}
 
-  if (entityType === 'business' || entityType === 'nonprofit') {
-    const folder = `listings/${entityType}/${entityId}`;
-    if (category === 'sku') {
-      return `${folder}/sku-${entityId}/${safeFilename}`;
-    }
-    return `${folder}/${category}/${safeFilename}`;
-  }
-
-  if (entityType === 'blog') {
-    return `blogs/${entityId}/${safeFilename}`;
-  }
-
-  return `pages/${entityId}/${safeFilename}`;
+// Parse type prefix to extract media category (profile, banner, gallery, etc.)
+function getMediaTypeFromPrefix(prefix: string): string {
+  // prefix format: 'businesses/{id}/profile' -> 'image' or 'video'
+  // Actually, we store the full prefix as 'type' and use it directly
+  return prefix;
 }
 
 export const uploadMedia = defineAction({
   accept: 'form',
   input: z.object({
     file: z.any(),
-    entityType: z.string().optional().default('general'),
-    entityId: z.string().optional().default(''),
-    category: z.string().optional().default('gallery'),
+    type: z.string(),           // R2 path prefix (e.g., 'businesses/biz-123/profile')
+    typeId: z.string(),        // entity ID
     hash: z.string().optional(),
     width: z.number().optional(),
     height: z.number().optional(),
-    businessId: z.string().optional(),
   }),
   handler: async (input) => {
     const db = await getDb();
     const auth = await initAuth();
-    const { user } = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => ({ user: null, session: null }));
+    const session = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
+    const user = session?.user ?? null;
 
     if (!user) {
       return { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } };
@@ -115,47 +108,51 @@ export const uploadMedia = defineAction({
               mimeType: existing[0].mimeType,
               size: existing[0].size,
               type: existing[0].type,
+              typeId: existing[0].typeId,
             },
             isDuplicate: true,
           };
         }
       }
 
-      // Check business limits
-      if (input.businessId) {
-        const [business] = await db.select({ planType: businessPages.planType, ownerId: businessPages.ownerId })
-          .from(businessPages)
-          .where(eq(businessPages.id, input.businessId))
+      // Parse type to check business limits
+      // type format: 'businesses/{id}/profile'
+      const typeParts = input.type.split('/');
+      const entityType = typeParts[0];
+
+      if (entityType === 'businesses') {
+        // Check ownership
+        const [business] = await db.select({ planType: businesses.planType, ownerId: businesses.ownerId })
+          .from(businesses)
+          .where(eq(businesses.id, input.typeId))
           .limit(1);
 
-        if (business && business.ownerId !== user.id && user.role !== 'admin' && user.role !== 'super_admin') {
+        if (!business) {
+          return { success: false, error: { code: 'NOT_FOUND', message: 'Business not found' } };
+        }
+
+        if (business.ownerId !== user.id && user.role !== 'admin' && user.role !== 'super_admin') {
           return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied to this business' } };
         }
 
         const limits = await getPlanLimits(business?.planType || null) || DEFAULT_LIMITS;
 
+        // Check image/video limits by type prefix
+        const imagePrefix = `${input.type.split('/').slice(0, -1).join('/')}`;
         const imageCountResult = await db.select({ count: count() })
           .from(media)
-          .where(and(eq(media.businessId, input.businessId), eq(media.type, 'image')))
-          .get();
-        const videoCountResult = await db.select({ count: count() })
-          .from(media)
-          .where(and(eq(media.businessId, input.businessId), eq(media.type, 'video')))
+          .where(and(eq(media.type, imagePrefix), eq(media.typeId, input.typeId)))
           .get();
 
         if (isImage && (imageCountResult?.count || 0) >= limits.maxBusinessImages) {
           return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessImages} images allowed` } };
         }
-        if (isVideo && (videoCountResult?.count || 0) >= limits.maxBusinessVideos) {
-          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessVideos} videos allowed` } };
-        }
       }
 
       // Build R2 key
       const r2Key = buildR2Key({
-        entityType: input.entityType || 'general',
-        entityId: input.entityId || '',
-        category: input.category || 'gallery',
+        type: input.type,
+        typeId: input.typeId,
         filename: file.name,
         timestamp,
         id,
@@ -171,14 +168,12 @@ export const uploadMedia = defineAction({
         const buffer = Buffer.from(await file.arrayBuffer());
         await bucket.put(r2Key, buffer, {
           httpMetadata: {
-            contentType: 'image/webp',
+            contentType: file.type,
             cacheControl: 'public, max-age=31536000, immutable',
           },
         });
         finalUrl = `${getR2PublicUrl()}/${r2Key}`;
         storedPath = r2Key;
-        finalMimeType = 'image/webp';
-        finalSize = buffer.length;
       } else {
         const buffer = Buffer.from(await file.arrayBuffer());
         const base64 = buffer.toString('base64');
@@ -194,13 +189,10 @@ export const uploadMedia = defineAction({
         size: finalSize,
         width: input.width || null,
         height: input.height || null,
-        type: isImage ? 'image' : 'video',
-        businessId: input.entityId || null,
+        type: input.type,
+        typeId: input.typeId,
         createdById: user.id,
         hash: input.hash || null,
-        entityType: input.entityType || 'general',
-        entityId: input.entityId || null,
-        category: input.category || 'gallery',
         r2Key: storedPath,
       }).returning();
 
@@ -212,7 +204,8 @@ export const uploadMedia = defineAction({
           filename: file.name,
           mimeType: finalMimeType,
           size: finalSize,
-          type: isImage ? 'image' : 'video',
+          type: created.type,
+          typeId: created.typeId,
           width: input.width || null,
           height: input.height || null,
         },

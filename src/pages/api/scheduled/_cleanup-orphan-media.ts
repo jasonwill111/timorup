@@ -40,7 +40,7 @@ export const onRequest: ScheduledHandler = async (context) => {
         id: media.id,
         url: media.url,
         type: media.type,
-        businessId: media.businessId,
+        typeId: media.typeId,
       })
       .from(media)
       .all();

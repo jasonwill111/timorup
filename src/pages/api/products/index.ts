@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { products, businessPages } from '@/db/schema';
+import { products, businesses } from '@/db/schema';
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { canCreateSku, canEditBusiness } from '@/lib/subscription';
@@ -29,12 +29,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
   const isAdmin = user && url.searchParams.get('isAdmin') === 'true';
 
   if (!isAdmin) {
-    // Non-admin: require businessPageId
-    const businessPageId = url.searchParams.get('businessPageId');
-    if (!businessPageId) {
+    // Non-admin: require businessId
+    const businessId = url.searchParams.get('businessId');
+    if (!businessId) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'businessPageId is required' }
+        error: { message: 'businessId is required' }
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -43,7 +43,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
     const db = await getDb();
     const activeOnly = url.searchParams.get('active') !== 'false';
-    const conditions = [eq(products.businessPageId, businessPageId)];
+    const conditions = [eq(products.businessId, businessId)];
     if (activeOnly) {
       conditions.push(eq(products.active, true));
     }
@@ -67,12 +67,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
   // Admin path
   const db = await getDb();
-  const businessPageId = url.searchParams.get('businessPageId');
+  const businessId = url.searchParams.get('businessId');
   const activeOnly = url.searchParams.get('active') !== 'false';
 
   const conditions = [];
-  if (businessPageId) {
-    conditions.push(eq(products.businessPageId, businessPageId));
+  if (businessId) {
+    conditions.push(eq(products.businessId, businessId));
   }
   if (activeOnly) {
     conditions.push(eq(products.active, true));
@@ -107,14 +107,14 @@ export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
     const {
-      title, price, priceUnit, description, businessPageId,
+      title, price, priceUnit, description, businessId,
       priceFields, serviceType, specifications, featured
     } = body;
 
-    if (!businessPageId || !title) {
+    if (!businessId || !title) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'businessPageId and title are required' }
+        error: { message: 'businessId and title are required' }
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -126,11 +126,10 @@ export async function POST({ request }: { request: Request }) {
 
     // Check business exists
     const business = await db.select({
-      id: businessPages.id,
-      entityType: businessPages.entityType,
+      id: businesses.id,
     })
-    .from(businessPages)
-    .where(eq(businessPages.id, businessPageId))
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
     .limit(1)
     .get();
 
@@ -144,19 +143,8 @@ export async function POST({ request }: { request: Request }) {
       });
     }
 
-    // Non-profits cannot have SKUs
-    if (business.entityType === 'nonprofit') {
-      return new Response(JSON.stringify({
-        success: false,
-        error: { message: 'Non-profit listings cannot have SKUs' }
-      }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     // Check subscription status and SKU limit using subscription helper
-    const canCreate = await canCreateSku(businessPageId);
+    const canCreate = await canCreateSku(businessId);
     if (!canCreate.can) {
       return new Response(JSON.stringify({
         success: false,
@@ -186,7 +174,7 @@ export async function POST({ request }: { request: Request }) {
       price: price || null,
       priceUnit: priceUnit || null,
       description: description || null,
-      businessPageId,
+      businessId,
       priceFields: safeStringify(priceFields),
       serviceType: finalServiceType,
       specifications: safeStringify(specifications),
@@ -232,11 +220,11 @@ export async function PUT({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { title, price, priceUnit, description, priceFields, serviceType, specifications, featured, active, businessPageId } = body;
+    const { title, price, priceUnit, description, priceFields, serviceType, specifications, featured, active, businessId } = body;
 
     // Check grace period if updating business association
-    if (businessPageId) {
-      const check = await canEditBusiness(businessPageId);
+    if (businessId) {
+      const check = await canEditBusiness(businessId);
       if (!check.can) {
         return new Response(JSON.stringify({
           success: false,
@@ -257,7 +245,7 @@ export async function PUT({ request }: { request: Request }) {
     }
 
     // Check grace period for existing product's business
-    const productBusinessId = existing.businessPageId;
+    const productBusinessId = existing.businessId;
     if (productBusinessId) {
       const check = await canEditBusiness(productBusinessId);
       if (!check.can) {

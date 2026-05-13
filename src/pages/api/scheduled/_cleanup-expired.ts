@@ -46,13 +46,13 @@ export async function GET({ request }: { params: Record<string, string>; request
         // Count SKUs before deletion
         const skuCountResult = await db.select({ count: sql<number>`count(*)` })
           .from(products)
-          .where(eq(products.businessPageId, business.id))
+          .where(eq(products.businessId, business.id))
           .get();
         const skuCount = Number(skuCountResult?.count) || 0;
 
         // Delete all SKUs for this listing
         await db.delete(products)
-          .where(eq(products.businessPageId, business.id))
+          .where(eq(products.businessId, business.id))
           .run();
 
         results.totalSkusDeleted += skuCount;

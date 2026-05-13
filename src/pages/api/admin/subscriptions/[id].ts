@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { orders, businessPages } from '@/db/schema';
+import { orders, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
@@ -108,20 +108,20 @@ export async function PUT({ params, request }: { params: Record<string, string>;
       .where(eq(orders.id, id))
       .run();
 
-    // If payment confirmed, update business page with plan info
-    if (status === 'paid' && order.businessPageId) {
+    // If payment confirmed, update business with plan info
+    if (status === 'paid' && order.typeId) {
       const finalPlanType = (planType || order.planType)
         .replace('-yearly', '')
         .replace('-monthly', '');
 
-      await db.update(businessPages)
+      await db.update(businesses)
         .set({
           planType: finalPlanType,
           expiryDate: newExpiryDate,
           status: order.status === 'draft' ? 'live' : order.status,
           updatedAt: new Date(),
         })
-        .where(eq(businessPages.id, order.businessPageId))
+        .where(eq(businesses.id, order.typeId))
         .run();
     }
 

@@ -1,0 +1,19 @@
+{
+  "id": "0052-rest-api-cleanup",
+  "status": "completed",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-13T12:51:34.667Z",
+  "lastActivity": "2026-05-13T12:59:23.800Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-13T12:57:42.271Z",
+  "approvedAt": "2026-05-13T12:59:23.800Z"
+}

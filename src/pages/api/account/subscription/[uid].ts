@@ -2,9 +2,9 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { orders, businessPages } from '@/db/schema';
+import { orders, businesses } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { z } from 'zod';
 
 function getErrorMessage(error: unknown): string {
@@ -26,7 +26,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
   const db = await getDb();
   // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`sub:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`sub:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({
@@ -59,7 +59,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
     // Get user's orders (subscriptions)
     const userOrders = await db.select({
       id: orders.id,
-      businessPageId: orders.businessPageId,
+      typeId: orders.typeId,
       planType: orders.planType,
       amount: orders.amount,
       status: orders.status,
@@ -74,16 +74,16 @@ export async function GET({ params, request }: { params: Record<string, string>;
 
     // Get business titles
     const businessMap = new Map();
-    const bizIds = [...new Set(userOrders.map(o => o.businessPageId))];
+    const bizIds = [...new Set(userOrders.map(o => o.typeId))];
     if (bizIds.length > 0) {
-      const businesses = await db.select({
-        id: businessPages.id,
-        title: businessPages.title,
+      const businessList = await db.select({
+        id: businesses.id,
+        title: businesses.title,
       })
-      .from(businessPages)
+      .from(businesses)
       .all();
 
-      businesses.forEach((biz: { id: string; title: string }) => {
+      businessList.forEach((biz: { id: string; title: string }) => {
         if (bizIds.includes(biz.id)) {
           businessMap.set(biz.id, biz.title);
         }
@@ -91,9 +91,9 @@ export async function GET({ params, request }: { params: Record<string, string>;
     }
 
     // Add business titles
-    const ordersWithBusiness = userOrders.map((order: { businessPageId: string }) => ({
+    const ordersWithBusiness = userOrders.map((order: { typeId: string }) => ({
       ...order,
-      businessTitle: businessMap.get(order.businessPageId) || 'Unknown Business',
+      businessTitle: businessMap.get(order.typeId) || 'Unknown Business',
     }));
 
     // Calculate subscription summary

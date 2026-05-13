@@ -4,7 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { z } from 'zod';
 
 function getErrorMessage(error: unknown): string {
@@ -26,7 +26,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
   const db = await getDb();
   // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`profile:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`profile:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({

@@ -1,17 +1,14 @@
-// Rate limiter for Cloudflare Workers (in-memory, per-instance)
-// For production at scale, use Cloudflare KV or Redis
-//
-// KV Support Limitation:
-// Currently uses in-memory Map which resets on each Worker instance cold start.
-// For production at scale, implement KV-based storage:
-//   - Use env.SESSION (KV namespace) for distributed rate limiting
-//   - Store rate limit data with TTL in KV
-//   - Example: await env.SESSION.put(`ratelimit:${identifier}`, JSON.stringify(data), { expirationTtl: 60 })
+// Rate limiter for Cloudflare Workers
+// Primary: KV-backed (distributed, persists across cold starts)
+// Fallback: in-memory Map (per-instance, resets on cold start)
 
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+import { env } from 'cloudflare:workers';
 
 const WINDOW_MS = 60 * 1000; // 1 minute window
-const MAX_REQUESTS_PER_WINDOW = 100; // 100 requests/min per IP (generous for real users)
+const MAX_REQUESTS_PER_WINDOW = 100; // 100 requests/min per IP
+
+// In-memory fallback store (per-instance)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -19,8 +16,60 @@ export interface RateLimitResult {
   resetIn: number; // seconds until reset
 }
 
-export function checkRateLimit(identifier: string): RateLimitResult {
+/**
+ * Check rate limit using KV storage (primary)
+ * Falls back to in-memory if KV unavailable
+ */
+export async function checkRateLimitKV(identifier: string): Promise<RateLimitResult> {
   const now = Date.now();
+  const key = `ratelimit:${identifier}`;
+
+  try {
+    // Try KV first
+    if (env.SESSION) {
+      const stored = await env.SESSION.get(key);
+      const record = stored ? JSON.parse(stored) as { count: number; resetTime: number } : null;
+
+      if (record && now < record.resetTime) {
+        // Valid record exists - increment
+        record.count++;
+        await env.SESSION.put(key, JSON.stringify(record), {
+          expirationTtl: Math.ceil(WINDOW_MS / 1000)
+        });
+        return {
+          allowed: true,
+          remaining: MAX_REQUESTS_PER_WINDOW - record.count,
+          resetIn: Math.ceil((record.resetTime - now) / 1000),
+        };
+      }
+
+      // No record or expired - create new
+      const newRecord = { count: 1, resetTime: now + WINDOW_MS };
+      await env.SESSION.put(key, JSON.stringify(newRecord), {
+        expirationTtl: Math.ceil(WINDOW_MS / 1000)
+      });
+      return {
+        allowed: true,
+        remaining: MAX_REQUESTS_PER_WINDOW - 1,
+        resetIn: Math.ceil(WINDOW_MS / 1000),
+      };
+    }
+  } catch (error) {
+    console.warn('[RateLimit] KV unavailable, falling back to in-memory:', error);
+  }
+
+  // Fallback to in-memory store
+  return checkRateLimitInMemory(identifier, now);
+}
+
+/**
+ * Synchronous in-memory rate limit check (fallback)
+ */
+export function checkRateLimit(identifier: string): RateLimitResult {
+  return checkRateLimitInMemory(identifier, Date.now());
+}
+
+function checkRateLimitInMemory(identifier: string, now: number): RateLimitResult {
   const record = rateLimitStore.get(identifier);
 
   // Window expired or doesn't exist - reset

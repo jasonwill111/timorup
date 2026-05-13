@@ -41,6 +41,10 @@ sw:sync-docs 0001
 - [FS-045: Header and Pricing Updates](FS-045/FEATURE.md)
 - [FS-046: Account Page Updates](FS-046/FEATURE.md)
 - [FS-047: Entity Detail Pages](FS-047/FEATURE.md)
+- [FS-052: REST API Cleanup](FS-052/FEATURE.md)
+- [FS-049: Admin Auth Cookie + Middleware](FS-049/FEATURE.md)
+- [FS-050: Rate Limiter KV Storage](FS-050/FEATURE.md)
+- [FS-051: Better Auth KV Session Cache](FS-051/FEATURE.md)
 
 ---
 

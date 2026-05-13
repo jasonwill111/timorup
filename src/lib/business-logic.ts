@@ -1,6 +1,6 @@
 // Business logic utilities
 import { db } from './db';
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import type { Role } from './permissions';
 
@@ -18,13 +18,13 @@ export async function hasUserBusiness(
 ) {
   const [result] = await dbInstance
     .select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      status: businessPages.status,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      status: businesses.status,
     })
-    .from(businessPages)
-    .where(eq(businessPages.ownerId, userId))
+    .from(businesses)
+    .where(eq(businesses.ownerId, userId))
     .limit(1);
 
   return result ?? null;

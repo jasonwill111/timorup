@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { orders, businessPages } from '@/db/schema';
+import { orders, businesses } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 
@@ -42,7 +42,7 @@ export const subscriptions = {
 
       let query = db.select({
         id: orders.id,
-        businessPageId: orders.businessPageId,
+        typeId: orders.typeId,
         userId: orders.userId,
         planType: orders.planType,
         amount: orders.amount,
@@ -125,8 +125,8 @@ export const subscriptions = {
         .where(eq(orders.id, input.id))
         .run();
 
-      // If payment confirmed, update business page with plan info
-      if (input.status === 'paid' && order.businessPageId) {
+      // If payment confirmed, update business with plan info
+      if (input.status === 'paid' && order.typeId) {
         const planType = order.planType
           .replace('-yearly', '')
           .replace('-monthly', '');
@@ -134,7 +134,7 @@ export const subscriptions = {
         const expiryTs = expiryTimestamp ? new Date(expiryTimestamp * 1000) : newExpiryDate;
         const expiry = expiryTs ? Math.floor(expiryTs.getTime() / 1000) : null;
 
-        await db.update(businessPages)
+        await db.update(businesses)
           .set({
             planType,
             expiryDate: expiry,
@@ -143,7 +143,7 @@ export const subscriptions = {
             gracePeriodEndDate: null,
             updatedAt: new Date(),
           })
-          .where(eq(businessPages.id, order.businessPageId))
+          .where(eq(businesses.id, order.typeId))
           .run();
       }
 
@@ -209,20 +209,20 @@ export const subscriptions = {
         .where(eq(orders.id, input.id))
         .run();
 
-      // If payment confirmed, update business page with plan info
-      if (input.status === 'paid' && order.businessPageId) {
+      // If payment confirmed, update business with plan info
+      if (input.status === 'paid' && order.typeId) {
         const finalPlanType = (input.planType || order.planType)
           .replace('-yearly', '')
           .replace('-monthly', '');
 
-        await db.update(businessPages)
+        await db.update(businesses)
           .set({
             planType: finalPlanType,
             expiryDate: newExpiryDate,
             status: order.status === 'draft' ? 'live' : order.status,
             updatedAt: new Date(),
           })
-          .where(eq(businessPages.id, order.businessPageId))
+          .where(eq(businesses.id, order.typeId))
           .run();
       }
 

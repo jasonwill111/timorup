@@ -17,8 +17,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    // Initialize auth
-    const auth = await initAuth();
+    // Get SESSION KV from Cloudflare runtime env
+    const runtimeEnv = (locals as { runtime?: { env?: { SESSION?: KVNamespace } } }).runtime?.env;
+    const sessionKV = runtimeEnv?.SESSION;
+
+    // Initialize auth with KV for session caching
+    const auth = await initAuth({ SESSION: sessionKV });
 
     // Get session from Better Auth cookie
     const sessionToken = cookies.get('better-auth.session_token')?.value;

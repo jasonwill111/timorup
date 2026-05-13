@@ -1,19 +1,41 @@
-// API endpoint to get all categories
+// API endpoint to get categories by entity type
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { categories } from '@/db/schema';
+import {
+  businessCategories,
+  nonProfitCategories,
+  publicSectorCategories,
+  listingCategories,
+} from '@/db/schema';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
 }
 
-export async function GET() {
+function getCategoryTable(entityType: string) {
+  switch (entityType) {
+    case 'business':
+      return businessCategories;
+    case 'nonprofit':
+      return nonProfitCategories;
+    case 'public_sector':
+      return publicSectorCategories;
+    case 'listing':
+      return listingCategories;
+    default:
+      return businessCategories;
+  }
+}
+
+export async function GET({ url }: { url: URL }) {
   try {
+    const entityType = url.searchParams.get('type') || 'business';
     const db = await getDb();
-    const allCategories = await db.select().from(categories).all();
-    
+    const table = getCategoryTable(entityType);
+    const allCategories = await db.select().from(table).all();
+
     // Cache in production: stale-while-revalidate for 60 seconds
     const cacheHeaders = process.env.NODE_ENV === 'production'
       ? { 'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=600' }

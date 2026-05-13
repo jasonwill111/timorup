@@ -2,7 +2,7 @@
 // Server Island: Fetches dynamic content on the homepage
 // This runs on the server and caches results
 import { getDb } from '@/lib/db';
-import { businessPages, categories, products } from '@/db/schema';
+import { businesses, businessCategories, products } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 import { parseIcon, DEFAULT_CATEGORY_ICONS, getLucideIconPath } from '@/lib/icons';
 import BusinessCard from '@/components/business/BusinessCard.astro';
@@ -38,7 +38,6 @@ type BusinessListing = {
   likes: number;
   status: string;
   categoryId: string | null;
-  entityType: string;
   profileImageId: string | null;
   category: string;
   rating: number;
@@ -58,13 +57,13 @@ let categoriesData: CategoryData[] = [];
 
 try {
   const categoriesResult = await db.select({
-    id: categories.id,
-    name: categories.name,
-    slug: categories.slug,
-    description: categories.description,
-    icon: categories.icon,
+    id: businessCategories.id,
+    name: businessCategories.name,
+    slug: businessCategories.slug,
+    description: businessCategories.description,
+    icon: businessCategories.icon,
   })
-  .from(categories)
+  .from(businessCategories)
   .limit(20);
 
   const categoryMap: Record<string, { name: string; icon: string }> = {};
@@ -73,19 +72,18 @@ try {
   });
 
   const businessesResult = await db.select({
-    id: businessPages.id,
-    title: businessPages.title,
-    slug: businessPages.slug,
-    tags: businessPages.tags,
-    likes: businessPages.likes,
-    status: businessPages.status,
-    categoryId: businessPages.categoryId,
-    entityType: businessPages.entityType,
-    profileImageId: businessPages.profileImageId,
+    id: businesses.id,
+    title: businesses.title,
+    slug: businesses.slug,
+    tags: businesses.tags,
+    likes: businesses.likes,
+    status: businesses.status,
+    categoryId: businesses.categoryId,
+    profileImageId: businesses.profileImageId,
   })
-  .from(businessPages)
-  .where(eq(businessPages.status, 'live'))
-  .orderBy(desc(businessPages.likes))
+  .from(businesses)
+  .where(eq(businesses.status, 'live'))
+  .orderBy(desc(businesses.likes))
   .limit(20);
 
   const allListings = businessesResult.map(b => {
@@ -148,20 +146,20 @@ try {
     businessPageId: products.businessPageId,
   })
   .from(products)
-  .innerJoin(businessPages, eq(products.businessPageId, businessPages.id))
-  .where(eq(businessPages.status, 'live'))
+  .innerJoin(businesses, eq(products.businessPageId, businesses.id))
+  .where(eq(businesses.status, 'live'))
   .orderBy(desc(products.createdAt))
   .limit(12);
 
   const businessIds = [...new Set(productsResult.map(p => p.businessPageId))];
   const businessesForProducts = businessIds.length > 0
     ? await db.select({
-        id: businessPages.id,
-        title: businessPages.title,
-        slug: businessPages.slug,
+        id: businesses.id,
+        title: businesses.title,
+        slug: businesses.slug,
       })
-      .from(businessPages)
-      .where(inArray(businessPages.id, businessIds))
+      .from(businesses)
+      .where(inArray(businesses.id, businessIds))
     : [];
 
   const businessMap: Record<string, { title: string; slug: string }> = {};

@@ -9,8 +9,13 @@ const AI_TIMEOUT = 60000;
 
 interface GenerationRequest {
   type: 'listing' | 'sku' | 'blog' | 'landing';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   stream?: boolean;
+}
+
+interface StreamResult {
+  fullStream: AsyncGenerator<{ type: string; content?: string }>;
+  object?: Record<string, unknown>;
 }
 
 // Build user message from request data
@@ -95,7 +100,7 @@ export async function POST({ request }: { request: Request }) {
             const result = await Promise.race([
               agent.stream(messages),
               new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), AI_TIMEOUT))
-            ]) as any;
+            ]) as StreamResult;
 
             for await (const chunk of result.fullStream) {
               if (chunk.type === 'content' && chunk.content) {
@@ -129,7 +134,7 @@ export async function POST({ request }: { request: Request }) {
     const result = await Promise.race([
       agent.generate(messages, { output: 'object' }),
       new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), AI_TIMEOUT))
-    ]) as any;
+    ]) as StreamResult;
 
     // result.object contains the structured output from Zod schema
     const output = result.object;

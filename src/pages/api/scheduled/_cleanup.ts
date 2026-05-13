@@ -73,15 +73,12 @@ export const onRequest: ScheduledHandler = async (context) => {
 
         // 2. Delete media records
         await db.delete(media).where(
-          or(
-            inArray(media.businessId, [business.id]),
-            isNull(media.businessId)
-          )
+          inArray(media.typeId, [business.id])
         ).where((f) => f.sql`url LIKE ${`${entityFolder}/%`}`)
         .run();
 
         // 3. Delete products
-        await db.delete(products).where(inArray(products.businessPageId, [business.id])).run();
+        await db.delete(products).where(inArray(products.businessId, [business.id])).run();
 
         // 4. Delete business
         await db.delete(businesses).where(inArray(businesses.id, [business.id])).run();

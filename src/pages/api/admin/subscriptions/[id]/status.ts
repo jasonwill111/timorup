@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { orders, businessPages } from '@/db/schema';
+import { orders, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 import { calculateGracePeriodEnd } from '@/lib/subscription';
@@ -71,15 +71,15 @@ export async function PUT({ params, request }: { params: Record<string, string>;
       .where(eq(orders.id, id))
       .run();
 
-    // If payment confirmed, update business page with plan info
-    if (status === 'paid' && order.businessPageId) {
+    // If payment confirmed, update business with plan info
+    if (status === 'paid' && order.typeId) {
       const planType = order.planType
         .replace('-yearly', '')
         .replace('-monthly', '');
 
       const expiryTimestamp = Math.floor(newExpiryDate.getTime() / 1000);
 
-      await db.update(businessPages)
+      await db.update(businesses)
         .set({
           planType,
           expiryDate: expiryTimestamp,
@@ -88,7 +88,7 @@ export async function PUT({ params, request }: { params: Record<string, string>;
           gracePeriodEndDate: null, // Clear grace period on renewal
           updatedAt: new Date(),
         })
-        .where(eq(businessPages.id, order.businessPageId))
+        .where(eq(businesses.id, order.typeId))
         .run();
     }
 

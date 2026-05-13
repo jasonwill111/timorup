@@ -2,9 +2,9 @@
 id: US-001
 feature: FS-039
 title: "Auth Actions Migration (P1)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-05-09
+created: 2026-05-09T00:00:00.000Z
 tldr: "**As a** developer."
 project: timorlist
 ---
@@ -21,12 +21,12 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: signUp action accepts email/password/name via FormData
-- [ ] **AC-US1-02**: signIn action validates credentials and returns session
-- [ ] **AC-US1-03**: signOut action clears session cookie
-- [ ] **AC-US1-04**: verifyEmail action marks email as verified
-- [ ] **AC-US1-05**: forgotPassword action sends reset email
-- [ ] **AC-US1-06**: resetPassword action updates password with token
+- [x] **AC-US1-01**: signUp action accepts email/password/name via FormData ✅ (2026-05-10)
+- [x] **AC-US1-02**: signIn action validates credentials and returns session ✅
+- [x] **AC-US1-03**: signOut action clears session ✅
+- [x] **AC-US1-04**: verifyEmail action validates token ✅
+- [x] **AC-US1-05**: forgotPassword action sends reset email ✅
+- [x] **AC-US1-06**: resetPassword action updates password ✅
 
 ---
 

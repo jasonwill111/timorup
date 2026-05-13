@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { orders, businessPages } from '@/db/schema';
+import { orders, businesses } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 
@@ -50,7 +50,7 @@ export async function GET({ request }: { request: Request }) {
   try {
     const userOrders = await db.select({
       id: orders.id,
-      businessPageId: orders.businessPageId,
+      typeId: orders.typeId,
       planType: orders.planType,
       amount: orders.amount,
       status: orders.status,
@@ -66,16 +66,16 @@ export async function GET({ request }: { request: Request }) {
 
     // Get business titles
     const businessMap = new Map();
-    const bizIds = [...new Set(userOrders.map(o => o.businessPageId).filter(Boolean))];
+    const bizIds = [...new Set(userOrders.map(o => o.typeId).filter(Boolean))];
     if (bizIds.length > 0) {
-      const businesses = await db.select({
-        id: businessPages.id,
-        title: businessPages.title,
+      const businessList = await db.select({
+        id: businesses.id,
+        title: businesses.title,
       })
-      .from(businessPages)
+      .from(businesses)
       .all();
 
-      businesses.forEach((biz: { id: string; title: string }) => {
+      businessList.forEach((biz: { id: string; title: string }) => {
         if (bizIds.includes(biz.id)) {
           businessMap.set(biz.id, biz.title);
         }
@@ -83,9 +83,9 @@ export async function GET({ request }: { request: Request }) {
     }
 
     // Add business titles
-    const ordersWithBusiness = userOrders.map((order: { businessPageId: string | null }) => ({
+    const ordersWithBusiness = userOrders.map((order: { typeId: string | null }) => ({
       ...order,
-      businessTitle: order.businessPageId ? (businessMap.get(order.businessPageId) || 'Unknown Business') : null,
+      businessTitle: order.typeId ? (businessMap.get(order.typeId) || 'Unknown Business') : null,
     }));
 
     return new Response(JSON.stringify({

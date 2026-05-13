@@ -2,27 +2,27 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { reviews, businessPages } from '@/db/schema';
+import { reviews, businesses } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 
 // GET - List reviews
 export async function GET({ url }: { url: URL }) {
   try {
     const db = await getDb();
-    const businessPageId = url.searchParams.get('businessPageId');
+    const businessId = url.searchParams.get('businessId');
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
 
     let conditions = [];
-    if (businessPageId) {
-      conditions.push(eq(reviews.businessPageId, businessPageId));
+    if (businessId) {
+      conditions.push(eq(reviews.businessId, businessId));
     }
 
     const reviewsResult = await db.select({
       id: reviews.id,
       rating: reviews.rating,
-      comment: reviews.comment,
+      content: reviews.content,
       isEdited: reviews.isEdited,
       createdAt: reviews.createdAt,
       reply: reviews.reply,
@@ -37,10 +37,10 @@ export async function GET({ url }: { url: URL }) {
 
     // Calculate average rating
     let avgRating = 0;
-    if (businessPageId) {
+    if (businessId) {
       const avgResult = await db.select({ avg: sql`AVG(${reviews.rating})` })
         .from(reviews)
-        .where(eq(reviews.businessPageId, businessPageId));
+        .where(eq(reviews.businessId, businessId));
       avgRating = Number(avgResult[0]?.avg) || 0;
     }
 
@@ -73,19 +73,19 @@ export async function POST({ request }: { request: Request }) {
   try {
     const db = await getDb();
     const body = await request.json();
-    const { businessPageId, userId, rating, comment } = body;
+    const { businessId, userId, rating, content } = body;
 
-    if (!businessPageId || !userId || !rating) {
+    if (!businessId || !userId || !rating) {
       return new Response(JSON.stringify({
         success: false,
-        error: { message: 'businessPageId, userId, and rating are required' }
+        error: { message: 'businessId, userId, and rating are required' }
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
     // Check business exists
     const business = await db.select()
-      .from(businessPages)
-      .where(eq(businessPages.id, businessPageId))
+      .from(businesses)
+      .where(eq(businesses.id, businessId))
       .limit(1);
 
     if (business.length === 0) {
@@ -98,23 +98,23 @@ export async function POST({ request }: { request: Request }) {
     const id = `review-${Date.now()}`;
     const newReview = await db.insert(reviews).values({
       id,
-      businessPageId,
+      businessId,
       userId,
       rating,
-      comment: comment || '',
+      content: content || '',
     }).returning();
 
     // Update business rating average
     const avgResult = await db.select({ avg: sql`AVG(${reviews.rating})`, count: sql`COUNT(*)` })
       .from(reviews)
-      .where(eq(reviews.businessPageId, businessPageId));
+      .where(eq(reviews.businessId, businessId));
 
-    await db.update(businessPages)
+    await db.update(businesses)
       .set({
         ratingAverage: Number(avgResult[0]?.avg) || rating,
         ratingCount: Number(avgResult[0]?.count) || 1
       })
-      .where(eq(businessPages.id, businessPageId));
+      .where(eq(businesses.id, businessId));
 
     return new Response(JSON.stringify({
       success: true,

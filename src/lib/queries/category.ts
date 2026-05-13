@@ -1,9 +1,14 @@
 /**
  * Category Query Functions
- * Centralized data access for categories
+ * Centralized data access for entity-specific categories
  */
 import { getDb } from '@/lib/db';
-import { categories } from '@/db/schema';
+import {
+  businessCategories,
+  nonProfitCategories,
+  publicSectorCategories,
+  listingCategories,
+} from '@/db/schema';
 import { eq, and, asc, isNull } from 'drizzle-orm';
 import { success, error, type Result } from './result';
 
@@ -15,40 +20,48 @@ export interface CategoryInfo {
   description: string | null;
   icon: string | null;
   parentId: string | null;
-  entityType: 'business' | 'nonprofit' | null;
 }
 
 export interface CategoryWithChildren extends CategoryInfo {
   children: CategoryInfo[];
 }
 
+export type EntityType = 'business' | 'nonprofit' | 'public_sector' | 'listing';
+
+function getCategoryTable(entityType: EntityType) {
+  switch (entityType) {
+    case 'business':
+      return businessCategories;
+    case 'nonprofit':
+      return nonProfitCategories;
+    case 'public_sector':
+      return publicSectorCategories;
+    case 'listing':
+      return listingCategories;
+  }
+}
+
 /**
- * Get all categories
+ * Get all categories for an entity type
  */
 export async function getAllCategories(
-  entityType?: 'business' | 'nonprofit' | 'all'
+  entityType: EntityType = 'business'
 ): Promise<Result<CategoryInfo[]>> {
   try {
     const db = await getDb();
-
-    const conditions = [];
-    if (entityType && entityType !== 'all') {
-      conditions.push(eq(categories.entityType, entityType));
-    }
+    const table = getCategoryTable(entityType);
 
     const results = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        parentId: categories.parentId,
-        entityType: categories.entityType,
+        id: table.id,
+        name: table.name,
+        slug: table.slug,
+        description: table.description,
+        icon: table.icon,
+        parentId: table.parentId,
       })
-      .from(categories)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(asc(categories.name))
+      .from(table)
+      .orderBy(asc(table.name))
       .all();
 
     return success(results);
@@ -61,22 +74,24 @@ export async function getAllCategories(
  * Get category by slug
  */
 export async function getCategoryBySlug(
-  slug: string
+  slug: string,
+  entityType: EntityType = 'business'
 ): Promise<Result<CategoryInfo | null>> {
   try {
     const db = await getDb();
+    const table = getCategoryTable(entityType);
+
     const result = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        parentId: categories.parentId,
-        entityType: categories.entityType,
+        id: table.id,
+        name: table.name,
+        slug: table.slug,
+        description: table.description,
+        icon: table.icon,
+        parentId: table.parentId,
       })
-      .from(categories)
-      .where(eq(categories.slug, slug))
+      .from(table)
+      .where(eq(table.slug, slug))
       .limit(1)
       .get();
 
@@ -90,22 +105,24 @@ export async function getCategoryBySlug(
  * Get category by ID
  */
 export async function getCategoryById(
-  id: string
+  id: string,
+  entityType: EntityType = 'business'
 ): Promise<Result<CategoryInfo | null>> {
   try {
     const db = await getDb();
+    const table = getCategoryTable(entityType);
+
     const result = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        parentId: categories.parentId,
-        entityType: categories.entityType,
+        id: table.id,
+        name: table.name,
+        slug: table.slug,
+        description: table.description,
+        icon: table.icon,
+        parentId: table.parentId,
       })
-      .from(categories)
-      .where(eq(categories.id, id))
+      .from(table)
+      .where(eq(table.id, id))
       .limit(1)
       .get();
 
@@ -119,24 +136,25 @@ export async function getCategoryById(
  * Get category with children
  */
 export async function getCategoryWithChildren(
-  slug: string
+  slug: string,
+  entityType: EntityType = 'business'
 ): Promise<Result<CategoryWithChildren | null>> {
   try {
     const db = await getDb();
+    const table = getCategoryTable(entityType);
 
     // Get parent category
     const parent = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        parentId: categories.parentId,
-        entityType: categories.entityType,
+        id: table.id,
+        name: table.name,
+        slug: table.slug,
+        description: table.description,
+        icon: table.icon,
+        parentId: table.parentId,
       })
-      .from(categories)
-      .where(eq(categories.slug, slug))
+      .from(table)
+      .where(eq(table.slug, slug))
       .limit(1)
       .get();
 
@@ -147,17 +165,16 @@ export async function getCategoryWithChildren(
     // Get children
     const children = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        parentId: categories.parentId,
-        entityType: categories.entityType,
+        id: table.id,
+        name: table.name,
+        slug: table.slug,
+        description: table.description,
+        icon: table.icon,
+        parentId: table.parentId,
       })
-      .from(categories)
-      .where(eq(categories.parentId, parent.id))
-      .orderBy(asc(categories.name))
+      .from(table)
+      .where(eq(table.parentId, parent.id))
+      .orderBy(asc(table.name))
       .all();
 
     return success({
@@ -173,29 +190,24 @@ export async function getCategoryWithChildren(
  * Get top-level categories (no parent)
  */
 export async function getTopLevelCategories(
-  entityType?: 'business' | 'nonprofit' | 'all'
+  entityType: EntityType = 'business'
 ): Promise<Result<CategoryInfo[]>> {
   try {
     const db = await getDb();
-
-    const conditions = [isNull(categories.parentId)];
-    if (entityType && entityType !== 'all') {
-      conditions.push(eq(categories.entityType, entityType));
-    }
+    const table = getCategoryTable(entityType);
 
     const results = await db
       .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        description: categories.description,
-        icon: categories.icon,
-        parentId: categories.parentId,
-        entityType: categories.entityType,
+        id: table.id,
+        name: table.name,
+        slug: table.slug,
+        description: table.description,
+        icon: table.icon,
+        parentId: table.parentId,
       })
-      .from(categories)
-      .where(and(...conditions))
-      .orderBy(asc(categories.name))
+      .from(table)
+      .where(isNull(table.parentId))
+      .orderBy(asc(table.name))
       .all();
 
     return success(results);

@@ -3,14 +3,13 @@
  * 统一 business listings 数据访问
  */
 import { getDb } from '@/lib/db';
-import { businessPages, categories, products, media } from '@/db/schema';
+import { businesses, listingCategories, products, media } from '@/db/schema';
 import { eq, desc, asc, like, and, or, sql, count } from 'drizzle-orm';
 
 export interface ListingWithCategory {
   id: string;
   title: string;
   slug: string;
-  entityType: string;
   categoryId: string | null;
   profileImageId: string | null;
   bannerImageId: string | null;
@@ -29,22 +28,21 @@ export async function getListingBySlug(slug: string): Promise<ListingWithCategor
 
   const result = await db
     .select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      entityType: businessPages.entityType,
-      categoryId: businessPages.categoryId,
-      profileImageId: businessPages.profileImageId,
-      bannerImageId: businessPages.bannerImageId,
-      address: businessPages.address,
-      tags: businessPages.tags,
-      status: businessPages.status,
-      categoryName: categories.name,
-      categorySlug: categories.slug,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      categoryId: businesses.categoryId,
+      profileImageId: businesses.profileImageId,
+      bannerImageId: businesses.bannerImageId,
+      address: businesses.address,
+      tags: businesses.tags,
+      status: businesses.status,
+      categoryName: listingCategories.name,
+      categorySlug: listingCategories.slug,
     })
-    .from(businessPages)
-    .leftJoin(categories, eq(businessPages.categoryId, categories.id))
-    .where(eq(businessPages.slug, slug))
+    .from(businesses)
+    .leftJoin(listingCategories, eq(businesses.categoryId, listingCategories.id))
+    .where(eq(businesses.slug, slug))
     .limit(1)
     .get();
 
@@ -59,19 +57,18 @@ export async function getUserListing(userId: string): Promise<ListingWithCategor
 
   const result = await db
     .select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      entityType: businessPages.entityType,
-      categoryId: businessPages.categoryId,
-      profileImageId: businessPages.profileImageId,
-      bannerImageId: businessPages.bannerImageId,
-      address: businessPages.address,
-      tags: businessPages.tags,
-      status: businessPages.status,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      categoryId: businesses.categoryId,
+      profileImageId: businesses.profileImageId,
+      bannerImageId: businesses.bannerImageId,
+      address: businesses.address,
+      tags: businesses.tags,
+      status: businesses.status,
     })
-    .from(businessPages)
-    .where(eq(businessPages.ownerId, userId))
+    .from(businesses)
+    .where(eq(businesses.ownerId, userId))
     .limit(1)
     .get();
 
@@ -92,30 +89,29 @@ export async function getListingsByType(
   const db = await getDb();
   const { limit = 20, offset = 0, status = 'live' } = options || {};
 
-  const conditions = [eq(businessPages.entityType, entityType)];
+  const conditions = [eq(businesses.entityType, entityType)];
   if (status) {
-    conditions.push(eq(businessPages.status, status));
+    conditions.push(eq(businesses.status, status));
   }
 
   return db
     .select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      entityType: businessPages.entityType,
-      categoryId: businessPages.categoryId,
-      profileImageId: businessPages.profileImageId,
-      bannerImageId: businessPages.bannerImageId,
-      address: businessPages.address,
-      tags: businessPages.tags,
-      status: businessPages.status,
-      categoryName: categories.name,
-      categorySlug: categories.slug,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      categoryId: businesses.categoryId,
+      profileImageId: businesses.profileImageId,
+      bannerImageId: businesses.bannerImageId,
+      address: businesses.address,
+      tags: businesses.tags,
+      status: businesses.status,
+      categoryName: listingCategories.name,
+      categorySlug: listingCategories.slug,
     })
-    .from(businessPages)
-    .leftJoin(categories, eq(businessPages.categoryId, categories.id))
+    .from(businesses)
+    .leftJoin(listingCategories, eq(businesses.categoryId, listingCategories.id))
     .where(and(...conditions))
-    .orderBy(desc(businessPages.likes))
+    .orderBy(desc(businesses.likes))
     .limit(limit)
     .offset(offset)
     .all();
@@ -136,33 +132,32 @@ export async function searchListings(
 
   const searchPattern = `%${query}%`;
   const conditions = or(
-    like(businessPages.title, searchPattern),
-    like(businessPages.tags, searchPattern),
-    like(businessPages.aboutUs, searchPattern)
+    like(businesses.title, searchPattern),
+    like(businesses.tags, searchPattern),
+    like(businesses.aboutUs, searchPattern)
   );
 
-  const typeCondition = entityType !== 'all' ? eq(businessPages.entityType, entityType) : undefined;
+  const typeCondition = entityType !== 'all' ? eq(businesses.entityType, entityType) : undefined;
   const whereClause = typeCondition ? and(conditions!, typeCondition) : conditions;
 
   return db
     .select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      entityType: businessPages.entityType,
-      categoryId: businessPages.categoryId,
-      profileImageId: businessPages.profileImageId,
-      bannerImageId: businessPages.bannerImageId,
-      address: businessPages.address,
-      tags: businessPages.tags,
-      status: businessPages.status,
-      categoryName: categories.name,
-      categorySlug: categories.slug,
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      categoryId: businesses.categoryId,
+      profileImageId: businesses.profileImageId,
+      bannerImageId: businesses.bannerImageId,
+      address: businesses.address,
+      tags: businesses.tags,
+      status: businesses.status,
+      categoryName: listingCategories.name,
+      categorySlug: listingCategories.slug,
     })
-    .from(businessPages)
-    .leftJoin(categories, eq(businessPages.categoryId, categories.id))
-    .where(and(whereClause!, eq(businessPages.status, 'live')))
-    .orderBy(desc(businessPages.likes))
+    .from(businesses)
+    .leftJoin(listingCategories, eq(businesses.categoryId, listingCategories.id))
+    .where(and(whereClause!, eq(businesses.status, 'live')))
+    .orderBy(desc(businesses.likes))
     .limit(limit)
     .all();
 }
@@ -176,7 +171,7 @@ export async function getListingProductCount(businessId: string): Promise<number
   const result = await db
     .select({ count: count() })
     .from(products)
-    .where(eq(products.businessPageId, businessId))
+    .where(eq(products.businessId, businessId))
     .get();
 
   return result?.count || 0;
@@ -188,14 +183,14 @@ export async function getListingProductCount(businessId: string): Promise<number
 export async function isSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
   const db = await getDb();
 
-  const conditions = [eq(businessPages.slug, slug)];
+  const conditions = [eq(businesses.slug, slug)];
   if (excludeId) {
-    conditions.push(sql`${businessPages.id} != ${excludeId}`);
+    conditions.push(sql`${businesses.id} != ${excludeId}`);
   }
 
   const existing = await db
-    .select({ id: businessPages.id })
-    .from(businessPages)
+    .select({ id: businesses.id })
+    .from(businesses)
     .where(and(...conditions))
     .limit(1)
     .get();

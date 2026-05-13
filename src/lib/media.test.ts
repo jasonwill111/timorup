@@ -36,14 +36,14 @@ describe('Database Schema', () => {
     expect(users).toBeDefined();
   });
 
-  it('should have categories table defined', async () => {
-    const { categories } = await import('../db/schema/index');
-    expect(categories).toBeDefined();
+  it('should have businessCategories table defined', async () => {
+    const { businessCategories } = await import('../db/schema/index');
+    expect(businessCategories).toBeDefined();
   });
 
-  it('should have businessPages table defined', async () => {
-    const { businessPages } = await import('../db/schema/index');
-    expect(businessPages).toBeDefined();
+  it('should have businesses table defined', async () => {
+    const { businesses } = await import('../db/schema/index');
+    expect(businesses).toBeDefined();
   });
 
   it('should have orders table defined', async () => {
@@ -57,14 +57,14 @@ describe('Database Schema', () => {
     expect(users).toBeDefined();
   });
 
-  it('should have categories table', async () => {
-    const { categories } = await import('../db/schema/index');
-    expect(categories).toBeDefined();
+  it('should have businessCategories table', async () => {
+    const { businessCategories } = await import('../db/schema/index');
+    expect(businessCategories).toBeDefined();
   });
 
-  it('should have businessPages table', async () => {
-    const { businessPages } = await import('../db/schema/index');
-    expect(businessPages).toBeDefined();
+  it('should have businesses table', async () => {
+    const { businesses } = await import('../db/schema/index');
+    expect(businesses).toBeDefined();
   });
 
   it('should have products table', async () => {

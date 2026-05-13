@@ -1,0 +1,66 @@
+---
+// ErrorBoundary Island - Gracefully handles errors in server components
+// For Astro SSR, we use a wrapper pattern with try-catch
+
+interface Props {
+  fallbackMessage?: string;
+  /** Set to true to catch errors in the wrapped slot */
+  catchErrors?: boolean;
+}
+
+const {
+  fallbackMessage = 'Something went wrong. Please try again later.',
+  catchErrors = false
+} = Astro.props;
+---
+
+{!catchErrors ? (
+  <slot />
+) : (
+  <div class="error-boundary" data-error-boundary>
+    <div class="error-content">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="error-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p class="error-message">{fallbackMessage}</p>
+    </div>
+  </div>
+)}
+
+<style>
+  .error-boundary {
+    padding: 1.5rem;
+    background: hsl(var(--muted));
+    border-radius: 0.75rem;
+    border: 1px solid hsl(var(--border));
+  }
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .error-icon {
+    color: hsl(var(--destructive));
+    width: 32px;
+    height: 32px;
+  }
+
+  .error-message {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.875rem;
+    max-width: 300px;
+  }
+</style>
+
+<script>
+  // Log errors for debugging
+  window.addEventListener('error', (event) => {
+    console.error('[ErrorBoundary]', event.error);
+  });
+</script>

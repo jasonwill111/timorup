@@ -3,9 +3,9 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { initAuth } from '@/lib/auth';
-import { businessPages, categories, products, reviews } from '@/db/schema';
+import { businesses, businessCategories, products, reviews } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -65,7 +65,7 @@ export async function GET({ params, request }: { params: { slug: string }; reque
 
   // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`biz:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`biz:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({
@@ -89,8 +89,8 @@ export async function GET({ params, request }: { params: { slug: string }; reque
 
   try {
     const business = await db.select()
-      .from(businessPages)
-      .where(eq(businessPages.slug, slug))
+      .from(businesses)
+      .where(eq(businesses.slug, slug))
       .limit(1)
       .get();
 
@@ -113,8 +113,8 @@ export async function GET({ params, request }: { params: { slug: string }; reque
     let categorySlug = 'business';
     if (business.categoryId) {
       const cat = await db.select()
-        .from(categories)
-        .where(eq(categories.id, business.categoryId))
+        .from(businessCategories)
+        .where(eq(businessCategories.id, business.categoryId))
         .limit(1)
         .get();
       if (cat) {
@@ -130,12 +130,12 @@ export async function GET({ params, request }: { params: { slug: string }; reque
     if (business.entityType !== 'nonprofit') {
       businessProducts = await db.select()
         .from(products)
-        .where(eq(products.businessPageId, business.id))
+        .where(eq(products.businessId, business.id))
         .all();
 
       businessReviews = await db.select()
         .from(reviews)
-        .where(eq(reviews.businessPageId, business.id))
+        .where(eq(reviews.businessId, business.id))
         .orderBy(desc(reviews.createdAt))
         .all();
     }
@@ -192,8 +192,8 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     const userId = session.user.id;
 
     const existing = await db.select()
-      .from(businessPages)
-      .where(eq(businessPages.slug, slug))
+      .from(businesses)
+      .where(eq(businesses.slug, slug))
       .limit(1)
       .get();
 
@@ -246,9 +246,9 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
 
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = Math.floor(Date.now() / 1000);
-      await db.update(businessPages)
+      await db.update(businesses)
         .set(updateValues)
-        .where(eq(businessPages.slug, slug))
+        .where(eq(businesses.slug, slug))
         .run();
 
       // Purge cache so next GET sees updated data
@@ -256,8 +256,8 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     }
 
     const updated = await db.select()
-      .from(businessPages)
-      .where(eq(businessPages.slug, slug))
+      .from(businesses)
+      .where(eq(businesses.slug, slug))
       .limit(1)
       .get();
 

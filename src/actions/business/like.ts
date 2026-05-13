@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 function getErrorMessage(error: unknown): string {
@@ -21,8 +21,8 @@ export const like = defineAction({
 
     try {
       const business = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.slug, input.slug))
+        .from(businesses)
+        .where(eq(businesses.slug, input.slug))
         .limit(1)
         .get();
 
@@ -31,18 +31,18 @@ export const like = defineAction({
       }
 
       if (input.action === 'like') {
-        await db.update(businessPages)
+        await db.update(businesses)
           .set({ likes: (business.likes || 0) + 1 })
-          .where(eq(businessPages.id, business.id))
+          .where(eq(businesses.id, business.id))
           .run();
 
         return { success: true, data: { likes: (business.likes || 0) + 1 } };
       }
 
       if (input.action === 'save') {
-        await db.update(businessPages)
+        await db.update(businesses)
           .set({ saves: (business.saves || 0) + 1 })
-          .where(eq(businessPages.id, business.id))
+          .where(eq(businesses.id, business.id))
           .run();
 
         return { success: true, data: { saves: (business.saves || 0) + 1 } };

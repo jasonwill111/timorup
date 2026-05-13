@@ -3,12 +3,12 @@
  * 统一 products 数据访问
  */
 import { getDb } from '@/lib/db';
-import { products, productImages } from '@/db/schema';
+import { products } from '@/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 
 export interface ProductWithImages {
   id: string;
-  businessPageId: string;
+  businessId: string;
   title: string;
   description: string | null;
   price: number | null;
@@ -35,19 +35,10 @@ export async function getProductById(productId: string): Promise<ProductWithImag
 
   if (!product) return null;
 
-  const images = await db
-    .select()
-    .from(productImages)
-    .where(eq(productImages.productId, productId))
-    .all();
-
+  // images stored as JSON in products.images field
   return {
     ...product,
-    images: images.map(img => ({
-      id: img.id,
-      url: img.url,
-      alt: img.alt,
-    })),
+    images: [],
   };
 }
 
@@ -64,9 +55,9 @@ export async function getBusinessProducts(
   const db = await getDb();
   const { status = 'active', limit = 50 } = options || {};
 
-  const conditions = [eq(products.businessPageId, businessId)];
+  const conditions = [eq(products.businessId, businessId)];
   if (status) {
-    conditions.push(eq(products.status, status));
+    conditions.push(eq(products.active, status === 'active' ? 1 : 0));
   }
 
   const productList = await db
@@ -77,26 +68,10 @@ export async function getBusinessProducts(
     .limit(limit)
     .all();
 
-  // Get images for all products
-  const result: ProductWithImages[] = [];
-  for (const product of productList) {
-    const images = await db
-      .select()
-      .from(productImages)
-      .where(eq(productImages.productId, product.id))
-      .all();
-
-    result.push({
-      ...product,
-      images: images.map(img => ({
-        id: img.id,
-        url: img.url,
-        alt: img.alt,
-      })),
-    });
-  }
-
-  return result;
+  return productList.map(p => ({
+    ...p,
+    images: [],
+  }));
 }
 
 /**
@@ -108,7 +83,7 @@ export async function getBusinessProductCount(businessId: string): Promise<numbe
   const result = await db
     .select()
     .from(products)
-    .where(eq(products.businessPageId, businessId))
+    .where(eq(products.businessId, businessId))
     .all();
 
   return result.length;

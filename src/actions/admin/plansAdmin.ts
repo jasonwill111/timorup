@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { plans, businessPages } from '@/db/schema';
+import { plans, businesses } from '@/db/schema';
 import { eq, asc, and, count } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 
@@ -189,8 +189,8 @@ export const plansAdmin = {
 
       // Check if any businesses are using this plan
       const businessesUsingPlan = await db.select({ count: count() })
-        .from(businessPages)
-        .where(eq(businessPages.planType, input.id))
+        .from(businesses)
+        .where(eq(businesses.planType, input.id))
         .get();
 
       if (businessesUsingPlan && businessesUsingPlan.count > 0) {

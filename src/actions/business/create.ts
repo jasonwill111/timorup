@@ -2,12 +2,9 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { businessPages } from '@/db/schema';
+import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUserFromCookies } from '@/lib/db/queries/auth';
-
-// Validate entity type
-const validTypes = ['business', 'nonprofit', 'non-profit'];
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -22,7 +19,6 @@ export const create = defineAction({
     contactName: z.string().min(1, 'Contact name is required'),
     contactNumber: z.string().min(1, 'Phone number is required'),
     email: z.string().email('Valid email required'),
-    entityType: z.enum(['business', 'nonprofit', 'non-profit']).optional().default('business'),
     slug: z.string().optional(),
     address: z.string().optional(),
     aboutUs: z.string().optional(),
@@ -47,14 +43,10 @@ export const create = defineAction({
     const db = await getDb();
 
     try {
-      // Normalize entity type
-      const rawType = input.entityType || 'business';
-      const finalEntityType = validTypes.includes(rawType) ? (rawType === 'non-profit' ? 'nonprofit' : rawType as 'business' | 'nonprofit') : 'business';
-
       // Check one-listing-per-user limit
       const existingListing = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.ownerId, userId))
+        .from(businesses)
+        .where(eq(businesses.ownerId, userId))
         .limit(1)
         .get();
 
@@ -63,7 +55,7 @@ export const create = defineAction({
           success: false,
           error: {
             code: 'LIMIT_REACHED',
-            message: `You already have a ${existingListing.entityType} listing. Each account can only create one listing.`
+            message: 'You already have a listing. Each account can only create one listing.'
           }
         };
       }
@@ -76,8 +68,8 @@ export const create = defineAction({
 
       // Check slug uniqueness
       const existingSlug = await db.select()
-        .from(businessPages)
-        .where(eq(businessPages.slug, businessSlug))
+        .from(businesses)
+        .where(eq(businesses.slug, businessSlug))
         .limit(1)
         .get();
 
@@ -95,21 +87,15 @@ export const create = defineAction({
 
       const id = `biz-${Date.now()}`;
 
-      // Set initial status based on entity type
-      let pageStatus: string;
-      if (finalEntityType === 'nonprofit') {
-        pageStatus = 'live';
-      } else {
-        pageStatus = 'pending_payment';
-      }
+      // Set initial status - pending_payment (requires subscription)
+      const pageStatus = 'pending_payment';
 
-      await db.insert(businessPages).values({
+      await db.insert(businesses).values({
         id,
         title: input.title,
         slug: businessSlug,
         ownerId: userId,
         categoryId: input.categoryId,
-        entityType: finalEntityType,
         industry: input.industry || null,
         contactName: input.contactName,
         contactNumber: input.contactNumber,
@@ -130,7 +116,7 @@ export const create = defineAction({
         subscriptionStatus: 'none',
       }).run();
 
-      return { success: true, data: { id, title: input.title, slug: businessSlug, entityType: finalEntityType } };
+      return { success: true, data: { id, title: input.title, slug: businessSlug } };
     } catch (error) {
       console.error('Create page error:', error);
       return { success: false, error: { message: getErrorMessage(error) || 'Failed to create page' } };

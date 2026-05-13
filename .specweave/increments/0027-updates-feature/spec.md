@@ -1,8 +1,9 @@
 ---
 name: updates-feature
 description: Business/Non-profit Updates (News) - posts with text, images, SKU/hashtag mentions
-status: ready_for_review
+status: completed
 created: 2026-05-07
+updated: 2026-05-13
 ---
 
 # Updates Feature Specification

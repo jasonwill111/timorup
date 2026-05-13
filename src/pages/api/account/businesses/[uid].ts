@@ -2,9 +2,9 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessPages, categories } from '@/db/schema';
+import { businesses, businessCategories } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 
@@ -60,7 +60,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
 
   // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`biz:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`biz:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({
@@ -91,30 +91,29 @@ export async function GET({ params, request }: { params: Record<string, string>;
 
   try {
     // Get user's businesses
-    const businesses = await db.select({
-      id: businessPages.id,
-      title: businessPages.title,
-      slug: businessPages.slug,
-      status: businessPages.status,
-      entityType: businessPages.entityType,
-      categoryId: businessPages.categoryId,
-      createdAt: businessPages.createdAt,
-      ratingAverage: businessPages.ratingAverage,
-      views: businessPages.views,
-      planType: businessPages.planType,
+    const businessList = await db.select({
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+      status: businesses.status,
+      categoryId: businesses.categoryId,
+      createdAt: businesses.createdAt,
+      ratingAverage: businesses.ratingAverage,
+      views: businesses.views,
+      planType: businesses.planType,
     })
-    .from(businessPages)
-    .where(eq(businessPages.ownerId, uid))
-    .orderBy(desc(businessPages.createdAt))
+    .from(businesses)
+    .where(eq(businesses.ownerId, uid))
+    .orderBy(desc(businesses.createdAt))
     .all();
 
     // Get category names
     const categoryMap = new Map();
-    const cats = await db.select().from(categories).all();
+    const cats = await db.select().from(businessCategories).all();
     cats.forEach((cat: { id: string; name: string }) => categoryMap.set(cat.id, cat.name));
 
     // Add category names
-    const businessesWithCategory = businesses.map((biz: { categoryId: string | null }) => ({
+    const businessesWithCategory = businessList.map((biz: { categoryId: string | null }) => ({
       ...biz,
       categoryName: biz.categoryId ? (categoryMap.get(biz.categoryId) || 'Uncategorized') : 'Uncategorized',
     }));

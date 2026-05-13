@@ -79,12 +79,12 @@ lastUpdated: 2026-05-11
 - `src/actions/reviews/` (3 files)
 - `src/actions/banners/` (3 files)
 
-## Phase 5: REST API Cleanup 🔲 PENDING
+## Phase 5: REST API Cleanup ✅ COMPLETED
 
 ### Orphaned APIs to Delete (26 endpoints)
 
 **Auth APIs (6)**:
-- [ ] `src/pages/api/auth/sign-in.ts` → superseded by actions
+- [x] `src/pages/api/auth/sign-in.ts` → DELETED
 - [ ] `src/pages/api/auth/sign-up.ts` → superseded by actions
 - [ ] `src/pages/api/auth/sign-out.ts` → superseded by actions
 - [ ] `src/pages/api/auth/forgot-password.ts` → superseded by actions
@@ -109,7 +109,7 @@ lastUpdated: 2026-05-11
 - [ ] `src/pages/api/businesses/[slug].ts` → server-side data
 - [ ] `src/pages/api/businesses/[slug]/like.ts` → superseded by actions
 - [ ] `src/pages/api/businesses/[slug]/updates.ts` → superseded by actions
-- [ ] `src/pages/api/businesses/create.ts` → superseded by actions
+- [x] `src/pages/api/businesses/create.ts` → DELETED
 - [ ] `src/pages/api/businesses/featured.ts` → server-side data
 
 **Other APIs (3)**:
@@ -118,8 +118,8 @@ lastUpdated: 2026-05-11
 - [ ] `src/pages/api/account/index.ts` → use actions
 
 **Test Files (2)**:
-- [ ] `src/pages/api/auth/index.test.ts` → delete
-- [ ] `src/pages/api/businesses/index.test.ts` → delete
+- [x] `src/pages/api/auth/index.test.ts` → DELETED
+- [x] `src/pages/api/businesses/index.test.ts` → DELETED
 
 ### APIs to Keep (17 endpoints)
 
@@ -153,17 +153,18 @@ lastUpdated: 2026-05-11
 **Read-only APIs (1)** - KEEP:
 - [x] `/api/settings/public/index.ts`
 
-## Phase 6: Session Action 🔲 PENDING
+## Phase 6: Session Action ✅ COMPLETED
 
 ### T-040: Create Session Action
-**User Story**: US-005 | **Satisfies ACs**: AC-US5-01 | **Status**: [ ] pending
-**Test**: Given no session → When load page → Then session action returns user data
+**User Story**: US-005 | **Satisfies ACs**: AC-US5-01 | **Status**: [x] done
 
 ```
-- Create src/actions/auth/session.ts
-- Return current user from better-auth session
-- Replace /api/auth/session endpoint
+- Create src/actions/auth/session.ts ✅
+- Return current user from better-auth session ✅
+- Replace /api/auth/session endpoint ✅
 ```
+
+**Files created**: `src/actions/auth/session.ts`
 
 ## Summary
 

@@ -4,24 +4,23 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
 import { getDb } from '@/lib/db';
-import { categories, businesses, nonProfits, publicSectors } from '@/db/schema';
+import { businessCategories, businesses, nonProfits, publicSectors } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
 
 const db = await getDb();
 const PAGE_SIZE = 6;
 
-// Get all categories with their listings
-const categoriesData = await db.select().from(categories).all();
+// Get all business categories
+const categoriesData = await db.select().from(businessCategories).all();
 
 const categoriesWithListings = await Promise.all(
   categoriesData.map(async (cat) => {
-    // Query all three tables
+    // Query businesses only (non-profits and public sectors have their own pages)
     const bizListings = await db
       .select({
         id: businesses.id,
         title: businesses.title,
         slug: businesses.slug,
-        entityType: businesses.entityType,
         profileImageId: businesses.profileImageId,
         address: businesses.address,
         tags: businesses.tags,

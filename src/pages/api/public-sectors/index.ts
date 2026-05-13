@@ -2,9 +2,9 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { publicSectors, categories } from '@/db/schema';
-import { eq, desc, like, and, or } from 'drizzle-orm';
-import { checkRateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+import { publicSectors, publicSectorCategories } from '@/db/schema';
+import { eq, desc, like, and, or, type SQL } from 'drizzle-orm';
+import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { PaginationSchema } from '@/lib/validation';
 
 function getErrorMessage(error: unknown): string {
@@ -23,7 +23,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
   // Rate limiting
   const clientIP = getClientIP(request);
-  const rateLimit = checkRateLimit(`public sectors:${clientIP}`);
+  const rateLimit = await checkRateLimitKV(`public sectors:${clientIP}`);
 
   if (!rateLimit.allowed) {
     return new Response(JSON.stringify({
@@ -53,8 +53,8 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     let categoryId = '';
     if (category) {
       const cat = await db.select()
-        .from(categories)
-        .where(eq(categories.slug, category))
+        .from(publicSectorCategories)
+        .where(eq(publicSectorCategories.slug, category))
         .limit(1)
         .all();
       if (cat.length > 0) {
@@ -63,11 +63,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     }
 
     // Build conditions - include both 'live' and 'published' status
-    const conditions = [
+    const conditions: SQL[] = [
       or(
         eq(publicSectors.status, 'live'),
         eq(publicSectors.status, 'published')
-      ) as any
+      )!
+
     ];
 
     if (search) {
@@ -76,12 +77,12 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
           like(publicSectors.title, `%${search}%`),
           like(publicSectors.aboutUs, `%${search}%`),
           like(publicSectors.tags, `%${search}%`)
-        ) as any
+        )!
       );
     }
 
     if (categoryId) {
-      conditions.push(eq(publicSectors.categoryId, categoryId) as any);
+      conditions.push(eq(publicSectors.categoryId, categoryId));
     }
 
     // Query publicSectors table
@@ -129,7 +130,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
     // Get category names
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(categories).all();
+    const allCategories = await db.select().from(publicSectorCategories).all();
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((ps) => ({

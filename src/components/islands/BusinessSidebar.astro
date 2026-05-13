@@ -2,7 +2,7 @@
 import Card from '../../components/ui/Card.astro';
 import { MapPin, Tag, Clock } from '@lucide/astro';
 import { getDb } from '@/lib/db';
-import { categories, media } from '@/db/schema';
+import { businessCategories, media } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 
 interface DayHours {
@@ -26,7 +26,7 @@ const { businessId, categoryId, locationLat, locationLng, address, tags, opening
 const db = await getDb();
 
 const category = categoryId
-  ? await db.select().from(categories).where(eq(categories.id, categoryId)).get()
+  ? await db.select().from(businessCategories).where(eq(businessCategories.id, categoryId)).get()
   : null;
 ---
 

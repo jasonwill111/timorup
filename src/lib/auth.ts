@@ -4,6 +4,7 @@ import type { BetterAuthInstance } from 'better-auth';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { getDb } from './db';
 import { users, sessions, accounts, verifications } from '@/db/schema';
+import { createSessionKVStore } from './auth-kv-store';
 
 // Get OAuth credentials from environment
 const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
@@ -59,10 +60,17 @@ function wrapDbForD1(db: DrizzleDbWrapper): DrizzleDbWrapper {
   return db;
 }
 
-// Factory function to create auth instance with given db
-export function createAuth(db: DrizzleDbWrapper) {
+// Factory function to create auth instance with given db and env
+export function createAuth(db: DrizzleDbWrapper, env?: { SESSION?: KVNamespace }) {
   // Wrap db to convert Date objects to timestamps for D1
   const wrappedDb = wrapDbForD1(db);
+
+  // Create secondary storage for sessions if KV available
+  const secondaryStorage = env?.SESSION
+    ? {
+        sessions: createSessionKVStore(env.SESSION, 86400), // 24 hour TTL
+      }
+    : undefined;
 
   return betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:8787',
@@ -76,6 +84,9 @@ export function createAuth(db: DrizzleDbWrapper) {
         verification: verifications,
       },
     }),
+
+    // Secondary storage for session caching
+    secondaryStorage,
 
     // Email and password authentication
     emailAndPassword: {
@@ -99,11 +110,19 @@ export function createAuth(db: DrizzleDbWrapper) {
 
     // Session configuration - optimized for performance
     session: {
-      expiresIn: 60 * 60 * 24 * 7, // 7 days
+      expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
       updateAge: 60 * 60 * 24, // 1 day
       cookieCache: {
         enabled: true,
         maxAge: 60 * 5, // 5 minutes cache for session reads
+      },
+      // Explicit cookie security configuration
+      cookie: {
+        name: 'better-auth.session_token',
+        httpOnly: true,       // Prevent XSS access to cookie
+        secure: import.meta.env.PROD,  // HTTPS only in production
+        sameSite: 'lax',      // CSRF protection
+        maxAge: 60 * 60 * 24 * 7, // 7 days in seconds (same as expiresIn)
       },
     },
 
@@ -157,19 +176,18 @@ export const auth = {
 } as unknown as BetterAuthInstance;
 
 // Initialize auth for current environment (cached)
-let _initAuth: BetterAuthInstance | null = null;
-
-export async function initAuth() {
+// Pass env from cloudflare:workers context for KV access
+export async function initAuth(env?: { SESSION?: KVNamespace }) {
   if (!_initAuth) {
     const db = await getDb();
-    _initAuth = createAuth(db);
+    _initAuth = createAuth(db, env);
   }
   return _initAuth;
 }
 
 // Sync auth object after initAuth is called
-export async function getAuth() {
-  return initAuth();
+export async function getAuth(env?: { SESSION?: KVNamespace }) {
+  return initAuth(env);
 }
 
 // Export OAuth status for UI

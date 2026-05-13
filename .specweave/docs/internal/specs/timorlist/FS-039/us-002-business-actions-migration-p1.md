@@ -2,9 +2,9 @@
 id: US-002
 feature: FS-039
 title: "Business Actions Migration (P1)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-05-09
+created: 2026-05-09T00:00:00.000Z
 tldr: "**As a** developer."
 project: timorlist
 ---
@@ -21,10 +21,10 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: createBusiness action validates and creates listing
-- [ ] **AC-US2-02**: updateBusiness action updates existing listing
-- [ ] **AC-US2-03**: addUpdate action appends update to listing
-- [ ] **AC-US2-04**: likeBusiness action toggles like status
+- [x] **AC-US2-01**: createBusiness action validates and creates listing ✅
+- [x] **AC-US2-02**: updateBusiness action updates existing listing ✅
+- [x] **AC-US2-03**: addUpdate action appends update to listing ✅
+- [x] **AC-US2-04**: likeBusiness action toggles like status ✅
 
 ---
 

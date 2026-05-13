@@ -2,9 +2,9 @@
 id: US-003
 feature: FS-039
 title: "Admin Actions Migration (P1)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-05-09
+created: 2026-05-09T00:00:00.000Z
 tldr: "**As a** admin user."
 project: timorlist
 ---
@@ -21,12 +21,15 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: adminCategory actions (create/update/delete) work with auth
-- [ ] **AC-US3-02**: adminPlans actions work with super_admin check
-- [ ] **AC-US3-03**: adminListings actions (create/update/delete) work
-- [ ] **AC-US3-04**: adminUsers actions (setRole) work with auth
-- [ ] **AC-US3-05**: adminSettings actions (save/load) work
-- [ ] **AC-US3-06**: adminSubscriptions actions (update/status) work
+- [x] **AC-US3-01**: adminCategory actions (create/update/delete) work with auth ✅
+- [x] **AC-US3-02**: adminPlans actions work with super_admin check ✅
+- [x] **AC-US3-03**: adminListings actions (create/update/delete) work ✅
+- [x] **AC-US3-04**: adminUsers actions (setRole) work with auth ✅
+- [x] **AC-US3-05**: adminSettings actions (save/load) work ✅
+- [x] **AC-US3-06**: adminSubscriptions actions (update/status) work ✅
+- [x] **AC-US3-07**: adminBlogs actions work ✅
+- [x] **AC-US3-08**: adminHeroes actions work ✅
+- [x] **AC-US3-09**: adminAI tools actions work ✅
 
 ---
 

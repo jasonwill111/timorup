@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { products, businessPages } from '@/db/schema';
+import { products, businesses } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { PLAN_LIMITS } from '@/lib/media';
 
@@ -11,14 +11,14 @@ export async function GET({ params, url }: { params: Record<string, string>; url
   try {
     const { businessPageId } = params;
 
-    // Get business page with plan info
+    // Get business with plan info
     const business = await db.select({
-      planType: businessPages.planType,
-      expiryDate: businessPages.expiryDate,
-      status: businessPages.status,
+      planType: businesses.planType,
+      expiryDate: businesses.expiryDate,
+      status: businesses.status,
     })
-    .from(businessPages)
-    .where(eq(businessPages.id, businessPageId))
+    .from(businesses)
+    .where(eq(businesses.id, businessPageId))
     .limit(1)
     .get();
 
@@ -45,7 +45,7 @@ export async function GET({ params, url }: { params: Record<string, string>; url
     // Count current products
     const countResult = await db.select({ count: sql<number>`count(*)` })
       .from(products)
-      .where(eq(products.businessPageId, businessPageId));
+      .where(eq(products.businessId, businessPageId));
 
     const current = Number(countResult[0]?.count) || 0;
     const remaining = Math.max(0, limit - current);
