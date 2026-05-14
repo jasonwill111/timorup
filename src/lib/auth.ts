@@ -121,7 +121,7 @@ export function createAuth(db: DrizzleDbWrapper, env?: { SESSION?: KVNamespace }
         name: 'better-auth.session_token',
         httpOnly: true,       // Prevent XSS access to cookie
         secure: import.meta.env.PROD,  // HTTPS only in production
-        sameSite: 'lax',      // CSRF protection
+        sameSite: 'strict',     // CSRF protection (strict is stronger than lax)
         maxAge: 60 * 60 * 24 * 7, // 7 days in seconds (same as expiresIn)
       },
     },
@@ -175,12 +175,19 @@ export const auth = {
   }
 } as unknown as BetterAuthInstance;
 
+// Module-level promise to prevent race condition in concurrent requests
+let _initAuth: BetterAuthInstance | undefined;
+let initPromise: Promise<BetterAuthInstance> | undefined;
+
 // Initialize auth for current environment (cached)
-// Pass env from cloudflare:workers context for KV access
+// Uses module-level promise pattern to prevent race condition
 export async function initAuth(env?: { SESSION?: KVNamespace }) {
   if (!_initAuth) {
-    const db = await getDb();
-    _initAuth = createAuth(db, env);
+    initPromise ??= (async () => {
+      const db = await getDb();
+      return createAuth(db, env);
+    })();
+    _initAuth = await initPromise;
   }
   return _initAuth;
 }

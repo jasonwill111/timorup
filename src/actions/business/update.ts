@@ -11,8 +11,20 @@ function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
-async function purgeCache(_path: string): Promise<void> {
-  // Cache purge placeholder - implement if needed
+async function purgeCache(path: string): Promise<void> {
+  // Use Cloudflare Cache API to purge CDN cache
+  // This ensures updated content is served immediately after DB update
+  try {
+    const cacheKey = `https://timorlist.com${path}`;
+    await caches.default.delete(cacheKey);
+    // Also purge list pages that might include this business
+    await caches.default.delete('https://timorlist.com/businesses');
+  } catch (e) {
+    // Log but don't fail the update if cache purge fails
+    if (import.meta.env.DEV) {
+      console.warn('[Cache] Purge failed:', e instanceof Error ? e.message : String(e));
+    }
+  }
 }
 
 export const update = defineAction({
@@ -25,7 +37,7 @@ export const update = defineAction({
     contactName: z.string().optional(),
     contactNumber: z.string().optional(),
     countryCode: z.string().optional(),
-    email: z.string().email().optional().or(z.string().optional()),
+    email: z.email({ error: 'Valid email required' }).optional().or(z.string().optional()),
     address: z.string().optional(),
     aboutUs: z.string().optional(),
     tags: z.array(z.string()).optional(),

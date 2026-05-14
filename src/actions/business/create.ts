@@ -18,7 +18,7 @@ export const create = defineAction({
     categoryId: z.string().min(1, 'Category is required'),
     contactName: z.string().min(1, 'Contact name is required'),
     contactNumber: z.string().min(1, 'Phone number is required'),
-    email: z.string().email('Valid email required'),
+    email: z.email({ error: 'Valid email required' }),
     slug: z.string().optional(),
     address: z.string().optional(),
     aboutUs: z.string().optional(),
@@ -80,10 +80,32 @@ export const create = defineAction({
         };
       }
 
-      // Parse optional JSON fields
-      const parsedTags = input.tags ? JSON.parse(input.tags) : null;
-      const parsedOpeningHours = input.openingHours ? JSON.parse(input.openingHours) : null;
-      const parsedSocialLinks = input.socialLinks ? JSON.parse(input.socialLinks) : null;
+      // Parse optional JSON fields (with error handling)
+      let parsedTags: unknown = null;
+      let parsedOpeningHours: unknown = null;
+      let parsedSocialLinks: unknown = null;
+
+      if (input.tags) {
+        try {
+          parsedTags = JSON.parse(input.tags);
+        } catch {
+          return { success: false, error: { code: 'INVALID_JSON', message: 'Invalid tags format' } };
+        }
+      }
+      if (input.openingHours) {
+        try {
+          parsedOpeningHours = JSON.parse(input.openingHours);
+        } catch {
+          return { success: false, error: { code: 'INVALID_JSON', message: 'Invalid opening hours format' } };
+        }
+      }
+      if (input.socialLinks) {
+        try {
+          parsedSocialLinks = JSON.parse(input.socialLinks);
+        } catch {
+          return { success: false, error: { code: 'INVALID_JSON', message: 'Invalid social links format' } };
+        }
+      }
 
       const id = `biz-${Date.now()}`;
 
