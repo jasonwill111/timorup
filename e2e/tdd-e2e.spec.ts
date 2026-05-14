@@ -15,6 +15,13 @@ const ADMIN_PASSWORD = 'admin12345';
 const USER_EMAIL = 'user@timorlist.com';
 const USER_PASSWORD = 'user12345';
 
+// ==================== HELPERS ====================
+
+async function fillLoginForm(page: any) {
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+}
+
 // ==================== TDD: RED (Write failing tests first) ====================
 
 test.describe('TDD: User Story 1 - Authentication', () => {
@@ -25,6 +32,7 @@ test.describe('TDD: User Story 1 - Authentication', () => {
   test('US1-AC1: User can login with valid credentials', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
 
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', USER_EMAIL);
     await page.fill('input[name="password"]', USER_PASSWORD);
     await page.click('button[type="submit"]');
@@ -40,6 +48,7 @@ test.describe('TDD: User Story 1 - Authentication', () => {
   test('US1-AC2: User can logout', async ({ page }) => {
     // Login first
     await page.goto(`${BASE_URL}/login`);
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', USER_EMAIL);
     await page.fill('input[name="password"]', USER_PASSWORD);
     await page.click('button[type="submit"]');
@@ -65,6 +74,7 @@ test.describe('TDD: User Story 1 - Authentication', () => {
 
   test('US1-AC3: Admin can access admin dashboard', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', ADMIN_EMAIL);
     await page.fill('input[name="password"]', ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
@@ -83,6 +93,7 @@ test.describe('TDD: User Story 2 - Business CRUD', () => {
   test.beforeEach(async ({ page }) => {
     // Login as user before each test
     await page.goto(`${BASE_URL}/login`);
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', USER_EMAIL);
     await page.fill('input[name="password"]', USER_PASSWORD);
     await page.click('button[type="submit"]');

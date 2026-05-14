@@ -10,9 +10,12 @@ const USER_PASSWORD = 'user12345';
 
 async function loginAs(page: Page, email: string, password: string) {
   await page.goto(`${BASE_URL}/login`);
+  // Wait for page load and Astro hydration
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000); // Extra time for Astro islands to hydrate
   await page.fill('input[name="email"], input[type="email"]', email);
   await page.fill('input[name="password"]', password);
-  await page.click('button[type="submit"]');
+  await page.click('#submit-btn');
   await page.waitForTimeout(2000);
 }
 
@@ -114,9 +117,11 @@ test.describe('Authentication', () => {
 
   test('Invalid credentials rejected', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
     await page.fill('input[name="email"]', 'invalid@test.com');
     await page.fill('input[name="password"]', 'wrongpassword');
-    await page.click('button[type="submit"]');
+    await page.click('#submit-btn');
     await page.waitForTimeout(2000);
     // Should stay on login page or show error
   });

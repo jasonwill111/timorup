@@ -1,16 +1,31 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:8787';
+const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8787';
 const USER_EMAIL = 'user@timorlist.com';
 const USER_PASSWORD = 'user12345';
 const ADMIN_EMAIL = 'admin@timorlist.com';
 const ADMIN_PASSWORD = 'admin12345';
 
+// ==================== HELPERS ====================
+
+async function fillLoginForm(page: any) {
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+}
+
+async function fillRegisterForm(page: any) {
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+}
+
+// ==================== TESTS ====================
+
 test.describe('User Registration Flow', () => {
   test('register new user', async ({ page }) => {
     await page.goto(`${BASE_URL}/register`);
 
-    // Fill registration form
+    // Fill registration form (wait for hydration)
+    await fillRegisterForm(page);
     await page.fill('input[name="name"]', 'Test User E2E');
     await page.fill('input[name="email"]', `test-e2e-${Date.now()}@example.com`);
     await page.fill('input[name="password"]', 'TestPass123!');
@@ -30,6 +45,7 @@ test.describe('User Login & Business Creation Flow', () => {
   test('user login', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
 
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', USER_EMAIL);
     await page.fill('input[name="password"]', USER_PASSWORD);
     await page.click('button[type="submit"]');
@@ -146,6 +162,7 @@ test.describe('Admin Operations', () => {
   test('admin login', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
 
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', ADMIN_EMAIL);
     await page.fill('input[name="password"]', ADMIN_PASSWORD);
     await page.click('button[type="submit"]');
@@ -194,6 +211,7 @@ test.describe('SKU Creation Flow', () => {
   test('create SKU in business page', async ({ page }) => {
     // Login as user
     await page.goto(`${BASE_URL}/login`);
+    await fillLoginForm(page);
     await page.fill('input[name="email"]', USER_EMAIL);
     await page.fill('input[name="password"]', USER_PASSWORD);
     await page.click('button[type="submit"]');
