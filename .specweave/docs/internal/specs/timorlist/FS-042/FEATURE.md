@@ -5,7 +5,7 @@ type: feature
 status: active
 priority: P1
 created: 2026-05-10T00:00:00.000Z
-lastUpdated: 2026-05-13
+lastUpdated: 2026-05-14
 tldr: "New database schema for listings with personal subscription system."
 complexity: high
 stakeholder_relevant: true
