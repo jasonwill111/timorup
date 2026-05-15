@@ -28,15 +28,14 @@ const business = await db.select()
   .where(eq(businesses.slug, slug ?? ''))
   .get();
 
-// CDN Cache: 2min for detail pages, stale-while-revalidate 10min
-Astro.response.headers.set('Cache-Control', 'public, max-age=120, s-maxage=600, stale-while-revalidate=600');
-
 if (!business) {
   return Astro.redirect('/businesses');
 }
 
 // Draft pages only visible to owner (check via session)
 let isOwner = false;
+let cacheControl = 'public, max-age=120, s-maxage=600, stale-while-revalidate=600';
+
 if (business.status === 'draft') {
   const cookieHeader = Astro.request.headers.get('cookie') || '';
   const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
@@ -51,6 +50,7 @@ if (business.status === 'draft') {
 
     if (session && session.userId === business.ownerId) {
       isOwner = true;
+      cacheControl = 'no-store'; // Don't cache draft pages
     }
   }
 
@@ -59,6 +59,7 @@ if (business.status === 'draft') {
     return Astro.redirect('/businesses');
   }
 }
+
 
 // Check pending_payment status - show message to owner
 const isPending = business.status === 'pending_payment';
