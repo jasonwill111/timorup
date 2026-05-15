@@ -26,6 +26,9 @@ const org = await db.select()
   .where(eq(publicSectors.slug, slug ?? ''))
   .get();
 
+// CDN Cache: 2min for detail pages
+Astro.response.headers.set('Cache-Control', 'public, max-age=120, s-maxage=600, stale-while-revalidate=600');
+
 if (!org) {
   return Astro.redirect('/public-sectors');
 }

@@ -28,6 +28,9 @@ const business = await db.select()
   .where(eq(businesses.slug, slug ?? ''))
   .get();
 
+// CDN Cache: 2min for detail pages, stale-while-revalidate 10min
+Astro.response.headers.set('Cache-Control', 'public, max-age=120, s-maxage=600, stale-while-revalidate=600');
+
 if (!business) {
   return Astro.redirect('/businesses');
 }

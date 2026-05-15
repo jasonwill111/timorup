@@ -96,7 +96,7 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
     </section>
 
     <!-- Server Island: Dynamic content with skeleton fallback -->
-    <HomepageContent server:defer>
+    <HomepageContent server:defer="max 5min"></HomepageContent>
       <!-- Fallback -->
       <div slot="fallback" class="space-y-10">
         <!-- Featured Listings Skeleton -->
