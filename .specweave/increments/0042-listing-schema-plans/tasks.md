@@ -1,4 +1,4 @@
-# Tasks: Listing Schema and Plans
+# Tasks: Listing Schema and Plans (4/12 completed)
 
 ## T-001: Add Personal entityType
 **User Story**: US-001 | **Satisfies ACs**: AC-US1-01 | **Status**: [x] completed
