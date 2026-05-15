@@ -1,8 +1,0 @@
-{
-  "version": "1.0",
-  "incrementId": "0031-admin-plan-management",
-  "timestamp": "2026-05-07T10:30:00.000Z",
-  "verdict": "WAIVED",
-  "consentStatus": "no_api_key",
-  "reason": "No ANTHROPIC_API_KEY configured, skipped external API call"
-}

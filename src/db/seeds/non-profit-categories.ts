@@ -78,7 +78,7 @@ export const nonProfitCategories = [
     sortOrder: 5,
     isActive: true,
     formFields: JSON.stringify([
-      { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Gender Equality', 'Violence Prevention', 'Women's Rights', 'Child Protection', 'Orphan Support', 'Youth Development', 'Early Childhood Development', 'Multiple'] },
+      { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Gender Equality', 'Violence Prevention', 'Women\'s Rights', 'Child Protection', 'Orphan Support', 'Youth Development', 'Early Childhood Development', 'Multiple'] },
       { name: 'ageGroups', type: 'text', label: 'Age Groups' },
       { name: 'shelterServices', type: 'boolean', label: 'Shelter Services' }
     ])

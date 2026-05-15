@@ -234,11 +234,12 @@ function formatRelativeTime(date: Date | null): string {
     for (const file of files) {
       if (selectedImages.length >= 4) break;
 
-      const formData = new FormData();
-      formData.append('file', file);
-
       try {
-        const res = await actions.media.uploadMedia(formData);
+        const res = await uploadFile(file, {
+          type: 'updates',
+          typeId: slug,
+          compress: true,
+        });
 
         if (res.success) {
           selectedImages.push(res.data.id);

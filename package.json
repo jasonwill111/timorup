@@ -56,6 +56,7 @@
     "astro": "^6.3.2",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.11",
+    "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "leaflet": "^1.9.4",
@@ -84,6 +85,7 @@
     "husky": "^9.1.7",
     "jsdom": "^29.1.0",
     "miniflare": "^4.20260426.0",
+    "playwright": "^1.60.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.5",
     "wrangler": "^4.90.1"

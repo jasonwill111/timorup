@@ -708,12 +708,10 @@ import { actions } from 'astro:actions';
         data: { topic, type, length, prompt }
       });
 
-      console.log('[Blog] Action result:', JSON.stringify(result));
+      // Debug logs removed for production
 
       // Astro Actions wraps result in data property
       const actionResult = (result as any).data || result;
-      console.log('[Blog] Full result:', JSON.stringify(result));
-      console.log('[Blog] Action result:', JSON.stringify(actionResult));
       if (!actionResult.success) {
         const errMsg = actionResult.error?.message || 'Generation failed';
         console.error('[Blog] Action failed:', errMsg);
@@ -722,7 +720,6 @@ import { actions } from 'astro:actions';
 
       // Use AI structured output - object is directly in actionResult
       const aiData = actionResult.object || {};
-      console.log('[Blog] AI data:', JSON.stringify(aiData));
       generatedBlog = {
         title: aiData.title || topic,
         excerpt: aiData.excerpt || '',

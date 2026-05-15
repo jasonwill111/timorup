@@ -1,8 +1,0 @@
-{
-  "version": "1.0",
-  "incrementId": "0006-api-review",
-  "timestamp": "2026-04-18T20:17:00Z",
-  "verdict": "WAIVED",
-  "consentStatus": "not_configured",
-  "reason": "No externalModels section in config.json - LLM judge validation skipped"
-}

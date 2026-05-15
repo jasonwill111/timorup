@@ -18,7 +18,7 @@ async function deleteFolderFromR2(prefix: string): Promise<boolean> {
   try {
     const bucket = getR2Bucket();
     if (!bucket) {
-      console.log('[Cleanup] R2 bucket not available, skipping folder delete');
+      // Debug info removed for production
       return false;
     }
 
@@ -45,7 +45,7 @@ export const onRequest: ScheduledHandler = async (context) => {
   const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
   const cutoffDate = now - GRACE_PERIOD_SECONDS;
 
-  console.log(`[Cleanup] Starting expired business cleanup`);
+  // Starting cleanup silently
 
   try {
     // Find businesses expired past grace period
@@ -64,7 +64,7 @@ export const onRequest: ScheduledHandler = async (context) => {
       )
       .all();
 
-    console.log(`[Cleanup] Found ${expiredBusinesses.length} expired businesses to delete`);
+    // Found count not logged to reduce log noise
 
     let deletedCount = 0;
 
@@ -94,7 +94,7 @@ export const onRequest: ScheduledHandler = async (context) => {
       }
     }
 
-    console.log(`[Cleanup] Completed. Deleted ${deletedCount} businesses`);
+    // Completion silently logged
     return new Response(JSON.stringify({
       success: true,
       deletedCount,

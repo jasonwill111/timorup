@@ -133,10 +133,10 @@ export const servicePackages = [
           skuLimit: 10,
           maxImages: 5,
           maxVideos: 1,
-          maxBusinessImages: 16,
-          maxBusinessVideos: 2
+          maxBusinessImages: 12,
+          maxBusinessVideos: 1
         },
-        features: ['Up to 10 products/services', 'Up to 5 images per product', '16 business images', 'Featured in category (7 days/month)', 'Basic analytics']
+        features: ['Up to 10 products/services', 'Up to 5 images per product', '12 business images', 'Featured in category (7 days/month)', 'Basic analytics']
       },
       {
         name: 'Starter Annual',
@@ -148,10 +148,10 @@ export const servicePackages = [
           skuLimit: 10,
           maxImages: 5,
           maxVideos: 1,
-          maxBusinessImages: 16,
-          maxBusinessVideos: 2
+          maxBusinessImages: 12,
+          maxBusinessVideos: 1
         },
-        features: ['Up to 10 products/services', 'Up to 5 images per product', '16 business images', 'Featured in category (7 days/month)', 'Basic analytics', 'Save 20%']
+        features: ['Up to 10 products/services', 'Up to 5 images per product', '12 business images', 'Featured in category (7 days/month)', 'Basic analytics', 'Save 20%']
       }
     ]),
     isActive: true,

@@ -89,6 +89,7 @@ export const createProduct = defineAction({
         data: { id, title: input.title, priceFields: input.priceFields, productType: finalProductType, specifications: input.specifications, featured: input.featured, description: input.description },
       };
     } catch (error) {
+      console.error('[Products:create] Database insert failed:', getErrorMessage(error));
       return { success: false, error: { message: getErrorMessage(error) } };
     }
   },

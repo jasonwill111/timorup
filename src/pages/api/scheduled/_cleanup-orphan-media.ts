@@ -17,7 +17,7 @@ async function deleteFromR2(key: string): Promise<boolean> {
   try {
     const bucket = getR2Bucket();
     if (!bucket) {
-      console.log('[Cleanup-Orphan-Media] R2 bucket not available');
+      // R2 bucket check silent
       return false;
     }
     await bucket.delete(key);
@@ -31,7 +31,7 @@ async function deleteFromR2(key: string): Promise<boolean> {
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();
 
-  console.log(`[Cleanup-Orphan-Media] Starting weekly orphan media cleanup at ${new Date().toISOString()}`);
+  // Starting cleanup silently
 
   try {
     // Get all media records that have R2 URLs (not data: URLs)
@@ -75,7 +75,7 @@ export const onRequest: ScheduledHandler = async (context) => {
       }
     }
 
-    console.log(`[Cleanup-Orphan-Media] Deleted ${deletedCount} orphan R2 files`);
+    // Completion silently logged
 
     return new Response(JSON.stringify({
       success: true,

@@ -41,7 +41,8 @@ export async function getPlanLimits(planSlug: string | null): Promise<PlanLimits
       maxBusinessImages: variant.limits?.maxBusinessImages ?? 0,
       maxBusinessVideos: variant.limits?.maxBusinessVideos ?? 0,
     };
-  } catch {
+  } catch (e) {
+    console.warn('[Subscription] Failed to parse plan variants JSON:', e instanceof Error ? e.message : String(e));
     return null;
   }
 }

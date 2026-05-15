@@ -1,6 +1,6 @@
 // Admin actions index
 export { adminCategories as categories } from './categories';
-export { plansAdmin } from './plansAdmin';
+export { servicePackagesAdmin } from './servicePackagesAdmin';
 export { subscriptions } from './subscriptions';
 export { blogs } from './blogs';
 export { heroes } from './heroes';
@@ -12,4 +12,4 @@ export { adminReviews as reviews } from './reviews';
 export { settings } from './settings';
 export { setUserRole } from './users/setRole';
 export { login } from './auth/login';
-export { adminPlans } from './plans';
+export { adminServicePackages } from './servicePackages';

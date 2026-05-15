@@ -1,0 +1,167 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { getDb } from '@/lib/db';
+import { blogPosts, blogCategories } from '@/db/schema';
+import { eq, desc, and } from 'drizzle-orm';
+
+export const prerender = false;
+
+const db = await getDb();
+
+// Fetch all published posts
+const posts = await db
+  .select({
+    id: blogPosts.id,
+    title: blogPosts.title,
+    slug: blogPosts.slug,
+    excerpt: blogPosts.excerpt,
+    coverImageId: blogPosts.coverImageId,
+    authorName: blogPosts.authorName,
+    status: blogPosts.status,
+    tags: blogPosts.tags,
+    publishedAt: blogPosts.publishedAt,
+    createdAt: blogPosts.createdAt,
+  })
+  .from(blogPosts)
+  .where(eq(blogPosts.status, 'published'))
+  .orderBy(desc(blogPosts.publishedAt))
+  .all();
+
+// Fetch categories
+const categories = await db
+  .select()
+  .from(blogCategories)
+  .all();
+---
+
+<Layout title="Blog - TimorList" description="Travel guides, local insights, and news about Timor-Leste">
+  <main class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-foreground mb-4">Timor-Leste Blog</h1>
+      <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Discover travel guides, local insights, and the latest news about Timor-Leste
+      </p>
+    </div>
+
+    <!-- Category Pills -->
+    {categories.length > 0 && (
+      <div class="flex flex-wrap gap-2 justify-center mb-8">
+        <a
+          href="/blog"
+          class="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium transition-colors"
+        >
+          All
+        </a>
+        {categories.filter(c => c.isActive).map((category) => (
+          <a
+            href={`/blog?category=${category.slug}`}
+            class="px-4 py-2 rounded-full bg-muted text-muted-foreground text-sm font-medium hover:bg-primary/10 transition-colors"
+          >
+            {category.name}
+          </a>
+        ))}
+      </div>
+    )}
+
+    <!-- Blog Grid -->
+    {posts.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map((post) => {
+          const postTags = post.tags ? JSON.parse(post.tags as string) : [];
+          const publishDate = post.publishedAt
+            ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            : new Date(post.createdAt!).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+
+          return (
+            <a
+              href={`/blog/${post.slug}`}
+              class="group block bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/40 hover:shadow-lg transition-all duration-300"
+            >
+              {/* Cover Image Placeholder */}
+              <div class="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                {post.coverImageId ? (
+                  <div class="w-full h-full bg-muted animate-pulse" />
+                ) : (
+                  <svg
+                    class="w-16 h-16 text-primary/40"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                    />
+                  </svg>
+                )}
+              </div>
+
+              {/* Content */}
+              <div class="p-5">
+                {/* Tags */}
+                {postTags.length > 0 && (
+                  <div class="flex flex-wrap gap-1 mb-3">
+                    {postTags.slice(0, 2).map((tag: string) => (
+                      <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Title */}
+                <h2 class="text-xl font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                  {post.title}
+                </h2>
+
+                {/* Excerpt */}
+                {post.excerpt && (
+                  <p class="text-muted-foreground text-sm mb-4 line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                )}
+
+                {/* Meta */}
+                <div class="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{post.authorName || 'TimorList'}</span>
+                  <span>{publishDate}</span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="text-center py-16">
+        <svg
+          class="w-16 h-16 text-muted-foreground/50 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+          />
+        </svg>
+        <h3 class="text-xl font-semibold text-foreground mb-2">No blog posts yet</h3>
+        <p class="text-muted-foreground">
+          Check back soon for travel guides and local insights about Timor-Leste.
+        </p>
+      </div>
+    )}
+  </main>
+</Layout>

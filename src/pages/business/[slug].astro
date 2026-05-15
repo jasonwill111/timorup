@@ -22,11 +22,17 @@ const { slug } = Astro.params;
 const siteUrl = import.meta.env.SITE || 'https://timorlist.com';
 const canonicalUrl = `${siteUrl}/business/${slug}`;
 
-// SSR: Load business data from businesses table
-const business = await db.select()
-  .from(businesses)
-  .where(eq(businesses.slug, slug ?? ''))
-  .get();
+// SSR: Load business data from businesses table with error handling
+let business;
+try {
+  business = await db.select()
+    .from(businesses)
+    .where(eq(businesses.slug, slug ?? ''))
+    .get();
+} catch (e) {
+  console.error('Business query failed:', e instanceof Error ? e.message : String(e));
+  return Astro.redirect('/businesses');
+}
 
 if (!business) {
   return Astro.redirect('/businesses');
@@ -75,48 +81,78 @@ const isInGracePeriod = gracePeriodEndDate
   ? subscriptionStatus === 'expired' && now < gracePeriodEndDate
   : false;
 
+const isExpiredBeyondGrace = subscriptionStatus === 'expired' && (!gracePeriodEndDate || now >= gracePeriodEndDate);
+
 const daysRemaining = gracePeriodEndDate
   ? Math.max(0, Math.ceil((gracePeriodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
   : 0;
 
-const category = business.categoryId
-  ? await db.select().from(businessCategories).where(eq(businessCategories.id, business.categoryId)).get()
-  : null;
+// Safe JSON parser with fallback
+function safeJsonParse(str: unknown, fallback: unknown): unknown {
+  if (!str || typeof str !== 'string') return fallback;
+  try {
+    return JSON.parse(str);
+  } catch {
+    return fallback;
+  }
+}
 
-const businessReviews = await db.select()
-  .from(reviews)
-  .where(eq(reviews.businessId, business.id))
-  .orderBy(desc(reviews.createdAt))
-  .all();
+const tags = safeJsonParse(business.tags, []) as string[];
+const openingHours = safeJsonParse(business.openingHours, null);
+const socialLinks = safeJsonParse(business.socialLinks, {}) as Record<string, string>;
 
-const tags = business.tags ? JSON.parse(business.tags) : [];
-const openingHours = business.openingHours ? JSON.parse(business.openingHours) : null;
-const socialLinks = business.socialLinks ? JSON.parse(business.socialLinks) : {};
-
-// Load photo gallery from media table (entityType: 'businesses')
+// Load related data with error handling
+let category = null;
+let businessReviews: any[] = [];
 let galleryImages: { id: string; url: string }[] = [];
-const galleryMedia = await db.select({ id: media.id })
-  .from(media)
-  .where(eq(media.entityId, business.id))
-  .where(eq(media.entityType, 'businesses'))
-  .where(eq(media.purpose, 'gallery'))
-  .orderBy(media.sortOrder)
-  .all();
-galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
+let updates: any[] = [];
 
-// Load business updates from latestUpdates table
-const latestUpdatesData = await db.select()
-  .from(latestUpdates)
-  .where(eq(latestUpdates.typeId, business.id))
-  .where(eq(latestUpdates.type, 'business'))
-  .orderBy(desc(latestUpdates.createdAt))
-  .limit(4)
-  .all();
+try {
+  category = business.categoryId
+    ? await db.select().from(businessCategories).where(eq(businessCategories.id, business.categoryId)).get()
+    : null;
+} catch (e) {
+  console.error('Category query failed:', e);
+}
 
-const updates = latestUpdatesData.map(u => ({
-  ...u,
-  images: u.imageIds ? JSON.parse(u.imageIds) : [],
-}));
+try {
+  businessReviews = await db.select()
+    .from(reviews)
+    .where(eq(reviews.businessId, business.id))
+    .orderBy(desc(reviews.createdAt))
+    .all();
+} catch (e) {
+  console.error('Reviews query failed:', e);
+}
+
+try {
+  const galleryMedia = await db.select({ id: media.id })
+    .from(media)
+    .where(eq(media.entityId, business.id))
+    .where(eq(media.entityType, 'businesses'))
+    .where(eq(media.purpose, 'gallery'))
+    .orderBy(media.sortOrder)
+    .all();
+  galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
+} catch (e) {
+  console.error('Gallery query failed:', e);
+}
+
+try {
+  const latestUpdatesData = await db.select()
+    .from(latestUpdates)
+    .where(eq(latestUpdates.typeId, business.id))
+    .where(eq(latestUpdates.type, 'business'))
+    .orderBy(desc(latestUpdates.createdAt))
+    .limit(4)
+    .all();
+  updates = latestUpdatesData.map(u => ({
+    ...u,
+    images: safeJsonParse(u.imageIds, []),
+  }));
+} catch (e) {
+  console.error('Updates query failed:', e);
+}
 
 const pageTitle = `${business.title} - TimorList`;
 const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${category?.name || 'Business'} in Timor-Leste`;
@@ -141,22 +177,47 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
     </div>
   )}
 
-  <!-- Grace Period Modal -->
+  <!-- Expired Banner (shown in grace period only - full page overlay handles expired beyond grace) -->
   {isInGracePeriod && (
-    <div id="grace-period-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70">
-      <div class="bg-card border rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-          <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+    <div class="bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-4 mb-4">
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <p class="font-semibold text-red-800 dark:text-red-300">Subscription Expired</p>
+          <p class="text-sm text-red-600 dark:text-red-400">Your subscription has expired. <a href="/subscribe" class="underline">Renew now</a> to restore full visibility.</p>
         </div>
-        <h2 class="text-xl font-bold mb-2">{business.title}</h2>
-        <p class="text-muted-foreground mb-4">
-          请及时为Business Page续费,否则60天之后会删除。谢谢配合!
-        </p>
-        <p class="text-lg font-semibold text-primary mb-6">
-          剩余 {daysRemaining} 天
-        </p>
+      </div>
+    </div>
+  )}
+
+  <!-- Grace Period / Expired - Show only title, hide all other content -->
+  {(isInGracePeriod || isExpiredBeyondGrace) && (
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm">
+      <div class="bg-card border rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
+        {isExpiredBeyondGrace ? (
+          <>
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold mb-2">{business.title}</h2>
+            <p class="text-muted-foreground mb-4">此页面已过期，内容不再公开显示。</p>
+          </>
+        ) : (
+          <>
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold mb-2">{business.title}</h2>
+            <p class="text-muted-foreground mb-4">请及时为 Business Page 续费，否则 60 天之后会删除。</p>
+            <p class="text-lg font-semibold text-primary mb-6">剩余 {daysRemaining} 天</p>
+          </>
+        )}
         <a
           href={`/subscribe?business=${business.slug}`}
           class="inline-block px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity"
@@ -202,7 +263,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
     { name: business.title || slug }
   ]))} />
 
-  <div class="bg-background min-h-screen">
+  <div class="bg-background min-h-screen" class:list={{ 'blur-sm pointer-events-none select-none': isInGracePeriod || isExpiredBeyondGrace }}>
     <!-- Banner -->
     <div class="relative h-48 md:h-64 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
       {business.bannerImageId && (

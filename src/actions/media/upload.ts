@@ -7,12 +7,7 @@ import { eq, and, sql, count } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { env } from 'cloudflare:workers';
 import { getPlanLimits } from '@/lib/subscription';
-
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
-const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
-
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+import { getMediaLimits, isAllowedImageType, isAllowedVideoType } from '@/lib/media-limits';
 
 const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1, maxBusinessImages: 16, maxBusinessVideos: 2 };
 
@@ -80,16 +75,22 @@ export const uploadMedia = defineAction({
         return { success: false, error: { code: 'NO_FILE', message: 'No file provided' } };
       }
 
-      const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
-      const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
+      // Use centralized limits based on entity type
+      const entityType = input.type.split('/')[0] || 'default';
+      const limits = getMediaLimits(entityType);
+
+      const isImage = isAllowedImageType(file.type);
+      const isVideo = isAllowedVideoType(file.type);
 
       if (!isImage && !isVideo) {
-        return { success: false, error: { code: 'INVALID_TYPE', message: 'File type not allowed' } };
+        const allowedTypes = [...limits.allowedImageTypes, ...limits.allowedVideoTypes].join(', ');
+        return { success: false, error: { code: 'INVALID_TYPE', message: `File type not allowed. Allowed: ${allowedTypes}` } };
       }
 
-      const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
+      const maxSize = isImage ? limits.maxImageSize : limits.maxVideoSize;
       if (file.size > maxSize) {
-        return { success: false, error: { code: 'FILE_TOO_LARGE', message: `File must be less than ${maxSize / 1024 / 1024}MB` } };
+        const maxMB = (maxSize / 1024 / 1024).toFixed(1);
+        return { success: false, error: { code: 'FILE_TOO_LARGE', message: `File must be less than ${maxMB}MB` } };
       }
 
       const id = crypto.randomUUID();
@@ -118,7 +119,6 @@ export const uploadMedia = defineAction({
       // Parse type to check business limits
       // type format: 'businesses/{id}/profile'
       const typeParts = input.type.split('/');
-      const entityType = typeParts[0];
 
       if (entityType === 'businesses') {
         // Check ownership
@@ -144,8 +144,26 @@ export const uploadMedia = defineAction({
           .where(and(eq(media.type, imagePrefix), eq(media.typeId, input.typeId)))
           .get();
 
-        if (isImage && (imageCountResult?.count || 0) >= limits.maxBusinessImages) {
+        if (isImage && limits.maxBusinessImages > 0 && (imageCountResult?.count || 0) >= limits.maxBusinessImages) {
           return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessImages} images allowed` } };
+        }
+
+        if (isVideo && limits.maxBusinessVideos > 0 && (imageCountResult?.count || 0) >= limits.maxBusinessVideos) {
+          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessVideos} videos allowed` } };
+        }
+      } else {
+        // Non-business entities use default limits (0 = unlimited)
+        const entityMediaCount = await db.select({ count: count() })
+          .from(media)
+          .where(and(eq(media.type, input.type), eq(media.typeId, input.typeId)))
+          .get();
+
+        if (isImage && limits.maxImages > 0 && (entityMediaCount?.count || 0) >= limits.maxImages) {
+          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxImages} images allowed` } };
+        }
+
+        if (isVideo && limits.maxVideos > 0 && (entityMediaCount?.count || 0) >= limits.maxVideos) {
+          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxVideos} videos allowed` } };
         }
       }
 

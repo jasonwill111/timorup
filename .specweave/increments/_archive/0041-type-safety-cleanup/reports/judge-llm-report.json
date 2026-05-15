@@ -1,9 +1,0 @@
-{
-  "version": "1.0",
-  "scope": "increment 0041-type-safety-cleanup",
-  "date": "2026-05-10",
-  "model": "n/a",
-  "outcome": "WAIVED",
-  "reason": "External models not configured in .specweave/config.json (externalModels: null)",
-  "review": null
-}

@@ -1,16 +1,16 @@
 // Business logic utilities
 import { db } from './db';
 import { businesses } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import type { Role } from './permissions';
 
 /**
- * Check if a user already has a business page.
- * Uses the indexed ownerId column for O(log n) lookup.
+ * Check if a user already has a LIVE business page.
+ * Filters by status='live' to exclude deleted/archived businesses.
  *
- * @param dbInstance - The Drizzle DB instance (defaults to module-level db)
+ * @param dbInstance - The Drizzle DB instance
  * @param userId - The user's ID
- * @returns The user's business record if found, null otherwise
+ * @returns The user's business record if found and live, null otherwise
  */
 export async function hasUserBusiness(
   dbInstance: typeof db,
@@ -24,7 +24,12 @@ export async function hasUserBusiness(
       status: businesses.status,
     })
     .from(businesses)
-    .where(eq(businesses.ownerId, userId))
+    .where(
+      and(
+        eq(businesses.ownerId, userId),
+        eq(businesses.status, 'live')
+      )
+    )
     .limit(1);
 
   return result ?? null;

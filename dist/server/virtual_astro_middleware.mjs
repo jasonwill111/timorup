@@ -1,26 +1,6 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { d as defineMiddleware, s as sequence } from "./chunks/params-and-props_B6Tkrc_q.mjs";
-import "./chunks/transition_BqjGjdz7.mjs";
-import { getDb } from "./chunks/db_CA2Y5n5c.mjs";
-let bindingsInitialized = false;
-const onRequest$1 = defineMiddleware(async (context, next) => {
-  if (!bindingsInitialized) {
-    try {
-      const db = await getDb();
-      if (db) {
-        bindingsInitialized = true;
-        console.log("[Middleware] DB initialized");
-      }
-    } catch (e) {
-      console.error("[Middleware] DB init failed:", e instanceof Error ? e.message : String(e));
-    }
-  }
-  return next();
-});
-const onRequest = sequence(
-  onRequest$1
-);
+const onRequest = (_, next) => next();
 export {
   onRequest
 };

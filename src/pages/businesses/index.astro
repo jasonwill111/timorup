@@ -31,7 +31,7 @@ try {
   parentCats = allCats.filter((c: any) => !c.parentId);
   getChildren = (pid: string) => allCats.filter((c: any) => c.parentId === pid);
   allCats.forEach((c: any) => categoryMap[c.id] = c.name);
-} catch (e) { console.log('Categories error:', e); }
+} catch (e) { console.error('Categories error:', e instanceof Error ? e.message : String(e)); }
 
 // Get all matching entities first
 let allEntities: any[] = [];
@@ -56,7 +56,7 @@ try {
     }
     return statusOk && searchMatch && catMatch;
   });
-} catch (e) { console.log('Query error:', e); allEntities = []; }
+} catch (e) { console.error('Query error:', e instanceof Error ? e.message : String(e)); allEntities = []; }
 
 // Pagination
 const total = allEntities.length;

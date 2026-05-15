@@ -84,9 +84,9 @@ import { actions } from 'astro:actions';
 </AdminLayout>
 
 <script>
-  import { actions } from 'astro:actions';
   import { toast } from '../../stores/toast';
-  
+  import { uploadFile } from '../../lib/client/upload-helper';
+
   let isEditMode = false;
   let heroImageId: string | null = null;
 
@@ -98,8 +98,14 @@ import { actions } from 'astro:actions';
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    // Use Server Action for media upload
-    const result = await actions.media.upload({ file, category: 'hero' });
+    // Compress and upload image
+    const result = await uploadFile(file, {
+      type: 'hero',
+      typeId: 'hero',
+      compress: true,
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+    });
 
     if (result.success && result.data?.id) {
       heroImageId = result.data.id;

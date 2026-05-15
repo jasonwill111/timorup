@@ -3,7 +3,7 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { businesses, businessCategories } from '@/db/schema';
-import { eq, like, and, or, type SQL } from 'drizzle-orm';
+import { eq, like, and, or, ne, isNull, type SQL } from 'drizzle-orm';
 import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { PaginationSchema } from '@/lib/validation';
 
@@ -96,12 +96,16 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     }
 
     // Build conditions - include both 'live' and 'published' status
+    // Also exclude expired subscriptions
     const conditions: SQL[] = [
       or(
         eq(businesses.status, 'live'),
         eq(businesses.status, 'published')
+      )!,
+      or(
+        ne(businesses.subscriptionStatus, 'expired'),
+        isNull(businesses.subscriptionStatus)
       )!
-
     ];
 
     if (search) {

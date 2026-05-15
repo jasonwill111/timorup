@@ -5,27 +5,8 @@ import { initAuth } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 import { users, sessions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000;
-const MAX_REQUESTS = 10;
-
-function checkRateLimit(identifier: string): boolean {
-  const now = Date.now();
-  const record = rateLimitStore.get(identifier);
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(identifier, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-  if (record.count >= MAX_REQUESTS) return false;
-  record.count++;
-  return true;
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
+import { checkRateLimitKV } from '@/lib/rate-limit';
+import { getErrorMessage } from '@/lib/utils';
 
 export const signIn = defineAction({
   accept: 'form',
@@ -35,8 +16,16 @@ export const signIn = defineAction({
     rememberMe: z.boolean().optional().default(false),
   }),
   handler: async (input) => {
-    if (!checkRateLimit(`signin:${input.email}`)) {
-      return { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' } };
+    // Use KV-backed rate limiting
+    const rateLimit = await checkRateLimitKV(`signin:${input.email.toLowerCase()}`);
+    if (!rateLimit.allowed) {
+      return {
+        success: false,
+        error: {
+          code: 'RATE_LIMITED',
+          message: `Too many requests. Please try again in ${rateLimit.resetIn} seconds.`
+        }
+      };
     }
 
     try {

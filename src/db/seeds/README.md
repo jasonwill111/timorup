@@ -37,3 +37,11 @@ npx wrangler d1 execute timorlist-db --local --file=src/db/seeds/05_update_publi
 | listings | 10 |
 | non_profits | 13 |
 | public_sectors | 5 |
+
+## Seed Commands
+
+```bash
+# Seed all service packages (local + remote)
+npx wrangler d1 execute timorlist-db --local --file="migrations/0045_seed_all_service_packages.sql"
+npx wrangler d1 execute timorlist-db --remote --file="migrations/0045_seed_all_service_packages.sql"
+```

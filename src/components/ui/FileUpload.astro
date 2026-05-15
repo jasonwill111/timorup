@@ -1,0 +1,168 @@
+---
+/**
+ * FileUpload - Reusable upload component with automatic compression
+ *
+ * Usage:
+ * <FileUpload
+ *   id="gallery-upload"
+ *   type="businesses"
+ *   typeId="biz-123"
+ *   accept="image/*,video/*"
+ *   maxFiles={4}
+ *   bind:value={uploadedIds}
+ * />
+ */
+import { actions } from 'astro:actions';
+import { uploadFile, type UploadResult } from '@/lib/client/upload-helper';
+
+interface Props {
+  id: string;
+  type: string;
+  typeId: string;
+  accept?: string;
+  maxFiles?: number;
+  maxSizeMB?: number;
+  maxWidthOrHeight?: number;
+  label?: string;
+  class?: string;
+}
+
+const {
+  id,
+  type,
+  typeId,
+  accept = 'image/*',
+  maxFiles = 10,
+  maxSizeMB = 1,
+  maxWidthOrHeight = 1920,
+  label = 'Upload files',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['upload-wrapper', className]}>
+  <input
+    type="file"
+    id={id}
+    accept={accept}
+    multiple={maxFiles > 1}
+    class="hidden"
+  />
+
+  <div id={`${id}-preview`} class="upload-preview hidden">
+    <!-- Preview grid populated by JS -->
+  </div>
+
+  <button type="button" id={`${id}-btn`} class="upload-btn">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    <span>{label}</span>
+  </button>
+</div>
+
+<script define:vars={{ id, type, typeId, accept, maxFiles, maxSizeMB, maxWidthOrHeight }}>
+  const fileInput = document.getElementById(id);
+  const btn = document.getElementById(`${id}-btn`);
+  const preview = document.getElementById(`${id}-preview`);
+
+  let uploadedIds = [];
+
+  // Open file picker on button click
+  btn?.addEventListener('click', () => fileInput?.click());
+
+  // Handle file selection
+  fileInput?.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const filesToUpload = files.slice(0, maxFiles - uploadedIds.length);
+
+    preview?.classList.remove('hidden');
+
+    for (const file of filesToUpload) {
+      // Skip compression for videos
+      const isVideo = file.type.startsWith('video/');
+
+      try {
+        let result;
+        if (isVideo) {
+          // Upload videos directly without compression
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('type', type);
+          formData.append('typeId', typeId);
+          result = await actions.media.uploadMedia(formData);
+        } else {
+          // Compress and upload images
+          result = await uploadFile(file, {
+            type,
+            typeId,
+            compress: true,
+            maxSizeMB,
+            maxWidthOrHeight,
+          });
+        }
+
+        if (result.success && result.data) {
+          uploadedIds.push(result.data.id);
+          addPreview(result.data.url, result.data.id);
+        }
+      } catch (err) {
+        console.error('Upload failed:', err);
+      }
+    }
+
+    // Clear input for re-selection
+    e.target.value = '';
+  });
+
+  function addPreview(url, id) {
+    if (!preview) return;
+
+    const item = document.createElement('div');
+    item.className = 'preview-item';
+    item.dataset.id = id;
+    item.innerHTML = `
+      <img src="${url}" alt="Preview" class="w-full h-full object-cover rounded" />
+      <button type="button" class="remove-btn absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs">×</button>
+    `;
+
+    item.querySelector('.remove-btn')?.addEventListener('click', () => {
+      const idToRemove = item.dataset.id;
+      uploadedIds = uploadedIds.filter(i => i !== idToRemove);
+      item.remove();
+      if (uploadedIds.length === 0) preview?.classList.add('hidden');
+    });
+
+    preview.appendChild(item);
+  }
+
+  // Expose to window for external access
+  window[`${id}_getIds`] = () => uploadedIds;
+  window[`${id}_setIds`] = (ids) => {
+    uploadedIds = ids;
+  };
+</script>
+
+<style>
+  .upload-wrapper {
+    @apply space-y-2;
+  }
+
+  .upload-btn {
+    @apply flex items-center gap-2 px-4 py-2 border-2 border-dashed border-muted-foreground/30 rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer;
+  }
+
+  .upload-preview {
+    @apply grid grid-cols-4 gap-2;
+  }
+
+  .preview-item {
+    @apply relative aspect-square bg-muted rounded overflow-hidden;
+  }
+
+  .remove-btn {
+    @apply flex items-center justify-center;
+  }
+</style>

@@ -131,7 +131,10 @@ import '../../styles/globals.css';
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        errorMsg!.textContent = data.error?.message || 'Invalid email or password';
+        const errorMessage = typeof data.error === 'string'
+          ? data.error
+          : data.error?.message || 'Invalid email or password';
+        errorMsg!.textContent = errorMessage;
         errorMsg!.classList.remove('hidden');
         return;
       }

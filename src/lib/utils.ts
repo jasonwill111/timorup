@@ -71,3 +71,12 @@ export function slugify(text: string): string {
     .replace(/\s+/g, '-')             // Replace spaces with hyphens
     .replace(/-+/g, '-');             // Collapse multiple hyphens
 }
+
+/**
+ * Extract error message from unknown error
+ * Used across all server actions to normalize error messages
+ */
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}

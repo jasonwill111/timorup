@@ -14,7 +14,8 @@ export function createKVStore(kv: KVNamespace): KVStore {
       try {
         const value = await kv.get(key);
         return value;
-      } catch {
+      } catch (e) {
+        console.warn('[KVStore] Get failed:', e instanceof Error ? e.message : String(e));
         return null;
       }
     },
@@ -46,7 +47,8 @@ export function createKVStore(kv: KVNamespace): KVStore {
           limit: options?.limit,
         });
         return { keys: listResult.keys.map(k => k.name) };
-      } catch {
+      } catch (e) {
+        console.warn('[KVStore] List failed:', e instanceof Error ? e.message : String(e));
         return { keys: [] };
       }
     },

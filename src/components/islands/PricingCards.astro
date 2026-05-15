@@ -1,0 +1,127 @@
+---
+// Pricing Cards Server Island - reads from service_packages table
+import { getDb } from '@/lib/db';
+import { servicePackages } from '@/db/schema';
+import { eq, asc } from 'drizzle-orm';
+import Button from '@/components/ui/Button.astro';
+
+const db = await getDb();
+
+// Get active subscription packages
+const allPackages = await db.select()
+  .from(servicePackages)
+  .where(eq(servicePackages.isActive, 1))
+  .orderBy(asc(servicePackages.sortOrder))
+  .all();
+
+// Parse and categorize
+const businessPlans = allPackages
+  .filter(p => p.type === 'subscription' && p.category === 'business')
+  .map(p => ({
+    ...p,
+    variants: JSON.parse(p.variants),
+  }));
+
+const listingPlans = allPackages
+  .filter(p => p.type === 'listing_renewal')
+  .map(p => ({
+    ...p,
+    variants: JSON.parse(p.variants),
+  }));
+---
+
+{/* Business Plans */}
+<section class="mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl font-bold mb-4">Business Page Plans</h2>
+    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+      Get a professional business page with your products, photos, and contact info.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    {businessPlans.map((pkg, index) => {
+      const monthly = pkg.variants.find((v: any) => v.durationUnit === 'month');
+      const annual = pkg.variants.find((v: any) => v.durationUnit === 'months');
+      const isPopular = index === 1;
+
+      return (
+        <div class={`bg-card border rounded-2xl p-8 relative ${isPopular ? 'border-2 border-primary' : ''}`}>
+          {isPopular && (
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white px-3 py-1 text-sm font-medium rounded-full">
+              Most Popular
+            </div>
+          )}
+          <div class="text-center mb-6">
+            <h3 class="text-2xl font-bold mb-2">{pkg.name}</h3>
+            <p class="text-sm text-muted-foreground mb-4">{pkg.description}</p>
+            {monthly && (
+              <div class="text-4xl font-bold">${monthly.price}<span class="text-lg text-muted-foreground">/mo</span></div>
+            )}
+            {annual && monthly && (
+              <p class="text-sm font-medium text-green-600 dark:text-green-400 mt-2">
+                ${annual.price}/year (save {Math.round((1 - annual.price / monthly.price / 12) * 100)}%)
+              </p>
+            )}
+          </div>
+
+          {monthly?.limits?.skuLimit && (
+            <div class="bg-muted/50 rounded-lg p-3 mb-6 text-center">
+              <span>Up to <strong class="font-bold text-primary">{monthly.limits.skuLimit}</strong> products</span>
+            </div>
+          )}
+
+          <ul class="text-left space-y-3 text-sm mb-8">
+            {monthly?.features?.map((feature: string) => (
+              <li class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          <a href={`/listings/create?plan=${pkg.slug}`} class="block">
+            <Button class={`w-full ${isPopular ? '' : 'bg-primary hover:bg-primary/90'}`}>
+              Get Started
+            </Button>
+          </a>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+{/* Listing Plans */}
+{listingPlans.length > 0 && (
+  <section class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-4">Classified Ads</h2>
+      <p class="text-lg text-muted-foreground">
+        Jobs, vehicles, property, services — post a listing and reach thousands of buyers.
+      </p>
+    </div>
+
+    <div class="bg-card border rounded-2xl p-8 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {listingPlans.map(lp => {
+          const variant = lp.variants[0];
+          return (
+            <div class="bg-muted/30 rounded-xl p-6 text-center">
+              <div class="text-2xl font-bold mb-2">{variant.durationValue} {variant.durationUnit}</div>
+              <p class="text-sm text-muted-foreground mb-3">{lp.name}</p>
+              <div class="text-lg font-bold">${variant.price}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div class="text-center mt-6">
+        <a href="/listings/create?type=listing" class="inline-block">
+          <Button>Post a Listing</Button>
+        </a>
+      </div>
+    </div>
+  </section>
+)}

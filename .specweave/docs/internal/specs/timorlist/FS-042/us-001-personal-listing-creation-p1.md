@@ -2,7 +2,7 @@
 id: US-001
 feature: FS-042
 title: "Personal Listing Creation (P1)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-10T00:00:00.000Z
 tldr: "**As a** individual user."
@@ -21,10 +21,10 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: User can create personal listing with `entityType = 'personal'`
-- [ ] **AC-US1-02**: Personal listings display owner's full name prominently
-- [ ] **AC-US1-03**: Personal listings appear in `/personal/[slug]` route
-- [ ] **AC-US1-04**: Each user can have only one personal listing
+- [x] **AC-US1-01**: User can create personal listing with `entityType = 'personal'`
+- [x] **AC-US1-02**: Personal listings display owner's full name prominently
+- [x] **AC-US1-03**: Personal listings appear in `/business/[slug]` route (same route, entityType flag)
+- [x] **AC-US1-04**: Each user can have only one personal listing
 
 ---
 

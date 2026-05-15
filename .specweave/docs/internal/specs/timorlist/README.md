@@ -45,6 +45,7 @@ sw:sync-docs 0001
 - [FS-055: Price Fields Format Unification](FS-055/FEATURE.md)
 - [FS-056: Homepage Redesign Tabs](FS-056/FEATURE.md)
 - [FS-057: Astro Server Islands Optimization](FS-057/FEATURE.md)
+- [FS-058: Code Quality Cleanup P0](FS-058/FEATURE.md)
 
 ---
 

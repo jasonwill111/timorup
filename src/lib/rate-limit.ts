@@ -31,6 +31,14 @@ export async function checkRateLimitKV(identifier: string): Promise<RateLimitRes
       const record = stored ? JSON.parse(stored) as { count: number; resetTime: number } : null;
 
       if (record && now < record.resetTime) {
+        // Check limit BEFORE incrementing
+        if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+          return {
+            allowed: false,
+            remaining: 0,
+            resetIn: Math.ceil((record.resetTime - now) / 1000),
+          };
+        }
         // Valid record exists - increment
         record.count++;
         await env.SESSION.put(key, JSON.stringify(record), {
@@ -85,20 +93,20 @@ function checkRateLimitInMemory(identifier: string, now: number): RateLimitResul
     };
   }
 
-  // Under limit
-  if (record.count < MAX_REQUESTS_PER_WINDOW) {
-    record.count++;
+  // Check limit BEFORE incrementing
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
     return {
-      allowed: true,
-      remaining: MAX_REQUESTS_PER_WINDOW - record.count,
+      allowed: false,
+      remaining: 0,
       resetIn: Math.ceil((record.resetTime - now) / 1000),
     };
   }
 
-  // Over limit
+  // Under limit - increment
+  record.count++;
   return {
-    allowed: false,
-    remaining: 0,
+    allowed: true,
+    remaining: MAX_REQUESTS_PER_WINDOW - record.count,
     resetIn: Math.ceil((record.resetTime - now) / 1000),
   };
 }

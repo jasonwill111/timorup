@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **0058-code-quality-cleanup-p0**: P0 code quality fixes:
+  - Type-safe env wrapper (`src/lib/env.ts`) - replaces `as any` pattern
+  - Empty catch blocks fixed (10 locations) with proper error logging
+  - Production console.log removed (17 locations)
+  - Redundant REST APIs deleted (9 files)
+
+### Changed
+- `src/mastra/agents/index.ts` - uses env wrapper, removes `as any`
+- `src/actions/admin/aiGenerate.ts` - uses env wrapper, removes debug logs
+- `src/lib/auth-kv-store.ts` - proper error logging in catch blocks
+- `src/lib/subscription.ts` - proper error logging in catch blocks
+
 ## [1.0.0] - 2026-05-07
 
 ### Added

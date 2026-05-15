@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { buildUpdateData } from '@/lib/admin-update';
 
 const updateSchema = z.object({
   id: z.string(),
@@ -40,6 +41,16 @@ const updateSchema = z.object({
   planType: z.string().optional().nullable(),
   expiryDate: z.number().optional().nullable(),
 });
+
+// Field transform config for listing updates
+const LISTING_FIELD_CONFIG = {
+  tags: 'json',
+  openingHours: 'json',
+  socialLinks: 'json',
+  email: 'emptyToNull',
+  registrationUrl: 'emptyToNull',
+  expiryDate: 'date',
+} as const;
 
 export const listing = {
   // Get single listing
@@ -77,31 +88,8 @@ export const listing = {
 
       if (!existing) throw new Error('Listing not found');
 
-      const updateData: Record<string, unknown> = {};
-      if (data.title !== undefined) updateData.title = data.title;
-      if (data.slug !== undefined) updateData.slug = data.slug;
-      if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
-      if (data.industry !== undefined) updateData.industry = data.industry;
-      if (data.contactName !== undefined) updateData.contactName = data.contactName;
-      if (data.countryCode !== undefined) updateData.countryCode = data.countryCode;
-      if (data.contactNumber !== undefined) updateData.contactNumber = data.contactNumber;
-      if (data.email !== undefined) updateData.email = data.email || null;
-      if (data.registrationUrl !== undefined) updateData.registrationUrl = data.registrationUrl || null;
-      if (data.address !== undefined) updateData.address = data.address;
-      if (data.aboutUs !== undefined) updateData.aboutUs = data.aboutUs;
-      if (data.tags !== undefined) updateData.tags = data.tags ? JSON.stringify(data.tags) : null;
-      if (data.yearOfEstablishment !== undefined) updateData.yearOfEstablishment = data.yearOfEstablishment;
-      if (data.openingHours !== undefined) updateData.openingHours = data.openingHours ? JSON.stringify(data.openingHours) : null;
-      if (data.locationLat !== undefined) updateData.locationLat = data.locationLat;
-      if (data.locationLng !== undefined) updateData.locationLng = data.locationLng;
-      if (data.status !== undefined) updateData.status = data.status;
-      if (data.bannerImageId !== undefined) updateData.bannerImageId = data.bannerImageId;
-      if (data.profileImageId !== undefined) updateData.profileImageId = data.profileImageId;
-      if (data.verifiedBadge !== undefined) updateData.verifiedBadge = data.verifiedBadge;
-      if (data.socialLinks !== undefined) updateData.socialLinks = data.socialLinks ? JSON.stringify(data.socialLinks) : null;
-      // Note: photoGallery, latestUpdate, latestUpdateImages, latestUpdateDate now use separate tables
-      if (data.planType !== undefined) updateData.planType = data.planType;
-      if (data.expiryDate !== undefined) updateData.expiryDate = data.expiryDate ? new Date(data.expiryDate) : null;
+      // Build update data with field transforms
+      const updateData = buildUpdateData(data, LISTING_FIELD_CONFIG);
 
       await db.update(businesses)
         .set(updateData)

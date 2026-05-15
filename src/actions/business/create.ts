@@ -88,21 +88,24 @@ export const create = defineAction({
       if (input.tags) {
         try {
           parsedTags = JSON.parse(input.tags);
-        } catch {
+        } catch (e) {
+          console.warn('[Business:create] Invalid tags format:', e instanceof Error ? e.message : String(e));
           return { success: false, error: { code: 'INVALID_JSON', message: 'Invalid tags format' } };
         }
       }
       if (input.openingHours) {
         try {
           parsedOpeningHours = JSON.parse(input.openingHours);
-        } catch {
+        } catch (e) {
+          console.warn('[Business:create] Invalid opening hours format:', e instanceof Error ? e.message : String(e));
           return { success: false, error: { code: 'INVALID_JSON', message: 'Invalid opening hours format' } };
         }
       }
       if (input.socialLinks) {
         try {
           parsedSocialLinks = JSON.parse(input.socialLinks);
-        } catch {
+        } catch (e) {
+          console.warn('[Business:create] Invalid social links format:', e instanceof Error ? e.message : String(e));
           return { success: false, error: { code: 'INVALID_JSON', message: 'Invalid social links format' } };
         }
       }

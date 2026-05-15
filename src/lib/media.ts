@@ -2,7 +2,18 @@
 // Uses Workers R2 binding - no credentials needed!
 
 import { env } from 'cloudflare:workers';
-import sharp from 'sharp';
+
+// Sharp is NOT compatible with Cloudflare Workers - use dynamic import with fallback
+async function getSharp() {
+  try {
+    // Dynamic import - only load when actually needed (for image processing)
+    const sharp = await import('sharp');
+    return sharp.default;
+  } catch (error) {
+    console.warn('Sharp not available in this environment, image processing disabled');
+    return null;
+  }
+}
 
 // Get R2 bucket from Workers binding
 export function getR2Bucket(): R2Bucket {
@@ -98,11 +109,22 @@ export async function uploadImageToR2(
       mimeType = 'image/webp';
     }
 
-    // Optimize image
-    const processed = await sharp(inputBuffer)
-      .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
-      .webp({ quality: IMAGE_QUALITY })
-      .toBuffer({ resolveWithObject: true });
+    // Dynamic sharp import - fails gracefully if not available
+    const sharpModule = await getSharp();
+    let processed: { data: Buffer; info: { width: number; height: number } };
+
+    if (sharpModule) {
+      processed = await sharpModule(inputBuffer)
+        .resize(MAX_IMAGE_WIDTH, null, { withoutEnlargement: true })
+        .webp({ quality: IMAGE_QUALITY })
+        .toBuffer({ resolveWithObject: true }) as { data: Buffer; info: { width: number; height: number } };
+    } else {
+      // Sharp not available - use original image
+      processed = {
+        data: inputBuffer,
+        info: { width: 0, height: 0 }
+      };
+    }
 
     const bucket = getR2Bucket();
     const publicUrl = getR2PublicUrl();

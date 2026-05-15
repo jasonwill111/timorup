@@ -1,0 +1,19 @@
+{
+  "id": "0058-code-quality-cleanup-p0",
+  "status": "completed",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-15T11:08:09.928Z",
+  "lastActivity": "2026-05-15T11:18:59.783Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-15T11:18:16.756Z",
+  "approvedAt": "2026-05-15T11:18:59.783Z"
+}

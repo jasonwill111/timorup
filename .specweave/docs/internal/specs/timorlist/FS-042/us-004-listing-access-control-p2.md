@@ -2,7 +2,7 @@
 id: US-004
 feature: FS-042
 title: "Listing Access Control (P2)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-10T00:00:00.000Z
 tldr: "**As a** visitor."
@@ -21,9 +21,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US4-01**: Search results filter by `subscriptionStatus = 'active'`
-- [ ] **AC-US4-02**: Homepage sections show only active listings
-- [ ] **AC-US4-03**: Expired listings show "Subscription Expired" banner
+- [x] **AC-US4-01**: Search results filter by `subscriptionStatus = 'active'`
+- [x] **AC-US4-02**: Homepage sections show only active listings
+- [x] **AC-US4-03**: Expired listings show "Subscription Expired" banner
 
 ---
 

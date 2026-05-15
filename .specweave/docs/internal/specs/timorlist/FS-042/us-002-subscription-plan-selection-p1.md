@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-042
 title: "Subscription Plan Selection (P1)"
-status: in_progress
+status: completed
 priority: P1
 created: 2026-05-10T00:00:00.000Z
 tldr: "**As a** user."
@@ -22,9 +22,9 @@ project: timorlist
 ## Acceptance Criteria
 
 - [x] **AC-US2-01**: Plans table supports periods: `trial_3d`, `weekly`, `monthly`, `yearly`
-- [ ] **AC-US2-02**: User selects planType during listing creation
-- [ ] **AC-US2-03**: Trial period converts to paid on payment completion
-- [ ] **AC-US2-04**: Subscription expiration triggers listing status change
+- [x] **AC-US2-02**: User selects planType during listing creation
+- [x] **AC-US2-03**: Trial period converts to paid on payment completion
+- [x] **AC-US2-04**: Subscription expiration triggers listing status change
 
 ---
 

@@ -2,23 +2,9 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getAdminUser } from '@/lib/admin-auth';
+import { getMinimaxApiKey } from '@/lib/env';
 
 const AI_TIMEOUT = 120000; // 2 minutes
-
-// Get API key - same logic as Mastra agents
-function getApiKey(): string {
-  if (typeof globalThis !== 'undefined' && (globalThis as any).env?.MINIMAX_API_KEY) {
-    return (globalThis as any).env.MINIMAX_API_KEY;
-  }
-  if (typeof import.meta !== 'undefined') {
-    const env = import.meta.env as Record<string, string | undefined>;
-    if (env?.MINIMAX_API_KEY) return env.MINIMAX_API_KEY;
-  }
-  if (typeof process !== 'undefined' && process.env?.MINIMAX_API_KEY) {
-    return process.env.MINIMAX_API_KEY;
-  }
-  return '';
-}
 
 export const aiGenerate = defineAction({
   input: z.object({
@@ -26,9 +12,7 @@ export const aiGenerate = defineAction({
     data: z.record(z.unknown()),
   }),
   handler: async (input, context) => {
-    console.log('[AI Action] Called with type:', input.type);
-
-    const request = context?.request as Request | undefined;
+    const request = context?.request;
     if (!request) {
       throw new Error('Request context not available');
     }
@@ -37,9 +21,7 @@ export const aiGenerate = defineAction({
     if (!user) throw new Error('Unauthorized');
 
     const data = input.data as Record<string, unknown>;
-    const apiKey = getApiKey();
-
-    console.log('[AI] API Key status:', apiKey ? `SET (length: ${apiKey.length})` : 'NOT SET');
+    const apiKey = getMinimaxApiKey();
 
     // Build user message based on type
     let userMessage = '';
@@ -83,7 +65,7 @@ IMPORTANT: Return ONLY valid JSON. Format:
         const priceVal = String(data.priceValue ?? 'N/A');
         const priceFields = Array.isArray(data.priceFields) ? data.priceFields : [];
         const priceInfo = priceFields.length > 0
-          ? priceFields.map((p: any) => `${p.label}: ${p.value} ${p.unit || ''}`).join(', ')
+          ? priceFields.map((p: { label: string; value: string; unit?: string }) => `${p.label}: ${p.value} ${p.unit || ''}`).join(', ')
           : `Price: ${priceVal}`;
         userMessage = `Create a ${data.productType || 'product'} called "${skuTitle}".
 Description: ${skuDesc}
@@ -132,8 +114,6 @@ IMPORTANT: Return ONLY valid JSON. Format:
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT);
 
-      console.log('[AI] Calling MiniMax API directly...');
-
       const response = await fetch('https://api.minimax.chat/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -157,7 +137,6 @@ IMPORTANT: Return ONLY valid JSON. Format:
       }
 
       const result = await response.json();
-      console.log('[AI] API Response received, content length:', result.choices?.[0]?.message?.content?.length || 0);
 
       const text = result.choices?.[0]?.message?.content || '';
 
@@ -173,15 +152,13 @@ IMPORTANT: Return ONLY valid JSON. Format:
         .trim();
 
       // Try to parse as JSON - find JSON object bounds
-      let parsed: Record<string, unknown>;
       try {
         // Find the first { and last } to extract JSON
         const firstBrace = cleanedText.indexOf('{');
         const lastBrace = cleanedText.lastIndexOf('}');
         if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
           const jsonStr = cleanedText.substring(firstBrace, lastBrace + 1);
-          parsed = JSON.parse(jsonStr);
-          console.log('[AI] Parsed JSON keys:', Object.keys(parsed));
+          const parsed = JSON.parse(jsonStr);
           return { success: true, object: parsed };
         }
         // If no JSON found, return the whole text as content
@@ -193,7 +170,6 @@ IMPORTANT: Return ONLY valid JSON. Format:
 
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      console.error('[AI] Error:', error.message);
 
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
         return { success: false, error: { code: 'TIMEOUT', message: 'AI generation timed out' } };

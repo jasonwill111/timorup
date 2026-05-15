@@ -76,6 +76,19 @@ coverage_target: 80
 - [ ] **AC-US3-02**: 日志记录 island 渲染失败，便于调试 ⏳ (existing try-catch)
 - [ ] **AC-US3-03**: 验证 Lighthouse 评分 ≥ 90 ⏳ (requires deploy)
 
+### US-004: Public Blog Pages
+**Project**: timorlist
+
+**As a** visitor
+**I want** 查看公开的 blog 文章
+**So that** 获取 Timor-Leste 旅游和本地信息
+
+**Acceptance Criteria**:
+- [x] **AC-US4-01**: `/blog` 列表页展示所有已发布文章 ✅
+- [x] **AC-US4-02**: `/blog/[slug]` 详情页展示完整内容 ✅
+- [ ] **AC-US4-03**: Blog 详情页包含分享按钮 (Twitter/Facebook/WhatsApp) ⏳ (deployed)
+- [x] **AC-US4-04**: SEO meta tags 正确设置 ✅
+
 ---
 
 ## Success Metrics

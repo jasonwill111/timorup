@@ -115,30 +115,33 @@ import AdminLayout from '@layouts/AdminLayout.astro';
       const res = await authFetch('/api/admin/stats');
       const data = await res.json();
 
-      if (data.success) {
-        document.getElementById('stat-users')!.textContent = String(data.data.totalUsers);
-        document.getElementById('stat-businesses')!.textContent = String(data.data.totalBusinesses - data.data.totalNonProfits);
-        document.getElementById('stat-nonprofits')!.textContent = String(data.data.totalNonProfits);
-        document.getElementById('stat-products')!.textContent = String(data.data.totalProducts);
-        document.getElementById('stat-categories')!.textContent = String(data.data.totalCategories);
+      if (data.success && data.data) {
+        const toNum = (val: unknown): number => typeof val === 'number' ? val : 0;
+
+        document.getElementById('stat-users')!.textContent = String(toNum(data.data.totalUsers));
+        document.getElementById('stat-businesses')!.textContent = String(toNum(data.data.totalBusinesses));
+        document.getElementById('stat-nonprofits')!.textContent = String(toNum(data.data.totalNonProfits));
+        document.getElementById('stat-products')!.textContent = String(toNum(data.data.totalProducts));
+        document.getElementById('stat-categories')!.textContent = String(toNum(data.data.totalCategories));
 
         if (data.data.mtd) {
-          document.getElementById('mtd-revenue')!.textContent = '$' + String(data.data.mtd.revenue || 0);
-          document.getElementById('mtd-subs')!.textContent = String(data.data.mtd.newSubscriptions || 0);
-          document.getElementById('mtd-users')!.textContent = String(data.data.mtd.newUsers || 0);
+          document.getElementById('mtd-revenue')!.textContent = '$' + String(toNum(data.data.mtd.revenue));
+          document.getElementById('mtd-subs')!.textContent = String(toNum(data.data.mtd.newSubscriptions));
+          document.getElementById('mtd-users')!.textContent = String(toNum(data.data.mtd.newUsers));
         }
 
-        document.getElementById('stat-expiring')!.textContent = String(data.data.expiringSoon || 0);
+        document.getElementById('stat-expiring')!.textContent = String(toNum(data.data.expiringSoon));
 
-        if (data.data.monthly && data.data.monthly.length > 0) {
+        if (data.data.monthly && Array.isArray(data.data.monthly) && data.data.monthly.length > 0) {
           renderRevenueChart(data.data.monthly);
-          renderLineChart('subscriptions-svg', data.data.monthly.map((m: MonthlyData) => m.subscriptions), data.data.monthly.map((m: MonthlyData) => m.month), '#8b5cf6');
-          const usersData = data.data.monthlyUsers || data.data.monthly.map((m: MonthlyData) => 0);
-          renderLineChart('users-svg', usersData, data.data.monthly.map((m: MonthlyData) => m.month), '#3b82f6');
+          renderLineChart('subscriptions-svg', data.data.monthly.map((m: MonthlyData) => toNum(m.subscriptions)), data.data.monthly.map((m: MonthlyData) => m.month || ''), '#8b5cf6');
+          renderLineChart('users-svg', data.data.monthly.map((m: MonthlyData) => 0), data.data.monthly.map((m: MonthlyData) => m.month || ''), '#3b82f6');
         }
       }
     } catch (err) {
       console.error('Error loading stats:', err);
+      document.getElementById('stat-users')!.textContent = '!';
+      document.getElementById('stat-businesses')!.textContent = '!';
     }
   }
 

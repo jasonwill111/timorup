@@ -45,6 +45,7 @@ export const sessions = sqliteTable("sessions", {
   userAgent: text("user_agent"),
   ipAddress: text("ip_address"),
   createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
 },
 (table) => [
   index("sessions_user_idx").on(table.userId),
@@ -93,7 +94,7 @@ export const businessCategories = sqliteTable("business_categories", {
   icon: text(),
   parentId: text("parent_id"),
   sortOrder: integer("sort_order").default(0),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
@@ -110,7 +111,7 @@ export const nonProfitCategories = sqliteTable("non_profit_categories", {
   icon: text(),
   parentId: text("parent_id"),
   sortOrder: integer("sort_order").default(0),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
@@ -127,7 +128,7 @@ export const publicSectorCategories = sqliteTable("public_sector_categories", {
   icon: text(),
   parentId: text("parent_id"),
   sortOrder: integer("sort_order").default(0),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
@@ -144,7 +145,7 @@ export const listingCategories = sqliteTable("listing_categories", {
   icon: text(),
   parentId: text("parent_id"),
   sortOrder: integer("sort_order").default(0),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   // JSON 配置 - 分类特有的表单字段，在 admin 后台可编辑
   // 结构: [{ name: "price", type: "number", label: "Price", required: true }, ...]
   formFields: text("form_fields"),
@@ -213,7 +214,6 @@ export const businesses = sqliteTable("businesses", {
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
   categoryId: text("category_id"),
-  entityType: text("entity_type").default("business"),
   status: text().default("draft"),
   bannerImageId: text("banner_image_id"),
   profileImageId: text("profile_image_id"),
@@ -271,7 +271,6 @@ export const nonProfits = sqliteTable("non_profits", {
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
   categoryId: text("category_id"),
-  entityType: text("entity_type").default("nonprofit"),
   status: text().default("draft"),
   bannerImageId: text("banner_image_id"),
   profileImageId: text("profile_image_id"),
@@ -326,7 +325,6 @@ export const publicSectors = sqliteTable("public_sectors", {
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
   categoryId: text("category_id"),
-  entityType: text("entity_type").default("government"),
   status: text().default("draft"),
   bannerImageId: text("banner_image_id"),
   profileImageId: text("profile_image_id"),
@@ -457,7 +455,7 @@ export const productCategories = sqliteTable("product_categories", {
   icon: text(),
   parentId: text("parent_id"),
   sortOrder: integer("sort_order").default(0),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   // JSON 配置 - 分类特有的表单字段
   // 结构: [{ name: "brand", type: "text", label: "Brand", required: false }, ...]
   formFields: text("form_fields"),
@@ -583,7 +581,7 @@ export const servicePackages = sqliteTable("service_packages", {
   // 变体数组 (JSON)
   // [{ name: "Starter Monthly", price: 29, currency: "USD", durationValue: 1, durationUnit: "month", limits: { skuLimit: 10, maxImages: 16, maxVideos: 2 }, features: ["SEO Tools"] }]
   variants: text("variants").notNull(),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
@@ -634,7 +632,7 @@ export const adBanners = sqliteTable("ad_banners", {
   position: text().notNull(),              // 'homepage' | 'businesses' | 'products-services' | 'listings'
   sortOrder: integer("sort_order").default(0),  // 越大越靠前
   orderId: text("order_id"),               // FK → orders.id (需付款后生效)
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   startDate: integer("start_date"),
   endDate: integer("end_date"),
   createdAt: integer("created_at"),
@@ -658,7 +656,7 @@ export const blogCategories = sqliteTable("blog_categories", {
   icon: text(),
   parentId: text("parent_id"),
   sortOrder: integer("sort_order").default(0),
-  isActive: integer("is_active").default(true),
+  isActive: integer("is_active").default(1),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
@@ -675,22 +673,21 @@ export const blogPosts = sqliteTable("blog_posts", {
   id: text().primaryKey().notNull(),
   title: text().notNull(),
   slug: text().notNull().unique(),
-  excerpt: text(),                           // 列表显示
+  excerpt: text(),
   content: text(),
   coverImageId: text("cover_image_id"),
-  authorName: text("author_name"),          // 更灵活，不一定是平台用户
-  // SEO
-  metaTitle: text("meta_title"),
-  metaDescription: text("meta_description"),
-  canonicalUrl: text("canonical_url"),
+  authorId: text("author_id"),
+  authorName: text("author_name"),
   status: text().default("draft"),
   tags: text(),
   publishedAt: integer("published_at"),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  canonicalUrl: text("canonical_url"),
 },
 (table) => [
-  uniqueIndex("blog_posts_slug_idx").on(table.slug),
   index("blog_posts_status_idx").on(table.status),
 ]);
 

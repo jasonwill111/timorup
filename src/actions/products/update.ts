@@ -98,6 +98,7 @@ export const updateProduct = defineAction({
 
       return { success: true, data: parsedUpdated };
     } catch (error) {
+      console.error('[Products:update] Database update failed:', getErrorMessage(error));
       return { success: false, error: { message: getErrorMessage(error) } };
     }
   },
@@ -116,6 +117,7 @@ export const deleteProduct = defineAction({
       await db.delete(products).where(eq(products.id, input.id)).run();
       return { success: true };
     } catch (error) {
+      console.error('[Products:delete] Database delete failed:', getErrorMessage(error));
       return { success: false, error: { message: getErrorMessage(error) } };
     }
   },

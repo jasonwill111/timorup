@@ -62,8 +62,7 @@ export async function GET({ request }: { params: Record<string, string>; request
       }
     }
 
-    console.log(`[Mark Expired] Summary: ${results.markedExpired.length} businesses marked expired, ${results.failed.length} failures`);
-
+    // Summary logged internally for debugging if needed, not needed in production output
     return new Response(JSON.stringify({
       success: true,
       data: {

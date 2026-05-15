@@ -4,7 +4,7 @@
  */
 import { getDb } from '@/lib/db';
 import { sessions, users, type User } from '@/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export interface AuthResult {
   userId: string;
@@ -13,6 +13,16 @@ export interface AuthResult {
 
 export interface AuthError {
   error: 'UNAUTHORIZED' | 'SESSION_EXPIRED' | 'USER_NOT_FOUND';
+}
+
+/**
+ * Check if session is expired (expiresAt is integer seconds)
+ */
+function isSessionExpired(expiresAt: number | Date): boolean {
+  const expiresAtMs = typeof expiresAt === 'number'
+    ? expiresAt * 1000
+    : expiresAt.getTime();
+  return expiresAtMs <= Date.now();
 }
 
 /**
@@ -27,20 +37,20 @@ export async function getAuthenticatedUser(
 
   const db = await getDb();
 
-  // 查询有效 session
+  // 查询 session (只匹配 token，expiry 在 JS 中检查)
   const session = await db
     .select()
     .from(sessions)
-    .where(
-      and(
-        eq(sessions.token, cookieValue),
-        gt(sessions.expiresAt, new Date())
-      )
-    )
+    .where(eq(sessions.token, cookieValue))
     .limit(1)
     .get();
 
   if (!session) {
+    return { error: 'SESSION_EXPIRED' };
+  }
+
+  // 检查 expiry (JS 层处理，避免 SQL 整数 vs Date 比较问题)
+  if (isSessionExpired(session.expiresAt)) {
     return { error: 'SESSION_EXPIRED' };
   }
 

@@ -1,0 +1,545 @@
+---
+export const prerender = false;
+import AdminLayout from '@layouts/AdminLayout.astro';
+import Button from '@components/ui/Button.astro';
+import { actions } from 'astro:actions';
+---
+
+<AdminLayout title="Service Packages">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+      <div class="min-w-0">
+        <h1 class="text-lg md:text-2xl font-bold truncate">Service Packages</h1>
+        <p class="text-xs md:text-sm text-muted-foreground hidden sm:block">Manage subscription packages pricing and limits</p>
+      </div>
+      <Button id="add-plan-btn" class="text-xs px-2 py-1 h-7 flex-shrink-0 whitespace-nowrap md:text-sm md:px-4 md:h-9">+ Add Plan</Button>
+    </div>
+
+    <!-- Important Notice - Prominent Warning -->
+    <div class="mb-4 bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-400 dark:border-amber-600 rounded-lg p-3">
+      <div class="flex items-start gap-2">
+        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <p class="text-amber-800 dark:text-amber-300 text-xs md:text-sm">
+          <span class="font-semibold">Note:</span> Changes to plan limits apply to new subscriptions only. Existing subscriptions retain their original limits.
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4">
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold" id="stat-total">-</p>
+        <p class="text-xs text-muted-foreground">Total</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold text-green-600" id="stat-monthly">-</p>
+        <p class="text-xs text-muted-foreground">Subscriptions</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold text-blue-600" id="stat-yearly">-</p>
+        <p class="text-xs text-muted-foreground">Listings</p>
+      </div>
+      <div class="bg-card border rounded-lg p-3 text-center">
+        <p class="text-xl md:text-2xl font-bold text-amber-600" id="stat-active">-</p>
+        <p class="text-xs text-muted-foreground">Active</p>
+      </div>
+    </div>
+
+    <!-- Plans Table -->
+    <div class="bg-card border rounded-lg">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-muted/50">
+            <tr>
+              <th class="text-left p-3 font-medium">Package</th>
+              <th class="text-left p-3 font-medium hidden md:table-cell">Type</th>
+              <th class="text-left p-3 font-medium">Price</th>
+              <th class="text-left p-3 font-medium hidden lg:table-cell">SKU Limit</th>
+              <th class="text-left p-3 font-medium hidden lg:table-cell">Images</th>
+              <th class="text-left p-3 font-medium hidden lg:table-cell">Variants</th>
+              <th class="text-center p-3 font-medium">Status</th>
+              <th class="text-right p-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="plans-list">
+            <tr>
+              <td colspan="8" class="text-center p-8 text-muted-foreground">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Plan Modal -->
+  <div id="plan-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-card border rounded-lg w-full max-w-lg my-8">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h2 class="text-lg font-semibold" id="modal-title">Edit Plan</h2>
+        <button id="close-modal" class="text-muted-foreground hover:text-foreground">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="plan-form" class="p-4 space-y-4">
+        <input type="hidden" id="plan-id" name="id" />
+        <input type="hidden" id="plan-mode" name="mode" value="edit" />
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Package Name</label>
+            <input type="text" id="plan-name" name="name" required class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+          <div id="package-type-field">
+            <label class="block text-sm font-medium mb-1">Type</label>
+            <select id="package-type" name="packageType" class="w-full h-9 px-3 rounded-md border bg-background text-sm">
+              <option value="subscription">Subscription</option>
+              <option value="listing_renewal">Listing Renewal</option>
+              <option value="featured">Featured</option>
+              <option value="addon">Addon</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Price (USD)</label>
+            <input type="number" id="plan-amount" name="amount" required min="0" step="0.01" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">SKU Limit</label>
+            <input type="number" id="plan-skuLimit" name="skuLimit" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Max Images per SKU</label>
+            <input type="number" id="plan-maxImages" name="maxImages" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Max Videos per SKU</label>
+            <input type="number" id="plan-maxVideos" name="maxVideos" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Max Business Images</label>
+            <input type="number" id="plan-maxBusinessImages" name="maxBusinessImages" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Max Business Videos</label>
+            <input type="number" id="plan-maxBusinessVideos" name="maxBusinessVideos" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Sort Order</label>
+          <input type="number" id="plan-sortOrder" name="sortOrder" min="0" value="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Description</label>
+          <textarea id="plan-description" name="description" rows="2" class="w-full px-3 py-2 rounded-md border bg-background text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Features (one per line)</label>
+          <textarea id="plan-features" name="features" rows="4" placeholder="Feature 1&#10;Feature 2&#10;Feature 3" class="w-full px-3 py-2 rounded-md border bg-background text-sm"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="plan-active" name="active" class="w-4 h-4 rounded border-gray-300" />
+          <label for="plan-active" class="text-sm">Active</label>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <Button type="button" id="delete-plan-btn" class="bg-red-600 hover:bg-red-700 text-white hidden">Delete</Button>
+          <div class="flex-1"></div>
+          <Button type="button" id="cancel-btn" variant="outline">Cancel</Button>
+          <Button type="submit">Save Changes</Button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-card border rounded-lg w-full max-w-sm my-8 p-6">
+      <h2 class="text-lg font-semibold mb-2">Delete Plan?</h2>
+      <p class="text-sm text-muted-foreground mb-4">This action cannot be undone. Any users with this plan will lose access.</p>
+      <div class="flex justify-end gap-2">
+        <Button type="button" id="cancel-delete" variant="outline">Cancel</Button>
+        <Button type="button" id="confirm-delete" class="bg-red-600 hover:bg-red-700 text-white">Delete</Button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { actions } from 'astro:actions';
+
+  interface Plan {
+    id: string;
+    name: string;
+    period: string;
+    amount: number;
+    skuLimit: number;
+    maxImages: number;
+    maxVideos: number;
+    maxBusinessImages: number;
+    maxBusinessVideos: number;
+    features: string[];
+    description: string;
+    active: boolean;
+    sortOrder: number;
+  }
+
+  interface PlanData {
+    editPlan?: (planId: string) => void;
+    createPlan?: () => void;
+  }
+
+  // Auth fetch helper
+  async function authFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    });
+  }
+
+  let plans: Plan[] = [];
+  let currentUserRole: string = '';
+
+  // Check auth and role
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/auth/session', { credentials: 'include' });
+      const data = await res.json();
+      if (data.user) {
+        currentUserRole = data.user.role || '';
+        // Show/hide Add Plan button based on role
+        const addBtn = document.getElementById('add-plan-btn');
+        if (addBtn) {
+          addBtn.classList.toggle('hidden', currentUserRole !== 'super_admin');
+        }
+      }
+    } catch (e) {
+      console.error('Auth check failed:', e);
+    }
+  }
+
+  async function loadPlans() {
+    try {
+      const result = await actions.admin.servicePackagesAdmin.getAll();
+
+      if (result.success && result.data) {
+        plans = result.data;
+        renderPlans();
+        updateStats();
+      } else {
+        showError(result.error?.message || 'Failed to load plans');
+      }
+    } catch (e) {
+      console.error('Failed to load plans:', e);
+      showError('Failed to load plans');
+    }
+  }
+
+  function renderPlans() {
+    const tbody = document.getElementById('plans-list');
+    if (!tbody) return;
+
+    if (plans.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-muted-foreground">No packages found</td></tr>';
+      return;
+    }
+
+    const canEdit = currentUserRole === 'super_admin';
+
+    tbody.innerHTML = plans.map(pkg => {
+      const firstVariant = pkg.variants?.[0] || {};
+      const durationUnit = firstVariant.durationUnit || 'month';
+      const price = firstVariant.price || 0;
+      const skuLimit = firstVariant.limits?.skuLimit ?? '-';
+      const maxImages = firstVariant.limits?.maxImages ?? '-';
+      const maxVideos = firstVariant.limits?.maxVideos ?? '-';
+      const variantCount = pkg.variants?.length || 0;
+
+      return `
+      <tr class="border-t hover:bg-muted/50">
+        <td class="p-3">
+          <div class="font-medium">${escapeHtml(pkg.name)}</div>
+          <div class="text-xs text-muted-foreground">${escapeHtml(pkg.slug)}</div>
+        </td>
+        <td class="p-3 hidden md:table-cell">
+          <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+            ${pkg.type}
+          </span>
+        </td>
+        <td class="p-3 font-semibold">$${price}</td>
+        <td class="p-3 hidden lg:table-cell">${skuLimit}</td>
+        <td class="p-3 hidden lg:table-cell">${maxImages}</td>
+        <td class="p-3 hidden lg:table-cell">${variantCount} variant${variantCount !== 1 ? 's' : ''}</td>
+        <td class="p-3 text-center">
+          <span class="px-2 py-1 text-xs rounded-full ${pkg.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}">
+            ${pkg.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+        <td class="p-3 text-right">
+          ${canEdit ? `<button onclick="window.editPlan('${pkg.id}')" class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>` : '<span class="text-xs text-muted-foreground">View only</span>'}
+        </td>
+      </tr>
+    `}).join('');
+  }
+
+  function updateStats() {
+    const total = plans.length;
+    const subscriptions = plans.filter(p => p.type === 'subscription').length;
+    const listings = plans.filter(p => p.type === 'listing_renewal').length;
+    const active = plans.filter(p => p.isActive).length;
+
+    const statTotal = document.getElementById('stat-total');
+    const statMonthly = document.getElementById('stat-monthly');
+    const statYearly = document.getElementById('stat-yearly');
+    const statActive = document.getElementById('stat-active');
+
+    if (statTotal) statTotal.textContent = String(total);
+    if (statMonthly) statMonthly.textContent = String(subscriptions);
+    if (statYearly) statYearly.textContent = String(listings);
+    if (statActive) statActive.textContent = String(active);
+  }
+
+  (window as PlanData).editPlan = function(planId: string) {
+    const pkg = plans.find(p => p.id === planId);
+    if (!pkg) return;
+
+    const firstVariant = pkg.variants?.[0] || {};
+
+    const modal = document.getElementById('plan-modal');
+    const title = document.getElementById('modal-title');
+    const modeInput = document.getElementById('plan-mode') as HTMLInputElement;
+    const deleteBtn = document.getElementById('delete-plan-btn');
+
+    if (modeInput) modeInput.value = 'edit';
+    if (title) title.textContent = `Edit ${pkg.name}`;
+    if (deleteBtn) {
+      deleteBtn.classList.remove('hidden');
+      deleteBtn.onclick = () => showDeleteConfirm(planId);
+    }
+
+    const form = document.getElementById('plan-form') as HTMLFormElement;
+    if (form) {
+      (document.getElementById('plan-id') as HTMLInputElement).value = pkg.id;
+      (document.getElementById('plan-name') as HTMLInputElement).value = pkg.name;
+      (document.getElementById('plan-amount') as HTMLInputElement).value = String(firstVariant.price || 0);
+      (document.getElementById('plan-skuLimit') as HTMLInputElement).value = String(firstVariant.limits?.skuLimit || 0);
+      (document.getElementById('plan-maxImages') as HTMLInputElement).value = String(firstVariant.limits?.maxImages || 0);
+      (document.getElementById('plan-maxVideos') as HTMLInputElement).value = String(firstVariant.limits?.maxVideos || 0);
+      (document.getElementById('plan-maxBusinessImages') as HTMLInputElement).value = String(firstVariant.limits?.maxBusinessImages || 0);
+      (document.getElementById('plan-maxBusinessVideos') as HTMLInputElement).value = String(firstVariant.limits?.maxBusinessVideos || 0);
+      (document.getElementById('plan-sortOrder') as HTMLInputElement).value = String(pkg.sortOrder || 0);
+      (document.getElementById('plan-description') as HTMLTextAreaElement).value = pkg.description || '';
+      (document.getElementById('plan-features') as HTMLTextAreaElement).value = (firstVariant.features || []).join('\n');
+      (document.getElementById('plan-active') as HTMLInputElement).checked = Boolean(pkg.isActive);
+    }
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  };
+
+  (window as PlanData).createPlan = function() {
+    const modal = document.getElementById('plan-modal');
+    const title = document.getElementById('modal-title');
+    const modeInput = document.getElementById('plan-mode') as HTMLInputElement;
+    const periodField = document.getElementById('period-field');
+    const deleteBtn = document.getElementById('delete-plan-btn');
+    const form = document.getElementById('plan-form') as HTMLFormElement;
+
+    if (modeInput) modeInput.value = 'create';
+    if (title) title.textContent = 'Create Plan';
+    if (periodField) periodField.classList.remove('hidden');
+    if (deleteBtn) deleteBtn.classList.add('hidden');
+
+    if (form) {
+      (document.getElementById('plan-id') as HTMLInputElement).value = '';
+      (document.getElementById('plan-name') as HTMLInputElement).value = '';
+      (document.getElementById('plan-period') as HTMLSelectElement).value = 'monthly';
+      (document.getElementById('plan-amount') as HTMLInputElement).value = '';
+      (document.getElementById('plan-skuLimit') as HTMLInputElement).value = '10';
+      (document.getElementById('plan-maxImages') as HTMLInputElement).value = '5';
+      (document.getElementById('plan-maxVideos') as HTMLInputElement).value = '1';
+      (document.getElementById('plan-maxBusinessImages') as HTMLInputElement).value = '16';
+      (document.getElementById('plan-maxBusinessVideos') as HTMLInputElement).value = '2';
+      (document.getElementById('plan-sortOrder') as HTMLInputElement).value = '0';
+      (document.getElementById('plan-description') as HTMLTextAreaElement).value = '';
+      (document.getElementById('plan-features') as HTMLTextAreaElement).value = '';
+      (document.getElementById('plan-active') as HTMLInputElement).checked = true;
+    }
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  };
+
+  let deleteTargetId: string | null = null;
+
+  function showDeleteConfirm(planId: string) {
+    deleteTargetId = planId;
+    const modal = document.getElementById('delete-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  }
+
+  function hideDeleteConfirm() {
+    deleteTargetId = null;
+    const modal = document.getElementById('delete-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  }
+
+  async function deletePlan(planId: string) {
+    try {
+      const result = await actions.admin.servicePackagesAdmin.delete({ id: planId });
+      if (result.success) {
+        hideDeleteConfirm();
+        closeModal();
+        loadPlans();
+      } else {
+        showError(result.error?.message || 'Failed to delete plan');
+      }
+    } catch (e) {
+      console.error('Failed to delete plan:', e);
+      showError('Failed to delete plan');
+    }
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('plan-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  }
+
+  async function savePlan(formData: FormData) {
+    const mode = formData.get('mode') as string;
+    const id = formData.get('id') as string;
+    const featuresText = formData.get('features') as string;
+    const features = featuresText.split('\n').filter(f => f.trim());
+
+    // Build variant from form data
+    const variant = {
+      name: formData.get('name') as string,
+      price: parseFloat(formData.get('amount') as string) || 0,
+      currency: 'USD',
+      durationValue: 1,
+      durationUnit: 'month',
+      limits: {
+        skuLimit: parseInt(formData.get('skuLimit') as string) || 0,
+        maxImages: parseInt(formData.get('maxImages') as string) || 0,
+        maxVideos: parseInt(formData.get('maxVideos') as string) || 0,
+        maxBusinessImages: parseInt(formData.get('maxBusinessImages') as string) || 0,
+        maxBusinessVideos: parseInt(formData.get('maxBusinessVideos') as string) || 0,
+      },
+      features: features,
+    };
+
+    try {
+      let result;
+      if (mode === 'edit' && id) {
+        // For edit, we need to get the existing package to preserve all variants
+        const existingPkg = plans.find(p => p.id === id);
+        const variants = existingPkg?.variants || [variant];
+        // Update first variant with new values
+        variants[0] = variant;
+
+        result = await actions.admin.servicePackagesAdmin.update({
+          id,
+          name: formData.get('name') as string,
+          description: formData.get('description') as string,
+          variants: variants,
+          isActive: formData.get('active') === 'on',
+          sortOrder: parseInt(formData.get('sortOrder') as string) || 0,
+        });
+      } else {
+        // Create new package
+        const packageType = (formData.get('packageType') as string) || 'subscription';
+        result = await actions.admin.servicePackagesAdmin.create({
+          name: formData.get('name') as string,
+          type: packageType as 'subscription' | 'listing_renewal' | 'featured' | 'addon',
+          description: formData.get('description') as string || '',
+          variants: [variant],
+          isActive: formData.get('active') === 'on',
+          sortOrder: parseInt(formData.get('sortOrder') as string) || 0,
+        });
+      }
+
+      if (result.success) {
+        closeModal();
+        loadPlans();
+      } else {
+        showError(result.error?.message || 'Failed to save plan');
+      }
+    } catch (e) {
+      console.error('Failed to save plan:', e);
+      showError('Failed to save plan');
+    }
+  }
+
+  function showError(message: string) {
+    alert(message);
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuth();
+    loadPlans();
+
+    document.getElementById('close-modal')?.addEventListener('click', closeModal);
+    document.getElementById('cancel-btn')?.addEventListener('click', closeModal);
+    document.getElementById('add-plan-btn')?.addEventListener('click', () => (window as PlanData).createPlan?.());
+
+    document.getElementById('plan-modal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    document.getElementById('plan-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
+      await savePlan(formData);
+    });
+
+    // Delete modal handlers
+    document.getElementById('cancel-delete')?.addEventListener('click', hideDeleteConfirm);
+    document.getElementById('confirm-delete')?.addEventListener('click', () => {
+      if (deleteTargetId) deletePlan(deleteTargetId);
+    });
+    document.getElementById('delete-modal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideDeleteConfirm();
+    });
+  });
+</script>
