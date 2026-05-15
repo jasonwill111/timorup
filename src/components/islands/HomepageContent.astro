@@ -2,32 +2,22 @@
 // Server Island: Fetches dynamic content on the homepage
 // This runs on the server and caches results
 import { getDb } from '@/lib/db';
-import { businesses, businessCategories, products } from '@/db/schema';
-import { eq, desc, inArray } from 'drizzle-orm';
-import { parseIcon, DEFAULT_CATEGORY_ICONS, getLucideIconPath } from '@/lib/icons';
+import { businesses, products, listings } from '@/db/schema';
+import { eq, desc, inArray, or } from 'drizzle-orm';
 import BusinessCard from '@/components/business/BusinessCard.astro';
 import ProductCard from '@/components/business/ProductCard.astro';
+import ListingCard from '@/components/business/ListingCard.astro';
 
 // Define types for better TypeScript safety
-type CategoryData = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  icon: string | null;
-  count: number;
-  iconType: string;
-};
 
 type ProductListing = {
   id: string;
   title: string;
-  price: string;
-  priceUnit: string;
   priceFields: { label: string; value: string; unit: string }[];
   productType: string;
   businessTitle: string;
   businessSlug: string;
+  thumbnail: string | null;
 };
 
 type BusinessListing = {
@@ -42,35 +32,32 @@ type BusinessListing = {
   category: string;
   rating: number;
   reviews: number;
-  imageUrl: string;
+  location: string;
+  tag: string;
+  entityType: string;
   entityTypeDisplay: string;
   isNew: boolean;
+};
+
+type ListingItem = {
+  id: string;
+  title: string;
+  slug: string;
+  price: string;
+  listingType: string;
+  location: string;
+  imageIds: string[];
+  likes: number;
 };
 
 const db = await getDb();
 
 let featuredBusinesses: BusinessListing[] = [];
-let featuredGovs: BusinessListing[] = [];
-let featuredNgos: BusinessListing[] = [];
-let featuredProducts: unknown[] = [];
-let categoriesData: CategoryData[] = [];
+let featuredListings: ListingItem[] = [];
+let featuredProducts: ProductListing[] = [];
 
 try {
-  const categoriesResult = await db.select({
-    id: businessCategories.id,
-    name: businessCategories.name,
-    slug: businessCategories.slug,
-    description: businessCategories.description,
-    icon: businessCategories.icon,
-  })
-  .from(businessCategories)
-  .limit(20);
-
-  const categoryMap: Record<string, { name: string; icon: string }> = {};
-  categoriesResult.forEach((c) => {
-    categoryMap[c.id] = { name: c.name, icon: c.icon || '' };
-  });
-
+  // Featured Businesses (live or published, limit 12)
   const businessesResult = await db.select({
     id: businesses.id,
     title: businesses.title,
@@ -82,17 +69,22 @@ try {
     profileImageId: businesses.profileImageId,
   })
   .from(businesses)
-  .where(eq(businesses.status, 'live'))
+  .where(
+    or(
+      eq(businesses.status, 'live'),
+      eq(businesses.status, 'published')
+    )
+  )
   .orderBy(desc(businesses.likes))
-  .limit(20);
+  .limit(12);
 
-  const allListings = businessesResult.map(b => {
+  featuredBusinesses = businessesResult.map(b => {
     const tags = b.tags ? JSON.parse(b.tags) : [];
     return {
       id: b.id,
       title: b.title,
       slug: b.slug,
-      category: categoryMap[b.categoryId || '']?.name || 'Business',
+      category: 'Business',
       rating: 0,
       reviews: 0,
       likes: b.likes || 0,
@@ -100,39 +92,33 @@ try {
       tag: tags[0] || '',
       tags,
       profileImageId: b.profileImageId,
-      entityType: 'business', // All entries in businesses table are 'business'
+      entityType: 'business',
       entityTypeDisplay: 'Business',
       isNew: false,
     };
   });
 
-  featuredBusinesses = allListings
-    .filter(b => b.entityType === 'business')
-    .slice(0, 12);
+  // Featured Listings (classified ads)
+  const allListings = await db.select().from(listings).limit(12).all();
+  const listingsResult = allListings.filter(l =>
+    l.status === 'active' || l.status === 'published'
+  );
 
-  featuredGovs = allListings
-    .filter(b => b.entityType === 'government')
-    .slice(0, 3);
-
-  featuredNgos = allListings
-    .filter(b => b.entityType === 'nonprofit')
-    .slice(0, 3);
-
-  categoriesData = categoriesResult.map(c => {
-    const icon = c.icon || '';
-    const parsed = parseIcon(icon);
-    const defaultIcon = DEFAULT_CATEGORY_ICONS[c.slug];
+  featuredListings = listingsResult.map(l => {
+    const imageIds = l.imageIds ? JSON.parse(l.imageIds) : [];
     return {
-      id: c.id,
-      name: c.name,
-      slug: c.slug,
-      description: c.description,
-      count: 0,
-      icon: parsed?.value || defaultIcon?.value || 'building',
-      iconType: parsed?.type || defaultIcon?.type || 'lucide'
+      id: l.id,
+      title: l.title,
+      slug: l.slug,
+      price: l.price || '',
+      listingType: l.listingType || 'product',
+      location: l.location || '',
+      imageIds,
+      likes: l.likes || 0,
     };
   });
 
+  // Featured Products & Services (limit 6)
   const productsResult = await db.select({
     id: products.id,
     title: products.title,
@@ -140,11 +126,12 @@ try {
     productType: products.productType,
     businessId: products.businessId,
     images: products.images,
+    featured: products.featured,
   })
   .from(products)
   .innerJoin(businesses, eq(products.businessId, businesses.id))
   .where(eq(businesses.status, 'live'))
-  .orderBy(desc(products.createdAt))
+  .orderBy(desc(products.featured), desc(products.createdAt))
   .limit(12);
 
   const businessIds = [...new Set(productsResult.map(p => p.businessId))];
@@ -175,6 +162,7 @@ try {
       productType: p.productType || 'product',
       businessTitle: business.title || '',
       businessSlug: business.slug || '',
+      thumbnail: images.length > 0 ? images[0] : null,
     };
   });
 
@@ -182,138 +170,188 @@ try {
   console.error('Failed to fetch database data:', e);
 }
 
-const mappedCategories = categoriesData;
+const hasContent = featuredBusinesses.length > 0 || featuredListings.length > 0 || featuredProducts.length > 0;
 ---
 
-<!-- Featured Businesses -->
-<section class="mb-6 sm:mb-12">
-  <div class="flex items-center justify-between mb-4 sm:mb-6">
-    <h2 class="text-lg sm:text-2xl font-bold">Featured Businesses</h2>
-    <a href="/listings?type=business" class="text-xs sm:text-sm text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-  </div>
-  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-    {featuredBusinesses.length > 0 ? featuredBusinesses.map((business: BusinessListing) => (
-      <BusinessCard
-        title={business.title}
-        slug={business.slug}
-        category={business.category}
-        thumbnail={null}
-        rating={business.rating}
-        likes={business.likes}
-        reviews={business.reviews}
-        location={business.location}
-        tag={business.tag}
-        type={business.entityType}
-      />
-    )) : (
-      <div class="col-span-full text-center py-8 text-muted-foreground">
-        <p>No featured businesses yet.</p>
-        <a href="/listings/create" class="text-amber-600 hover:underline">Add your business!</a>
+{hasContent ? (
+  <div class="space-y-8">
+    <!-- Tab Navigation (Desktop) -->
+    <div class="hidden md:flex items-center gap-1 border-b">
+      <button
+        class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[active=true]:border-primary transition-colors"
+        data-tab="businesses"
+        data-active="true"
+      >
+        Featured Businesses
+      </button>
+      <button
+        class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[active=true]:border-primary transition-colors"
+        data-tab="listings"
+        data-active="false"
+      >
+        Classified Ads
+      </button>
+      <button
+        class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[active=true]:border-primary transition-colors"
+        data-tab="products"
+        data-active="false"
+      >
+        Products & Services
+      </button>
+    </div>
+
+    <!-- Mobile: Select dropdown instead of tabs -->
+    <div class="md:hidden">
+      <select id="content-select" class="w-full p-3 rounded-lg border bg-card text-sm font-medium">
+        <option value="businesses">Featured Businesses</option>
+        <option value="listings">Classified Ads</option>
+        <option value="products">Products & Services</option>
+      </select>
+    </div>
+
+    <!-- Content Panels -->
+    <div id="tab-panels">
+      <!-- Featured Businesses Panel -->
+      <div class="tab-panel" data-panel="businesses">
+        {featuredBusinesses.length > 0 ? (
+          <>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+              {featuredBusinesses.map((business: BusinessListing) => (
+                <BusinessCard
+                  title={business.title}
+                  slug={business.slug}
+                  category={business.category}
+                  thumbnail={null}
+                  rating={business.rating}
+                  likes={business.likes}
+                  reviews={business.reviews}
+                  location={business.location}
+                  tag={business.tag}
+                  type={business.entityType}
+                />
+              ))}
+            </div>
+            <div class="mt-6 text-center">
+              <a href="/businesses" class="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                View All Businesses
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </>
+        ) : (
+          <div class="text-center py-12 bg-muted/30 rounded-xl">
+            <p class="text-muted-foreground mb-4">No featured businesses yet.</p>
+            <a href="/businesses/create" class="text-primary hover:underline">Add your business!</a>
+          </div>
+        )}
       </div>
-    )}
-  </div>
-</section>
 
-<!-- Featured Government -->
-{featuredGovs.length > 0 && (
-  <section class="mb-6 sm:mb-12">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-lg sm:text-2xl font-bold">Government</h2>
-      <a href="/listings?type=govs" class="text-purple-600 hover:text-purple-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {featuredGovs.map((gov: BusinessListing) => (
-        <a href={`/business/${gov.slug}`} data-animate-card class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-purple-300 transition-all overflow-hidden">
-          <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40">
-            {gov.profileImageId ? (
-              <img src={`/api/media/${gov.profileImageId}`} alt={gov.title} class="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <span class="text-5xl font-bold text-purple-400">{gov.title.charAt(0)}</span>
-            )}
+      <!-- Featured Listings Panel -->
+      <div class="tab-panel hidden" data-panel="listings">
+        {featuredListings.length > 0 ? (
+          <>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+              {featuredListings.map((listing: ListingItem) => (
+                <ListingCard
+                  title={listing.title}
+                  slug={listing.slug}
+                  price={listing.price}
+                  listingType={listing.listingType}
+                  location={listing.location}
+                  thumbnail={null}
+                  imageIds={listing.imageIds}
+                  likes={listing.likes}
+                />
+              ))}
+            </div>
+            <div class="mt-6 text-center">
+              <a href="/listings" class="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition-colors">
+                View All Listings
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </>
+        ) : (
+          <div class="text-center py-12 bg-muted/30 rounded-xl">
+            <p class="text-muted-foreground mb-4">No classified ads yet.</p>
+            <a href="/listings/create" class="text-primary hover:underline">Post your ad!</a>
           </div>
-          <div class="p-3">
-            <h3 class="font-semibold truncate group-hover:text-purple-600 transition-colors">{gov.title}</h3>
-            <p class="text-xs text-muted-foreground truncate">{gov.category}</p>
+        )}
+      </div>
+
+      <!-- Featured Products Panel -->
+      <div class="tab-panel hidden" data-panel="products">
+        {featuredProducts.length > 0 ? (
+          <>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+              {featuredProducts.map((product: ProductListing) => (
+                <ProductCard
+                  title={product.title}
+                  businessTitle={product.businessTitle}
+                  businessSlug={product.businessSlug}
+                  priceFields={product.priceFields}
+                  productType={product.productType}
+                  slug={product.id}
+                  thumbnail={product.thumbnail}
+                />
+              ))}
+            </div>
+            <div class="mt-6 text-center">
+              <a href="/products-services" class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                View All Products
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </>
+        ) : (
+          <div class="text-center py-12 bg-muted/30 rounded-xl">
+            <p class="text-muted-foreground mb-4">No products available yet.</p>
+            <a href="/businesses/create" class="text-primary hover:underline">Add your products!</a>
           </div>
-        </a>
-      ))}
+        )}
+      </div>
     </div>
-  </section>
+  </div>
+) : (
+  <div class="text-center py-16">
+    <p class="text-muted-foreground mb-4">No content available yet. Be the first to add something!</p>
+    <a href="/businesses/create" class="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">Get Started</a>
+  </div>
 )}
 
-<!-- Featured NGOs -->
-{featuredNgos.length > 0 && (
-  <section class="mb-6 sm:mb-12">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-lg sm:text-2xl font-bold">NGOs & Non-Profits</h2>
-      <a href="/listings?type=ngos" class="text-orange-600 hover:text-orange-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {featuredNgos.map((ngo: BusinessListing) => (
-        <a href={`/business/${ngo.slug}`} data-animate-card class="block bg-card rounded-xl border shadow-sm hover:shadow-lg hover:border-orange-300 transition-all overflow-hidden">
-          <div class="aspect-square relative overflow-hidden bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40">
-            {ngo.profileImageId ? (
-              <img src={`/api/media/${ngo.profileImageId}`} alt={ngo.title} class="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <span class="text-5xl font-bold text-orange-400">{ngo.title.charAt(0)}</span>
-            )}
-          </div>
-          <div class="p-3">
-            <h3 class="font-semibold truncate group-hover:text-orange-600 transition-colors">{ngo.title}</h3>
-            <p class="text-xs text-muted-foreground truncate">{ngo.category}</p>
-          </div>
-        </a>
-      ))}
-    </div>
-  </section>
-)}
+<script>
+  // Tab switching logic
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
 
-<!-- Featured Products & Services -->
-<section class="mb-6 sm:mb-12">
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-lg sm:text-2xl font-bold">Featured Products & Services</h2>
-    <a href="/products-services" class="text-amber-600 hover:text-amber-700 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded cursor-pointer">View All →</a>
-  </div>
-  {featuredProducts.length > 0 ? (
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-      {featuredProducts.map((product: ProductListing) => (
-        <ProductCard
-          title={product.title}
-          businessTitle={product.businessTitle}
-          businessSlug={product.businessSlug}
-          price={product.price}
-          priceUnit={product.priceUnit}
-          priceFields={product.priceFields}
-          productType={product.productType}
-          slug={product.id}
-        />
-      ))}
-    </div>
-  ) : (
-    <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl p-8 text-center">
-      <p class="text-muted-foreground mb-4">No products available yet. Be the first to add one!</p>
-      <a href="/listings/create">
-        <button class="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">List Your Business</button>
-      </a>
-    </div>
-  )}
-</section>
+      // Update button states
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.setAttribute('data-active', b.getAttribute('data-tab') === tab ? 'true' : 'false');
+      });
 
-<!-- Categories -->
-<section class="mb-6 sm:mb-12">
-  <h2 class="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Browse by Category</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
-    {mappedCategories.map((cat: CategoryData) => (
-      <a href={`/listings?type=business&industry=${cat.slug}`} data-animate-card class="block cursor-pointer">
-        <div class="p-4 text-center border rounded-xl hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-          <div class="w-8 h-8 mx-auto mb-2 text-amber-500 flex items-center justify-center">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d={getLucideIconPath(cat.icon)} />
-            </svg>
-          </div>
-          <p class="font-medium text-sm">{cat.name}</p>
-        </div>
-      </a>
-    ))}
-  </div>
-</section>
+      // Show/hide panels
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.getAttribute('data-panel') !== tab);
+      });
+    });
+  });
+
+  // Mobile select handler
+  const mobileSelect = document.getElementById('content-select');
+  if (mobileSelect) {
+    mobileSelect.addEventListener('change', (e) => {
+      const tab = (e.target as HTMLSelectElement).value;
+
+      // Show correct panel on mobile (no tabs, just panel switching)
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.getAttribute('data-panel') !== tab);
+      });
+
+      // Sync desktop tabs if visible
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.setAttribute('data-active', btn.getAttribute('data-tab') === tab ? 'true' : 'false');
+      });
+    });
+  }
+</script>

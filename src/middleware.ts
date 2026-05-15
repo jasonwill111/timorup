@@ -1,7 +1,12 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getDb } from './lib/db';
 
-// Initialize DB at cold start
+/**
+ * DB Initialization Middleware
+ * Initializes D1 binding once per Worker cold start.
+ * This is separate from Admin Auth which lives in src/middleware/index.ts
+ */
+
 let bindingsInitialized = false;
 
 export const onRequest = defineMiddleware(async (context, next) => {

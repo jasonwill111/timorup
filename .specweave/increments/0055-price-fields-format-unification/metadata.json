@@ -1,0 +1,11 @@
+{
+  "increment": "0055",
+  "title": "Price Fields Format Unification",
+  "type": "feature",
+  "priority": "P1",
+  "status": "completed",
+  "created": "2026-05-15",
+  "test_mode": "unit",
+  "parent_increment": "0053",
+  "description": "Unified price format across schema, database, and frontend - single source of truth with $X.XX / unit format"
+}

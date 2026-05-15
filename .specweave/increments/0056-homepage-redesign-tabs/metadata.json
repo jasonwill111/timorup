@@ -1,0 +1,11 @@
+{
+  "increment": "0056",
+  "title": "Homepage Redesign - Tabs + 12 Cards",
+  "type": "feature",
+  "priority": "P1",
+  "status": "completed",
+  "created": "2026-05-15",
+  "test_mode": "unit",
+  "parent_increment": "0055",
+  "description": "Homepage: 3 tabs (Businesses/Classified Ads/Products), each shows 12 cards with View All button, desktop tabs, mobile dropdown, removed skeleton fallback and Browse by Category"
+}

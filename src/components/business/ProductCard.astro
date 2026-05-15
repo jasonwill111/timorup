@@ -3,8 +3,6 @@ interface Props {
   title: string;
   businessTitle?: string;
   businessSlug?: string;
-  price?: string;
-  priceUnit?: string;
   priceFields?: Array<{label: string; value: string; unit: string}>;
   thumbnail?: string | null;
   slug?: string;
@@ -16,8 +14,6 @@ const {
   title,
   businessTitle = '',
   businessSlug = '',
-  price = '',
-  priceUnit = '',
   priceFields = [],
   thumbnail = null,
   slug = '',
@@ -25,17 +21,10 @@ const {
   class: className = '',
 } = Astro.props;
 
-// Clean price value - remove existing $ and parse
-const cleanPrice = price?.replace(/[^0-9.]/g, '') || '';
-const numericPrice = parseFloat(cleanPrice) || 0;
-
-const displayPrice = priceFields.length > 0
-  ? priceFields.map(p => {
-      const cleanVal = (p.value || '').replace(/[^0-9.]/g, '');
-      const val = parseFloat(cleanVal) || 0;
-      return val > 0 ? `$${cleanVal}${p.unit}` : 'Ask for price';
-    }).join(' / ')
-  : (numericPrice > 0 ? `$${cleanPrice}${priceUnit ? '/' + priceUnit : ''}` : 'Ask for price');
+// Display price format: "$4.50 / bottle"
+const displayPrice = priceFields.length > 0 && priceFields[0].value
+  ? `$${priceFields[0].value} / ${priceFields[0].unit || 'unit'}`
+  : 'Price on request';
 
 const href = businessSlug ? `/business/${businessSlug}${slug ? `/product/${slug}` : ''}` : '#';
 

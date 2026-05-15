@@ -473,6 +473,7 @@ export const productCategories = sqliteTable("product_categories", {
 // Products (for businesses)
 // 每个 product 属于一个 category，category 的 formFields 定义该分类的价格字段
 // priceFields JSON 存储用户输入的价格值（来自 category 的 formFields）
+// specifications JSON 存储分类特有的属性（品牌、型号、年份等）
 // ============================================
 
 export const products = sqliteTable("products", {
@@ -485,8 +486,6 @@ export const products = sqliteTable("products", {
   description: text(),
   serviceType: text("service_type").default("product"),  // 旧字段，保留兼容性
   productType: text("product_type").default("product"),
-  price: text(),
-  priceUnit: text("price_unit"),
   priceFields: text("price_fields"),
   specifications: text(),
   images: text().default("[]"),

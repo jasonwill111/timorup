@@ -51,16 +51,11 @@ const businessProducts = await db.select()
               {(() => {
                 try {
                   const pf = product.priceFields ? JSON.parse(product.priceFields) : null;
-                  if (!pf) return null;
-                  // Handle both array and object formats
-                  const priceValue = Array.isArray(pf)
-                    ? pf.find((f: any) => f.value)?.value
-                    : pf.price || pf.pricePerNight || pf.hourlyRate;
-                  const currency = Array.isArray(pf)
-                    ? pf.find((f: any) => f.currency)?.currency
-                    : pf.currency || 'USD';
+                  if (!pf || !Array.isArray(pf) || pf.length === 0) return null;
+                  const priceValue = pf[0].value;
+                  const priceUnit = pf[0].unit || 'unit';
                   return priceValue ? (
-                    <span class="font-bold text-primary">${priceValue} {currency}</span>
+                    <span class="font-bold text-primary">${priceValue} / {priceUnit}</span>
                   ) : null;
                 } catch {
                   return null;

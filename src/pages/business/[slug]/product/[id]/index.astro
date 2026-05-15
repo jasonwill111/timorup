@@ -56,9 +56,14 @@ const canonicalUrl = `${siteUrl}/business/${slug}/product/${productId}`;
 const pageTitle = `${product.title} - TimorList`;
 const pageDesc = product.description?.substring(0, 160) || `${product.title} - ${business.title}`;
 
-// Parse specifications
+// Parse specifications and price fields
 const specifications = product.specifications ? JSON.parse(product.specifications) : null;
 const priceFields = product.priceFields ? JSON.parse(product.priceFields) : null;
+
+// Get first price for display under title (e.g., "$4.50 / bottle")
+const firstPrice = priceFields && priceFields.length > 0 && priceFields[0].value
+  ? `$${priceFields[0].value} / ${priceFields[0].unit || 'unit'}`
+  : null;
 
 // Service type display names
 const productTypeLabels: Record<string, string> = {
@@ -73,11 +78,6 @@ const productTypeLabels: Record<string, string> = {
   beauty: 'Beauty & Wellness',
   event: 'Event Service',
 };
-
-// Helper to format price fields
-function formatPriceField(pf: { label: string; value: string; unit: string }) {
-  return `${pf.label}: $${pf.value}${pf.unit}`;
-}
 ---
 
 <Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
@@ -115,237 +115,258 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
       <div class="container">
         <a href={`/business/${slug}`} class="flex items-center gap-2 py-3 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft class="w-5 h-5" />
-          Back to {business.title}
+          <span class="text-sm">Back to {business.title}</span>
         </a>
       </div>
     </div>
 
     <div class="container py-6">
-      <div class="max-w-4xl mx-auto">
-        <!-- Image Carousel -->
-        <div class="mb-6">
-          <!-- Main Image - smaller, scrollable -->
-          <div class="max-w-2xl mx-auto">
-            <div id="main-image" class="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted">
-              {images.length > 0 ? (
-                <img id="current-image" src={`/api/media/${images[0]?.mediaId}`} alt={product.title} class="w-full h-full object-cover" />
-              ) : (
-                <div class="w-full h-full flex items-center justify-center text-6xl font-bold text-muted-foreground bg-gradient-to-br from-amber-100 to-amber-200">
-                  {product.title.charAt(0)}
+      <!-- Desktop: 2-column | Mobile: stacked -->
+      <div class="max-w-5xl mx-auto lg:grid lg:grid-cols-5 lg:gap-8">
+
+        <!-- Left Column: Images (60%) -->
+        <div class="lg:col-span-3">
+          <!-- Image Carousel -->
+          <div class="mb-6">
+            <div class="max-w-xl mx-auto">
+              <div id="main-image" class="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted shadow-md">
+                {images.length > 0 ? (
+                  <img id="current-image" src={`/api/media/${images[0]?.mediaId}`} alt={product.title} class="w-full h-full object-cover" />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center text-6xl font-bold text-muted-foreground bg-gradient-to-br from-amber-100 to-amber-200">
+                    {product.title.charAt(0)}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <!-- Thumbnail Navigation -->
+            {images.length > 1 && (
+              <div class="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+                <button id="scroll-left" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
+                  <ChevronLeft class="w-5 h-5" />
+                </button>
+                {images.map((img, index) => (
+                  <button
+                    class={`thumbnail-btn w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${index === 0 ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'}`}
+                    data-index={index}
+                  >
+                    <img src={`/api/media/${img.mediaId}`} alt="" class="w-full h-full object-cover" />
+                  </button>
+                ))}
+                <button id="scroll-right" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
+                  <ChevronRight class="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
+            <!-- Image Counter -->
+            {images.length > 1 && (
+              <div class="flex justify-center gap-1 mt-3">
+                {images.map((_, index) => (
+                  <span class={`image-dot w-2 h-2 rounded-full transition-colors ${index === 0 ? 'bg-amber-500' : 'bg-gray-300'}`}></span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <!-- Mobile: Product Info + Business Info -->
+          <div class="lg:hidden mb-6 space-y-4">
+            <!-- Product Header -->
+            <div>
+              <h1 class="text-2xl font-bold mb-1">{product.title}</h1>
+              {/* Show price from priceFields */}
+              {firstPrice && (
+                <p class="text-xl font-semibold text-primary">{firstPrice}</p>
+              )}
+            </div>
+
+            <!-- Business Info - Compact row -->
+            <div class="flex items-center gap-3 py-3 px-4 bg-muted/50 rounded-xl">
+              <a href={`/business/${slug}`} class="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden border-2 border-background shadow-sm flex-shrink-0">
+                  {business.profileImageId ? (
+                    <img src={`/api/media/${business.profileImageId}`} alt="" class="w-full h-full object-cover" />
+                  ) : (
+                    <span class="text-sm font-bold text-white">{business.title.charAt(0)}</span>
+                  )}
                 </div>
+                <div class="min-w-0">
+                  <p class="text-xs text-muted-foreground">Sold by</p>
+                  <p class="font-semibold truncate">{business.title}</p>
+                </div>
+              </a>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <ShareDialog url={`${siteUrl}/business/${slug}/product/${productId}`} title={product.title} client:load />
+                {business.contactNumber && (
+                  <a
+                    href={`https://wa.me/${business.contactNumber.replace(/\s/g, '')}?text=Hi, I'm interested in "${product.title}" from ${encodeURIComponent(business.title)}`}
+                    target="_blank"
+                    class="inline-flex items-center justify-center w-10 h-10 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-full transition-colors shadow-sm"
+                  >
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Info (40%) -->
+        <div class="lg:col-span-2 space-y-4">
+          <!-- Desktop: Product Header Card -->
+          <div class="hidden lg:block bg-card border rounded-2xl p-5 shadow-sm">
+            <h1 class="text-xl font-bold mb-2">{product.title}</h1>
+            {/* Show price from priceFields */}
+            {firstPrice && (
+              <p class="text-2xl font-bold text-primary mb-4">{firstPrice}</p>
+            )}
+
+            <!-- Business Info -->
+            <a href={`/business/${slug}`} class="flex items-center gap-3 py-3 px-3 bg-muted/50 rounded-xl hover:bg-muted transition-colors">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden border-2 border-background shadow-sm flex-shrink-0">
+                {business.profileImageId ? (
+                  <img src={`/api/media/${business.profileImageId}`} alt="" class="w-full h-full object-cover" />
+                ) : (
+                  <span class="text-sm font-bold text-white">{business.title.charAt(0)}</span>
+                )}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-muted-foreground">Sold by</p>
+                <p class="font-semibold truncate">{business.title}</p>
+              </div>
+            </a>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 mt-4">
+              <div class="flex-1">
+                <ShareDialog url={`${siteUrl}/business/${slug}/product/${productId}`} title={product.title} client:load />
+              </div>
+              {business.contactNumber && (
+                <a
+                  href={`https://wa.me/${business.contactNumber.replace(/\s/g, '')}?text=Hi, I'm interested in "${product.title}" from ${encodeURIComponent(business.title)}`}
+                  target="_blank"
+                  class="flex-1 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-xl py-3 font-medium transition-colors shadow-sm"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  <span>WhatsApp</span>
+                </a>
               )}
             </div>
           </div>
 
-          <!-- Thumbnail Navigation (if multiple images) -->
-          {images.length > 1 && (
-            <div class="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-              <button id="scroll-left" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
-                <ChevronLeft class="w-5 h-5" />
-              </button>
-              {images.map((img, index) => (
-                <button
-                  class={`thumbnail-btn w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${index === 0 ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'}`}
-                  data-index={index}
-                >
-                  <img src={`/api/media/${img.mediaId}`} alt="" class="w-full h-full object-cover" />
-                </button>
-              ))}
-              <button id="scroll-right" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
-                <ChevronRight class="w-5 h-5" />
-              </button>
-            </div>
+          <!-- Description -->
+          {product.description && (
+            <Card>
+              <CardContent class="p-5">
+                <h2 class="text-base font-semibold mb-3">Description</h2>
+                <div class="prose dark:prose-invert max-w-none text-sm leading-relaxed" set:html={product.description}></div>
+              </CardContent>
+            </Card>
           )}
 
-          <!-- Image Counter -->
-          {images.length > 1 && (
-            <div class="flex justify-center gap-1 mt-3">
-              {images.map((_, index) => (
-                <span class={`image-dot w-2 h-2 rounded-full transition-colors ${index === 0 ? 'bg-amber-500' : 'bg-gray-300'}`}></span>
-              ))}
-            </div>
-          )}
-        </div>
+          <!-- Industry Specifications -->
+          {specifications && (
+            <Card>
+              <CardContent class="p-5">
+                <h2 class="text-base font-semibold mb-3">
+                  {productTypeLabels[product.productType || 'product'] || 'Details'}
+                </h2>
 
-        <!-- Product Info -->
-        <div class="mb-6">
-          <h1 class="text-2xl md:text-3xl font-bold mb-2">{product.title}</h1>
-          {product.price && (
-            <p class="text-2xl font-semibold text-primary">{product.price}</p>
-          )}
-        </div>
+                {/* Specifications Grid */}
+                {specifications && (
+                  <div class="grid grid-cols-2 gap-3">
+                    {/* Automotive */}
+                    {specifications.vehicleType && (
+                      <>
+                        {specifications.brand && <div><span class="text-xs text-muted-foreground">Brand</span><p class="font-medium text-sm">{specifications.brand}</p></div>}
+                        {specifications.model && <div><span class="text-xs text-muted-foreground">Model</span><p class="font-medium text-sm">{specifications.model}</p></div>}
+                        {specifications.year && <div><span class="text-xs text-muted-foreground">Year</span><p class="font-medium text-sm">{specifications.year}</p></div>}
+                        {specifications.mileage && <div><span class="text-xs text-muted-foreground">Mileage</span><p class="font-medium text-sm">{specifications.mileage.toLocaleString()} km</p></div>}
+                        {specifications.fuelType && <div><span class="text-xs text-muted-foreground">Fuel</span><p class="font-medium text-sm capitalize">{specifications.fuelType}</p></div>}
+                        {specifications.transmission && <div><span class="text-xs text-muted-foreground">Transmission</span><p class="font-medium text-sm capitalize">{specifications.transmission}</p></div>}
+                        {specifications.color && <div><span class="text-xs text-muted-foreground">Color</span><p class="font-medium text-sm">{specifications.color}</p></div>}
+                        {specifications.condition && <div><span class="text-xs text-muted-foreground">Condition</span><p class="font-medium text-sm capitalize">{specifications.condition}</p></div>}
+                      </>
+                    )}
 
+                    {/* Food & Dining */}
+                    {specifications.cuisine && (
+                      <>
+                        <div class="col-span-2"><span class="text-xs text-muted-foreground">Cuisine</span><p class="font-medium text-sm">{Array.isArray(specifications.cuisine) ? specifications.cuisine.join(', ') : specifications.cuisine}</p></div>
+                        {specifications.priceRange && <div><span class="text-xs text-muted-foreground">Price Range</span><p class="font-medium text-sm">{specifications.priceRange}</p></div>}
+                        {specifications.mealType && <div><span class="text-xs text-muted-foreground">Meal Type</span><p class="font-medium text-sm capitalize">{specifications.mealType}</p></div>}
+                      </>
+                    )}
 
-        <!-- Description -->
-        {product.description && (
-          <Card class="mb-6">
-            <CardContent class="p-6">
-              <h2 class="text-lg font-semibold mb-3">Description</h2>
-              <div class="prose dark:prose-invert max-w-none" set:html={product.description}></div>
-            </CardContent>
-          </Card>
-        )}
+                    {/* Accommodation */}
+                    {specifications.roomType && (
+                      <>
+                        <div><span class="text-xs text-muted-foreground">Room Type</span><p class="font-medium text-sm capitalize">{specifications.roomType}</p></div>
+                        {specifications.maxGuests && <div><span class="text-xs text-muted-foreground">Max Guests</span><p class="font-medium text-sm">{specifications.maxGuests} persons</p></div>}
+                        {specifications.numBeds && <div><span class="text-xs text-muted-foreground">Beds</span><p class="font-medium text-sm">{specifications.numBeds}</p></div>}
+                        {specifications.roomSize && <div><span class="text-xs text-muted-foreground">Room Size</span><p class="font-medium text-sm">{specifications.roomSize} sqm</p></div>}
+                        {specifications.amenities && <div class="col-span-2"><span class="text-xs text-muted-foreground">Amenities</span><p class="font-medium text-sm">{Array.isArray(specifications.amenities) ? specifications.amenities.map((a: string) => a.charAt(0).toUpperCase() + a.slice(1)).join(', ') : specifications.amenities}</p></div>}
+                      </>
+                    )}
 
-        <!-- Industry Specifications -->
-        {(specifications || priceFields) && (
-          <Card class="mb-6">
-            <CardContent class="p-6">
-              <h2 class="text-lg font-semibold mb-3">
-                {productTypeLabels[product.productType || 'product'] || 'Details'}
-              </h2>
+                    {/* Healthcare */}
+                    {specifications.specialization && (
+                      <>
+                        <div class="col-span-2"><span class="text-xs text-muted-foreground">Specialization</span><p class="font-medium text-sm">{specifications.specialization}</p></div>
+                        {specifications.consultationType && <div><span class="text-xs text-muted-foreground">Consultation</span><p class="font-medium text-sm capitalize">{specifications.consultationType.replace('_', ' ')}</p></div>}
+                        {specifications.consultationDuration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium text-sm">{specifications.consultationDuration} min</p></div>}
+                      </>
+                    )}
 
-              {/* Flexible Pricing */}
-              {priceFields && priceFields.length > 0 && (
-                <div class="mb-4">
-                  <h3 class="text-sm font-medium text-muted-foreground mb-2">Pricing Options</h3>
-                  <div class="space-y-2">
-                    {priceFields.map((pf: { label: string; value: string; unit: string }) => (
-                      <div class="flex justify-between items-center py-2 border-b border-border last:border-0">
-                        <span class="text-sm">{pf.label}</span>
-                        <span class="font-semibold text-primary">${pf.value}{pf.unit}</span>
-                      </div>
-                    ))}
+                    {/* Education */}
+                    {specifications.courseType && (
+                      <>
+                        <div class="col-span-2"><span class="text-xs text-muted-foreground">Course Type</span><p class="font-medium text-sm capitalize">{specifications.courseType}</p></div>
+                        {specifications.subject && <div><span class="text-xs text-muted-foreground">Subject</span><p class="font-medium text-sm">{specifications.subject}</p></div>}
+                        {specifications.duration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium text-sm">{specifications.duration}</p></div>}
+                        {specifications.level && <div><span class="text-xs text-muted-foreground">Level</span><p class="font-medium text-sm capitalize">{specifications.level.replace('_', ' ')}</p></div>}
+                      </>
+                    )}
+
+                    {/* Beauty */}
+                    {specifications.serviceCategory && (
+                      <>
+                        <div><span class="text-xs text-muted-foreground">Service</span><p class="font-medium text-sm capitalize">{specifications.serviceCategory}</p></div>
+                        {specifications.duration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium text-sm">{specifications.duration} min</p></div>}
+                      </>
+                    )}
+
+                    {/* Event */}
+                    {specifications.eventType && (
+                      <>
+                        <div class="col-span-2"><span class="text-xs text-muted-foreground">Event Type</span><p class="font-medium text-sm capitalize">{specifications.eventType}</p></div>
+                        {specifications.coverage && <div><span class="text-xs text-muted-foreground">Coverage</span><p class="font-medium text-sm">{specifications.coverage}</p></div>}
+                        {specifications.teamIncluded && <div><span class="text-xs text-muted-foreground">Team</span><p class="font-medium text-sm">{specifications.teamIncluded} people</p></div>}
+                      </>
+                    )}
+
+                    {/* General Service */}
+                    {specifications.serviceCategory && !specifications.eventType && !specifications.serviceCategory && (
+                      <>
+                        {specifications.coverage && <div><span class="text-xs text-muted-foreground">Coverage</span><p class="font-medium text-sm">{specifications.coverage}</p></div>}
+                        {specifications.responseTime && <div><span class="text-xs text-muted-foreground">Response Time</span><p class="font-medium text-sm">{specifications.responseTime}</p></div>}
+                        {specifications.warranty && <div><span class="text-xs text-muted-foreground">Warranty</span><p class="font-medium text-sm">{specifications.warranty}</p></div>}
+                      </>
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* Specifications Grid */}
-              {specifications && (
-                <div class="grid grid-cols-2 gap-4">
-                  {/* Automotive */}
-                  {specifications.vehicleType && (
-                    <>
-                      {specifications.brand && <div><span class="text-xs text-muted-foreground">Brand</span><p class="font-medium">{specifications.brand}</p></div>}
-                      {specifications.model && <div><span class="text-xs text-muted-foreground">Model</span><p class="font-medium">{specifications.model}</p></div>}
-                      {specifications.year && <div><span class="text-xs text-muted-foreground">Year</span><p class="font-medium">{specifications.year}</p></div>}
-                      {specifications.mileage && <div><span class="text-xs text-muted-foreground">Mileage</span><p class="font-medium">{specifications.mileage.toLocaleString()} km</p></div>}
-                      {specifications.fuelType && <div><span class="text-xs text-muted-foreground">Fuel</span><p class="font-medium capitalize">{specifications.fuelType}</p></div>}
-                      {specifications.transmission && <div><span class="text-xs text-muted-foreground">Transmission</span><p class="font-medium capitalize">{specifications.transmission}</p></div>}
-                      {specifications.color && <div><span class="text-xs text-muted-foreground">Color</span><p class="font-medium">{specifications.color}</p></div>}
-                      {specifications.condition && <div><span class="text-xs text-muted-foreground">Condition</span><p class="font-medium capitalize">{specifications.condition}</p></div>}
-                      {specifications.doors && <div><span class="text-xs text-muted-foreground">Doors</span><p class="font-medium">{specifications.doors}</p></div>}
-                      {specifications.seats && <div><span class="text-xs text-muted-foreground">Seats</span><p class="font-medium">{specifications.seats}</p></div>}
-                    </>
-                  )}
-
-                  {/* Food & Dining */}
-                  {specifications.cuisine && (
-                    <>
-                      <div><span class="text-xs text-muted-foreground">Cuisine</span><p class="font-medium">{Array.isArray(specifications.cuisine) ? specifications.cuisine.join(', ') : specifications.cuisine}</p></div>
-                      {specifications.priceRange && <div><span class="text-xs text-muted-foreground">Price Range</span><p class="font-medium">{specifications.priceRange}</p></div>}
-                      {specifications.mealType && <div><span class="text-xs text-muted-foreground">Meal Type</span><p class="font-medium capitalize">{specifications.mealType}</p></div>}
-                      {specifications.dietaryOptions && <div><span class="text-xs text-muted-foreground">Dietary</span><p class="font-medium">{Array.isArray(specifications.dietaryOptions) ? specifications.dietaryOptions.join(', ') : specifications.dietaryOptions}</p></div>}
-                    </>
-                  )}
-
-                  {/* Accommodation */}
-                  {specifications.roomType && (
-                    <>
-                      <div><span class="text-xs text-muted-foreground">Room Type</span><p class="font-medium capitalize">{specifications.roomType}</p></div>
-                      {specifications.maxGuests && <div><span class="text-xs text-muted-foreground">Max Guests</span><p class="font-medium">{specifications.maxGuests} persons</p></div>}
-                      {specifications.numBeds && <div><span class="text-xs text-muted-foreground">Beds</span><p class="font-medium">{specifications.numBeds} {specifications.bedType || ''}</p></div>}
-                      {specifications.checkInTime && <div><span class="text-xs text-muted-foreground">Check-in</span><p class="font-medium">{specifications.checkInTime}</p></div>}
-                      {specifications.checkOutTime && <div><span class="text-xs text-muted-foreground">Check-out</span><p class="font-medium">{specifications.checkOutTime}</p></div>}
-                      {specifications.roomSize && <div><span class="text-xs text-muted-foreground">Room Size</span><p class="font-medium">{specifications.roomSize} sqm</p></div>}
-                      {specifications.amenities && <div class="col-span-2"><span class="text-xs text-muted-foreground">Amenities</span><p class="font-medium">{Array.isArray(specifications.amenities) ? specifications.amenities.map((a: string) => a.charAt(0).toUpperCase() + a.slice(1)).join(', ') : specifications.amenities}</p></div>}
-                    </>
-                  )}
-
-                  {/* Healthcare */}
-                  {specifications.specialization && (
-                    <>
-                      <div><span class="text-xs text-muted-foreground">Specialization</span><p class="font-medium">{specifications.specialization}</p></div>
-                      {specifications.consultationType && <div><span class="text-xs text-muted-foreground">Consultation</span><p class="font-medium capitalize">{specifications.consultationType.replace('_', ' ')}</p></div>}
-                      {specifications.consultationDuration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium">{specifications.consultationDuration} min</p></div>}
-                      {specifications.emergencyService && <div><span class="text-xs text-muted-foreground">Emergency</span><p class="font-medium text-green-600">Available 24/7</p></div>}
-                    </>
-                  )}
-
-                  {/* Education */}
-                  {specifications.courseType && (
-                    <>
-                      <div><span class="text-xs text-muted-foreground">Course Type</span><p class="font-medium capitalize">{specifications.courseType}</p></div>
-                      {specifications.subject && <div><span class="text-xs text-muted-foreground">Subject</span><p class="font-medium">{specifications.subject}</p></div>}
-                      {specifications.duration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium">{specifications.duration}</p></div>}
-                      {specifications.level && <div><span class="text-xs text-muted-foreground">Level</span><p class="font-medium capitalize">{specifications.level.replace('_', ' ')}</p></div>}
-                      {specifications.schedule && <div><span class="text-xs text-muted-foreground">Schedule</span><p class="font-medium capitalize">{specifications.schedule}</p></div>}
-                      {specifications.certificate && <div><span class="text-xs text-muted-foreground">Certificate</span><p class="font-medium">{specifications.certificate ? 'Yes' : 'No'}</p></div>}
-                      {specifications.classSize && <div><span class="text-xs text-muted-foreground">Class Size</span><p class="font-medium">Max {specifications.classSize} students</p></div>}
-                    </>
-                  )}
-
-                  {/* Beauty */}
-                  {specifications.serviceCategory && (
-                    <>
-                      <div><span class="text-xs text-muted-foreground">Service</span><p class="font-medium capitalize">{specifications.serviceCategory}</p></div>
-                      {specifications.duration && <div><span class="text-xs text-muted-foreground">Duration</span><p class="font-medium">{specifications.duration} min</p></div>}
-                      {specifications.genderPreference && <div><span class="text-xs text-muted-foreground">Gender</span><p class="font-medium capitalize">{specifications.genderPreference}</p></div>}
-                      {specifications.homeService && <div><span class="text-xs text-muted-foreground">Home Visit</span><p class="font-medium">{specifications.homeService ? 'Available' : 'Not available'}</p></div>}
-                    </>
-                  )}
-
-                  {/* Event */}
-                  {specifications.eventType && (
-                    <>
-                      <div><span class="text-xs text-muted-foreground">Event Type</span><p class="font-medium capitalize">{specifications.eventType}</p></div>
-                      {specifications.coverage && <div><span class="text-xs text-muted-foreground">Coverage</span><p class="font-medium">{specifications.coverage}</p></div>}
-                      {specifications.minBooking && <div><span class="text-xs text-muted-foreground">Min Booking</span><p class="font-medium">{specifications.minBooking}</p></div>}
-                      {specifications.teamIncluded && <div><span class="text-xs text-muted-foreground">Team</span><p class="font-medium">{specifications.teamIncluded} people</p></div>}
-                    </>
-                  )}
-
-                  {/* General Service */}
-                  {specifications.serviceCategory && !specifications.eventType && !specifications.serviceCategory && (
-                    <>
-                      {specifications.coverage && <div><span class="text-xs text-muted-foreground">Coverage</span><p class="font-medium">{specifications.coverage}</p></div>}
-                      {specifications.responseTime && <div><span class="text-xs text-muted-foreground">Response Time</span><p class="font-medium">{specifications.responseTime}</p></div>}
-                      {specifications.warranty && <div><span class="text-xs text-muted-foreground">Warranty</span><p class="font-medium">{specifications.warranty}</p></div>}
-                    </>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        <!-- Business Info -->
-        <a href={`/business/${slug}`} class="block">
-          <Card class="hover:bg-muted/30 transition-colors">
-            <CardContent class="p-4">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden border-2 border-background shadow flex-shrink-0">
-                  {business.profileImageId ? (
-                    <img src={`/api/media/${business.profileImageId}`} alt="" class="w-full h-full object-cover" />
-                  ) : (
-                    <span class="text-xl font-bold text-white">{business.title.charAt(0)}</span>
-                  )}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs text-muted-foreground">Sold by</p>
-                  <h3 class="font-semibold truncate">{business.title}</h3>
-                </div>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                  <ShareDialog url={`${siteUrl}/business/${slug}/product/${productId}`} title={product.title} client:load />
-                  {business.contactNumber ? (
-                    <a
-                      href={`https://wa.me/${business.contactNumber.replace(/\s/g, '')}?text=Hi, I'm interested in "${product.title}" from ${encodeURIComponent(business.title)}`}
-                      target="_blank"
-                      class="inline-flex items-center justify-center w-10 h-10 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-full transition-colors shadow-sm"
-                    >
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                      </svg>
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </a>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   </div>
-
 </Layout>
 
 <script>
