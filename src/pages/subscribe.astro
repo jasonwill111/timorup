@@ -82,59 +82,70 @@ const url = new URL(Astro.request.url);
 const planParam = url.searchParams.get('plan') || 'basic-monthly';
 const isConfirmed = url.searchParams.get('confirmed') === 'true';
 
-// Fetch plans from DB
+// Fetch service packages from DB
 let PLAN_INFO: Record<string, {
   id: string;
   name: string;
-  amount: number;
-  period: string;
-  skuLimit: number;
-  features: string[];
+  variants: Array<{
+    name: string;
+    price: number;
+    currency: string;
+    durationValue: number;
+    durationUnit: string;
+    limits: { skuLimit?: number; maxImages?: number; maxVideos?: number; maxBusinessImages?: number; maxBusinessVideos?: number };
+    features: string[];
+  }>;
   description: string;
 }> = {};
 
 try {
   const { getDb } = await import('@/lib/db');
   const db = await getDb();
-  const { plans } = await import('@/db/schema');
+  const { servicePackages } = await import('@/db/schema');
   const { eq, asc } = await import('drizzle-orm');
 
-  const allPlans = await db.select()
-    .from(plans)
-    .where(eq(plans.active, true))
-    .orderBy(asc(plans.sortOrder))
+  const allPackages = await db.select()
+    .from(servicePackages)
+    .where(eq(servicePackages.isActive, true))
+    .orderBy(asc(servicePackages.sortOrder))
     .all();
 
-  PLAN_INFO = allPlans.reduce((acc, plan) => {
-    acc[plan.id] = {
-      id: plan.id,
-      name: plan.name,
-      amount: plan.amount,
-      period: plan.period,
-      skuLimit: plan.skuLimit,
-      features: plan.features ? JSON.parse(plan.features) : [],
-      description: plan.description || '',
-    };
+  PLAN_INFO = allPackages.reduce((acc, pkg) => {
+    try {
+      const variants = JSON.parse(pkg.variants || '[]');
+      acc[pkg.id] = {
+        id: pkg.id,
+        name: pkg.name,
+        variants,
+        description: pkg.description || '',
+      };
+    } catch (e) {
+      // Skip invalid packages
+    }
     return acc;
   }, {} as typeof PLAN_INFO);
 } catch (e) {
   console.error('Failed to fetch plans:', e);
-  // Fallback to empty - page will show error
 }
 
-const selectedPlan = PLAN_INFO[planParam] || PLAN_INFO['basic-monthly'] || {
-  id: 'basic-monthly',
-  name: 'Basic',
-  amount: 29,
-  period: 'monthly',
-  skuLimit: 10,
-  features: [],
+// Get first variant as default for display
+const getFirstVariant = (pkg: typeof PLAN_INFO[string]) => {
+  return pkg?.variants?.[0] || { name: 'Default', price: 0, currency: 'USD', durationValue: 1, durationUnit: 'month', limits: {}, features: [] };
+};
+
+const selectedPlan = PLAN_INFO[planParam] || PLAN_INFO['sp-business-free'] || {
+  id: 'sp-business-free',
+  name: 'Free Plan',
+  variants: [{ name: 'Free', price: 0, currency: 'USD', durationValue: 3, durationUnit: 'days', limits: { skuLimit: 0, maxImages: 4, maxVideos: 1, maxBusinessImages: 4, maxBusinessVideos: 1 }, features: ['Basic listing for 3 days'] }],
   description: 'Plan unavailable',
 };
 
 // Get or create order
 let orderId: string | null = null;
 let isOrderCreated = false;
+
+// Get first variant for display
+const firstVariant = getFirstVariant(selectedPlan);
 
 try {
   const { getDb } = await import('@/lib/db');
@@ -147,8 +158,8 @@ try {
     .from(orders)
     .where(and(
       eq(orders.userId, user.id),
-      eq(orders.planType, planParam),
-      eq(orders.status, 'unpaid')
+      eq(orders.servicePackageId, planParam),
+      eq(orders.status, 'pending')
     ))
     .limit(1)
     .get();
@@ -157,15 +168,17 @@ try {
     orderId = existingOrder.id;
     isOrderCreated = true;
   } else if (userBusiness) {
-    // Create new order
+    // Create new order with new schema
     orderId = `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     await db.insert(orders).values({
       id: orderId,
+      servicePackageId: planParam,
+      variantSnapshot: JSON.stringify(firstVariant),
+      type: 'business',
+      typeId: userBusiness.id,
       userId: user.id,
-      businessPageId: userBusiness.id,
-      planType: planParam,
-      amount: selectedPlan.amount,
-      status: 'unpaid',
+      amount: firstVariant.price * 100, // Store in cents
+      status: 'pending',
     }).run();
     isOrderCreated = true;
   }
@@ -257,20 +270,20 @@ const adminInfo = {
             <CardHeader>
               <CardTitle class="flex items-center justify-between">
                 <span>Selected Plan</span>
-                <span class="px-3 py-1 bg-primary text-black text-sm rounded-full">{selectedPlan.name}</span>
+                <span class="px-3 py-1 bg-primary text-black text-sm rounded-full">{selectedPlan.name} - {firstVariant.name}</span>
               </CardTitle>
               <CardDescription>{selectedPlan.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <div class="flex justify-between items-center mb-4">
-                <span class="text-3xl font-bold text-primary">${selectedPlan.amount}</span>
-                <span class="text-muted-foreground">/{selectedPlan.period === 'yearly' ? 'year' : 'month'}</span>
+                <span class="text-3xl font-bold text-primary">${firstVariant.price}</span>
+                <span class="text-muted-foreground">/{firstVariant.durationValue} {firstVariant.durationUnit}</span>
               </div>
 
               <div class="border-t pt-4">
                 <p class="text-sm font-medium mb-2">What's included:</p>
                 <ul class="space-y-1">
-                  {selectedPlan.features.map(feature => (
+                  {firstVariant.features.map(feature => (
                     <li class="flex items-center gap-2 text-sm">
                       <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -284,7 +297,7 @@ const adminInfo = {
             <CardFooter class="bg-muted/30">
               <div class="flex justify-between w-full text-sm">
                 <span class="text-muted-foreground">SKU Limit</span>
-                <span class="font-medium">{selectedPlan.skuLimit} products</span>
+                <span class="font-medium">{firstVariant.limits?.skuLimit ?? 0} products</span>
               </div>
             </CardFooter>
           </Card>
@@ -336,7 +349,7 @@ const adminInfo = {
               </div>
               <div class="flex justify-between border-t pt-2">
                 <span class="font-semibold">Total Amount</span>
-                <span class="font-bold text-xl text-primary">${selectedPlan.amount}</span>
+                <span class="font-bold text-xl text-primary">${firstVariant.price} {firstVariant.currency}</span>
               </div>
             </CardContent>
           </Card>
@@ -363,8 +376,8 @@ const adminInfo = {
                   href={`https://wa.me/${adminInfo.whatsapp}?text=${encodeURIComponent(
                     `Hi, I want to confirm my TimorList subscription.\n\n` +
                     `Order ID: ${orderId?.slice(0, 20)}...\n` +
-                    `Plan: ${selectedPlan.name} (${selectedPlan.period})\n` +
-                    `Amount: $${selectedPlan.amount}\n` +
+                    `Plan: ${selectedPlan.name} - ${firstVariant.name}\n` +
+                    `Amount: $${firstVariant.price} ${firstVariant.currency}\n` +
                     `Business: ${userBusiness.title}`
                   )}`}
                   target="_blank"

@@ -88,7 +88,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         <!-- Business -->
         <div>
           <label for="sku-business" class="block text-sm font-medium mb-1">Business *</label>
-          <select id="sku-business" name="businessPageId" required class="w-full px-3 py-2 border rounded-md text-sm bg-background">
+          <select id="sku-business" name="businessId" required class="w-full px-3 py-2 border rounded-md text-sm bg-background">
             <option value="">Select a business...</option>
           </select>
         </div>
@@ -102,7 +102,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
         <!-- Service Type -->
         <div>
           <label for="sku-service-type" class="block text-sm font-medium mb-1">Service Type</label>
-          <select id="sku-service-type" name="serviceType" class="w-full px-3 py-2 border rounded-md text-sm bg-background">
+          <select id="sku-service-type" name="productType" class="w-full px-3 py-2 border rounded-md text-sm bg-background">
             {SKU_SERVICE_TYPES.map(type => (
               <option value={type.value}>{type.icon} {type.label}</option>
             ))}
@@ -395,11 +395,11 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   }
 
   // Render price fields based on service type
-  function renderPriceFields(serviceType = 'product', existingFields = []) {
+  function renderPriceFields(productType = 'product', existingFields = []) {
     const container = document.getElementById('price-fields');
     if (!container) return;
 
-    const units = getPriceUnitsForServiceType(serviceType);
+    const units = getPriceUnitsForServiceType(productType);
 
     // Add first field if empty
     if (existingFields.length === 0) {
@@ -429,8 +429,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
   document.getElementById('add-price-field')?.addEventListener('click', () => {
     const container = document.getElementById('price-fields-container');
     const count = parseInt(container.dataset.fieldCount || '1') + 1;
-    const serviceType = document.getElementById('sku-service-type')?.value || 'product';
-    const units = getPriceUnitsForServiceType(serviceType);
+    const productType = document.getElementById('sku-service-type')?.value || 'product';
+    const units = getPriceUnitsForServiceType(productType);
 
     const row = document.createElement('div');
     row.className = 'flex gap-2 items-center price-field-row';
@@ -462,18 +462,18 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
   // Service type change
   document.getElementById('sku-service-type')?.addEventListener('change', (e) => {
-    const serviceType = e.target.value;
-    renderPriceFields(serviceType);
-    renderSpecificationFields(serviceType);
+    const productType = e.target.value;
+    renderPriceFields(productType);
+    renderSpecificationFields(productType);
   });
 
   // Render specification fields based on service type
-  function renderSpecificationFields(serviceType = 'product', existingSpecs = {}) {
+  function renderSpecificationFields(productType = 'product', existingSpecs = {}) {
     const container = document.getElementById('specifications-container');
     const fieldsContainer = document.getElementById('specifications-fields');
     if (!container || !fieldsContainer) return;
 
-    const fields = SPECIFICATION_FIELDS[serviceType] || [];
+    const fields = SPECIFICATION_FIELDS[productType] || [];
 
     if (fields.length === 0) {
       container.classList.add('hidden');
@@ -605,8 +605,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
     const filtered = (window as SkuData).allSkus.filter((sku: SkuData) => {
       const matchesSearch = !search || sku.title?.toLowerCase().includes(search);
-      const matchesBusiness = !businessFilter || sku.businessPageId === businessFilter;
-      const matchesType = !typeFilter || sku.serviceType === typeFilter;
+      const matchesBusiness = !businessFilter || sku.businessId === businessFilter;
+      const matchesType = !typeFilter || sku.productType === typeFilter;
       return matchesSearch && matchesBusiness && matchesType;
     });
 
@@ -634,11 +634,11 @@ const businessOptionsJson = JSON.stringify(businessOptions);
           <div class="min-w-0 flex-1">
             <p class="font-medium truncate">${escapeHtml(sku.title)}</p>
             <p class="text-xs text-muted-foreground">
-              ${priceDisplay} - ${bizMap.get(sku.businessPageId) || 'Unknown'}
+              ${priceDisplay} - ${bizMap.get(sku.businessId) || 'Unknown'}
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 text-xs rounded-full ${sku.serviceType === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'}">${sku.serviceType || 'product'}</span>
+            <span class="px-2 py-0.5 text-xs rounded-full ${sku.productType === 'product' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'}">${sku.productType || 'product'}</span>
             <button class="edit-sku text-primary hover:text-primary/80 text-xs px-2 py-1" data-id="${sku.id}">Edit</button>
             <button class="delete-sku text-red-500 hover:text-red-600 text-xs px-2 py-1" data-id="${sku.id}">Del</button>
           </div>
@@ -672,8 +672,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       document.getElementById('modal-title').textContent = 'Edit SKU';
       document.getElementById('sku-id').value = id;
       document.getElementById('sku-title').value = data.title || '';
-      document.getElementById('sku-business').value = data.businessPageId || '';
-      document.getElementById('sku-service-type').value = data.serviceType || 'product';
+      document.getElementById('sku-business').value = data.businessId || '';
+      document.getElementById('sku-service-type').value = data.productType || 'product';
 
       // Parse price fields
       let priceFields = [];
@@ -682,7 +682,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       } catch (e) {
         // ignore
       }
-      renderPriceFields(data.serviceType || 'product', priceFields);
+      renderPriceFields(data.productType || 'product', priceFields);
 
       // Parse and render specification fields
       let specifications = {};
@@ -782,8 +782,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     }
 
     // Collect specification fields
-    const serviceType = formData.get('serviceType');
-    const specFields = SPECIFICATION_FIELDS[serviceType] || [];
+    const productType = formData.get('productType');
+    const specFields = SPECIFICATION_FIELDS[productType] || [];
     const specifications = {};
     specFields.forEach(field => {
       const key = `spec_${field.key}`;
@@ -804,15 +804,15 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
     const skuData = {
       title: formData.get('title'),
-      businessPageId: formData.get('businessPageId'),
-      serviceType,
+      businessId: formData.get('businessId'),
+      productType,
       priceFields: priceFields.length > 0 ? JSON.stringify(priceFields) : null,
       specifications: Object.keys(specifications).length > 0 ? specifications : null,
       description,
       isAdmin: true,
     };
 
-    if (!skuData.businessPageId) {
+    if (!skuData.businessId) {
       alert('Please select a business');
       return;
     }

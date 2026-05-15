@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
-import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
@@ -23,7 +22,7 @@ export default defineConfig({
   },
 
   integrations: [
-    sitemap(),
+    // sitemap() removed - using custom src/pages/sitemap.xml.ts for dynamic sitemap
   ],
 
   vite: {

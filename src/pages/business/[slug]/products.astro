@@ -189,11 +189,11 @@ import CardContent from '../../../components/ui/CardContent.astro'
   }
   
   // Load subscription status
-  async function loadSubscription(businessPageId: string) {
+  async function loadSubscription(businessId: string) {
     try {
-      const res = await fetch(`/api/account/subscription/${businessPageId}`);
+      const res = await fetch(`/api/account/subscription/${businessId}`);
       const data = await res.json();
-      
+
       if (data.success) {
         return data.data;
       }
@@ -202,13 +202,13 @@ import CardContent from '../../../components/ui/CardContent.astro'
     }
     return null;
   }
-  
+
   // Load products
-  async function loadProducts(businessPageId: string) {
+  async function loadProducts(businessId: string) {
     try {
-      const res = await fetch(`/api/products?businessPageId=${businessPageId}`);
+      const res = await fetch(`/api/products?businessId=${businessId}`);
       const data = await res.json();
-      
+
       if (data.success) {
         return data.data;
       }

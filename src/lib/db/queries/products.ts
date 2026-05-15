@@ -9,15 +9,17 @@ import { eq, desc, and } from 'drizzle-orm';
 export interface ProductWithImages {
   id: string;
   businessId: string;
+  categoryId: string | null;
   title: string;
   description: string | null;
-  price: number | null;
-  category: string | null;
-  sku: string | null;
-  stock: number | null;
-  status: string;
+  productType: string;
+  priceFields: Record<string, unknown> | null;
+  specifications: Record<string, unknown> | null;
+  images: string[];
+  featured: boolean;
+  active: boolean;
   createdAt: number | Date;
-  images: Array<{ id: string; url: string; alt: string | null }>;
+  updatedAt: number | Date;
 }
 
 /**
@@ -35,10 +37,20 @@ export async function getProductById(productId: string): Promise<ProductWithImag
 
   if (!product) return null;
 
-  // images stored as JSON in products.images field
   return {
-    ...product,
-    images: [],
+    id: product.id,
+    businessId: product.businessId,
+    categoryId: product.categoryId,
+    title: product.title,
+    description: product.description,
+    productType: product.productType || 'product',
+    priceFields: product.priceFields ? JSON.parse(product.priceFields as string) : null,
+    specifications: product.specifications ? JSON.parse(product.specifications as string) : null,
+    images: product.images ? JSON.parse(product.images as string) : [],
+    featured: !!product.featured,
+    active: !!product.active,
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
   };
 }
 
@@ -48,16 +60,16 @@ export async function getProductById(productId: string): Promise<ProductWithImag
 export async function getBusinessProducts(
   businessId: string,
   options?: {
-    status?: string;
+    active?: boolean;
     limit?: number;
   }
 ): Promise<ProductWithImages[]> {
   const db = await getDb();
-  const { status = 'active', limit = 50 } = options || {};
+  const { active = true, limit = 50 } = options || {};
 
   const conditions = [eq(products.businessId, businessId)];
-  if (status) {
-    conditions.push(eq(products.active, status === 'active' ? 1 : 0));
+  if (active !== undefined) {
+    conditions.push(eq(products.active, active ? 1 : 0));
   }
 
   const productList = await db
@@ -69,8 +81,19 @@ export async function getBusinessProducts(
     .all();
 
   return productList.map(p => ({
-    ...p,
-    images: [],
+    id: p.id,
+    businessId: p.businessId,
+    categoryId: p.categoryId,
+    title: p.title,
+    description: p.description,
+    productType: p.productType || 'product',
+    priceFields: p.priceFields ? JSON.parse(p.priceFields as string) : null,
+    specifications: p.specifications ? JSON.parse(p.specifications as string) : null,
+    images: p.images ? JSON.parse(p.images as string) : [],
+    featured: !!p.featured,
+    active: !!p.active,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
   }));
 }
 
@@ -81,7 +104,7 @@ export async function getBusinessProductCount(businessId: string): Promise<numbe
   const db = await getDb();
 
   const result = await db
-    .select()
+    .select({ count: and(eq(products.businessId, businessId)) })
     .from(products)
     .where(eq(products.businessId, businessId))
     .all();

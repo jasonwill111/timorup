@@ -7,10 +7,8 @@ import { eq } from 'drizzle-orm';
 import { canEditBusiness } from '@/lib/subscription';
 import { getAdminUser } from '@/lib/admin-auth';
 
-const VALID_SERVICE_TYPES = [
-  'product', 'service', 'rental', 'food',
-  'accommodation', 'automotive', 'healthcare',
-  'education', 'beauty', 'event'
+const VALID_PRODUCT_TYPES = [
+  'product', 'service', 'virtual', 'ticket', 'rental', 'subscription'
 ];
 
 function getErrorMessage(error: unknown): string {
@@ -21,15 +19,15 @@ function getErrorMessage(error: unknown): string {
 const UpdateProductSchema = z.object({
   id: z.string(),
   title: z.string().optional(),
-  price: z.number().optional().nullable(),
-  priceUnit: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  categoryId: z.string().optional().nullable(),
   priceFields: z.record(z.unknown()).optional().nullable(),
-  serviceType: z.string().optional(),
+  productType: z.enum(['product', 'service', 'virtual', 'ticket', 'rental', 'subscription']).optional(),
   specifications: z.record(z.unknown()).optional().nullable(),
+  images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional(),
   active: z.boolean().optional(),
-  businessPageId: z.string().optional(),
+  businessId: z.string().optional(),
 });
 
 const parseJsonField = (val: string): unknown => {
@@ -53,8 +51,8 @@ export const updateProduct = defineAction({
 
     try {
       // Check grace period if updating business association
-      if (input.businessPageId) {
-        const check = await canEditBusiness(input.businessPageId);
+      if (input.businessId) {
+        const check = await canEditBusiness(input.businessId);
         if (!check.can) {
           return { success: false, error: { code: 'EDIT_BLOCKED', message: check.reason || 'Cannot edit during grace period' } };
         }
@@ -66,8 +64,8 @@ export const updateProduct = defineAction({
       }
 
       // Check grace period for existing product's business
-      if (existing.businessPageId) {
-        const check = await canEditBusiness(existing.businessPageId);
+      if (existing.businessId) {
+        const check = await canEditBusiness(existing.businessId);
         if (!check.can) {
           return { success: false, error: { code: 'EDIT_BLOCKED', message: check.reason || 'Cannot edit during grace period' } };
         }
@@ -75,14 +73,15 @@ export const updateProduct = defineAction({
 
       const updateData: Record<string, unknown> = {};
       if (input.title !== undefined) updateData.title = input.title;
-      if (input.price !== undefined) updateData.price = input.price || null;
-      if (input.priceUnit !== undefined) updateData.priceUnit = input.priceUnit || null;
       if (input.description !== undefined) updateData.description = input.description || null;
+      if (input.categoryId !== undefined) updateData.categoryId = input.categoryId || null;
       if (input.priceFields !== undefined) updateData.priceFields = input.priceFields ? JSON.stringify(input.priceFields) : null;
-      if (input.serviceType !== undefined) updateData.serviceType = VALID_SERVICE_TYPES.includes(input.serviceType) ? input.serviceType : 'product';
+      if (input.productType !== undefined) updateData.productType = VALID_PRODUCT_TYPES.includes(input.productType) ? input.productType : 'product';
       if (input.specifications !== undefined) updateData.specifications = input.specifications ? JSON.stringify(input.specifications) : null;
+      if (input.images !== undefined) updateData.images = input.images ? JSON.stringify(input.images) : null;
       if (input.featured !== undefined) updateData.featured = input.featured;
       if (input.active !== undefined) updateData.active = input.active;
+      if (input.businessId !== undefined) updateData.businessId = input.businessId;
 
       if (Object.keys(updateData).length > 0) {
         updateData.updatedAt = Math.floor(Date.now() / 1000);
@@ -94,9 +93,28 @@ export const updateProduct = defineAction({
         ...updated,
         priceFields: updated.priceFields ? parseJsonField(updated.priceFields as string) : null,
         specifications: updated.specifications ? parseJsonField(updated.specifications as string) : null,
+        images: updated.images ? parseJsonField(updated.images as string) : null,
       } : null;
 
       return { success: true, data: parsedUpdated };
+    } catch (error) {
+      return { success: false, error: { message: getErrorMessage(error) } };
+    }
+  },
+});
+
+export const deleteProduct = defineAction({
+  input: z.object({ id: z.string() }),
+  handler: async (input, { request }) => {
+    const user = await getAdminUser(request);
+    if (!user) {
+      return { success: false, error: { code: 'UNAUTHORIZED', message: 'Admin access required' } };
+    }
+
+    const db = await getDb();
+    try {
+      await db.delete(products).where(eq(products.id, input.id)).run();
+      return { success: true };
     } catch (error) {
       return { success: false, error: { message: getErrorMessage(error) } };
     }

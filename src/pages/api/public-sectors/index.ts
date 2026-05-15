@@ -90,15 +90,11 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       id: publicSectors.id,
       title: publicSectors.title,
       slug: publicSectors.slug,
-      entityType: publicSectors.entityType,
-      profileImageId: publicSectors.profileImageId,
       address: publicSectors.address,
       tags: publicSectors.tags,
       likes: publicSectors.likes,
       saves: publicSectors.saves,
       views: publicSectors.views,
-      ratingAverage: publicSectors.ratingAverage,
-      ratingCount: publicSectors.ratingCount,
       createdAt: publicSectors.createdAt,
     })
     .from(publicSectors)

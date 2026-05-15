@@ -215,9 +215,8 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     const {
       title, slug: newSlug, categoryId, industry, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
-      latitude, longitude, yearOfEstablishment, latestUpdates,
-      registrationUrl, bannerImageId, profileImageId, socialLinks,
-      photoGallery
+      latitude, longitude, yearOfEstablishment, registrationUrl,
+      bannerImageId, profileImageId, socialLinks
     } = body;
 
     const updateValues: Record<string, unknown> = {};
@@ -236,13 +235,12 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
     if (latitude !== undefined) updateValues.locationLat = latitude || null;
     if (longitude !== undefined) updateValues.locationLng = longitude || null;
     if (yearOfEstablishment !== undefined) updateValues.yearOfEstablishment = yearOfEstablishment || null;
-    if (latestUpdates !== undefined) updateValues.latestUpdates = latestUpdates || null;
     if (registrationUrl !== undefined) updateValues.registrationUrl = registrationUrl || null;
     // Image fields
     if (bannerImageId !== undefined) updateValues.bannerImageId = bannerImageId || null;
     if (profileImageId !== undefined) updateValues.profileImageId = profileImageId || null;
     if (socialLinks !== undefined) updateValues.socialLinks = socialLinks ? JSON.stringify(socialLinks) : null;
-    if (photoGallery !== undefined) updateValues.photoGallery = photoGallery ? JSON.stringify(photoGallery) : null;
+    // Note: latestUpdates and photoGallery now use separate tables (latestUpdates, media)
 
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = Math.floor(Date.now() / 1000);

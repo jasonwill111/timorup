@@ -25,7 +25,7 @@ type ProductListing = {
   price: string;
   priceUnit: string;
   priceFields: { label: string; value: string; unit: string }[];
-  serviceType: string;
+  productType: string;
   businessTitle: string;
   businessSlug: string;
 };
@@ -88,9 +88,6 @@ try {
 
   const allListings = businessesResult.map(b => {
     const tags = b.tags ? JSON.parse(b.tags) : [];
-    const entityTypeDisplay = b.entityType === 'business' ? 'Business'
-      : b.entityType === 'government' ? 'Government'
-      : b.entityType === 'nonprofit' ? 'Nonprofit' : 'Business';
     return {
       id: b.id,
       title: b.title,
@@ -103,8 +100,8 @@ try {
       tag: tags[0] || '',
       tags,
       profileImageId: b.profileImageId,
-      entityType: b.entityType,
-      entityTypeDisplay,
+      entityType: 'business', // All entries in businesses table are 'business'
+      entityTypeDisplay: 'Business',
       isNew: false,
     };
   });
@@ -139,19 +136,18 @@ try {
   const productsResult = await db.select({
     id: products.id,
     title: products.title,
-    price: products.price,
-    priceUnit: products.priceUnit,
     priceFields: products.priceFields,
-    serviceType: products.serviceType,
-    businessPageId: products.businessPageId,
+    productType: products.productType,
+    businessId: products.businessId,
+    images: products.images,
   })
   .from(products)
-  .innerJoin(businesses, eq(products.businessPageId, businesses.id))
+  .innerJoin(businesses, eq(products.businessId, businesses.id))
   .where(eq(businesses.status, 'live'))
   .orderBy(desc(products.createdAt))
   .limit(12);
 
-  const businessIds = [...new Set(productsResult.map(p => p.businessPageId))];
+  const businessIds = [...new Set(productsResult.map(p => p.businessId))];
   const businessesForProducts = businessIds.length > 0
     ? await db.select({
         id: businesses.id,
@@ -168,15 +164,15 @@ try {
   });
 
   featuredProducts = productsResult.map(p => {
-    const business = businessMap[p.businessPageId] || {};
-    const priceFields = p.priceFields ? JSON.parse(p.priceFields) : [];
+    const business = businessMap[p.businessId] || {};
+    const priceFields = p.priceFields ? JSON.parse(p.priceFields as string) : [];
+    const images = p.images ? JSON.parse(p.images as string) : [];
     return {
       id: p.id,
       title: p.title,
-      price: p.price || '',
-      priceUnit: p.priceUnit || '',
       priceFields,
-      serviceType: p.serviceType || 'product',
+      images,
+      productType: p.productType || 'product',
       businessTitle: business.title || '',
       businessSlug: business.slug || '',
     };
@@ -288,7 +284,7 @@ const mappedCategories = categoriesData;
           price={product.price}
           priceUnit={product.priceUnit}
           priceFields={product.priceFields}
-          serviceType={product.serviceType}
+          productType={product.productType}
           slug={product.id}
         />
       ))}

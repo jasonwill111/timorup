@@ -110,6 +110,46 @@ const userId = Astro.locals.user?.id || 'system';
               placeholder="news, update, tips" />
           </div>
 
+          <!-- SEO Fields Section -->
+          <div class="md:col-span-2 border-t pt-4 mt-4">
+            <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              SEO Settings
+            </h3>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Author Name</label>
+            <input type="text" id="post-author-name"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Author name" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Canonical URL</label>
+            <input type="url" id="post-canonical-url"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="https://..." />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Meta Title</label>
+            <input type="text" id="post-meta-title" maxlength="60"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="SEO title (max 60 chars)" />
+            <p class="text-xs text-muted-foreground mt-1">Recommended: 50-60 characters</p>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Meta Description</label>
+            <textarea id="post-meta-description" rows="2" maxlength="160"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              placeholder="SEO description (max 160 chars)"></textarea>
+            <p class="text-xs text-muted-foreground mt-1">Recommended: 120-160 characters</p>
+          </div>
+
           <div>
             <label class="block text-sm font-medium mb-1">Featured Image</label>
             <div id="featured-image-upload" class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
@@ -423,6 +463,11 @@ const userId = Astro.locals.user?.id || 'system';
     excerptInput.value = post.excerpt || '';
     statusSelect.value = post.status || 'draft';
     tagsInput.value = post.tags ? JSON.parse(post.tags).join(', ') : '';
+    // SEO fields
+    (document.getElementById('post-author-name') as HTMLInputElement).value = post.authorName || '';
+    (document.getElementById('post-meta-title') as HTMLInputElement).value = post.metaTitle || '';
+    (document.getElementById('post-meta-description') as HTMLTextAreaElement).value = post.metaDescription || '';
+    (document.getElementById('post-canonical-url') as HTMLInputElement).value = post.canonicalUrl || '';
     modalTitle.textContent = 'Edit Blog Post';
 
     openModal();
@@ -484,7 +529,11 @@ const userId = Astro.locals.user?.id || 'system';
       content: finalContent,
       status: statusSelect.value,
       tags,
-      authorId: getCurrentUserId(),
+      // SEO fields
+      authorName: (document.getElementById('post-author-name') as HTMLInputElement)?.value || undefined,
+      metaTitle: (document.getElementById('post-meta-title') as HTMLInputElement)?.value || undefined,
+      metaDescription: (document.getElementById('post-meta-description') as HTMLTextAreaElement)?.value || undefined,
+      canonicalUrl: (document.getElementById('post-canonical-url') as HTMLInputElement)?.value || undefined,
     };
 
     try {

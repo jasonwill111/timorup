@@ -122,7 +122,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       id: businesses.id,
       title: businesses.title,
       slug: businesses.slug,
-      profileImageId: businesses.profileImageId,
+      categoryId: businesses.categoryId,
       address: businesses.address,
       tags: businesses.tags,
       likes: businesses.likes,
@@ -148,10 +148,10 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
         results.sort((a, b) => (b.ratingAverage || 0) - (a.ratingAverage || 0));
         break;
       case 'name':
-        results.sort((a, b) => a.title.localeCompare(b.title));
+        results.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
         break;
       default:
-        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        results.sort((a, b) => (new Date(b.createdAt || 0).getTime()) - (new Date(a.createdAt || 0).getTime()));
     }
 
     const paginated = results.slice(offset, offset + limit);
@@ -163,7 +163,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
     const responseData = paginated.map((biz) => ({
       ...biz,
-      tags: biz.tags ? JSON.parse(biz.tags) : [],
+      tags: biz.tags ? (typeof biz.tags === 'string' ? JSON.parse(biz.tags) : biz.tags) : [],
       categoryName: categoryMap.get(biz.categoryId) || 'Business',
     }));
 

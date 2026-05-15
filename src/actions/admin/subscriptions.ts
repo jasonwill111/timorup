@@ -14,16 +14,19 @@ const listSchema = z.object({
 
 const updateStatusSchema = z.object({
   id: z.string(),
-  status: z.enum(['pending', 'paid', 'rejected']),
-  expiryDate: z.number().optional(),
+  status: z.enum(['pending', 'paid', 'cancelled', 'refunded']),
+  expiresAt: z.number().optional(),
 });
 
 const updateSchema = z.object({
   id: z.string(),
-  planType: z.string().optional(),
+  servicePackageId: z.string().optional(),
+  variantSnapshot: z.string().optional(),
+  type: z.string().optional(),
+  typeId: z.string().optional(),
   amount: z.number().optional(),
-  status: z.enum(['pending', 'paid', 'rejected', 'draft']).optional(),
-  expiryDate: z.number().optional(),
+  status: z.enum(['pending', 'paid', 'cancelled', 'refunded']).optional(),
+  expiresAt: z.number().optional(),
   adminNotes: z.string().optional(),
 });
 
@@ -42,13 +45,15 @@ export const subscriptions = {
 
       let query = db.select({
         id: orders.id,
+        servicePackageId: orders.servicePackageId,
+        variantSnapshot: orders.variantSnapshot,
+        type: orders.type,
         typeId: orders.typeId,
         userId: orders.userId,
-        planType: orders.planType,
         amount: orders.amount,
         paymentMethod: orders.paymentMethod,
         status: orders.status,
-        expiryDate: orders.expiryDate,
+        expiresAt: orders.expiresAt,
         paidDate: orders.paidDate,
         createdAt: orders.createdAt,
         adminNotes: orders.adminNotes,
@@ -88,30 +93,29 @@ export const subscriptions = {
 
       if (!order) throw new Error('Order not found');
 
-      // Calculate expiry date if setting to paid
-      let newExpiryDate = order.expiryDate;
+      // Calculate expiresAt if setting to paid
+      let newExpiresAt = order.expiresAt;
       let paidDate = order.paidDate;
 
       if (input.status === 'paid' && !order.paidDate) {
         paidDate = new Date();
-        const planType = order.planType || 'basic';
-        const isYearly = planType.includes('yearly');
-        const days = isYearly ? 365 : 30;
+        const variantSnapshot = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : null;
+        const durationValue = variantSnapshot?.durationValue || 30;
+        const durationUnit = variantSnapshot?.durationUnit || 'days';
 
-        if (input.expiryDate) {
-          newExpiryDate = new Date(input.expiryDate);
+        if (input.expiresAt) {
+          newExpiresAt = input.expiresAt;
         } else {
-          newExpiryDate = new Date();
-          newExpiryDate.setDate(newExpiryDate.getDate() + days);
+          const expiresDate = new Date();
+          if (durationUnit === 'months') {
+            expiresDate.setMonth(expiresDate.getMonth() + durationValue);
+          } else if (durationUnit === 'years') {
+            expiresDate.setFullYear(expiresDate.getFullYear() + durationValue);
+          } else {
+            expiresDate.setDate(expiresDate.getDate() + durationValue);
+          }
+          newExpiresAt = Math.floor(expiresDate.getTime() / 1000);
         }
-      }
-
-      // Calculate timestamp for storage
-      let expiryTimestamp: number | null = null;
-      if (newExpiryDate) {
-        expiryTimestamp = newExpiryDate instanceof Date
-          ? Math.floor(newExpiryDate.getTime() / 1000)
-          : newExpiryDate;
       }
 
       // Update order
@@ -119,25 +123,23 @@ export const subscriptions = {
         .set({
           status: input.status,
           paidDate,
-          expiryDate: expiryTimestamp,
+          expiresAt: newExpiresAt,
           updatedAt: new Date(),
         })
         .where(eq(orders.id, input.id))
         .run();
 
-      // If payment confirmed, update business with plan info
+      // If payment confirmed, update business
       if (input.status === 'paid' && order.typeId) {
-        const planType = order.planType
-          .replace('-yearly', '')
-          .replace('-monthly', '');
-
-        const expiryTs = expiryTimestamp ? new Date(expiryTimestamp * 1000) : newExpiryDate;
-        const expiry = expiryTs ? Math.floor(expiryTs.getTime() / 1000) : null;
+        const variantSnapshot = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : null;
+        const limits = variantSnapshot?.limits || {};
+        const planSlug = order.servicePackageId || 'unknown';
 
         await db.update(businesses)
           .set({
-            planType,
-            expiryDate: expiry,
+            planSlug,
+            limits: JSON.stringify(limits),
+            expiresAt: newExpiresAt ? new Date(newExpiresAt * 1000) : null,
             status: 'live',
             subscriptionStatus: 'active',
             gracePeriodEndDate: null,
@@ -147,7 +149,7 @@ export const subscriptions = {
           .run();
       }
 
-      return { success: true, data: { id: input.id, status: input.status, expiryDate: expiryTimestamp, paidDate } };
+      return { success: true, data: { id: input.id, status: input.status, expiresAt: newExpiresAt, paidDate } };
     },
   }),
 
@@ -169,56 +171,58 @@ export const subscriptions = {
 
       if (!order) throw new Error('Order not found');
 
-      // Calculate expiry date if setting to paid
-      let newExpiryDate = input.expiryDate ? new Date(input.expiryDate) : order.expiryDate;
+      // Calculate expiresAt if setting to paid
+      let newExpiresAt = input.expiresAt ? input.expiresAt : order.expiresAt;
       let paidDate = order.paidDate;
 
       if (input.status === 'paid' && order.status !== 'paid' && !order.paidDate) {
         paidDate = new Date();
 
-        if (!input.expiryDate) {
-          const isYearly = input.planType?.includes('yearly') || order.planType.includes('yearly');
-          const days = isYearly ? 365 : 30;
-          newExpiryDate = new Date();
-          newExpiryDate.setDate(newExpiryDate.getDate() + days);
+        if (!input.expiresAt) {
+          const variantSnapshot = (input.variantSnapshot || order.variantSnapshot) ? JSON.parse(input.variantSnapshot || order.variantSnapshot) : null;
+          const durationValue = variantSnapshot?.durationValue || 30;
+          const durationUnit = variantSnapshot?.durationUnit || 'days';
+
+          const expiresDate = new Date();
+          if (durationUnit === 'months') {
+            expiresDate.setMonth(expiresDate.getMonth() + durationValue);
+          } else if (durationUnit === 'years') {
+            expiresDate.setFullYear(expiresDate.getFullYear() + durationValue);
+          } else {
+            expiresDate.setDate(expiresDate.getDate() + durationValue);
+          }
+          newExpiresAt = Math.floor(expiresDate.getTime() / 1000);
         }
       }
-
-      // Calculate amount if not provided
-      const planAmounts: Record<string, number> = {
-        'basic-monthly': 29,
-        'basic-yearly': 290,
-        'pro-monthly': 59,
-        'pro-yearly': 590,
-        'max-monthly': 89,
-        'max-yearly': 890,
-      };
-      const finalAmount = input.amount ?? planAmounts[input.planType || order.planType] ?? order.amount;
 
       // Update order
       await db.update(orders)
         .set({
-          planType: input.planType || order.planType,
-          amount: finalAmount,
+          servicePackageId: input.servicePackageId || order.servicePackageId,
+          variantSnapshot: input.variantSnapshot || order.variantSnapshot,
+          type: input.type || order.type,
+          typeId: input.typeId || order.typeId,
+          amount: input.amount ?? order.amount,
           status: input.status || order.status,
           paidDate,
-          expiryDate: newExpiryDate,
+          expiresAt: newExpiresAt,
           adminNotes: input.adminNotes !== undefined ? input.adminNotes : order.adminNotes,
           updatedAt: new Date(),
         })
         .where(eq(orders.id, input.id))
         .run();
 
-      // If payment confirmed, update business with plan info
+      // If payment confirmed, update business
       if (input.status === 'paid' && order.typeId) {
-        const finalPlanType = (input.planType || order.planType)
-          .replace('-yearly', '')
-          .replace('-monthly', '');
+        const variantSnapshot = (input.variantSnapshot || order.variantSnapshot) ? JSON.parse(input.variantSnapshot || order.variantSnapshot) : null;
+        const limits = variantSnapshot?.limits || {};
+        const planSlug = input.servicePackageId || order.servicePackageId || 'unknown';
 
         await db.update(businesses)
           .set({
-            planType: finalPlanType,
-            expiryDate: newExpiryDate,
+            planSlug,
+            limits: JSON.stringify(limits),
+            expiresAt: newExpiresAt ? new Date(newExpiresAt * 1000) : null,
             status: order.status === 'draft' ? 'live' : order.status,
             updatedAt: new Date(),
           })
@@ -230,10 +234,10 @@ export const subscriptions = {
         success: true,
         data: {
           id: input.id,
-          planType: input.planType || order.planType,
-          amount: finalAmount,
+          servicePackageId: input.servicePackageId || order.servicePackageId,
+          amount: input.amount ?? order.amount,
           status: input.status || order.status,
-          expiryDate: newExpiryDate,
+          expiresAt: newExpiresAt,
           paidDate,
         },
       };
@@ -267,6 +271,10 @@ export const subscriptions = {
         .where(eq(orders.id, input.id))
         .limit(1)
         .get();
+
+      if (!order) {
+        return { success: false, error: { code: 'NOT_FOUND', message: 'Order not found' } };
+      }
 
       return { success: true, data: order };
     },

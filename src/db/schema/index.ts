@@ -1,14 +1,18 @@
 /**
  * Unified Database Schema
  * timorlist
- * Last updated: 2026-05-13
+ * Last updated: 2026-05-14
  *
  * Key changes:
- * - listingCategories: added formFields for dynamic category-specific fields
- * - listings: removed listingType/imageIds/price/condition, added extraData/featured/featuredUntil
- * - businesses/nonProfits/publicSectors: removed legacy fields, businesses has limits/planSlug
- * - orders: added snapshots (snapshotName/snapshotPrice/snapshotConfig/snapshotFeatures)
- * - servicePackages: new unified table (renamed from plans), supports subscriptions/renewals/addons
+ * - productCategories: NEW table for SKU categories (42 categories with formFields)
+ * - products: categoryId NOT NULL, removed price/priceUnit
+ * - reviews: removed isEdited, added UNIQUE(userId, businessId)
+ * - servicePackages: variants JSON array, removed flat price/config fields
+ * - orders: variantSnapshot JSON instead of separate snapshot fields
+ * - latestUpdates: content max 255 chars
+ * - savedItems: added UNIQUE constraint
+ * - adBanners: linkUrl/linkType/position/sortOrder, FK orderId
+ * - blogPosts: added metaTitle/metaDescription/canonicalUrl, authorId→authorName
  */
 import { sqliteTable, text, integer, real, index, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { sql } from "drizzle-orm"
@@ -209,7 +213,10 @@ export const businesses = sqliteTable("businesses", {
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
   categoryId: text("category_id"),
+  entityType: text("entity_type").default("business"),
   status: text().default("draft"),
+  bannerImageId: text("banner_image_id"),
+  profileImageId: text("profile_image_id"),
   contactName: text("contact_name"),
   contactNumber: text("contact_number"),
   countryCode: text("country_code").default("+670"),
@@ -220,6 +227,7 @@ export const businesses = sqliteTable("businesses", {
   locationLng: real("location_lng"),
   openingHours: text("opening_hours"),
   aboutUs: text("about_us"),
+  latestUpdates: text("latest_updates"),
   tags: text(),
   industry: text(),
   // 统计
@@ -229,16 +237,23 @@ export const businesses = sqliteTable("businesses", {
   ratingCount: integer("rating_count").default(0),
   views: integer().default(0),
   // 订阅
-  subscriptionStatus: text("subscription_status").default("none"), // none | trial | active | expired
+  planType: text("plan_type"),
+  publishDate: integer("publish_date"),
+  expiryDate: integer("expiry_date"),
+  subscriptionStatus: text("subscription_status").default("none"),
   subscriptionExpiresAt: integer("subscription_expires_at"),
   gracePeriodEndDate: integer("grace_period_end_date"),
   // 当前套餐限制（JSON，购买订阅时更新）
-  // { "skuLimit": 10, "maxImages": 16, "maxVideos": 2 }
   limits: text(),
-  planSlug: text("plan_slug"),           // 当前订阅的 plan slug
+  planSlug: text("plan_slug"),
   registrationUrl: text("registration_url"),
   verifiedBadge: integer("verified_badge").default(false),
   socialLinks: text("social_links"),
+  photoGallery: text("photo_gallery"),
+  latestUpdate: text("latest_update"),
+  latestUpdateImages: text("latest_update_images"),
+  latestUpdateDate: integer("latest_update_date"),
+  organizationType: text("organization_type"),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
@@ -256,7 +271,10 @@ export const nonProfits = sqliteTable("non_profits", {
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
   categoryId: text("category_id"),
+  entityType: text("entity_type").default("nonprofit"),
   status: text().default("draft"),
+  bannerImageId: text("banner_image_id"),
+  profileImageId: text("profile_image_id"),
   contactName: text("contact_name"),
   contactNumber: text("contact_number"),
   countryCode: text("country_code").default("+670"),
@@ -267,11 +285,27 @@ export const nonProfits = sqliteTable("non_profits", {
   locationLng: real("location_lng"),
   openingHours: text("opening_hours"),
   aboutUs: text("about_us"),
+  latestUpdates: text("latest_updates"),
   tags: text(),
   // 统计
   likes: integer().default(0),
   saves: integer().default(0),
   views: integer().default(0),
+  ratingAverage: real("rating_average").default(0),
+  ratingCount: integer("rating_count").default(0),
+  // 订阅（保留旧字段兼容性）
+  planType: text("plan_type"),
+  publishDate: integer("publish_date"),
+  expiryDate: integer("expiry_date"),
+  subscriptionStatus: text("subscription_status").default("none"),
+  subscriptionExpiresAt: integer("subscription_expires_at"),
+  trialStartedAt: integer("trial_started_at"),
+  gracePeriodEndDate: integer("grace_period_end_date"),
+  // 媒体
+  photoGallery: text("photo_gallery"),
+  latestUpdate: text("latest_update"),
+  latestUpdateImages: text("latest_update_images"),
+  latestUpdateDate: integer("latest_update_date"),
   // 免费 - 无订阅
   registrationUrl: text("registration_url"),
   verifiedBadge: integer("verified_badge").default(false),
@@ -292,7 +326,10 @@ export const publicSectors = sqliteTable("public_sectors", {
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
   categoryId: text("category_id"),
+  entityType: text("entity_type").default("government"),
   status: text().default("draft"),
+  bannerImageId: text("banner_image_id"),
+  profileImageId: text("profile_image_id"),
   contactName: text("contact_name"),
   contactNumber: text("contact_number"),
   countryCode: text("country_code").default("+670"),
@@ -303,13 +340,28 @@ export const publicSectors = sqliteTable("public_sectors", {
   locationLng: real("location_lng"),
   openingHours: text("opening_hours"),
   aboutUs: text("about_us"),
+  latestUpdates: text("latest_updates"),
   tags: text(),
   // 统计
   likes: integer().default(0),
   saves: integer().default(0),
   views: integer().default(0),
+  ratingAverage: real("rating_average").default(0),
+  ratingCount: integer("rating_count").default(0),
+  // 订阅（保留旧字段兼容性）
+  planType: text("plan_type"),
+  publishDate: integer("publish_date"),
+  expiryDate: integer("expiry_date"),
+  subscriptionStatus: text("subscription_status").default("none"),
+  subscriptionExpiresAt: integer("subscription_expires_at"),
+  trialStartedAt: integer("trial_started_at"),
+  gracePeriodEndDate: integer("grace_period_end_date"),
+  // 媒体
+  photoGallery: text("photo_gallery"),
+  latestUpdate: text("latest_update"),
+  latestUpdateImages: text("latest_update_images"),
+  latestUpdateDate: integer("latest_update_date"),
   // 政府特有字段 (JSON)
-  // { "department": "Education", "serviceTypes": ["consulting", "permits"], ... }
   governmentData: text("government_data"),
   // 免费 - 无订阅
   registrationUrl: text("registration_url"),
@@ -330,10 +382,12 @@ export const listings = sqliteTable("listings", {
   title: text().notNull(),
   slug: text().notNull().unique(),
   ownerId: text("owner_id").notNull(),
-  categoryId: text("category_id"),                 // FK to listing_categories
+  categoryId: text("category_id"),
   status: text().default("draft"),
+  listingType: text("listing_type").notNull().default("product"),
   description: text().notNull(),
-  // 通用字段
+  price: text(),
+  condition: text(),
   location: text(),
   locationLat: real("location_lat"),
   locationLng: real("location_lng"),
@@ -341,19 +395,19 @@ export const listings = sqliteTable("listings", {
   contactNumber: text("contact_number"),
   countryCode: text("country_code").default("+670"),
   email: text(),
+  imageIds: text("image_ids"),
   tags: text(),
   // 统计
   likes: integer().default(0),
   saves: integer().default(0),
   views: integer().default(0),
   // 有效期
-  expiresAt: integer("expires_at"),               // null = 永久（付费后设置）
+  expiresAt: integer("expires_at"),
   lastRenewedAt: integer("last_renewed_at"),
   // Admin 设置
-  featured: integer().default(false),             // 精选标记
-  featuredUntil: integer("featured_until"),       // 精选截止日期
+  featured: integer().default(false),
+  featuredUntil: integer("featured_until"),
   // 分类特有字段 - JSON 存储
-  // 结构: { price: 100, currency: "USD", condition: "new", brand: "Apple", ... }
   extraData: text("extra_data"),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
@@ -391,21 +445,51 @@ export const latestUpdates = sqliteTable("latest_updates", {
 ]);
 
 // ============================================
+// Product Categories (for businesses' SKUs)
+// 42 categories with formFields for type-specific fields
+// ============================================
+
+export const productCategories = sqliteTable("product_categories", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  slug: text().notNull().unique(),
+  description: text(),
+  icon: text(),
+  parentId: text("parent_id"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active").default(true),
+  // JSON 配置 - 分类特有的表单字段
+  // 结构: [{ name: "brand", type: "text", label: "Brand", required: false }, ...]
+  formFields: text("form_fields"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("product_categories_slug_idx").on(table.slug),
+  index("product_categories_parent_idx").on(table.parentId),
+]);
+
+// ============================================
 // Products (for businesses)
+// 每个 product 属于一个 category，category 的 formFields 定义该分类的价格字段
+// priceFields JSON 存储用户输入的价格值（来自 category 的 formFields）
 // ============================================
 
 export const products = sqliteTable("products", {
   id: text().primaryKey().notNull(),
+  businessPageId: text("business_page_id"),  // 旧字段，保留兼容性
   businessId: text("business_id").notNull(),
+  categoryId: text("category_id").notNull(),
   title: text().notNull(),
   slug: text().notNull().unique(),
   description: text(),
-  priceFields: text("price_fields"),
-  serviceType: text("service_type").default("product"),
+  serviceType: text("service_type").default("product"),  // 旧字段，保留兼容性
+  productType: text("product_type").default("product"),
   price: text(),
   priceUnit: text("price_unit"),
+  priceFields: text("price_fields"),
   specifications: text(),
-  images: text(),                          // JSON array of media IDs
+  images: text().default("[]"),
   featured: integer().default(false),
   active: integer().default(true),
   sortOrder: integer("sort_order").default(0),
@@ -414,6 +498,7 @@ export const products = sqliteTable("products", {
 },
 (table) => [
   index("products_business_idx").on(table.businessId),
+  index("products_category_idx").on(table.categoryId),
   uniqueIndex("products_slug_idx").on(table.slug),
   index("products_active_idx").on(table.active),
 ]);
@@ -428,12 +513,11 @@ export const reviews = sqliteTable("reviews", {
   userId: text("user_id").notNull(),
   rating: integer().notNull(),
   title: text(),
-  content: text(),
+  content: text(),                           // max 255 chars
   reply: text(),
   repliedAt: integer("replied_at"),
   repliedBy: text("replied_by"),
-  isEdited: integer("is_edited").default(false),
-  status: text().default("pending"),
+  status: text().default("pending"),       // pending | approved | rejected
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
@@ -441,13 +525,12 @@ export const reviews = sqliteTable("reviews", {
   index("reviews_business_idx").on(table.businessId),
   index("reviews_user_idx").on(table.userId),
   index("reviews_status_idx").on(table.status),
+  uniqueIndex("reviews_user_business_idx").on(table.userId, table.businessId),
 ]);
 
 // ============================================
 // Orders (Service Package Purchases)
-// Orders store a SNAPSHOT of the service package at purchase time
-// type = 'business' | 'listing' (entity type)
-// typeId = entity ID (business_id / listing_id)
+// Orders store a SNAPSHOT of the selected variant at purchase time
 // ============================================
 
 export const orders = sqliteTable("orders", {
@@ -455,26 +538,23 @@ export const orders = sqliteTable("orders", {
   // 关联
   servicePackageId: text("service_package_id"),  // FK to service_packages
 
-  // 快照 - 购买时的值（不随 service package 更新而变化）
-  snapshotName: text("snapshot_name"),           // "Starter Plan"
-  snapshotPrice: integer("snapshot_price"),       // 购买时的总价（分）
-  snapshotCurrency: text("snapshot_currency"),   // "USD"
-  snapshotConfig: text("snapshot_config"),       // JSON: { duration, limits, featured, credits }
-  snapshotFeatures: text("snapshot_features"),   // JSON: ["SEO Tools"]
+  // 变体快照 - 购买时的值（不随 service package 更新而变化）
+  // 从 servicePackages.variants 数组中选择的那个变体的完整快照
+  variantSnapshot: text("variant_snapshot").notNull(),  // JSON: { name, price, currency, durationValue, durationUnit, limits, features }
 
   // 订单信息
   type: text().notNull(),                       // 'business' | 'listing'
-  typeId: text("type_id"),                      // business_id / listing_id (nullable for future services)
+  typeId: text("type_id"),                      // business_id / listing_id
   userId: text("user_id").notNull(),
 
   // 付款
-  amount: integer().notNull(),
+  amount: integer().notNull(),                  // 实际支付金额（分）
   status: text("status").default("pending"),     // pending | paid | cancelled | refunded
   paymentMethod: text("payment_method"),
   paidDate: integer("paid_date"),
 
-  // 这次购买的有效期
-  expiresAt: integer("expires_at"),             // 这次购买的截止日期
+  // 这次购买的有效期（从 variantSnapshot.duration 计算得出）
+  expiresAt: integer("expires_at"),
 
   // Admin
   adminNotes: text("admin_notes"),
@@ -490,29 +570,20 @@ export const orders = sqliteTable("orders", {
 ]);
 
 // ============================================
-// Service Packages (Formerly Plans)
-// Unified service product table - covers subscriptions, renewals, and one-time services
+// Service Packages (SKUs)
+// Each SKU has multiple variants (different pricing/duration/limits)
 // ============================================
 
 export const servicePackages = sqliteTable("service_packages", {
   id: text().primaryKey().notNull(),
-  name: text().notNull(),
+  name: text().notNull(),                    // "Business Page Plan", "Listing Renewal", "Ad Banner"
   slug: text().notNull().unique(),
-  // 服务类型
-  type: text().notNull(),               // 'subscription' | 'listing_renewal' | 'featured' | 'addon'
+  type: text().notNull(),                    // 'subscription' | 'listing_renewal' | 'featured' | 'addon'
+  category: text(),                          // 'business' | 'listing' | 'other'
   description: text(),
-  // 价格
-  price: real("price").notNull(),
-  currency: text("currency").default("USD"),
-  // 灵活配置 (JSON)
-  // subscription: { "duration": { "value": 1, "unit": "month" }, "limits": { "skuLimit": 10, "maxImages": 16 } }
-  // listing_renewal: { "duration": { "value": 30, "unit": "days" } }
-  // featured: { "featured": { "days": 7, "renewable": true } }
-  // addon: { "credits": 100 }
-  config: text(),
-  // 附加功能列表
-  features: text(),                      // JSON array: ["SEO Tools", "Analytics"]
-  // 状态
+  // 变体数组 (JSON)
+  // [{ name: "Starter Monthly", price: 29, currency: "USD", durationValue: 1, durationUnit: "month", limits: { skuLimit: 10, maxImages: 16, maxVideos: 2 }, features: ["SEO Tools"] }]
+  variants: text("variants").notNull(),
   isActive: integer("is_active").default(true),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at"),
@@ -521,6 +592,7 @@ export const servicePackages = sqliteTable("service_packages", {
 (table) => [
   uniqueIndex("service_packages_slug_idx").on(table.slug),
   index("service_packages_type_idx").on(table.type),
+  index("service_packages_category_idx").on(table.category),
   index("service_packages_active_idx").on(table.isActive),
 ]);
 
@@ -549,26 +621,30 @@ export const savedItems = sqliteTable("saved_items", {
 
 // ============================================
 // Ad Banners
+// Position: homepage | businesses | products-services | listings
+// linkType: business | listing | product
 // ============================================
 
 export const adBanners = sqliteTable("ad_banners", {
   id: text().primaryKey().notNull(),
   title: text().notNull(),
-  description: text(),
+  description: text(),                        // admin 备注
   imageId: text("image_id"),
-  linkedEntityType: text("linked_entity_type"),
-  linkedEntityId: text("linked_entity_id"),
-  externalUrl: text("external_url"),
+  linkUrl: text("link_url"),               // slug
+  linkType: text("link_type").notNull(),   // 'business' | 'listing' | 'product'
+  position: text().notNull(),              // 'homepage' | 'businesses' | 'products-services' | 'listings'
+  sortOrder: integer("sort_order").default(0),  // 越大越靠前
+  orderId: text("order_id"),               // FK → orders.id (需付款后生效)
   isActive: integer("is_active").default(true),
   startDate: integer("start_date"),
   endDate: integer("end_date"),
-  position: text().default("homepage"),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
 },
 (table) => [
+  index("ad_banners_position_idx").on(table.position),
   index("ad_banners_active_idx").on(table.isActive),
-  index("ad_banners_date_range_idx").on(table.startDate, table.endDate),
+  index("ad_banners_order_idx").on(table.orderId),
 ]);
 
 // ============================================
@@ -579,10 +655,14 @@ export const blogPosts = sqliteTable("blog_posts", {
   id: text().primaryKey().notNull(),
   title: text().notNull(),
   slug: text().notNull().unique(),
-  excerpt: text(),
+  excerpt: text(),                           // 列表显示
   content: text(),
   coverImageId: text("cover_image_id"),
-  authorId: text("author_id").notNull(),
+  authorName: text("author_name"),          // 更灵活，不一定是平台用户
+  // SEO
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  canonicalUrl: text("canonical_url"),
   status: text().default("draft"),
   tags: text(),
   publishedAt: integer("published_at"),
@@ -592,7 +672,6 @@ export const blogPosts = sqliteTable("blog_posts", {
 (table) => [
   uniqueIndex("blog_posts_slug_idx").on(table.slug),
   index("blog_posts_status_idx").on(table.status),
-  index("blog_posts_author_idx").on(table.authorId),
 ]);
 
 // ============================================

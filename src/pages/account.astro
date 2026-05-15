@@ -107,7 +107,7 @@ try {
           // Get reviews for the first page
           const reviewsList = await db.select()
             .from(reviews)
-            .where(eq(reviews.businessPageId, firstPage.id))
+            .where(eq(reviews.businessId, firstPage.id))
             .orderBy(desc(reviews.createdAt))
             .limit(20);
 
@@ -129,7 +129,7 @@ try {
           const latestOrder = await db.select()
             .from(orders)
             .where(and(
-              eq(orders.businessPageId, firstPage.id),
+              eq(orders.typeId, firstPage.id),
               eq(orders.status, 'paid')
             ))
             .orderBy(desc(orders.paidDate))
@@ -137,11 +137,13 @@ try {
             .get();
 
           if (latestOrder) {
+            const variantSnapshot = latestOrder.variantSnapshot ? JSON.parse(latestOrder.variantSnapshot) : {};
             subscription = {
-              planType: latestOrder.planType || 'basic',
+              planType: latestOrder.servicePackageId || 'basic',
+              planName: variantSnapshot?.name || '',
               amount: latestOrder.amount || 0,
               status: latestOrder.status,
-              expiryDate: latestOrder.expiryDate,
+              expiresAt: latestOrder.expiresAt ? new Date(latestOrder.expiresAt * 1000) : null,
             };
           }
         }
@@ -160,12 +162,12 @@ try {
           const skuProducts = await db.select({
             id: products.id,
             title: products.title,
-            businessPageId: products.businessPageId,
+            businessId: products.businessId,
           })
           .from(products)
           .where(inArray(products.id, skuIds));
 
-          const businessIds = [...new Set(skuProducts.map(p => p.businessPageId))];
+          const businessIds = [...new Set(skuProducts.map(p => p.businessId))];
           const businessList = businessIds.length > 0
             ? await db.select({ id: businesses.id, title: businesses.title, slug: businesses.slug })
                 .from(businesses)
@@ -176,8 +178,8 @@ try {
           savedSkus = skuProducts.map(p => ({
             id: p.id,
             title: p.title,
-            businessTitle: businessMap.get(p.businessPageId)?.title || '',
-            slug: businessMap.get(p.businessPageId)?.slug || '',
+            businessTitle: businessMap.get(p.businessId)?.title || '',
+            slug: businessMap.get(p.businessId)?.slug || '',
           }));
         }
 

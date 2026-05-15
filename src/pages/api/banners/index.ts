@@ -14,24 +14,33 @@ export async function GET({ request }: { request: Request }) {
     const db = await getDb();
 
     if (isActive) {
+      // Get active banners by position, sorted by sortOrder, max 4 per position
       const banners = await db.select({
         id: adBanners.id,
         title: adBanners.title,
         description: adBanners.description,
         imageId: adBanners.imageId,
-        linkedBusinessPageId: adBanners.linkedBusinessPageId,
-        externalUrl: adBanners.externalUrl,
+        linkUrl: adBanners.linkUrl,
+        linkType: adBanners.linkType,
+        position: adBanners.position,
+        sortOrder: adBanners.sortOrder,
       })
       .from(adBanners)
       .where(eq(adBanners.isActive, true))
-      .limit(5)
+      .orderBy(desc(adBanners.sortOrder))
+      .limit(16) // 4 positions * 4 max per position
       .all();
 
       const bannersWithImages = await Promise.all(
         banners.map(async (banner) => ({
           ...banner,
           imageUrl: banner.imageId ? `/api/media/${banner.imageId}` : '/images/default-banner.jpg',
-          linkUrl: banner.externalUrl || (banner.linkedBusinessPageId ? `/business/${banner.linkedBusinessPageId}` : null),
+          // Build link based on linkType
+          link: banner.linkType === 'listing'
+            ? `/listing/${banner.linkUrl}`
+            : banner.linkType === 'product'
+            ? `/products-services/${banner.linkUrl}`
+            : `/business/${banner.linkUrl}`,
         }))
       );
 
@@ -61,14 +70,17 @@ export async function POST({ request }: { request: Request }) {
   try {
     const db = await getDb();
     const body = await request.json();
-    const { title, description, imageId, linkedBusinessPageId, externalUrl, isActive, startDate, endDate } = body;
+    const { title, description, imageId, linkUrl, linkType, position, sortOrder, orderId, isActive, startDate, endDate } = body;
 
     const [newBanner] = await db.insert(adBanners).values({
       title,
       description: description || null,
       imageId: imageId || null,
-      linkedBusinessPageId: linkedBusinessPageId || null,
-      externalUrl: externalUrl || null,
+      linkUrl: linkUrl || null,
+      linkType: linkType || 'business',
+      position: position || 'homepage',
+      sortOrder: sortOrder || 0,
+      orderId: orderId || null,
       isActive: isActive ?? true,
       startDate: startDate ? new Date(startDate) : null,
       endDate: endDate ? new Date(endDate) : null,

@@ -441,7 +441,7 @@ import { actions } from 'astro:actions';
 
   interface GeneratedSku {
     title: string;
-    serviceType: string;
+    productType: string;
     skuDescription: string;
     priceFields: PriceField[];
   }
@@ -625,7 +625,7 @@ import { actions } from 'astro:actions';
     e.preventDefault();
 
     const title = (document.getElementById('sku-title') as HTMLInputElement).value;
-    const serviceType = (document.getElementById('sku-type') as HTMLSelectElement).value;
+    const productType = (document.getElementById('sku-type') as HTMLSelectElement).value;
     const description = (document.getElementById('sku-description') as HTMLTextAreaElement).value;
     const priceLabel = (document.getElementById('sku-price-label') as HTMLInputElement).value;
     const priceValue = (document.getElementById('sku-price-value') as HTMLInputElement).value;
@@ -640,7 +640,7 @@ import { actions } from 'astro:actions';
     try {
       const result = await actions.admin.aiGenerate({
         type: 'sku',
-        data: { title, serviceType, description, priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [] }
+        data: { title, productType, description, priceFields: priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : [] }
       });
 
       // Astro Actions wraps result in data property
@@ -652,13 +652,13 @@ import { actions } from 'astro:actions';
       const aiData = actionResult.object || {};
       generatedSku = {
         title: aiData.title || title,
-        serviceType: aiData.serviceType || serviceType,
+        productType: aiData.productType || productType,
         skuDescription: aiData.description || description,
         priceFields: aiData.priceFields || (priceValue ? [{ label: priceLabel || 'Price', value: priceValue, unit: priceUnit || '' }] : []),
       };
 
       document.getElementById('preview-sku-title')!.textContent = generatedSku.title;
-      document.getElementById('preview-sku-type')!.textContent = generatedSku.serviceType;
+      document.getElementById('preview-sku-type')!.textContent = generatedSku.productType;
       document.getElementById('preview-sku-price')!.textContent = generatedSku.priceFields.map((p: PriceField) => `${p.label}: $${p.value}${p.unit}`).join(', ');
       document.getElementById('preview-sku-desc')!.textContent = generatedSku.skuDescription;
 

@@ -85,14 +85,14 @@ IMPORTANT: Return ONLY valid JSON. Format:
         const priceInfo = priceFields.length > 0
           ? priceFields.map((p: any) => `${p.label}: ${p.value} ${p.unit || ''}`).join(', ')
           : `Price: ${priceVal}`;
-        userMessage = `Create a ${data.serviceType || 'product'} called "${skuTitle}".
+        userMessage = `Create a ${data.productType || 'product'} called "${skuTitle}".
 Description: ${skuDesc}
 ${priceInfo}
 
 IMPORTANT: Return ONLY valid JSON. Format:
 {
   "title": "Product name",
-  "serviceType": "product|service|rental",
+  "productType": "product|service|rental",
   "description": "<p>HTML description</p>",
   "priceFields": [{"label": "Price", "value": "25.00", "unit": "/hour"}],
   "status": "draft"

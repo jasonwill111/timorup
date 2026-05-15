@@ -1,87 +1,49 @@
 // Subscription and SKU limit helper functions
 import { getDb } from './db';
-import { businesses, products, plans } from '@/db/schema';
-import { eq, count, and, lt } from 'drizzle-orm';
-
-/**
- * Get SKU limit from plans table by plan type
- * planType format: 'basic-monthly', 'pro-yearly', 'max-monthly', etc.
- */
-export async function getPlanSkuLimit(planType: string | null): Promise<number> {
-  if (!planType) return 0;
-
-  const db = await getDb();
-
-  // Try exact match first
-  const plan = await db.select({ skuLimit: plans.skuLimit })
-    .from(plans)
-    .where(eq(plans.id, planType))
-    .limit(1)
-    .get();
-
-  if (plan) return plan.skuLimit;
-
-  // Fallback: try to match by tier name
-  const tier = planType.split('-')[0]; // 'basic', 'pro', 'max'
-  const planByTier = await db.select({ skuLimit: plans.skuLimit })
-    .from(plans)
-    .where(eq(plans.name, tier.charAt(0).toUpperCase() + tier.slice(1)))
-    .limit(1)
-    .get();
-
-  return planByTier?.skuLimit ?? 0;
-}
+import { businesses, products, servicePackages } from '@/db/schema';
+import { eq, count } from 'drizzle-orm';
 
 export interface PlanLimits {
   skuLimit: number;
-  maxImages: number; // per SKU
-  maxVideos: number; // per SKU
-  maxBusinessImages: number; // business page level
-  maxBusinessVideos: number; // business page level
+  maxImages: number;
+  maxVideos: number;
+  maxBusinessImages: number;
+  maxBusinessVideos: number;
 }
 
 /**
- * Get plan limits from DB
- * Handles both full plan ID (e.g., "pro-monthly") and tier name (e.g., "pro")
+ * Get plan limits from DB by plan slug
+ * Now queries servicePackages table with variants JSON
  */
-export async function getPlanLimits(planType: string | null): Promise<PlanLimits | null> {
-  if (!planType) return null;
+export async function getPlanLimits(planSlug: string | null): Promise<PlanLimits | null> {
+  if (!planSlug) return null;
 
   const db = await getDb();
 
-  // Try exact match first
-  const plan = await db.select({
-    skuLimit: plans.skuLimit,
-    maxImages: plans.maxImages,
-    maxVideos: plans.maxVideos,
-    maxBusinessImages: plans.maxBusinessImages,
-    maxBusinessVideos: plans.maxBusinessVideos,
-  })
-    .from(plans)
-    .where(eq(plans.id, planType))
+  const plan = await db.select()
+    .from(servicePackages)
+    .where(eq(servicePackages.slug, planSlug))
     .limit(1)
     .get();
 
-  if (plan) return plan;
+  if (!plan) return null;
 
-  // Fallback: try to match by tier name (e.g., "pro" -> "Pro")
-  // Get the tier part (e.g., "pro" from "pro-monthly")
-  const tier = planType.split('-')[0];
-  const capitalizedTier = tier.charAt(0).toUpperCase() + tier.slice(1);
+  try {
+    const variants = JSON.parse(plan.variants);
+    if (!Array.isArray(variants) || variants.length === 0) return null;
 
-  const planByTier = await db.select({
-    skuLimit: plans.skuLimit,
-    maxImages: plans.maxImages,
-    maxVideos: plans.maxVideos,
-    maxBusinessImages: plans.maxBusinessImages,
-    maxBusinessVideos: plans.maxBusinessVideos,
-  })
-    .from(plans)
-    .where(eq(plans.name, capitalizedTier))
-    .limit(1)
-    .get();
-
-  return planByTier || null;
+    // Use first variant's limits (or could be configurable)
+    const variant = variants[0];
+    return {
+      skuLimit: variant.limits?.skuLimit ?? 0,
+      maxImages: variant.limits?.maxImages ?? 0,
+      maxVideos: variant.limits?.maxVideos ?? 0,
+      maxBusinessImages: variant.limits?.maxBusinessImages ?? 0,
+      maxBusinessVideos: variant.limits?.maxBusinessVideos ?? 0,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export type SubscriptionStatus = 'none' | 'active' | 'expired' | 'cancelled';
@@ -91,10 +53,10 @@ export const GRACE_PERIOD_DAYS = 60;
 
 export interface SubscriptionInfo {
   status: SubscriptionStatus;
-  planType: string | null;
+  planSlug: string | null;
   skuLimit: number;
   skuCount: number;
-  expiryDate: Date | null;
+  expiresAt: Date | null;
   gracePeriodEndDate: Date | null;
   isInGracePeriod: boolean;
   isActive: boolean;
@@ -121,25 +83,29 @@ export async function getSubscriptionInfo(businessId: string): Promise<Subscript
     .get();
 
   const skuCount = skuResult?.count ?? 0;
-  const planType = business.planType || null;
-  const skuLimit = await getPlanSkuLimit(planType);
+  const planSlug = business.planSlug || null;
+  const planLimits = planSlug ? await getPlanLimits(planSlug) : null;
+  const skuLimit = planLimits?.skuLimit ?? 0;
 
   // Check grace period
   const now = new Date();
   const gracePeriodEnd = business.gracePeriodEndDate
-    ? new Date(business.gracePeriodEndDate * 1000)
+    ? new Date(business.gracePeriodEndDate)
+    : null;
+  const expiresAt = business.subscriptionExpiresAt
+    ? new Date(business.subscriptionExpiresAt)
     : null;
 
   const isInGracePeriod = gracePeriodEnd
-    ? now < gracePeriodEnd && now > new Date((business.expiryDate || 0) * 1000)
+    ? now < gracePeriodEnd && expiresAt && now > expiresAt
     : false;
 
   return {
     status: (business.subscriptionStatus as SubscriptionStatus) || 'none',
-    planType,
+    planSlug,
     skuLimit,
     skuCount,
-    expiryDate: business.expiryDate ? new Date(business.expiryDate * 1000) : null,
+    expiresAt,
     gracePeriodEndDate: gracePeriodEnd,
     isInGracePeriod,
     isActive: business.subscriptionStatus === 'active',
@@ -174,7 +140,7 @@ export async function canCreateSku(businessId: string): Promise<{ can: boolean; 
   }
 
   // Check SKU limit
-  if (info.skuCount >= info.skuLimit) {
+  if (info.skuLimit > 0 && info.skuCount >= info.skuLimit) {
     return { can: false, reason: `SKU limit reached (${info.skuCount}/${info.skuLimit})` };
   }
 
@@ -208,7 +174,7 @@ export async function isInGracePeriod(businessId: string): Promise<boolean> {
  * Calculate grace period end date from expiry date
  */
 export function calculateGracePeriodEnd(expiryTimestamp: number): number {
-  return expiryTimestamp + (GRACE_PERIOD_DAYS * 24 * 60 * 60);
+  return expiryTimestamp + (GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
 }
 
 /**

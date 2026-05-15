@@ -7,8 +7,10 @@ import Card from '../../components/ui/Card.astro';
 import LocationMap from '../../components/ui/LocationMap.astro';
 import MediaGallery from '../../components/ui/MediaGallery.astro';
 import UpdatesSection from '../../components/UpdatesSection.astro';
-import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
+import { Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
+import ShareDialog from '@/components/ui/ShareDialog.astro';
 import { getDb } from '@/lib/db';
+import { createBreadcrumbSchema } from '@/lib/seo';
 import { publicSectors, publicSectorCategories, media, latestUpdates } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
@@ -35,29 +37,30 @@ const category = org.categoryId
 const tags = org.tags ? JSON.parse(org.tags) : [];
 const openingHours = org.openingHours ? JSON.parse(org.openingHours) : null;
 const socialLinks = org.socialLinks ? JSON.parse(org.socialLinks) : {};
-const photoGallery = org.photoGallery ? JSON.parse(org.photoGallery) : [];
 
-// Load photo gallery images
+// Load photo gallery from media table (entityType: 'public-sectors')
 let galleryImages: { id: string; url: string }[] = [];
-if (photoGallery.length > 0) {
-  const mediaItems = await db.select({ id: media.id, url: media.url })
-    .from(media)
-    .where(inArray(media.id, photoGallery))
-    .all();
-  galleryImages = mediaItems.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
-}
+const galleryMedia = await db.select({ id: media.id })
+  .from(media)
+  .where(eq(media.entityId, org.id))
+  .where(eq(media.entityType, 'public-sectors'))
+  .where(eq(media.purpose, 'gallery'))
+  .orderBy(media.sortOrder)
+  .all();
+galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
 
-// Load business updates
+// Load updates from latestUpdates table
 const updatesData = await db.select()
   .from(latestUpdates)
-  .where(eq(latestUpdates.businessId, org.id))
+  .where(eq(latestUpdates.typeId, org.id))
+  .where(eq(latestUpdates.type, 'public_sector'))
   .orderBy(desc(latestUpdates.createdAt))
   .limit(4)
   .all();
 
 const updates = updatesData.map(u => ({
   ...u,
-  images: u.images ? JSON.parse(u.images) : [],
+  images: u.imageIds ? JSON.parse(u.imageIds) : [],
 }));
 
 const pageTitle = `${org.title} - TimorList`;
@@ -84,6 +87,13 @@ const jsonLdType = 'GovernmentOrganization';
     },
     "telephone": org.contactNumber ? `${org.countryCode} ${org.contactNumber}` : undefined,
   })} />
+
+  <!-- Breadcrumb JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(createBreadcrumbSchema([
+    { name: 'Home', url: `${siteUrl}/` },
+    { name: 'Public Sectors', url: `${siteUrl}/public-sectors` },
+    { name: org.title || slug }
+  ]))} />
 
   <div class="bg-background min-h-screen">
     <!-- Banner -->
@@ -172,9 +182,7 @@ const jsonLdType = 'GovernmentOrganization';
                 <Bookmark class="w-3.5 h-3.5" />
                 <span>{org.saves || 0}</span>
               </div>
-              <button id="share-btn" class="p-1.5 rounded-lg border hover:bg-muted transition-colors" title="Share">
-                <Share2 class="w-3.5 h-3.5" />
-              </button>
+              <ShareDialog url={canonicalUrl} title={org.title} class="p-1.5" />
             </div>
 
             <!-- WhatsApp -->
@@ -220,7 +228,7 @@ const jsonLdType = 'GovernmentOrganization';
           )}
 
           <!-- Latest Update -->
-          {!org.latestUpdate && updates.length === 0 && org.latestUpdate && (
+          {updates.length === 0 && (
             <Card class="border-l-4 border-l-primary">
               <div class="p-3">
                 <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
@@ -229,12 +237,7 @@ const jsonLdType = 'GovernmentOrganization';
                   </svg>
                   Latest Update
                 </h3>
-                <p class="text-sm text-muted-foreground">{org.latestUpdate}</p>
-                {org.latestUpdateDate && (
-                  <p class="text-xs text-muted-foreground/60 mt-1">
-                    {new Date(org.latestUpdateDate).toLocaleDateString()}
-                  </p>
-                )}
+                <p class="text-sm text-muted-foreground">No updates yet</p>
               </div>
             </Card>
           )}
@@ -355,16 +358,6 @@ const jsonLdType = 'GovernmentOrganization';
 </Layout>
 
 <script>
-  // Share
-  document.getElementById('share-btn')?.addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({ title: document.title, text: 'Check out this organization on TimorLIST', url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied!');
-    }
-  });
-
   // Global map navigation function
   window.openOrgMap = function(lat: string, lng: string) {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);

@@ -4,11 +4,11 @@ export const prerender = false;
 import type { ScheduledHandler } from '@cloudflare/workers-types';
 import { getDb } from '@/lib/db';
 import { businesses, media, products } from '@/db/schema';
-import { lt, isNull, or, inArray } from 'drizzle-orm';
+import { lt, and, inArray } from 'drizzle-orm';
 import { env } from 'cloudflare:workers';
 
-// 60 days in milliseconds
-const EXPIRY_GRACE_PERIOD_MS = 60 * 24 * 60 * 60 * 1000;
+// 60 days grace period in seconds
+const GRACE_PERIOD_SECONDS = 60 * 24 * 60 * 60;
 
 function getR2Bucket(): R2Bucket | undefined {
   return env.MEDIA_BUCKET as R2Bucket | undefined;
@@ -42,13 +42,13 @@ async function deleteFolderFromR2(prefix: string): Promise<boolean> {
 
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();
-  const now = Date.now();
-  const cutoffDate = new Date(now - EXPIRY_GRACE_PERIOD_MS);
+  const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
+  const cutoffDate = now - GRACE_PERIOD_SECONDS;
 
   console.log(`[Cleanup] Starting expired business cleanup`);
 
   try {
-    // Find businesses expired for 60+ days (only from businesses table)
+    // Find businesses expired past grace period
     const expiredBusinesses = await db
       .select({
         id: businesses.id,
@@ -57,7 +57,10 @@ export const onRequest: ScheduledHandler = async (context) => {
       })
       .from(businesses)
       .where(
-        lt(businesses.expiryDate, cutoffDate)
+        and(
+          eq(businesses.subscriptionStatus, 'expired'),
+          lt(businesses.gracePeriodEndDate, cutoffDate)
+        )
       )
       .all();
 
@@ -68,14 +71,16 @@ export const onRequest: ScheduledHandler = async (context) => {
     for (const business of expiredBusinesses) {
       try {
         // 1. Delete R2 folder
-        const entityFolder = `business/${business.id}`;
+        const entityFolder = `businesses/${business.id}`;
         await deleteFolderFromR2(entityFolder);
 
         // 2. Delete media records
-        await db.delete(media).where(
-          inArray(media.typeId, [business.id])
-        ).where((f) => f.sql`url LIKE ${`${entityFolder}/%`}`)
-        .run();
+        await db.delete(media)
+          .where(and(
+            eq(media.entityId, business.id),
+            eq(media.entityType, 'businesses')
+          ))
+          .run();
 
         // 3. Delete products
         await db.delete(products).where(inArray(products.businessId, [business.id])).run();

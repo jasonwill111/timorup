@@ -3,15 +3,12 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { products, businesses } from '@/db/schema';
-import { eq, desc, sql, and } from 'drizzle-orm';
-import { z } from 'zod';
+import { eq, desc, and } from 'drizzle-orm';
 import { canCreateSku, canEditBusiness } from '@/lib/subscription';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
-const VALID_SERVICE_TYPES = [
-  'product', 'service', 'rental', 'food',
-  'accommodation', 'automotive', 'healthcare',
-  'education', 'beauty', 'event'
+const VALID_PRODUCT_TYPES = [
+  'product', 'service', 'virtual', 'ticket', 'rental', 'subscription'
 ];
 
 const parseJsonField = (val: string): unknown => {
@@ -25,11 +22,9 @@ const parseJsonField = (val: string): unknown => {
 
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const user = await getAdminUser(request);
-  // Admin APIs require auth, regular product APIs don't
   const isAdmin = user && url.searchParams.get('isAdmin') === 'true';
 
   if (!isAdmin) {
-    // Non-admin: require businessId
     const businessId = url.searchParams.get('businessId');
     if (!businessId) {
       return new Response(JSON.stringify({
@@ -58,6 +53,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
         ...p,
         priceFields: p.priceFields ? parseJsonField(p.priceFields as string) : null,
         specifications: p.specifications ? parseJsonField(p.specifications as string) : null,
+        images: p.images ? parseJsonField(p.images as string) : null,
       })),
     }), {
       status: 200,
@@ -92,6 +88,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       ...p,
       priceFields: p.priceFields ? parseJsonField(p.priceFields as string) : null,
       specifications: p.specifications ? parseJsonField(p.specifications as string) : null,
+      images: p.images ? parseJsonField(p.images as string) : null,
     })),
   }), {
     status: 200,
@@ -107,8 +104,8 @@ export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
     const {
-      title, price, priceUnit, description, businessId,
-      priceFields, serviceType, specifications, featured
+      title, description, businessId,
+      categoryId, priceFields, productType, specifications, images, featured
     } = body;
 
     if (!businessId || !title) {
@@ -121,17 +118,15 @@ export async function POST({ request }: { request: Request }) {
       });
     }
 
-    // Validate serviceType
-    const finalServiceType = VALID_SERVICE_TYPES.includes(serviceType) ? serviceType : 'product';
+    // Validate productType
+    const finalProductType = VALID_PRODUCT_TYPES.includes(productType) ? productType : 'product';
 
     // Check business exists
-    const business = await db.select({
-      id: businesses.id,
-    })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .limit(1)
-    .get();
+    const business = await db.select({ id: businesses.id })
+      .from(businesses)
+      .where(eq(businesses.id, businessId))
+      .limit(1)
+      .get();
 
     if (!business) {
       return new Response(JSON.stringify({
@@ -143,15 +138,12 @@ export async function POST({ request }: { request: Request }) {
       });
     }
 
-    // Check subscription status and SKU limit using subscription helper
+    // Check subscription status and SKU limit
     const canCreate = await canCreateSku(businessId);
     if (!canCreate.can) {
       return new Response(JSON.stringify({
         success: false,
-        error: {
-          code: 'SKU_NOT_ALLOWED',
-          message: canCreate.reason || 'Cannot create SKU',
-        }
+        error: { code: 'SKU_NOT_ALLOWED', message: canCreate.reason || 'Cannot create SKU' }
       }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' },
@@ -171,20 +163,20 @@ export async function POST({ request }: { request: Request }) {
     await db.insert(products).values({
       id,
       title,
-      price: price || null,
-      priceUnit: priceUnit || null,
       description: description || null,
       businessId,
+      categoryId: categoryId || null,
       priceFields: safeStringify(priceFields),
-      serviceType: finalServiceType,
+      productType: finalProductType,
       specifications: safeStringify(specifications),
+      images: images ? JSON.stringify(images) : null,
       featured: featured || false,
       active: true,
     }).run();
 
     return new Response(JSON.stringify({
       success: true,
-      data: { id, title, price, priceFields, serviceType, specifications, featured, description },
+      data: { id, title, priceFields, productType, specifications, images, featured, description },
     }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
@@ -220,7 +212,7 @@ export async function PUT({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { title, price, priceUnit, description, priceFields, serviceType, specifications, featured, active, businessId } = body;
+    const { title, description, priceFields, productType, specifications, images, featured, active, businessId } = body;
 
     // Check grace period if updating business association
     if (businessId) {
@@ -261,12 +253,11 @@ export async function PUT({ request }: { request: Request }) {
 
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
-    if (price !== undefined) updateData.price = price || null;
-    if (priceUnit !== undefined) updateData.priceUnit = priceUnit || null;
     if (description !== undefined) updateData.description = description || null;
     if (priceFields !== undefined) updateData.priceFields = priceFields ? JSON.stringify(priceFields) : null;
-    if (serviceType !== undefined) updateData.serviceType = VALID_SERVICE_TYPES.includes(serviceType) ? serviceType : 'product';
+    if (productType !== undefined) updateData.productType = VALID_PRODUCT_TYPES.includes(productType) ? productType : 'product';
     if (specifications !== undefined) updateData.specifications = specifications ? JSON.stringify(specifications) : null;
+    if (images !== undefined) updateData.images = images ? JSON.stringify(images) : null;
     if (featured !== undefined) updateData.featured = featured;
     if (active !== undefined) updateData.active = active;
 
@@ -280,6 +271,7 @@ export async function PUT({ request }: { request: Request }) {
       ...updated,
       priceFields: updated.priceFields ? parseJsonField(updated.priceFields as string) : null,
       specifications: updated.specifications ? parseJsonField(updated.specifications as string) : null,
+      images: updated.images ? parseJsonField(updated.images as string) : null,
     } : null;
 
     return new Response(JSON.stringify({ success: true, data: parsedUpdated }), {

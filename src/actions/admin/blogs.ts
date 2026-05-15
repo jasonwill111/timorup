@@ -15,6 +15,11 @@ const createBlogSchema = z.object({
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   tags: z.array(z.string()).optional(),
   coverImageId: z.string().optional(),
+  // SEO fields
+  authorName: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  canonicalUrl: z.string().optional(),
 });
 
 const updateBlogSchema = createBlogSchema.partial().extend({
@@ -54,7 +59,10 @@ export const blogs = {
         status: input.status,
         tags: input.tags ? JSON.stringify(input.tags) : null,
         coverImageId: input.coverImageId || null,
-        authorId: user.id,
+        authorName: input.authorName || user.name, // Default to current user's name
+        metaTitle: input.metaTitle || null,
+        metaDescription: input.metaDescription || null,
+        canonicalUrl: input.canonicalUrl || null,
         publishedAt: input.status === 'published' ? new Date() : null,
       };
 
@@ -87,6 +95,11 @@ export const blogs = {
       }
       if (data.tags !== undefined) updateData.tags = data.tags ? JSON.stringify(data.tags) : null;
       if (data.coverImageId !== undefined) updateData.coverImageId = data.coverImageId;
+      // SEO fields
+      if (data.authorName !== undefined) updateData.authorName = data.authorName;
+      if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle;
+      if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription;
+      if (data.canonicalUrl !== undefined) updateData.canonicalUrl = data.canonicalUrl;
 
       await db.update(blogPosts)
         .set(updateData)

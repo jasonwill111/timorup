@@ -50,7 +50,6 @@ export const update = defineAction({
     bannerImageId: z.string().optional(),
     profileImageId: z.string().optional(),
     socialLinks: z.record(z.string(), z.string()).optional(),
-    photoGallery: z.array(z.string()).optional(),
     newSlug: z.string().optional(),
   }),
   handler: async (input, { cookies }) => {
@@ -107,7 +106,6 @@ export const update = defineAction({
       if (input.bannerImageId !== undefined) updateValues.bannerImageId = input.bannerImageId || null;
       if (input.profileImageId !== undefined) updateValues.profileImageId = input.profileImageId || null;
       if (input.socialLinks !== undefined) updateValues.socialLinks = JSON.stringify(input.socialLinks);
-      if (input.photoGallery !== undefined) updateValues.photoGallery = JSON.stringify(input.photoGallery);
 
       if (Object.keys(updateValues).length > 0) {
         updateValues.updatedAt = Math.floor(Date.now() / 1000);

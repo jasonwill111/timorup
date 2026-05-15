@@ -62,7 +62,7 @@ export const SkuDataSchema = z.object({
     // Exact fields from products table
     title: z.string().min(1, 'Title is required'),
     description: z.string().optional(),
-    serviceType: z.enum(['product', 'service', 'rental', 'food', 'accommodation', 'automotive', 'healthcare', 'education', 'beauty', 'event']).default('product'),
+    productType: z.enum(['product', 'service', 'rental', 'food', 'accommodation', 'automotive', 'healthcare', 'education', 'beauty', 'event']).default('product'),
     priceFields: z.array(PriceFieldSchema).optional(), // [{ label, value, unit }]
     specifications: z.record(z.string(), z.unknown()).optional(),
     featured: z.boolean().optional(),
@@ -169,7 +169,7 @@ IMPORTANT: Output exact database schema fields:
   "data": {
     "title": "Product name",
     "description": "<p>HTML formatted description with <strong>, <em>, <ul> tags</p>",
-    "serviceType": "product|service|rental|food|accommodation",
+    "productType": "product|service|rental|food|accommodation",
     "priceFields": [{ "label": "Price", "value": "25.00", "unit": "/hour" }],
     "specifications": { "key": "value" },
     "featured": false,

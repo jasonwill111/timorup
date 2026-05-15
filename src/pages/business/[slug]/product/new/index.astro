@@ -249,9 +249,9 @@ import { actions } from 'astro:actions'
   }
 
   // Check subscription status
-  async function checkSubscription(businessPageId: string) {
+  async function checkSubscription(businessId: string) {
     try {
-      const res = await fetch(`/api/businesses/${businessPageId}/subscription`);
+      const res = await fetch(`/api/account/subscription/${businessId}`);
       const data = await res.json();
       return data;
     } catch (err) {
@@ -336,9 +336,8 @@ import { actions } from 'astro:actions'
 
     try {
       const result = await actions.products.createProduct({
-        businessPageId: currentBusiness.id,
+        businessId: currentBusiness.id,
         title,
-        price,
         description,
       });
 

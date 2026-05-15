@@ -3,7 +3,7 @@ export const prerender = false;
 
 import { getDb } from '@/lib/db';
 import { reviews, businesses } from '@/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, and } from 'drizzle-orm';
 
 // GET - List reviews
 export async function GET({ url }: { url: URL }) {
@@ -21,16 +21,17 @@ export async function GET({ url }: { url: URL }) {
 
     const reviewsResult = await db.select({
       id: reviews.id,
+      businessId: reviews.businessId,
+      userId: reviews.userId,
       rating: reviews.rating,
+      title: reviews.title,
       content: reviews.content,
-      isEdited: reviews.isEdited,
-      createdAt: reviews.createdAt,
       reply: reviews.reply,
-      repliedAt: reviews.repliedAt,
-      repliedBy: reviews.repliedBy,
+      status: reviews.status,
+      createdAt: reviews.createdAt,
     })
     .from(reviews)
-    .where(conditions.length > 0 ? conditions[0] : undefined)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(reviews.createdAt))
     .limit(limit)
     .offset(offset);
@@ -46,7 +47,7 @@ export async function GET({ url }: { url: URL }) {
 
     const countResult = await db.select({ count: sql`count(*)` })
       .from(reviews)
-      .where(conditions.length > 0 ? conditions[0] : undefined);
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
 
     return new Response(JSON.stringify({
       success: true,
@@ -73,7 +74,7 @@ export async function POST({ request }: { request: Request }) {
   try {
     const db = await getDb();
     const body = await request.json();
-    const { businessId, userId, rating, content } = body;
+    const { businessId, userId, rating, title, content } = body;
 
     if (!businessId || !userId || !rating) {
       return new Response(JSON.stringify({
@@ -101,7 +102,9 @@ export async function POST({ request }: { request: Request }) {
       businessId,
       userId,
       rating,
-      content: content || '',
+      title: title || null,
+      content: content || null,
+      status: 'approved',
     }).returning();
 
     // Update business rating average

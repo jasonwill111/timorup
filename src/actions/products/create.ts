@@ -20,13 +20,13 @@ function getErrorMessage(error: unknown): string {
 
 const CreateProductSchema = z.object({
   title: z.string().min(1),
-  price: z.number().optional().nullable(),
-  priceUnit: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  businessPageId: z.string().min(1),
-  priceFields: z.record(z.unknown()).optional().nullable(),
-  serviceType: z.string().optional().default('product'),
-  specifications: z.record(z.unknown()).optional().nullable(),
+  businessId: z.string().min(1),           // FK to businesses.id (NOT businessPageId)
+  categoryId: z.string().optional().nullable(),  // FK to product_categories.id
+  priceFields: z.record(z.unknown()).optional().nullable(),  // JSON with category-specific price fields
+  productType: z.enum(['product', 'service', 'virtual', 'ticket', 'rental', 'subscription']).default('product'),
+  specifications: z.record(z.unknown()).optional().nullable(),  // JSON with category-specific specs
+  images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional().default(false),
 });
 
@@ -43,10 +43,9 @@ export const createProduct = defineAction({
       // Check business exists
       const business = await db.select({
         id: businesses.id,
-        entityType: businesses.entityType,
       })
       .from(businesses)
-      .where(eq(businesses.id, input.businessPageId))
+      .where(eq(businesses.id, input.businessId))
       .limit(1)
       .get();
 
@@ -54,19 +53,14 @@ export const createProduct = defineAction({
         return { success: false, error: { message: 'Business not found' } };
       }
 
-      // Non-profits cannot have SKUs
-      if (business.entityType === 'nonprofit') {
-        return { success: false, error: { message: 'Non-profit listings cannot have SKUs' } };
-      }
-
       // Check subscription status and SKU limit
-      const canCreate = await canCreateSku(input.businessPageId);
+      const canCreate = await canCreateSku(input.businessId);
       if (!canCreate.can) {
         return { success: false, error: { code: 'SKU_NOT_ALLOWED', message: canCreate.reason || 'Cannot create SKU' } };
       }
 
       const id = `prod-${Date.now()}`;
-      const finalServiceType = VALID_SERVICE_TYPES.includes(input.serviceType) ? input.serviceType : 'product';
+      const finalProductType = input.productType || 'product';
 
       const safeStringify = (val: unknown): string | null => {
         if (!val) return null;
@@ -79,20 +73,20 @@ export const createProduct = defineAction({
       await db.insert(products).values({
         id,
         title: input.title,
-        price: input.price ?? null,
-        priceUnit: input.priceUnit ?? null,
         description: input.description ?? null,
-        businessPageId: input.businessPageId,
+        businessId: input.businessId,
+        categoryId: input.categoryId ?? null,
         priceFields: safeStringify(input.priceFields),
-        serviceType: finalServiceType,
+        productType: finalProductType,
         specifications: safeStringify(input.specifications),
+        images: input.images ? JSON.stringify(input.images) : null,
         featured: input.featured ?? false,
         active: true,
       }).run();
 
       return {
         success: true,
-        data: { id, title: input.title, price: input.price, priceFields: input.priceFields, serviceType: finalServiceType, specifications: input.specifications, featured: input.featured, description: input.description },
+        data: { id, title: input.title, priceFields: input.priceFields, productType: finalProductType, specifications: input.specifications, featured: input.featured, description: input.description },
       };
     } catch (error) {
       return { success: false, error: { message: getErrorMessage(error) } };

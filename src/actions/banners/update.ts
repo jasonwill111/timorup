@@ -16,8 +16,11 @@ const UpdateBannerSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional().nullable(),
   imageId: z.string().optional().nullable(),
-  linkedBusinessPageId: z.string().optional().nullable(),
-  externalUrl: z.string().optional().nullable(),
+  linkUrl: z.string().optional().nullable(),
+  linkType: z.enum(['business', 'listing', 'product']).optional(),
+  position: z.enum(['homepage', 'businesses', 'products-services', 'listings']).optional(),
+  sortOrder: z.number().optional(),
+  orderId: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
@@ -38,8 +41,11 @@ export const updateBanner = defineAction({
           title: input.title,
           description: input.description,
           imageId: input.imageId,
-          linkedBusinessPageId: input.linkedBusinessPageId,
-          externalUrl: input.externalUrl,
+          linkUrl: input.linkUrl,
+          linkType: input.linkType,
+          position: input.position,
+          sortOrder: input.sortOrder,
+          orderId: input.orderId,
           isActive: input.isActive,
           startDate: input.startDate ? new Date(input.startDate) : undefined,
           endDate: input.endDate ? new Date(input.endDate) : undefined,
@@ -64,7 +70,7 @@ export const deleteBanner = defineAction({
   input: z.object({
     id: z.string(),
   }),
-  handler: async (_, { request }) => {
+  handler: async ({ id }, { request }) => {
     const user = await getAdminUser(request);
     if (!user) {
       return { success: false, error: { code: 'UNAUTHORIZED', message: 'Admin access required' } };
@@ -72,7 +78,7 @@ export const deleteBanner = defineAction({
 
     const db = await getDb();
     try {
-      await db.delete(adBanners).where(eq(adBanners.id, input.id)).run();
+      await db.delete(adBanners).where(eq(adBanners.id, id)).run();
       return { success: true };
     } catch (error) {
       return { success: false, error: { code: 'DELETE_ERROR', message: getErrorMessage(error) } };

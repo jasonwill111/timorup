@@ -316,29 +316,7 @@ import CardContent from '@/components/ui/CardContent.astro';
             </CardContent>
           </Card>
 
-          <!-- Latest Update -->
-          <Card>
-            <CardHeader>
-              <CardTitle>Latest Update</CardTitle>
-              <CardDescription>Share news or announcements (updates weekly)</CardDescription>
-            </CardHeader>
-            <CardContent class="space-y-4">
-              <div>
-                <label for="latestUpdate" class="block text-sm font-medium mb-1">Update Message</label>
-                <textarea
-                  id="latestUpdate"
-                  name="latestUpdate"
-                  rows="3"
-                  class="w-full px-3 py-2 border rounded-lg bg-background"
-                  placeholder="Share your latest news, promotions, or announcements..."
-                  maxlength="500"
-                ></textarea>
-                <p class="text-xs text-muted-foreground mt-1">Max 500 characters. Can be updated once per week.</p>
-                <p id="update-cooldown" class="text-xs text-muted-foreground mt-1 hidden"></p>
-              </div>
-            </CardContent>
-          </Card>
-
+          
           <!-- Photo Gallery -->
           <Card>
             <CardHeader>
@@ -767,33 +745,7 @@ import CardContent from '@/components/ui/CardContent.astro';
       } catch { /* ignore */ }
     }
 
-    // Latest update
-    const updateInput = document.getElementById('latestUpdate') as HTMLTextAreaElement;
-    const updateCooldown = document.getElementById('update-cooldown');
-    if (updateInput && business.latestUpdate) updateInput.value = business.latestUpdate;
-    if (updateCooldown && business.latestUpdateDate) {
-      const lastUpdate = new Date(business.latestUpdateDate);
-      const now = new Date();
-      const daysSince = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSince < 7) {
-        const daysLeft = 7 - daysSince;
-        updateCooldown.textContent = `You can update again in ${daysLeft} day${daysLeft > 1 ? 's' : ''}.`;
-        updateCooldown.classList.remove('hidden');
-      }
-    }
-
-    // Photo gallery
-    const galleryInput = document.getElementById('gallery-media-ids') as HTMLInputElement;
-    if (business.photoGallery && galleryInput) {
-      try {
-        const gallery = typeof business.photoGallery === 'string' ? JSON.parse(business.photoGallery) : business.photoGallery;
-        if (Array.isArray(gallery)) {
-          galleryInput.value = JSON.stringify(gallery);
-          // Show existing gallery previews
-          loadGalleryPreview(gallery);
-        }
-      } catch { /* ignore */ }
-    }
+    // Latest update - removed (now via latestUpdates table)
 
     // Coordinates
     if (latInput && business.locationLat != null) latInput.value = String(business.locationLat);
@@ -1068,20 +1020,9 @@ import CardContent from '@/components/ui/CardContent.astro';
       });
     }
 
-    // Latest update
-    const latestUpdate = formData.get('latestUpdate') as string;
-    if (latestUpdate) {
-      data.latestUpdate = latestUpdate;
-      data.latestUpdateDate = new Date();
-    }
+    // Latest update - removed (now via latestUpdates table)
 
-    // Photo gallery
-    const galleryMediaIds = formData.get('galleryMediaIds') as string;
-    if (galleryMediaIds) {
-      try {
-        data.photoGallery = galleryMediaIds;
-      } catch { /* ignore */ }
-    }
+    // Photo gallery - removed (now via media table with entityType/entityId/purpose)
 
     try {
       const result = await actions.business.update(data as Parameters<typeof actions.business.update>[0]);

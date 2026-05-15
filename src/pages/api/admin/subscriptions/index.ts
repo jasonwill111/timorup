@@ -34,13 +34,15 @@ export async function GET({ request }: { request: Request }) {
 
     const allOrders = await db.select({
       id: orders.id,
-      businessPageId: orders.businessPageId,
+      servicePackageId: orders.servicePackageId,
+      variantSnapshot: orders.variantSnapshot,
+      type: orders.type,
+      typeId: orders.typeId,
       userId: orders.userId,
-      planType: orders.planType,
       amount: orders.amount,
       paymentMethod: orders.paymentMethod,
       status: orders.status,
-      expiryDate: orders.expiryDate,
+      expiresAt: orders.expiresAt,
       paidDate: orders.paidDate,
       createdAt: orders.createdAt,
     })

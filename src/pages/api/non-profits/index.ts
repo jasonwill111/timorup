@@ -90,15 +90,11 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
       id: nonProfits.id,
       title: nonProfits.title,
       slug: nonProfits.slug,
-      entityType: nonProfits.entityType,
-      profileImageId: nonProfits.profileImageId,
       address: nonProfits.address,
       tags: nonProfits.tags,
       likes: nonProfits.likes,
       saves: nonProfits.saves,
       views: nonProfits.views,
-      ratingAverage: nonProfits.ratingAverage,
-      ratingCount: nonProfits.ratingCount,
       createdAt: nonProfits.createdAt,
     })
     .from(nonProfits)

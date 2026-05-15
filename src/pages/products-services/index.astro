@@ -15,7 +15,6 @@ const allBusinesses = await db
     id: businesses.id,
     title: businesses.title,
     slug: businesses.slug,
-    entityType: businesses.entityType,
   })
   .from(businesses)
   .where(eq(businesses.status, 'live'))
@@ -23,17 +22,7 @@ const allBusinesses = await db
 
 // Get all products with business info
 const allProducts = await db
-  .select({
-    id: products.id,
-    title: products.title,
-    description: products.description,
-    price: products.price,
-    priceUnit: products.priceUnit,
-    priceFields: products.priceFields,
-    serviceType: products.serviceType,
-    businessId: products.businessId,
-    createdAt: products.createdAt,
-  })
+  .select()
   .from(products)
   .orderBy(desc(products.createdAt))
   .all();
@@ -158,9 +147,9 @@ const structuredData = {
       <a href="${getProductUrl(product)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer">
         <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
           <span class="text-4xl font-bold text-amber-500/40">${product.title.charAt(0)}</span>
-          ${product.serviceType ? `
+          ${product.productType ? `
             <span class="absolute top-1.5 left-1.5 sm:top-2 px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-black/75 text-white rounded-full capitalize">
-              ${product.serviceType}
+              ${product.productType}
             </span>
           ` : ''}
         </div>

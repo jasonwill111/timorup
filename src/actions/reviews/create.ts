@@ -38,13 +38,13 @@ export const createReview = defineAction({
         businessId: input.businessId,
         userId: input.userId,
         rating: input.rating,
-        content: input.content || '',
+        comment: input.comment || '',
       }).returning();
 
       // Update business rating average
       const avgResult = await db.select({ avg: sql`AVG(${reviews.rating})`, count: sql`COUNT(*)` })
         .from(reviews)
-        .where(eq(reviews.businessId, input.businessId));
+        .where(eq(reviews.businessPageId, input.businessId));
 
       await db.update(businesses)
         .set({

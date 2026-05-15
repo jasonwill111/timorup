@@ -8,8 +8,14 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
 ---
 
 <Layout title="TimorList - Business Directory for Timor-Leste">
+  <!-- Ad Banner Carousel (if banners exist) -->
+  {(() => {
+    // banners will be passed from server
+    return null; // Placeholder - actual banners loaded via HomepageContent island
+  })()}
+
   <!-- Hero - Brand Yellow Theme with Parallax -->
-  <div class="relative h-[240px] sm:h-[300px] md:h-[400px] lg:h-[480px] bg-gradient-to-br from-brand-500 via-brand-400 to-amber-400 overflow-hidden" data-parallax data-parallax-speed="0.3">
+  <div class="relative h-[200px] sm:h-[280px] md:h-[360px] lg:h-[420px] bg-gradient-to-br from-brand-500 via-brand-400 to-amber-400 overflow-hidden" data-parallax data-parallax-speed="0.3">
     <!-- Decorative elements -->
     <div class="absolute inset-0 opacity-20">
       <div class="absolute top-8 sm:top-16 left-[10%] w-32 sm:w-64 h-32 sm:h-64 bg-white/30 rounded-full blur-3xl"></div>
@@ -23,7 +29,8 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
     <div class="relative z-10 h-full flex items-center justify-center">
       <div class="text-center text-white max-w-3xl px-4">
         <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold mb-3 sm:mb-4 drop-shadow-lg" style="font-family: var(--font-oswald), sans-serif;">TimorList</h1>
-        <p class="text-base sm:text-lg md:text-2xl mb-5 sm:mb-8 opacity-95 font-light">Discover Local Businesses in Timor-Leste</p>
+        <p class="text-base sm:text-lg md:text-2xl mb-5 sm:mb-8 opacity-95 font-light">Discover local businesses, products & services near you</p>
+        <p class="text-xs sm:text-sm text-white/80 mb-6 sm:mb-8 max-w-xl mx-auto">Restaurants, shops, supermarkets, salons, mechanics, and more. Or sell your own products & services.</p>
         <div class="flex gap-4 sm:gap-6 justify-center flex-wrap">
           <a href="/businesses">
             <Button size="lg" variant="default" class="bg-white text-brand-700 hover:bg-brand-50 font-semibold shadow-xl px-8 py-3 transition-all hover:scale-105">Browse Directory</Button>
@@ -34,61 +41,55 @@ import HomepageContent from '../components/islands/HomepageContent.astro';
         </div>
       </div>
     </div>
-    <!-- Wave divider -->
-    <div class="absolute bottom-0 left-0 right-0">
-      <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-12 sm:h-20 text-background">
-        <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="currentColor"/>
-      </svg>
-    </div>
   </div>
 
   <div class="container py-8 sm:py-12">
     <!-- Explore by Type - 4 Entity Cards -->
     <section class="mb-10 sm:mb-14">
       <h2 class="text-xl sm:text-2xl font-bold mb-6 text-center">Explore Timor-Leste</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         <!-- Businesses -->
-        <a href="/businesses" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-400 to-amber-400 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+        <a href="/businesses" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-400 to-amber-400 p-4 sm:p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full"></div>
           <div class="relative z-10">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
             </div>
-            <h3 class="font-bold text-lg mb-1">Businesses</h3>
-            <p class="text-white/80 text-sm">Restaurants, shops, hotels & more</p>
+            <h3 class="font-bold text-base mb-0.5">Businesses</h3>
+            <p class="text-white/80 text-xs">Restaurants, shops, hotels</p>
           </div>
         </a>
-        <!-- Listings -->
-        <a href="/listings" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+        <!-- Listings / Classified Ads -->
+        <a href="/listings" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-4 sm:p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full"></div>
           <div class="relative z-10">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/></svg>
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/></svg>
             </div>
-            <h3 class="font-bold text-lg mb-1">Listings</h3>
-            <p class="text-white/80 text-sm">Jobs, vehicles, property & services</p>
+            <h3 class="font-bold text-base mb-0.5">Classified Ads</h3>
+            <p class="text-white/80 text-xs">Jobs, vehicles, property</p>
           </div>
         </a>
         <!-- Non-Profits -->
-        <a href="/non-profits" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+        <a href="/non-profits" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 p-4 sm:p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full"></div>
           <div class="relative z-10">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
             </div>
-            <h3 class="font-bold text-lg mb-1">Non-Profits</h3>
-            <p class="text-white/80 text-sm">NGOs & charitable organizations</p>
+            <h3 class="font-bold text-base mb-0.5">Non-Profits</h3>
+            <p class="text-white/80 text-xs">NGOs & charities</p>
           </div>
         </a>
         <!-- Public Sectors -->
-        <a href="/public-sectors" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-          <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-bl-full"></div>
+        <a href="/public-sectors" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 p-4 sm:p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full"></div>
           <div class="relative z-10">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3"/></svg>
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3"/></svg>
             </div>
-            <h3 class="font-bold text-lg mb-1">Public Sectors</h3>
-            <p class="text-white/80 text-sm">Government ministries & agencies</p>
+            <h3 class="font-bold text-base mb-0.5">Public Sectors</h3>
+            <p class="text-white/80 text-xs">Government offices</p>
           </div>
         </a>
       </div>

@@ -17,15 +17,18 @@ export async function PUT({ request }: { request: Request }) {
 
   try {
     const body = await request.json();
-    const { title, description, imageId, linkedBusinessPageId, externalUrl, isActive, startDate, endDate } = body;
+    const { title, description, imageId, linkUrl, linkType, position, sortOrder, orderId, isActive, startDate, endDate } = body;
 
     const updated = await db.update(adBanners)
       .set({
         title,
         description,
         imageId,
-        linkedBusinessPageId,
-        externalUrl,
+        linkUrl,
+        linkType,
+        position,
+        sortOrder,
+        orderId,
         isActive,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,

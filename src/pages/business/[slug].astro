@@ -10,8 +10,10 @@ import MediaGallery from '../../components/ui/MediaGallery.astro';
 import UpdatesSection from '../../components/UpdatesSection.astro';
 import ProductsSection from '../../components/islands/ProductsSection.astro';
 import BusinessSidebar from '../../components/islands/BusinessSidebar.astro';
-import { Share2, Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
+import { Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
+import ShareDialog from '@/components/ui/ShareDialog.astro';
 import { getDb } from '@/lib/db';
+import { createBreadcrumbSchema } from '@/lib/seo';
 const db = await getDb();
 import { businesses, businessCategories, reviews, media, latestUpdates } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
@@ -79,37 +81,37 @@ const category = business.categoryId
 
 const businessReviews = await db.select()
   .from(reviews)
-  .where(eq(reviews.businessPageId, business.id))
+  .where(eq(reviews.businessId, business.id))
   .orderBy(desc(reviews.createdAt))
   .all();
 
 const tags = business.tags ? JSON.parse(business.tags) : [];
 const openingHours = business.openingHours ? JSON.parse(business.openingHours) : null;
 const socialLinks = business.socialLinks ? JSON.parse(business.socialLinks) : {};
-const photoGallery = business.photoGallery ? JSON.parse(business.photoGallery) : [];
-const latestUpdate = business.latestUpdate || null;
 
-// Load photo gallery images
+// Load photo gallery from media table (entityType: 'businesses')
 let galleryImages: { id: string; url: string }[] = [];
-if (photoGallery.length > 0) {
-  const mediaItems = await db.select({ id: media.id, url: media.url })
-    .from(media)
-    .where(inArray(media.id, photoGallery))
-    .all();
-  galleryImages = mediaItems.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
-}
+const galleryMedia = await db.select({ id: media.id })
+  .from(media)
+  .where(eq(media.entityId, business.id))
+  .where(eq(media.entityType, 'businesses'))
+  .where(eq(media.purpose, 'gallery'))
+  .orderBy(media.sortOrder)
+  .all();
+galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
 
-// Load business updates
+// Load business updates from latestUpdates table
 const latestUpdatesData = await db.select()
   .from(latestUpdates)
-  .where(eq(latestUpdates.businessId, business.id))
+  .where(eq(latestUpdates.typeId, business.id))
+  .where(eq(latestUpdates.type, 'business'))
   .orderBy(desc(latestUpdates.createdAt))
   .limit(4)
   .all();
 
 const updates = latestUpdatesData.map(u => ({
   ...u,
-  images: u.images ? JSON.parse(u.images) : [],
+  images: u.imageIds ? JSON.parse(u.imageIds) : [],
 }));
 
 const pageTitle = `${business.title} - TimorList`;
@@ -188,6 +190,13 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
       "reviewCount": business.ratingCount
     } : undefined
   })} />
+
+  <!-- Breadcrumb JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(createBreadcrumbSchema([
+    { name: 'Home', url: `${siteUrl}/` },
+    { name: 'Businesses', url: `${siteUrl}/businesses` },
+    { name: business.title || slug }
+  ]))} />
 
   <div class="bg-background min-h-screen">
     <!-- Banner -->
@@ -277,9 +286,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
                 <Bookmark class="w-3.5 h-3.5" />
                 <span>{business.saves || 0}</span>
               </div>
-              <button id="share-btn" class="p-1.5 rounded-lg border hover:bg-muted transition-colors" title="Share">
-                <Share2 class="w-3.5 h-3.5" />
-              </button>
+              <ShareDialog url={canonicalUrl} title={business.title} class="p-1.5" />
             </div>
 
             <!-- WhatsApp -->
@@ -325,7 +332,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
           )}
 
           <!-- Legacy Latest Update (hidden when new Updates exist) -->
-          {!latestUpdate && updates.length === 0 && (
+          {updates.length === 0 && (
             <Card class="border-l-4 border-l-primary">
               <div class="p-3">
                 <h3 class="font-semibold text-sm mb-2 flex items-center gap-2">
@@ -334,18 +341,13 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
                   </svg>
                   Latest Update
                 </h3>
-                <p class="text-sm text-muted-foreground">{latestUpdate}</p>
-                {business.latestUpdateDate && (
-                  <p class="text-xs text-muted-foreground/60 mt-1">
-                    {new Date(business.latestUpdateDate).toLocaleDateString()}
-                  </p>
-                )}
+                <p class="text-sm text-muted-foreground">No updates yet</p>
               </div>
             </Card>
           )}
 
           <!-- Products & Services - Server Island -->
-          <ProductsSection server:defer="2min" businessId={business.id} slug={slug ?? ''}>
+          <ProductsSection businessId={business.id} slug={slug ?? ''}>
             <!-- Skeleton fallback -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {[...Array(5)].map(() => (
@@ -475,16 +477,6 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
 </Layout>
 
 <script>
-  // Share
-  document.getElementById('share-btn')?.addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({ title: document.title, text: 'Check out this business on TimorLIST', url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied!');
-    }
-  });
-
   // Save
   document.getElementById('save-btn')?.addEventListener('click', () => {
     alert('Save feature coming soon!');

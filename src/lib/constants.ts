@@ -114,7 +114,7 @@ export const SKU_SERVICE_TYPES = [
   { value: 'event', label: 'Event Service', icon: '🎉' },
 ] as const;
 
-// Industry-specific specification fields (shown based on serviceType)
+// Industry-specific specification fields (shown based on productType)
 export const SPECIFICATION_FIELDS: Record<string, Array<{ key: string; label: string; type: string; options?: string[]; placeholder?: string }>> = {
   automotive: [
     { key: 'vehicleType', label: 'Vehicle Type', type: 'select', options: ['sedan', 'suv', 'motorcycle', 'truck', 'van', 'pickup'] },
@@ -198,7 +198,7 @@ export const SPECIFICATION_FIELDS: Record<string, Array<{ key: string; label: st
 };
 
 // Get relevant price units for a service type
-export function getPriceUnitsForServiceType(serviceType: string): typeof PRICE_UNITS {
+export function getPriceUnitsForServiceType(productType: string): typeof PRICE_UNITS {
   const unitMap: Record<string, string[]> = {
     product: ['/piece', '/kg', '/liter', '/pack', '/set', '/unit', ''],
     service: ['/hour', '/day', '/session', '/person', '/table', '/group', ''],
@@ -211,6 +211,6 @@ export function getPriceUnitsForServiceType(serviceType: string): typeof PRICE_U
     beauty: ['/session', '/hour', '/person', ''],
     event: ['/event', '/day', '/hour', 'fixed', ''],
   };
-  const allowed = unitMap[serviceType] || [];
+  const allowed = unitMap[productType] || [];
   return PRICE_UNITS.filter(u => allowed.includes(u.value));
 }

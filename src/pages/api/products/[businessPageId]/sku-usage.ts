@@ -4,17 +4,19 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { products, businesses } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { PLAN_LIMITS } from '@/lib/media';
+import { getPlanLimits } from '@/lib/subscription';
 
-export async function GET({ params, url }: { params: Record<string, string>; url: URL }) {
+export async function GET({ params }: { params: Record<string, string> }) {
   const db = await getDb();
   try {
     const { businessPageId } = params;
 
     // Get business with plan info
     const business = await db.select({
-      planType: businesses.planType,
-      expiryDate: businesses.expiryDate,
+      planSlug: businesses.planSlug,
+      limits: businesses.limits,
+      subscriptionStatus: businesses.subscriptionStatus,
+      subscriptionExpiresAt: businesses.subscriptionExpiresAt,
       status: businesses.status,
     })
     .from(businesses)
@@ -32,15 +34,14 @@ export async function GET({ params, url }: { params: Record<string, string>; url
       });
     }
 
-    const plan = business.planType || 'basic';
-
-    // Check if plan is expired
-    let effectivePlan = plan;
-    if (business.expiryDate && new Date(business.expiryDate) < new Date()) {
+    // Check if subscription expired
+    let effectivePlan = business.planSlug || null;
+    if (business.subscriptionExpiresAt && new Date(business.subscriptionExpiresAt) < new Date()) {
       effectivePlan = 'expired';
     }
 
-    const limit = PLAN_LIMITS[effectivePlan]?.maxProducts || PLAN_LIMITS.basic.maxProducts;
+    const planData = effectivePlan ? await getPlanLimits(effectivePlan) : null;
+    const limit = planData?.skuLimit || 0;
 
     // Count current products
     const countResult = await db.select({ count: sql<number>`count(*)` })
@@ -59,7 +60,7 @@ export async function GET({ params, url }: { params: Record<string, string>; url
         remaining,
         canAdd: remaining > 0,
         isExpired: effectivePlan === 'expired',
-        expiryDate: business.expiryDate,
+        expiresAt: business.subscriptionExpiresAt,
       }
     }), {
       status: 200,

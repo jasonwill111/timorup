@@ -4,6 +4,7 @@ export const prerender = false;
 import { getDb } from '@/lib/db';
 import { products } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
 
 export async function GET({ params }: { params: { id: string } }) {
   try {
@@ -43,16 +44,12 @@ export async function GET({ params }: { params: { id: string } }) {
 
 export async function PUT({ params, request }: { params: { id: string }, request: Request }) {
   try {
+    const user = await getAdminUser(request);
+    if (!user) return unauthorizedResponse();
+
     const db = await getDb();
     const body = await request.json();
-    const { title, price, priceUnit, description, businessPageId, priceFields, serviceType, isAdmin } = body;
-
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    const { title, description, priceFields, productType, specifications, images, featured, active, businessId } = body;
 
     const existing = await db
       .select()
@@ -67,17 +64,20 @@ export async function PUT({ params, request }: { params: { id: string }, request
       });
     }
 
+    const updateData: Record<string, unknown> = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (priceFields !== undefined) updateData.priceFields = priceFields ? JSON.stringify(priceFields) : null;
+    if (productType !== undefined) updateData.productType = productType;
+    if (specifications !== undefined) updateData.specifications = specifications ? JSON.stringify(specifications) : null;
+    if (images !== undefined) updateData.images = images ? JSON.stringify(images) : null;
+    if (featured !== undefined) updateData.featured = featured;
+    if (active !== undefined) updateData.active = active;
+    if (businessId !== undefined) updateData.businessId = businessId;
+
     await db
       .update(products)
-      .set({
-        title: title ?? existing.title,
-        price: price ?? existing.price,
-        priceUnit: priceUnit ?? existing.priceUnit,
-        description: description ?? existing.description,
-        businessPageId: businessPageId ?? existing.businessPageId,
-        priceFields: priceFields ?? existing.priceFields,
-        serviceType: serviceType ?? existing.serviceType,
-      })
+      .set(updateData)
       .where(eq(products.id, params.id));
 
     return new Response(JSON.stringify({ success: true }), {
@@ -95,16 +95,10 @@ export async function PUT({ params, request }: { params: { id: string }, request
 
 export async function DELETE({ params, request }: { params: { id: string }, request: Request }) {
   try {
-    const db = await getDb();
-    const url = new URL(request.url);
-    const isAdmin = url.searchParams.get('isAdmin') === 'true' || request.headers.get('admin') === 'true';
+    const user = await getAdminUser(request);
+    if (!user) return unauthorizedResponse();
 
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    const db = await getDb();
 
     await db
       .delete(products)

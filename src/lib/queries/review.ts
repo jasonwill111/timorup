@@ -3,23 +3,24 @@
  * Centralized data access for reviews
  */
 import { getDb } from '@/lib/db';
-import { reviews, users, businesses } from '@/db/schema';
+import { reviews, users } from '@/db/schema';
 import { eq, desc, and, count } from 'drizzle-orm';
 import { success, error, type Result } from './result';
 
-// Types
+// Types - match actual database schema
 export interface ReviewWithUser {
   id: string;
   businessId: string;
   userId: string;
   rating: number;
+  title: string | null;
   content: string | null;
-  isEdited: boolean;
   reply: string | null;
-  repliedAt: Date | null;
+  repliedAt: number | null;
   repliedBy: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  status: string;
+  createdAt: number;
+  updatedAt: number;
   userName: string;
   userImage: string | null;
 }
@@ -58,11 +59,12 @@ export async function getReviewsByBusinessId(
         businessId: reviews.businessId,
         userId: reviews.userId,
         rating: reviews.rating,
+        title: reviews.title,
         content: reviews.content,
-        isEdited: reviews.isEdited,
         reply: reviews.reply,
         repliedAt: reviews.repliedAt,
         repliedBy: reviews.repliedBy,
+        status: reviews.status,
         createdAt: reviews.createdAt,
         updatedAt: reviews.updatedAt,
         userName: users.name,
@@ -151,11 +153,12 @@ export async function getUserReviewForBusiness(
         businessId: reviews.businessId,
         userId: reviews.userId,
         rating: reviews.rating,
+        title: reviews.title,
         content: reviews.content,
-        isEdited: reviews.isEdited,
         reply: reviews.reply,
         repliedAt: reviews.repliedAt,
         repliedBy: reviews.repliedBy,
+        status: reviews.status,
         createdAt: reviews.createdAt,
         updatedAt: reviews.updatedAt,
         userName: users.name,

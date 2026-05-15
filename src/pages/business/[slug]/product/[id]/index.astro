@@ -6,8 +6,10 @@ import Layout from '@layouts/Layout.astro';
 import Button from '@components/ui/Button.astro';
 import Card from '@components/ui/Card.astro';
 import CardContent from '@components/ui/CardContent.astro';
-import { Share2, ArrowLeft, ChevronLeft, ChevronRight, ArrowRight } from '@lucide/astro';
+import { ArrowLeft, ChevronLeft, ChevronRight, ArrowRight } from '@lucide/astro';
+import ShareDialog from '@/components/ui/ShareDialog.astro';
 import { getDb } from '@/lib/db';
+import { createBreadcrumbSchema } from '@/lib/seo';
 import { products, businesses, businessCategories as categories } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -39,8 +41,8 @@ if (!business || business.slug !== slug) {
   return Astro.redirect(`/business/${business?.slug || ''}`);
 }
 
-// Load product images from JSON array in product.images
-const images = product.images ? JSON.parse(product.images) : [];
+// Product images now stored via media table (entityType: 'products')
+const images: string[] = [];
 
 // Load category
 const category = business.categoryId
@@ -59,7 +61,7 @@ const specifications = product.specifications ? JSON.parse(product.specification
 const priceFields = product.priceFields ? JSON.parse(product.priceFields) : null;
 
 // Service type display names
-const serviceTypeLabels: Record<string, string> = {
+const productTypeLabels: Record<string, string> = {
   product: 'Product',
   service: 'Service',
   rental: 'Rental',
@@ -97,6 +99,15 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
       "name": business.title
     }
   })} />
+
+  <!-- Breadcrumb JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(createBreadcrumbSchema([
+    { name: 'Home', url: `${siteUrl}/` },
+    { name: 'Businesses', url: `${siteUrl}/businesses` },
+    { name: business.title || slug, url: `${siteUrl}/business/${slug}` },
+    { name: 'Products', url: `${siteUrl}/business/${slug}/products` },
+    { name: product.title }
+  ]))} />
 
   <div class="bg-background min-h-screen pb-20">
     <!-- Header -->
@@ -181,9 +192,7 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
             <Button>Contact Business</Button>
           )}
 
-          <Button id="share-btn" variant="outline" size="icon">
-            <Share2 class="w-5 h-5" />
-          </Button>
+          <ShareDialog url={`${siteUrl}/business/${slug}/product/${productId}`} title={product.title} class="px-3 py-2" />
         </div>
 
         <!-- Description -->
@@ -201,7 +210,7 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
           <Card class="mb-6">
             <CardContent class="p-6">
               <h2 class="text-lg font-semibold mb-3">
-                {serviceTypeLabels[product.serviceType || 'product'] || 'Details'}
+                {productTypeLabels[product.productType || 'product'] || 'Details'}
               </h2>
 
               {/* Flexible Pricing */}
@@ -366,9 +375,7 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
       ) : (
         <Button class="flex-1">Contact Business</Button>
       )}
-      <Button id="mobile-share-btn" variant="outline" size="icon">
-        <Share2 class="w-5 h-5" />
-      </Button>
+      <ShareDialog url={`${siteUrl}/business/${slug}/product/${productId}`} title={product.title} class="px-3 py-2" />
     </div>
   </div>
 </Layout>
@@ -408,32 +415,5 @@ function formatPriceField(pf: { label: string; value: string; unit: string }) {
 
   document.getElementById('scroll-right')?.addEventListener('click', () => {
     thumbnailContainer?.scrollBy({ left: 160, behavior: 'smooth' });
-  });
-
-  // Share button
-  document.getElementById('share-btn')?.addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: document.title,
-        text: 'Check out this product on TimorLIST',
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
-  });
-
-  document.getElementById('mobile-share-btn')?.addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: document.title,
-        text: 'Check out this product on TimorLIST',
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
   });
 </script>

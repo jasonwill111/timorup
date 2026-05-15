@@ -13,4 +13,4 @@ Disallow: /register
 Disallow: /account
 
 # Sitemap
-Sitemap: https://timorlist.com/sitemap-index.xml
+Sitemap: https://timorlist.com/sitemap.xml

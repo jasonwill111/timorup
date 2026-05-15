@@ -99,10 +99,7 @@ export const listing = {
       if (data.profileImageId !== undefined) updateData.profileImageId = data.profileImageId;
       if (data.verifiedBadge !== undefined) updateData.verifiedBadge = data.verifiedBadge;
       if (data.socialLinks !== undefined) updateData.socialLinks = data.socialLinks ? JSON.stringify(data.socialLinks) : null;
-      if (data.photoGallery !== undefined) updateData.photoGallery = data.photoGallery ? JSON.stringify(data.photoGallery) : null;
-      if (data.latestUpdate !== undefined) updateData.latestUpdate = data.latestUpdate;
-      if (data.latestUpdateImages !== undefined) updateData.latestUpdateImages = data.latestUpdateImages ? JSON.stringify(data.latestUpdateImages) : null;
-      if (data.latestUpdateDate !== undefined) updateData.latestUpdateDate = data.latestUpdateDate ? new Date(data.latestUpdateDate) : null;
+      // Note: photoGallery, latestUpdate, latestUpdateImages, latestUpdateDate now use separate tables
       if (data.planType !== undefined) updateData.planType = data.planType;
       if (data.expiryDate !== undefined) updateData.expiryDate = data.expiryDate ? new Date(data.expiryDate) : null;
 

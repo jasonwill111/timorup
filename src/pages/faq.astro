@@ -9,42 +9,34 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "How do I list my business on TimorList?",
+      "name": "What's the difference between Business Directories and Classified Ads?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "To list your business on TimorList, click the 'List Your Business' button on the homepage, fill in your business details, choose a category, and submit. Your listing will be reviewed and published within 24 hours."
+        "text": "Business Directories are permanent listings for established businesses like restaurants, hotels, and shops with reviews and photos. Classified Ads are temporary listings for buying, selling, or finding jobs, vehicles, property, and services."
       }
     },
     {
       "@type": "Question",
-      "name": "Is TimorList free to use?",
+      "name": "Are classified ads really free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, TimorList is free for consumers to browse and discover local businesses. Business owners can create a basic listing at no cost. Premium features like product listings and enhanced visibility are available with paid plans."
+        "text": "Yes! Classified ads are free for the first 3 days. After that, you can renew for 7, 30, or 365 days at affordable rates."
       }
     },
     {
       "@type": "Question",
-      "name": "How can I update my business information?",
+      "name": "Can I list products or services directly?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sign in to your account, go to 'My Account', select your business, and click 'Edit'. You can update your address, contact information, hours, photos, and more."
+        "text": "Absolutely! Business directory members can add products and services with photos, descriptions, and pricing in our Products & Services section."
       }
     },
     {
       "@type": "Question",
-      "name": "How do reviews work on TimorList?",
+      "name": "How do I find NGOs or government services?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Any registered user can leave a review for a business. Reviews help other consumers make informed decisions and help businesses understand their customers better."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What areas does TimorList cover?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "TimorList currently covers businesses throughout Timor-Leste, with a focus on Dili. We're expanding to cover all municipalities including Baucau, Lospalos, Maliana, and more."
+        "text": "Visit the Non-Profits or Public Sectors sections to discover NGOs, charitable organizations, ministries, and government agencies in Timor-Leste."
       }
     }
   ]
@@ -52,35 +44,43 @@ const faqSchema = {
 
 const faqs = [
   {
+    question: "What's the difference between Business Directories and Classified Ads?",
+    answer: "Business Directories are permanent listings for established businesses like restaurants, hotels, and shops — complete with reviews, photos, and contact info. Classified Ads are temporary listings for buying, selling, or finding jobs, vehicles, property, and services. Think of it like the difference between a Yelp listing and a Craigslist post."
+  },
+  {
     question: "How do I list my business on TimorList?",
-    answer: "To list your business on TimorList, click the 'List Your Business' button on the homepage. Fill in your business details including name, category, contact information, and address. Choose your subscription plan and submit. Your listing will be reviewed and published within 24 hours."
+    answer: "Click 'Add Your Listing' on the homepage, choose your listing type (Business, Classified Ad, NGO, or Government), fill in details, and submit. Business listings require a subscription plan; classified ads are free for the first few days."
   },
   {
-    question: "Is TimorList free to use?",
-    answer: "Yes, TimorList is completely free for consumers to browse and discover local businesses. Business owners can create a basic listing at no cost. Premium features like product listings, enhanced visibility, and priority placement are available with paid subscription plans."
+    question: "Are classified ads really free?",
+    answer: "Yes! Classified ads are free for the first 3 days. After that, you can renew for 7, 30, or 365 days at affordable rates. Business directory listings offer subscription plans with enhanced features."
   },
   {
-    question: "How can I update my business information?",
-    answer: "Sign in to your account and navigate to 'My Account'. Select the business you want to update and click 'Edit'. You can update your address, contact information, operating hours, photos, products, and more. Changes are reflected immediately after saving."
+    question: "Can I list products or services directly?",
+    answer: "Absolutely! Business directory members can add products and services with photos, descriptions, and pricing. Browse the Products & Services section to see what's available from local businesses."
   },
   {
-    question: "How do reviews work on TimorList?",
-    answer: "Any registered user can leave a review for a business they've visited or used. Reviews help other consumers make informed decisions and provide valuable feedback to business owners. We encourage honest and constructive reviews to maintain quality."
+    question: "How do I find NGOs or non-profit organizations?",
+    answer: "Visit the Non-Profits section to discover NGOs and charitable organizations in Timor-Leste. Filter by category to find volunteer opportunities, community initiatives, or social services near you."
+  },
+  {
+    question: "Where can I find government contact information?",
+    answer: "The Public Sectors section lists all ministries, government agencies, and public institutions. Each entry includes contact details, locations, and descriptions of their services."
   },
   {
     question: "What subscription plans are available?",
-    answer: "We offer three plans: Basic (free) with standard listing, Pro ($25/month) with product listings and enhanced visibility, and Max ($50/month) with all features plus priority placement and dedicated support."
+    answer: "We offer Basic (free) for standard business listings, Pro ($25/month) with product listings and enhanced visibility, and Max ($50/month) with all features plus priority placement. NGOs and public sectors are always free."
   },
   {
     question: "How can I contact TimorList support?",
-    answer: "You can reach our support team by email at support@timbiz.com or through the contact form on our website. We typically respond within 24 hours on business days."
+    answer: "Email us at hello@timorlist.com or use the contact form on our website. We typically respond within 24 hours on business days."
   }
 ];
 ---
 
 <Layout
   title="FAQ - Frequently Asked Questions"
-  description="Find answers to common questions about using TimorList, listing your business, subscription plans, and more."
+  description="Find answers about TimorList — business directories, classified ads, NGOs, government services, and more."
   structuredData={faqSchema}
 >
   <div class="container py-12 max-w-4xl">
@@ -88,7 +88,7 @@ const faqs = [
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
       <p class="text-lg text-muted-foreground">
-        Find answers to common questions about TimorList
+        Discover local businesses, products & services near you
       </p>
     </div>
 
@@ -113,10 +113,10 @@ const faqs = [
     <div class="mt-12 text-center bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8">
       <h2 class="text-2xl font-bold mb-4">Still have questions?</h2>
       <p class="text-muted-foreground mb-6">
-        Can't find the answer you're looking for? Contact our support team.
+        Can't find what you're looking for? Contact us directly.
       </p>
-      <a href="mailto:support@timbiz.com" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
-        Contact Support
+      <a href="mailto:hello@timorlist.com" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+        Contact Us
       </a>
     </div>
   </div>

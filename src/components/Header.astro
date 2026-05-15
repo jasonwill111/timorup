@@ -23,44 +23,50 @@ const urlParams = new URL(Astro.request.url).searchParams;
       </a>
 
       <!-- Desktop Navigation - ALL buttons 44px height -->
-      <nav class="hidden md:flex items-center gap-0.5">
-        <a
-          href="/businesses"
-          class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
-            currentPath.startsWith('/businesses') || currentPath.startsWith('/business/') ? "text-primary" : "text-muted-foreground"
-          ]}
-        >
-          Businesses
-        </a>
-        <a
-          href="/listings"
-          class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
-            currentPath.startsWith('/listings') || currentPath.startsWith('/listing/') ? "text-primary" : "text-muted-foreground"
-          ]}
-        >
-          Listings
-        </a>
-        <!-- Dropdown: Govs & NGOs -->
+      <nav class="hidden md:flex items-center gap-0">
+        <!-- Dropdown: Business -->
         <div class="relative group">
-          <button class="text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center text-muted-foreground hover:text-primary">
-            Govs & NGOs
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button class="text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center text-muted-foreground hover:text-primary">
+            Business
+            <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
           <!-- Hover bridge: invisible area to prevent dropdown from disappearing when mouse moves down -->
-          <div class="absolute left-0 right-0 h-3 -mb-2 -mt-1 cursor-default"></div>
-          <div class="hidden group-hover:block absolute left-0 mt-2 w-44 bg-background border rounded-lg shadow-lg py-1 z-50">
-            <a href="/public-sectors" class="block px-4 py-2.5 text-sm hover:bg-muted">Public Sectors</a>
-            <a href="/non-profits" class="block px-4 py-2.5 text-sm hover:bg-muted">Non-Profits</a>
+          <div class="absolute left-0 right-0 h-2 -mb-1 -mt-0.5 cursor-default"></div>
+          <div class="hidden group-hover:block absolute left-0 mt-1 w-48 bg-background border rounded-lg shadow-lg py-1 z-50">
+            <a href="/businesses" class="block px-3 py-2 text-sm hover:bg-muted">Business Directories</a>
+            <a href="/products-services" class="block px-3 py-2 text-sm hover:bg-muted">Products & Services</a>
+          </div>
+        </div>
+        <a
+          href="/listings"
+          class:list={[
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center",
+            currentPath.startsWith('/listings') || currentPath.startsWith('/listing/') ? "text-primary" : "text-muted-foreground"
+          ]}
+        >
+          Classified Ads
+        </a>
+        <!-- Dropdown: Govs & NGOs -->
+        <div class="relative group">
+          <button class="text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center text-muted-foreground hover:text-primary">
+            Govs & NGOs
+            <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <!-- Hover bridge: invisible area to prevent dropdown from disappearing when mouse moves down -->
+          <div class="absolute left-0 right-0 h-2 -mb-1 -mt-0.5 cursor-default"></div>
+          <div class="hidden group-hover:block absolute left-0 mt-1 w-40 bg-background border rounded-lg shadow-lg py-1 z-50">
+            <a href="/public-sectors" class="block px-3 py-2 text-sm hover:bg-muted">Public Sectors</a>
+            <a href="/non-profits" class="block px-3 py-2 text-sm hover:bg-muted">Non-Profits</a>
           </div>
         </div>
         <a
           href="/pricing"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center",
             currentPath === '/pricing' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -69,7 +75,7 @@ const urlParams = new URL(Astro.request.url).searchParams;
         <a
           href="/faq"
           class:list={[
-            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1.5 flex items-center",
+            "text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center",
             currentPath === '/faq' ? "text-primary" : "text-muted-foreground"
           ]}
         >
@@ -77,7 +83,7 @@ const urlParams = new URL(Astro.request.url).searchParams;
         </a>
         <a
           href="/listings/create"
-          class="text-sm font-medium bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center ml-1"
+          class="text-sm font-medium bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center ml-1"
         >
           + Create
         </a>
@@ -101,10 +107,10 @@ const urlParams = new URL(Astro.request.url).searchParams;
             </div>
           ) : (
             <>
-              <a href="/login" class="text-sm font-medium text-muted-foreground hover:text-primary px-3 h-10 rounded-md hover:bg-muted transition-colors flex items-center">
+              <a href="/login" class="text-sm font-medium text-muted-foreground hover:text-primary px-2 sm:px-3 h-7 rounded-md hover:bg-muted transition-colors flex items-center py-0.5">
                 Log in
               </a>
-              <a href="/register" class="text-sm font-medium bg-primary text-primary-foreground px-4 h-10 rounded-md hover:bg-primary/90 transition-colors flex items-center">
+              <a href="/register" class="text-sm font-medium bg-primary text-primary-foreground px-3 sm:px-4 h-7 rounded-md hover:bg-primary/90 transition-colors flex items-center py-0.5">
                 Sign Up
               </a>
             </>
@@ -129,10 +135,13 @@ const urlParams = new URL(Astro.request.url).searchParams;
   <div id="mobile-menu" class="hidden md:hidden border-t">
     <nav class="container max-w-6xl py-4 space-y-2">
       <a href="/businesses" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/businesses') ? "bg-muted text-primary" : "text-muted-foreground"]}>
-        Businesses
+        Business Directories
+      </a>
+      <a href="/products-services" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/products-services') ? "bg-muted text-primary" : "text-muted-foreground"]}>
+        Products & Services
       </a>
       <a href="/listings" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/listings') ? "bg-muted text-primary" : "text-muted-foreground"]}>
-        Listings
+        Classified Ads
       </a>
       <a href="/public-sectors" class:list={["block px-3 py-3 min-h-[44px] rounded-lg text-base sm:text-sm font-medium flex items-center", currentPath.startsWith('/public-sectors') ? "bg-muted text-primary" : "text-muted-foreground"]}>
         Public Sectors

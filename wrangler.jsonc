@@ -9,7 +9,8 @@
     "directory": "./dist/client"
   },
 
-  // D1 - remote: true = 本地 dev 直连远程 D1
+  // D1 - 本地开发用local SQLite (无数据)，build时连接远程
+  // 如需直连远程D1，改remote: true
   "d1_databases": [
     {
       "binding": "DB",
@@ -22,7 +23,8 @@
   "kv_namespaces": [
     {
       "binding": "SESSION",
-      "id": "3e9ae14a105b4aa48316eaa029f5bc5f"
+      "id": "3e9ae14a105b4aa48316eaa029f5bc5f",
+      "preview_id": "3e9ae14a105b4aa48316eaa029f5bc5f"
     }
   ],
 
@@ -30,7 +32,7 @@
     {
       "binding": "MEDIA_BUCKET",
       "bucket_name": "timorlist-media",
-      "remote": false
+      "preview_bucket_name": "timorlist-media"
     }
   ]
 }

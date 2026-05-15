@@ -152,18 +152,20 @@ import { actions } from 'astro:actions';
       const data = result.data;
       countEl.textContent = `${data.length} order${data.length !== 1 ? 's' : ''}`;
 
-      container.innerHTML = data.map((order: SubscriptionData) => `
+      container.innerHTML = data.map((order: SubscriptionData) => {
+        const snapshot = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : {};
+        return `
         <div class="flex items-center justify-between p-3 border rounded text-sm cursor-pointer hover:bg-muted/50" onclick="showOrderDetails('${order.id}')">
           <div class="min-w-0 flex-1">
             <p class="font-medium truncate">#${order.id.slice(0, 8)}</p>
-            <p class="text-xs text-muted-foreground truncate">${order.planType} - $${order.amount}</p>
-            <p class="text-xs text-muted-foreground">${order.businessTitle || order.userEmail || 'N/A'}</p>
+            <p class="text-xs text-muted-foreground truncate">${snapshot.name || order.servicePackageId || 'N/A'} - $${order.amount / 100}</p>
+            <p class="text-xs text-muted-foreground">${order.typeId || order.userId || 'N/A'}</p>
           </div>
           <div class="flex items-center gap-2 ml-2">
             <span class="px-2 py-0.5 text-xs rounded-full ${order.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}">${order.status}</span>
           </div>
         </div>
-      `).join('');
+      `; }).join('');
     } catch (err) {
       console.error('Error loading orders:', err);
       toast.error('Failed to load orders');
@@ -201,25 +203,29 @@ import { actions } from 'astro:actions';
       const order = result.data;
       currentOrderData = order;
 
+      // Parse variant snapshot
+      const snapshot = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : {};
+      const planName = snapshot.name || order.servicePackageId || 'N/A';
+
       // Fill form
       (document.getElementById('order-id') as HTMLInputElement).value = order.id;
-      (document.getElementById('plan-type') as HTMLSelectElement).value = order.planType;
-      (document.getElementById('amount') as HTMLInputElement).value = order.amount;
+      (document.getElementById('plan-type') as HTMLSelectElement).value = order.servicePackageId || '';
+      (document.getElementById('amount') as HTMLInputElement).value = (order.amount / 100).toString();
       (document.getElementById('status') as HTMLSelectElement).value = order.status;
-      (document.getElementById('expiry-date') as HTMLInputElement).value = order.expiryDate ? new Date(order.expiryDate).toISOString().split('T')[0] : '';
+      (document.getElementById('expiry-date') as HTMLInputElement).value = order.expiresAt ? new Date(order.expiresAt * 1000).toISOString().split('T')[0] : '';
       (document.getElementById('admin-notes') as HTMLTextAreaElement).value = order.adminNotes || '';
 
       // Info display
       document.getElementById('modal-order-id')!.textContent = order.id.slice(0, 12) + '...';
-      document.getElementById('modal-business-title')!.textContent = order.businessTitle || 'N/A';
-      document.getElementById('modal-created-date')!.textContent = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
-      document.getElementById('modal-paid-date')!.textContent = order.paidDate ? new Date(order.paidDate).toLocaleDateString() : 'Not paid';
+      document.getElementById('modal-business-title')!.textContent = planName;
+      document.getElementById('modal-created-date')!.textContent = order.createdAt ? new Date(order.createdAt * 1000).toLocaleDateString() : 'N/A';
+      document.getElementById('modal-paid-date')!.textContent = order.paidDate ? new Date(order.paidDate * 1000).toLocaleDateString() : 'Not paid';
 
       // Show confirm/reject buttons for unpaid orders
       const confirmBtn = document.getElementById('confirm-order-btn');
       const rejectBtn = document.getElementById('reject-order-btn');
       const saveBtn = document.getElementById('save-order-btn');
-      if (order.status === 'unpaid') {
+      if (order.status === 'pending') {
         confirmBtn?.classList.remove('hidden');
         rejectBtn?.classList.remove('hidden');
         saveBtn?.classList.add('hidden');

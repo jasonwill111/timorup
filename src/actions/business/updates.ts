@@ -3,7 +3,7 @@ import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
 import { businesses, latestUpdates } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 
 function getErrorMessage(error: unknown): string {
@@ -49,34 +49,33 @@ export const createUpdate = defineAction({
       }
 
       // Check daily limit (max 5 updates per day)
-      const today = new Date().toISOString().split('T')[0];
-      const todayStart = new Date(today + 'T00:00:00Z').getTime() / 1000;
-      const todayEnd = new Date(today + 'T23:59:59Z').getTime() / 1000;
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
       const todayPosts = await db.select()
         .from(latestUpdates)
         .where(eq(latestUpdates.typeId, business.id))
+        .where(eq(latestUpdates.type, 'businesses'))
         .all();
 
       const businessUpdates = todayPosts.filter(u => {
         const createdAt = typeof u.createdAt === 'number' ? u.createdAt : new Date(u.createdAt as unknown as string).getTime() / 1000;
-        return createdAt >= todayStart && createdAt <= todayEnd && u.type === 'businesses';
+        return createdAt >= todayStart.getTime() / 1000 && createdAt <= todayEnd.getTime() / 1000;
       });
 
       if (businessUpdates.length >= 5) {
         return { success: false, error: { message: 'Daily limit reached. You can only post 5 updates per day.' } };
       }
 
-      const now = Math.floor(Date.now() / 1000);
-      const id = `upd-${now}-${Math.random().toString(36).substr(2, 9)}`;
+      const id = `upd-${Math.floor(Date.now() / 1000)}-${Math.random().toString(36).substr(2, 9)}`;
 
       await db.insert(latestUpdates).values({
         id,
-        type: 'businesses',
+        type: 'business',
         typeId: business.id,
         content: input.content,
-        images: input.images ? JSON.stringify(input.images) : null,
-        postedDate: now,
+        imageIds: input.images ? JSON.stringify(input.images) : null,
       }).run();
 
       return { success: true, data: { id, content: input.content } };
@@ -107,14 +106,14 @@ export const listUpdates = defineAction({
       const updates = await db.select()
         .from(latestUpdates)
         .where(eq(latestUpdates.typeId, business.id))
+        .where(eq(latestUpdates.type, 'businesses'))
         .orderBy(desc(latestUpdates.createdAt))
         .limit(4)
         .all();
 
-      const businessUpdates = updates.filter(u => u.type === 'businesses');
-      const updatesWithImages = businessUpdates.map(u => ({
+      const updatesWithImages = updates.map(u => ({
         ...u,
-        images: u.images ? JSON.parse(u.images) : [],
+        images: u.images ? JSON.parse(u.images) : (u.imageIds ? JSON.parse(u.imageIds) : []),
       }));
 
       return { success: true, data: updatesWithImages };

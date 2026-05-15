@@ -8,7 +8,7 @@ interface Props {
   priceFields?: Array<{label: string; value: string; unit: string}>;
   thumbnail?: string | null;
   slug?: string;
-  serviceType?: string;
+  productType?: string;
   class?: string;
 }
 
@@ -21,7 +21,7 @@ const {
   priceFields = [],
   thumbnail = null,
   slug = '',
-  serviceType = 'product',
+  productType = 'product',
   class: className = '',
 } = Astro.props;
 
@@ -39,7 +39,7 @@ const displayPrice = priceFields.length > 0
 
 const href = businessSlug ? `/business/${businessSlug}${slug ? `/product/${slug}` : ''}` : '#';
 
-const serviceTypeColors: Record<string, string> = {
+const productTypeColors: Record<string, string> = {
   product: 'from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40',
   service: 'from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40',
   rental: 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40',
@@ -48,7 +48,7 @@ const serviceTypeColors: Record<string, string> = {
   project: 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/40',
 };
 
-const gradientClass = serviceTypeColors[serviceType] || serviceTypeColors.product;
+const gradientClass = productTypeColors[productType] || productTypeColors.product;
 ---
 
 <a

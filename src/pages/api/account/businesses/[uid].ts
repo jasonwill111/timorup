@@ -100,7 +100,8 @@ export async function GET({ params, request }: { params: Record<string, string>;
       createdAt: businesses.createdAt,
       ratingAverage: businesses.ratingAverage,
       views: businesses.views,
-      planType: businesses.planType,
+      planSlug: businesses.planSlug,
+      limits: businesses.limits,
     })
     .from(businesses)
     .where(eq(businesses.ownerId, uid))

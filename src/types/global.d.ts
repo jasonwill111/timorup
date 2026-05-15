@@ -49,7 +49,7 @@ interface HeroData {
 interface SkuData {
   id: number;
   title: string;
-  serviceType: string;
+  productType: string;
   price: number | null;
   businessPageId: number;
   active: number;

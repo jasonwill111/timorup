@@ -4,26 +4,65 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout
-  title="About TimorList - Timor-Leste Business Directory"
-  description="Learn about TimorList, Timor-Leste's premier business directory. Discover local businesses, connect with communities, and explore opportunities in East Timor."
+  title="About TimorList - Timor-Leste's Local Business Platform"
+  description="TimorList connects you with local businesses, products & services in Timor-Leste. Discover restaurants, shops, NGOs, government services, and more."
 >
   <div class="container py-12 max-w-4xl">
     <!-- Hero Section -->
     <div class="text-center mb-16">
       <h1 class="text-4xl md:text-5xl font-bold mb-6">
-        Connecting Timor-Leste, <span class="text-primary">One Business at a Time</span>
+        TimorList
       </h1>
       <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
-        TimorList is the premier business directory for Timor-Leste, helping locals and visitors discover quality businesses across the country.
+        Discover local businesses, products & services near you.
       </p>
     </div>
 
-    <!-- Mission -->
-    <div class="bg-card border rounded-2xl p-8 mb-12">
-      <h2 class="text-2xl font-bold mb-4">Our Mission</h2>
-      <p class="text-muted-foreground leading-relaxed">
-        We believe in the power of local businesses to build stronger communities. TimorList exists to bridge the gap between businesses and customers, making it easier for everyone in Timor-Leste to discover and support local enterprises. From traditional markets in Dili to emerging businesses in the municipalities, we're here to shine a spotlight on the entrepreneurial spirit of our nation.
+    <!-- About -->
+    <div class="bg-card border rounded-2xl p-8 mb-8">
+      <h2 class="text-2xl font-bold mb-4">What is TimorList?</h2>
+      <p class="text-muted-foreground leading-relaxed mb-4">
+        TimorList is Timor-Leste's local business platform. We connect people with local businesses, products, and services — all in one place.
       </p>
+
+      <div class="space-y-6">
+        <div>
+          <h3 class="font-semibold mb-2">Business Directories</h3>
+          <p class="text-sm text-muted-foreground">Find restaurants, hotels, shops, salons, mechanics, supermarkets, and more. Browse by category or search by name. Each listing shows location, contact info, reviews, and photos.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-2">Products & Services</h3>
+          <p class="text-sm text-muted-foreground">Business owners list their products with photos and prices. Browse locally available items, compare options, and contact sellers directly.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-2">Classified Ads</h3>
+          <p class="text-sm text-muted-foreground">Buy, sell, or trade in the community. Jobs, vehicles, property, electronics, services — post a listing and reach thousands of buyers in Timor-Leste.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-2">Non-Profits & NGOs</h3>
+          <p class="text-sm text-muted-foreground">Discover charitable organizations, volunteer opportunities, and community initiatives across all municipalities.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-2">Government Services</h3>
+          <p class="text-sm text-muted-foreground">Find ministries, government agencies, and public offices. Get contact details, addresses, and information about available services.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="grid md:grid-cols-2 gap-6 mb-12">
+      <div class="bg-card border rounded-2xl p-8">
+        <h2 class="text-2xl font-bold mb-4">Our Mission</h2>
+        <p class="text-muted-foreground leading-relaxed">
+          Make it easy to find and support local businesses in Timor-Leste. Keep commerce local.
+        </p>
+      </div>
+      <div class="bg-card border rounded-2xl p-8">
+        <h2 class="text-2xl font-bold mb-4">Our Vision</h2>
+        <p class="text-muted-foreground leading-relaxed">
+          Every Timorese business and service searchable and accessible to all.
+        </p>
+      </div>
     </div>
 
     <!-- Stats -->
@@ -49,55 +88,50 @@ import Layout from '../layouts/Layout.astro';
     <!-- What We Offer -->
     <div class="mb-12">
       <h2 class="text-2xl font-bold mb-6 text-center">What We Offer</h2>
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid md:grid-cols-4 gap-6">
         <div class="bg-card border rounded-xl p-6">
           <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
           </div>
-          <h3 class="font-bold mb-2">Easy Discovery</h3>
-          <p class="text-sm text-muted-foreground">
-            Search and browse businesses by category, location, or keyword. Find exactly what you need, when you need it.
-          </p>
+          <h3 class="font-bold mb-2">Business Directories</h3>
+          <p class="text-sm text-muted-foreground">Restaurants, hotels, shops — find verified local businesses with reviews and ratings.</p>
         </div>
         <div class="bg-card border rounded-xl p-6">
-          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/></svg>
           </div>
-          <h3 class="font-bold mb-2">Verified Listings</h3>
-          <p class="text-sm text-muted-foreground">
-            We verify business information to ensure accuracy. Trust that the details you find are current and reliable.
-          </p>
+          <h3 class="font-bold mb-2">Classified Ads</h3>
+          <p class="text-sm text-muted-foreground">Jobs, vehicles, property, services — buy and sell with the Timor-Leste community.</p>
         </div>
         <div class="bg-card border rounded-xl p-6">
-          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-            </svg>
+          <div class="w-12 h-12 bg-rose-500/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
           </div>
-          <h3 class="font-bold mb-2">Reviews & Ratings</h3>
-          <p class="text-sm text-muted-foreground">
-            Read honest reviews from other customers. Share your own experiences to help the community make informed choices.
-          </p>
+          <h3 class="font-bold mb-2">NGOs & Non-Profits</h3>
+          <p class="text-sm text-muted-foreground">Discover charitable organizations, volunteer opportunities, and community initiatives.</p>
+        </div>
+        <div class="bg-card border rounded-xl p-6">
+          <div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3"/></svg>
+          </div>
+          <h3 class="font-bold mb-2">Government Services</h3>
+          <p class="text-sm text-muted-foreground">Find ministries, agencies, and public information all in one place.</p>
         </div>
       </div>
     </div>
 
     <!-- CTA -->
     <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 text-center">
-      <h2 class="text-2xl font-bold mb-4">List Your Business Today</h2>
+      <h2 class="text-2xl font-bold mb-4">Get Listed Today</h2>
       <p class="text-muted-foreground mb-6 max-w-lg mx-auto">
-        Join hundreds of businesses already showcasing their products and services on TimorList. It's free to get started!
+        Whether you run a restaurant, sell products, manage an NGO, or offer services — TimorList connects you with your audience.
       </p>
       <div class="flex flex-wrap gap-4 justify-center">
-        <a href="/pricing" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
-          View Plans
+        <a href="/listings/create" class="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity">
+          Add Your Listing
         </a>
         <a href="/businesses" class="inline-flex items-center justify-center px-6 py-3 border border-input bg-background font-semibold rounded-lg hover:bg-muted transition-colors">
-          Browse Businesses
+          Explore Now
         </a>
       </div>
     </div>
@@ -109,7 +143,7 @@ import Layout from '../layouts/Layout.astro';
         Questions or suggestions? We'd love to hear from you.
       </p>
       <p class="text-sm mt-2">
-        <a href="mailto:hello@timbiz.com" class="text-primary hover:underline">hello@timbiz.com</a>
+        <a href="mailto:hello@timorlist.com" class="text-primary hover:underline">hello@timorlist.com</a>
       </p>
     </div>
   </div>

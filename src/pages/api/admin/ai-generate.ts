@@ -34,7 +34,7 @@ ${data.yearOfEstablishment ? `Year established: ${data.yearOfEstablishment}` : '
 ${data.registrationUrl ? `Registration URL: ${data.registrationUrl}` : ''}`.trim();
 
     case 'sku':
-      return `Create a ${data.serviceType || 'product'} called "${data.title}".
+      return `Create a ${data.productType || 'product'} called "${data.title}".
 ${data.description ? `Description: ${data.description}` : ''}
 ${data.priceFields?.length ? `Price fields: ${data.priceFields.map((p: { label: string; value: string; unit: string }) => `${p.label}: $${p.value}${p.unit || ''}`).join(', ')}` : ''}`.trim();
 

@@ -60,10 +60,12 @@ export async function GET({ params, request }: { params: Record<string, string>;
     const userOrders = await db.select({
       id: orders.id,
       typeId: orders.typeId,
-      planType: orders.planType,
+      servicePackageId: orders.servicePackageId,
+      variantSnapshot: orders.variantSnapshot,
+      type: orders.type,
       amount: orders.amount,
       status: orders.status,
-      expiryDate: orders.expiryDate,
+      expiresAt: orders.expiresAt,
       paidDate: orders.paidDate,
       createdAt: orders.createdAt,
     })
@@ -74,7 +76,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
 
     // Get business titles
     const businessMap = new Map();
-    const bizIds = [...new Set(userOrders.map(o => o.typeId))];
+    const bizIds = [...new Set(userOrders.map(o => o.typeId).filter(Boolean))];
     if (bizIds.length > 0) {
       const businessList = await db.select({
         id: businesses.id,
@@ -90,15 +92,23 @@ export async function GET({ params, request }: { params: Record<string, string>;
       });
     }
 
-    // Add business titles
-    const ordersWithBusiness = userOrders.map((order: { typeId: string }) => ({
-      ...order,
-      businessTitle: businessMap.get(order.typeId) || 'Unknown Business',
-    }));
+    // Add business titles + parse variant
+    const ordersWithBusiness = userOrders.map((order: { typeId: string | null; variantSnapshot: string }) => {
+      let variantName = '';
+      try {
+        const snapshot = JSON.parse(order.variantSnapshot);
+        variantName = snapshot?.name || '';
+      } catch {}
+      return {
+        ...order,
+        variantName,
+        businessTitle: order.typeId ? (businessMap.get(order.typeId) || 'Unknown Business') : null,
+      };
+    });
 
     // Calculate subscription summary
     const activeSubscription = userOrders.find(o =>
-      o.status === 'paid' && o.expiryDate && new Date(o.expiryDate) > new Date()
+      o.status === 'paid' && o.expiresAt && new Date(o.expiresAt * 1000) > new Date()
     );
 
     return new Response(JSON.stringify({

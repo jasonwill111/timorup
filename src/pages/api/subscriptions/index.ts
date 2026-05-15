@@ -51,11 +51,13 @@ export async function GET({ request }: { request: Request }) {
     const userOrders = await db.select({
       id: orders.id,
       typeId: orders.typeId,
-      planType: orders.planType,
+      servicePackageId: orders.servicePackageId,
+      variantSnapshot: orders.variantSnapshot,
+      type: orders.type,
       amount: orders.amount,
       status: orders.status,
       paymentMethod: orders.paymentMethod,
-      expiryDate: orders.expiryDate,
+      expiresAt: orders.expiresAt,
       paidDate: orders.paidDate,
       createdAt: orders.createdAt,
     })
