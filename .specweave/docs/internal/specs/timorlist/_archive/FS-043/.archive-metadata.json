@@ -1,0 +1,11 @@
+{
+  "id": "FS-043",
+  "type": "feature",
+  "archivedAt": "2026-05-15T07:33:02.659Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-043",
+  "linkedIncrements": [
+    "0043-listing-frontend-routes"
+  ]
+}

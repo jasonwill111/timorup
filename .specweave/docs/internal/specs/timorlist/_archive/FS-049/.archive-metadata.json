@@ -1,0 +1,11 @@
+{
+  "id": "FS-049",
+  "type": "feature",
+  "archivedAt": "2026-05-15T07:33:03.121Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-049",
+  "linkedIncrements": [
+    "0049-0040-admin-auth-cookie-middleware"
+  ]
+}

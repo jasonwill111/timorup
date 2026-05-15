@@ -1,0 +1,11 @@
+{
+  "id": "FS-041",
+  "type": "feature",
+  "archivedAt": "2026-05-15T07:33:02.550Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-041",
+  "linkedIncrements": [
+    "0041-type-safety-cleanup"
+  ]
+}

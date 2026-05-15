@@ -1,0 +1,11 @@
+{
+  "id": "FS-050",
+  "type": "feature",
+  "archivedAt": "2026-05-15T07:33:03.213Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-050",
+  "linkedIncrements": [
+    "0050-0041-rate-limiter-kv"
+  ]
+}

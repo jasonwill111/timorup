@@ -1,0 +1,11 @@
+{
+  "id": "FS-038",
+  "type": "feature",
+  "archivedAt": "2026-05-15T07:33:02.197Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/specs/timorlist/FS-038",
+  "linkedIncrements": [
+    "0038-admin-dashboard-enhancement"
+  ]
+}
