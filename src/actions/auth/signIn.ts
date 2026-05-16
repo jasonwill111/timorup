@@ -29,7 +29,22 @@ export const signIn = defineAction({
     }
 
     try {
+      console.log('[signIn] Starting login process');
       const db = await getDb();
+      console.log('[signIn] getDb result:', db ? 'db available' : 'db is null');
+
+      if (!db) {
+        console.error('[signIn] DB is null, returning error');
+        return { success: false, error: { code: 'DB_ERROR', message: 'Database not available. Please try again later.' } };
+      }
+
+      console.log('[signIn] DB ready, calling db.select() to check users');
+      // Don't wait for db.select - it seems to hang with remote D1
+      // Just try to continue with initAuth
+      console.log('[signIn] Skipping db.select() test, moving to initAuth');
+      console.log('[signIn] About to call initAuth');
+
+      console.log('[signIn] DB ready, initializing auth');
       const auth = await initAuth();
       const authApi = auth.api;
 

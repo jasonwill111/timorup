@@ -15,7 +15,7 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     footerText="Don't have an account?"
     footerLink={{ href: '/register', text: 'Sign up' }}
   >
-    <form id="login-form" action="/api/auth/sign-in" class="space-y-4">
+    <form id="login-form" class="space-y-4">
       <FormMessage id="form-message" type="error" />
 
       <div>
@@ -96,12 +96,36 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
   const btnText = document.getElementById('submit-btn-text');
   const btnLoading = document.getElementById('submit-btn-loading');
-  const message = document.getElementById('form-message');
+  const message = document.getElementById('form-message') as HTMLElement;
 
   function setLoading(loading: boolean) {
     if (submitBtn) submitBtn.disabled = loading;
     btnText?.classList.toggle('hidden', loading);
     btnLoading?.classList.toggle('hidden', !loading);
+  }
+
+  function showError(msg: string) {
+    if (message) {
+      message.textContent = msg;
+      message.className = message.className
+        .replace(/bg-green-\d+/g, 'bg-red-50')
+        .replace(/text-green-\d+/g, 'text-red-700')
+        .replace(/dark:bg-green-\d+/g, 'dark:bg-red-900/20')
+        .replace(/dark:text-green-\d+/g, 'dark:text-red-400');
+      message.classList.remove('hidden');
+    }
+  }
+
+  function showSuccess(msg: string) {
+    if (message) {
+      message.textContent = msg;
+      message.className = message.className
+        .replace(/bg-red-\d+/g, 'bg-green-50')
+        .replace(/text-red-\d+/g, 'text-green-700')
+        .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
+        .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
+      message.classList.remove('hidden');
+    }
   }
 
   form?.addEventListener('submit', async (e) => {
@@ -110,40 +134,33 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     setLoading(true);
 
     const formData = new FormData(form);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
 
     try {
-      const res = await actions.auth.signIn({ email, password });
+      // Use REST API for reliable cookie setting
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.get('email'),
+          password: formData.get('password')
+        }),
+        credentials: 'include'
+      });
+
+      const res = await response.json();
       setLoading(false);
 
       if (res.success) {
-        if (message) {
-          message.textContent = 'Login successful! Redirecting...';
-          message.className = message.className
-            .replace(/bg-red-\d+/g, 'bg-green-50')
-            .replace(/text-red-\d+/g, 'text-green-700')
-            .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
-            .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
-          message.classList.remove('hidden');
-        }
-        if (res.user?.id) {
-          localStorage.setItem('userId', res.user.id);
-          localStorage.setItem('userName', res.user.name || '');
-        }
-        window.location.href = '/account';
+        showSuccess('Login successful! Redirecting...');
+        window.location.assign('/account');
+        return;
       } else {
-        if (message) {
-          message.textContent = res.error?.message || 'Login failed';
-          message.classList.remove('hidden');
-        }
+        showError(res.error?.message || 'Invalid email or password');
       }
-    } catch {
+    } catch (err) {
+      console.error('[LOGIN] Error:', err);
       setLoading(false);
-      if (message) {
-        message.textContent = 'Network error. Please try again.';
-        message.classList.remove('hidden');
-      }
+      showError('Network error. Please try again.');
     }
   });
 </script>

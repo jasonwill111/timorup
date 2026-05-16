@@ -101,18 +101,40 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
 </Layout>
 
 <script>
-  import { actions } from 'astro:actions';
-
   const form = document.getElementById('register-form');
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
   const btnText = document.getElementById('submit-btn-text');
   const btnLoading = document.getElementById('submit-btn-loading');
-  const message = document.getElementById('form-message');
+  const message = document.getElementById('form-message') as HTMLElement;
 
   function setLoading(loading: boolean) {
     if (submitBtn) submitBtn.disabled = loading;
     btnText?.classList.toggle('hidden', loading);
     btnLoading?.classList.toggle('hidden', !loading);
+  }
+
+  function showError(msg: string) {
+    if (message) {
+      message.textContent = msg;
+      message.className = message.className
+        .replace(/bg-green-\d+/g, 'bg-red-50')
+        .replace(/text-green-\d+/g, 'text-red-700')
+        .replace(/dark:bg-green-\d+/g, 'dark:bg-red-900/20')
+        .replace(/dark:text-green-\d+/g, 'dark:text-red-400');
+      message.classList.remove('hidden');
+    }
+  }
+
+  function showSuccess(msg: string) {
+    if (message) {
+      message.textContent = msg;
+      message.className = message.className
+        .replace(/bg-red-\d+/g, 'bg-green-50')
+        .replace(/text-red-\d+/g, 'text-green-700')
+        .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
+        .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
+      message.classList.remove('hidden');
+    }
   }
 
   form?.addEventListener('submit', async (e) => {
@@ -122,18 +144,12 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     const confirm = (document.getElementById('confirmPassword') as HTMLInputElement)?.value;
 
     if (password !== confirm) {
-      if (message) {
-        message.textContent = 'Passwords do not match';
-        message.classList.remove('hidden');
-      }
+      showError('Passwords do not match');
       return;
     }
 
     if (password.length < 8) {
-      if (message) {
-        message.textContent = 'Password must be at least 8 characters';
-        message.classList.remove('hidden');
-      }
+      showError('Password must be at least 8 characters');
       return;
     }
 
@@ -141,42 +157,33 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     setLoading(true);
 
     const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
 
     try {
-      const result = await actions.auth.signUp({
-        email: data.email as string,
-        password: data.password as string,
-        name: data.name as string
+      const response = await fetch('/api/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.get('email'),
+          password: formData.get('password'),
+          name: formData.get('name')
+        }),
+        credentials: 'include'
       });
 
+      const res = await response.json();
       setLoading(false);
 
-      if (result.success) {
-        if (message) {
-          message.textContent = result.message || 'Account created successfully!';
-          message.className = message.className
-            .replace(/bg-red-\d+/g, 'bg-green-50')
-            .replace(/text-red-\d+/g, 'text-green-700')
-            .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
-            .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
-          message.classList.remove('hidden');
-        }
+      if (res.success) {
+        showSuccess('Account created successfully! Redirecting...');
         setTimeout(() => {
           window.location.href = '/account';
         }, 1500);
       } else {
-        if (message) {
-          message.textContent = result.error?.message || 'Registration failed';
-          message.classList.remove('hidden');
-        }
+        showError(res.error?.message || 'Registration failed');
       }
     } catch {
       setLoading(false);
-      if (message) {
-        message.textContent = 'Network error. Please try again.';
-        message.classList.remove('hidden');
-      }
+      showError('Network error. Please try again.');
     }
   });
 </script>

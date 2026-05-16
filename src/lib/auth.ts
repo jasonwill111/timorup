@@ -34,30 +34,32 @@ function convertToTimestamp(value: unknown): number | unknown {
   return value;
 }
 
-// Drizzle DB wrapper interface for timestamp conversion
-interface DrizzleDbWrapper {
-  insert: (table: unknown) => {
-    values: (data: unknown) => unknown;
-  };
-}
-
-// Wrap db to convert Date objects to timestamps before insert
-function wrapDbForD1(db: DrizzleDbWrapper): DrizzleDbWrapper {
-  if (!db || !db.insert) return db;
-
-  const originalInsert = db.insert.bind(db);
-  db.insert = (table: unknown) => {
-    const originalQueryBuilder = originalInsert(table);
-    const originalValues = originalQueryBuilder.values.bind(originalQueryBuilder);
-
-    originalQueryBuilder.values = (data: unknown) => {
-      return originalValues(convertToTimestamp(data));
-    };
-
-    return originalQueryBuilder;
-  };
-
-  return db;
+// Wrapper that only intercepts insert to convert Date to timestamps
+function wrapDbForD1(db: any): any {
+  return new Proxy(db, {
+    get(target, prop) {
+      if (prop === 'insert') {
+        return function(table: any) {
+          const query = target.insert(table);
+          return new Proxy(query, {
+            get(qTarget, qProp) {
+              if (qProp === 'values') {
+                return function(data: any) {
+                  return qTarget.values.call(qTarget, convertToTimestamp(data));
+                };
+              }
+              return qTarget[qProp];
+            }
+          });
+        };
+      }
+      const value = target[prop];
+      if (typeof value === 'function') {
+        return value.bind(target);
+      }
+      return value;
+    }
+  });
 }
 
 // Factory function to create auth instance with given db and env
@@ -184,8 +186,23 @@ let initPromise: Promise<BetterAuthInstance> | undefined;
 export async function initAuth(env?: { SESSION?: KVNamespace }) {
   if (!_initAuth) {
     initPromise ??= (async () => {
+      console.log('[initAuth] Getting DB...');
       const db = await getDb();
-      return createAuth(db, env);
+      console.log('[initAuth] DB status:', db ? 'ready' : 'null');
+
+      if (!db) {
+        throw new Error('[initAuth] Database not available. Check env.DB binding.');
+      }
+
+      console.log('[initAuth] Creating auth with DB, db type:', typeof db, 'has select:', !!db?.select);
+      try {
+        const auth = createAuth(db, env);
+        console.log('[initAuth] Auth created successfully');
+        return auth;
+      } catch (createErr) {
+        console.error('[initAuth] createAuth failed:', createErr);
+        throw createErr;
+      }
     })();
     _initAuth = await initPromise;
   }

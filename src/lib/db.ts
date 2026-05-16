@@ -4,6 +4,14 @@
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '@/db/schema';
 
+// Type for Cloudflare Workers env
+interface CfEnv {
+  DB?: D1Database;
+  SESSION?: KVNamespace;
+  MEDIA_BUCKET?: R2Bucket;
+  [key: string]: unknown;
+}
+
 // Global singleton - initialized once per Worker cold start
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
@@ -12,21 +20,33 @@ let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
  * Uses cloudflare:workers env.DB - works with remote bindings in local dev
  */
 export async function getDb(): Promise<ReturnType<typeof drizzle<typeof schema>> | null> {
-  if (_db) return _db;
-
+  // Always check env first - don't rely on cached _db
   try {
-    // Only try to access cloudflare:workers in Cloudflare environment
-    if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
-      const env = (globalThis as any).env;
-      if (env?.DB) {
-        _db = drizzle(env.DB as D1Database, { schema });
-      }
+    // Try to get env from cloudflare:workers module
+    let cfEnv: CfEnv | null = null;
+
+    try {
+      const { env: workersEnv } = await import('cloudflare:workers');
+      cfEnv = workersEnv as CfEnv;
+    } catch {
+      // cloudflare:workers not available, try globalThis
+      cfEnv = (globalThis as any).env;
+    }
+
+    if (cfEnv?.DB) {
+      const freshDb = drizzle(cfEnv.DB as D1Database, { schema });
+      _db = freshDb; // Update cache
+      console.log('[getDb] Fresh DB initialized from cloudflare:workers env.DB');
+      return freshDb;
+    } else {
+      console.error('[getDb] env.DB not available. CF_ENV keys:', Object.keys(cfEnv || {}));
+      if (_db) return _db; // Return cached if available
+      return null;
     }
   } catch (e) {
     console.error('[getDb] Failed to initialize:', e);
+    return _db; // Return cached if available
   }
-
-  return _db;
 }
 
 /**
