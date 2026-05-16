@@ -11,13 +11,16 @@ let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
  * Get Drizzle DB instance
  * Uses cloudflare:workers env.DB - works with remote bindings in local dev
  */
-export async function getDb() {
+export async function getDb(): Promise<ReturnType<typeof drizzle<typeof schema>> | null> {
   if (_db) return _db;
 
   try {
-    const { env } = await import('cloudflare:workers');
-    if (env.DB) {
-      _db = drizzle(env.DB, { schema });
+    // Only try to access cloudflare:workers in Cloudflare environment
+    if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
+      const env = (globalThis as any).env;
+      if (env?.DB) {
+        _db = drizzle(env.DB as D1Database, { schema });
+      }
     }
   } catch (e) {
     console.error('[getDb] Failed to initialize:', e);
@@ -29,7 +32,7 @@ export async function getDb() {
 /**
  * Initialize DB with a D1Database instance (for middleware)
  */
-export function initDb(d1Db: D1Database) {
+export function initDb(d1Db: D1Database): ReturnType<typeof drizzle<typeof schema>> {
   _db = drizzle(d1Db, { schema });
   return _db;
 }

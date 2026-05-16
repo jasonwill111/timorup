@@ -1,6 +1,6 @@
 ---
-// Pricing page - mostly static, pricing cards are Server Island
-export const prerender = true;
+// Pricing page - SSR to access database for pricing cards
+export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import PricingCards from '@/components/islands/PricingCards.astro';
 ---

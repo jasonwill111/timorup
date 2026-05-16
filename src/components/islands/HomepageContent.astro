@@ -52,11 +52,18 @@ type ListingItem = {
 
 const db = await getDb();
 
+// Guard: if db is null, show empty state
+if (!db) {
+  console.error('[HomepageContent] Database not available');
+}
+
 let featuredBusinesses: BusinessListing[] = [];
 let featuredListings: ListingItem[] = [];
 let featuredProducts: ProductListing[] = [];
 
 try {
+  if (!db) throw new Error('Database not initialized');
+
   // Featured Businesses (live or published, limit 12)
   const businessesResult = await db.select({
     id: businesses.id,

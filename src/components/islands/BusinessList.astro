@@ -11,14 +11,19 @@ const search = searchParams.get('q') || '';
 const PAGE_SIZE = 24;
 const OFFSET = (page - 1) * PAGE_SIZE;
 
-// Query published businesses
-const conditions = [eq(businesses.status, 'published')];
+// Guard: if db is null, show empty state
+if (!db) {
+  console.error('[BusinessList] Database not available');
+}
 
-let allBusinesses = await db.select()
-  .from(businesses)
-  .where(eq(businesses.status, 'published'))
-  .orderBy(desc(businesses.createdAt))
-  .all();
+let allBusinesses = db
+  ? await db
+      .select()
+      .from(businesses)
+      .where(eq(businesses.status, 'published'))
+      .orderBy(desc(businesses.createdAt))
+      .all()
+  : [];
 
 // Search filter
 if (search) {

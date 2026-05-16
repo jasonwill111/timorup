@@ -29,27 +29,35 @@ const whereCondition = statusFilter;
 
 // Get categories for filter
 const db = await getDb();
-const allCategories = await db.select().from(businessCategories).all();
+
+// Guard: if db is null, show empty state
+if (!db) {
+  console.error('[ListingContent] Database not available');
+}
+
+const allCategories = db ? await db.select().from(businessCategories).all() : [];
 
 // Query listings with combined filter
-const allListings = await db
-  .select({
-    id: businesses.id,
-    title: businesses.title,
-    slug: businesses.slug,
-    organizationType: businesses.organizationType,
-    industry: businesses.industry,
-    categoryId: businesses.categoryId,
-    profileImageId: businesses.profileImageId,
-    address: businesses.address,
-    ratingAverage: businesses.ratingAverage,
-    likes: businesses.likes,
-    createdAt: businesses.createdAt,
-  })
-  .from(businesses)
-  .where(whereCondition)
-  .orderBy(desc(businesses.createdAt))
-  .all();
+const allListings = db
+  ? await db
+      .select({
+        id: businesses.id,
+        title: businesses.title,
+        slug: businesses.slug,
+        organizationType: businesses.organizationType,
+        industry: businesses.industry,
+        categoryId: businesses.categoryId,
+        profileImageId: businesses.profileImageId,
+        address: businesses.address,
+        ratingAverage: businesses.ratingAverage,
+        likes: businesses.likes,
+        createdAt: businesses.createdAt,
+      })
+      .from(businesses)
+      .where(whereCondition)
+      .orderBy(desc(businesses.createdAt))
+      .all()
+  : [];
 
 // Apply search/filter in memory
 let filteredListings = allListings;

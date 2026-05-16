@@ -1,5 +1,6 @@
 ---
-export const prerender = true;
+// Products & Services page - SSR with client-side filtering
+export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Input from '../../components/ui/Input.astro';
@@ -7,42 +8,83 @@ import { getDb } from '@/lib/db';
 import { products, businesses } from '@/db/schema';
 import { desc, eq } from 'drizzle-orm';
 
+// Get database instance
 const db = await getDb();
 
+// If database is not available, show error
+if (!db) {
+  return new Response('Service temporarily unavailable', { status: 503 });
+}
+
 // Get all businesses for filter
-const allBusinesses = await db
-  .select({
-    id: businesses.id,
-    title: businesses.title,
-    slug: businesses.slug,
-  })
-  .from(businesses)
-  .where(eq(businesses.status, 'live'))
-  .all();
+let allBusinesses: any[] = [];
+try {
+  allBusinesses = await db
+    .select({
+      id: businesses.id,
+      title: businesses.title,
+      slug: businesses.slug,
+    })
+    .from(businesses)
+    .where(eq(businesses.status, 'live'))
+    .all();
+} catch (e) {
+  console.error('Failed to fetch businesses:', e);
+  allBusinesses = [];
+}
 
 // Get all products with business info
-const allProducts = await db
-  .select()
-  .from(products)
-  .orderBy(desc(products.createdAt))
-  .all();
+let allProducts: any[] = [];
+try {
+  allProducts = await db
+    .select()
+    .from(products)
+    .orderBy(desc(products.createdAt))
+    .all();
+} catch (e) {
+  console.error('Failed to fetch products:', e);
+  allProducts = [];
+}
 
 // Join with business data
 const productsWithBusiness = allProducts
-  .map(p => {
-    const business = allBusinesses.find(b => b.id === p.businessId);
+  .map((p: any) => {
+    const business = allBusinesses.find((b: any) => b.id === p.businessId);
     return {
-      ...p,
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      priceFields: p.priceFields,
+      productType: p.productType,
+      businessId: p.businessId,
       businessTitle: business?.title || 'Unknown',
       businessSlug: business?.slug || '',
       businessType: business?.entityType || 'business',
     };
   })
-  .filter(p => p.businessTitle !== 'Unknown');
+  .filter((p: any) => p.businessTitle !== 'Unknown');
 
-// Serialize for client
-const businessesJson = JSON.stringify(allBusinesses);
-const productsJson = JSON.stringify(productsWithBusiness);
+// Serialize for client - ensure all values are strings or primitives
+const safeBusinesses = allBusinesses.map((b: any) => ({
+  id: String(b.id || ''),
+  title: String(b.title || ''),
+  slug: String(b.slug || ''),
+}));
+
+const safeProducts = productsWithBusiness.map((p: any) => ({
+  id: String(p.id || ''),
+  title: String(p.title || ''),
+  price: p.price ? String(p.price) : null,
+  priceFields: p.priceFields ? String(p.priceFields) : null,
+  productType: p.productType ? String(p.productType) : null,
+  businessId: String(p.businessId || ''),
+  businessTitle: String(p.businessTitle || ''),
+  businessSlug: String(p.businessSlug || ''),
+  businessType: String(p.businessType || 'business'),
+}));
+
+const businessesJson = JSON.stringify(safeBusinesses);
+const productsJson = JSON.stringify(safeProducts);
 
 const structuredData = {
   "@context": "https://schema.org",

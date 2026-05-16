@@ -12,11 +12,18 @@ interface Props {
 const { businessId, slug } = Astro.props;
 const db = await getDb();
 
-const businessProducts = await db.select()
-  .from(products)
-  .where(eq(products.businessId, businessId))
-  .orderBy(desc(products.createdAt))
-  .all();
+// Guard: if db is null, show empty state
+if (!db) {
+  console.error('[ProductsSection] Database not available');
+}
+
+const businessProducts = db
+  ? await db.select()
+      .from(products)
+      .where(eq(products.businessId, businessId))
+      .orderBy(desc(products.createdAt))
+      .all()
+  : [];
 
 // Images stored via media table (entityType: 'products')
 ---

@@ -49,20 +49,130 @@
     "tags": [],
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
-    "version": "1.59.1",
+    "version": "1.60.0",
     "workers": 1,
     "webServer": null
   },
   "suites": [],
   "errors": [
     {
-      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
-      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/comprehensive.spec.ts:33:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/comprehensive.spec.ts",
+        "column": 6,
+        "line": 33
+      },
+      "snippet": "\u001b[90m   at \u001b[39mcomprehensive.spec.ts:33\n\n  31 | // ==================== PUBLIC PAGES ====================\n  32 |\n> 33 | test.describe('Public Pages', () => {\n     |      ^\n  34 |   test('Homepage loads', async ({ page }) => {\n  35 |     const response = await page.goto(BASE_URL);\n  36 |     expect(response?.status()).toBe(200);"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/full-flow.spec.ts:23:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/full-flow.spec.ts",
+        "column": 6,
+        "line": 23
+      },
+      "snippet": "\u001b[90m   at \u001b[39mfull-flow.spec.ts:23\n\n  21 | // ==================== TESTS ====================\n  22 |\n> 23 | test.describe('User Registration Flow', () => {\n     |      ^\n  24 |   test('register new user', async ({ page }) => {\n  25 |     await page.goto(`${BASE_URL}/register`);\n  26 |"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/seo.spec.ts:5:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/seo.spec.ts",
+        "column": 6,
+        "line": 5
+      },
+      "snippet": "\u001b[90m   at \u001b[39mseo.spec.ts:5\n\n  3 | const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8787';\n  4 |\n> 5 | test.describe('SEO: Sitemap & Breadcrumb', () => {\n    |      ^\n  6 |\n  7 |   test('sitemap.xml returns valid XML', async ({ page }) => {\n  8 |     const response = await page.request.get(`${BASE_URL}/sitemap.xml`);"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/tdd-e2e.spec.ts:27:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/tdd-e2e.spec.ts",
+        "column": 6,
+        "line": 27
+      },
+      "snippet": "\u001b[90m   at \u001b[39mtdd-e2e.spec.ts:27\n\n  25 | // ==================== TDD: RED (Write failing tests first) ====================\n  26 |\n> 27 | test.describe('TDD: User Story 1 - Authentication', () => {\n     |      ^\n  28 |   // Given: A user visits the login page\n  29 |   // When: They enter valid credentials\n  30 |   // Then: They should be logged in and redirected"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-001.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-001.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-001.spec.ts:9\n\n   7 |  * So that system maintains clean data model\n   8 |  */\n>  9 | test.describe('US-001: One Listing Per User', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US1-01: User without listing sees both Business and Non-Profit options when creating', async ({ page }) => {\n  12 |     // Given: a logged-in user with no existing listing"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-002.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-002.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-002.spec.ts:9\n\n   7 |  * So that government agencies and NGOs can list free\n   8 |  */\n>  9 | test.describe('US-002: Non-Profit Listing (Free, Immediate)', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US2-01: Non-profit listing becomes status published immediately after creation', async ({ page }) => {\n  12 |     // Given: a logged-in user with no existing listing"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-003.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-003.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-003.spec.ts:9\n\n   7 |  * So that only paid listings are visible\n   8 |  */\n>  9 | test.describe('US-003: Business Listing Requires Subscription', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US3-01: New business listing created with status pending_payment', async ({ page }) => {\n  12 |     // Given: a logged-in user with no existing listing"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-004.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-004.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-004.spec.ts:9\n\n   7 |  * So that I don't waste SKU quota before business is live\n   8 |  */\n>  9 | test.describe('US-004: SKU Creation After Activation', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US4-01: SKU creation page/API blocked if business status != published', async ({ page }) => {\n  12 |     // Given: a business listing with `status: 'pending_payment'` or `'expired'`"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-005.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-005.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-005.spec.ts:9\n\n   7 |  * So that users have time to renew without immediate data loss\n   8 |  */\n>  9 | test.describe('US-005: Grace Period (60 Days)', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US5-01: When subscription expires, listing status set to expired', async ({ page }) => {\n  12 |     // Given: a business listing with an active subscription"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-006.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-006.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-006.spec.ts:9\n\n   7 |  * So that access control reflects payment status\n   8 |  */\n>  9 | test.describe('US-006: Subscription Expiry Sync', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US6-01: Listing checks subscription status before allowing SKU operations', async ({ page }) => {\n  12 |     // Given: a business listing with an expired subscription"
+    },
+    {
+      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
+      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-007.spec.ts:9:6",
+      "location": {
+        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-007.spec.ts",
+        "column": 6,
+        "line": 9
+      },
+      "snippet": "\u001b[90m   at \u001b[39mus-007.spec.ts:9\n\n   7 |  * So that database stays clean\n   8 |  */\n>  9 | test.describe('US-007: Scheduled Cleanup Job', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US7-01: Scheduled job runs daily (or on demand)', async ({ page }) => {\n  12 |     // Given: a scheduled job is configured for cleanup"
+    },
+    {
+      "message": "Error: No tests found",
+      "stack": "Error: No tests found"
     }
   ],
   "stats": {
-    "startTime": "2026-05-14T02:12:43.148Z",
-    "duration": 23.024,
+    "startTime": "2026-05-16T00:36:16.904Z",
+    "duration": 157.17100000000005,
     "expected": 0,
     "skipped": 0,
     "unexpected": 0,

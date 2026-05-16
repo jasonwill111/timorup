@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "lastCheckAt": "2026-05-15T06:45:16.138Z",
+  "lastCheckAt": "2026-05-15T15:37:10.268Z",
   "lastResult": {
-    "pluginUpdates": 1,
+    "pluginUpdates": 2,
     "skillUpdates": 1,
     "doctorStatus": "warn"
   },
-  "lastBannerShownAt": "2026-05-15T06:45:16.138Z"
+  "lastBannerShownAt": "2026-05-15T15:37:10.268Z"
 }

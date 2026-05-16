@@ -25,7 +25,12 @@ interface Props {
 const { businessId, categoryId, locationLat, locationLng, address, tags, openingHours } = Astro.props;
 const db = await getDb();
 
-const category = categoryId
+// Guard: if db is null, skip database queries
+if (!db) {
+  console.error('[BusinessSidebar] Database not available');
+}
+
+const category = db && categoryId
   ? await db.select().from(businessCategories).where(eq(businessCategories.id, categoryId)).get()
   : null;
 ---

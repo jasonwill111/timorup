@@ -7,12 +7,17 @@ import Button from '@/components/ui/Button.astro';
 
 const db = await getDb();
 
-// Get active subscription packages
-const allPackages = await db.select()
-  .from(servicePackages)
-  .where(eq(servicePackages.isActive, 1))
-  .orderBy(asc(servicePackages.sortOrder))
-  .all();
+// Guard: if db is null (local dev without D1 binding), show empty state
+if (!db) {
+  console.error('[PricingCards] Database not available - returning empty state');
+}
+const allPackages = db
+  ? await db.select()
+      .from(servicePackages)
+      .where(eq(servicePackages.isActive, 1))
+      .orderBy(asc(servicePackages.sortOrder))
+      .all()
+  : [];
 
 // Parse and categorize
 const businessPlans = allPackages
