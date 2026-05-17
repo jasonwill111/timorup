@@ -46,6 +46,7 @@ sw:sync-docs 0001
 - [FS-056: Homepage Redesign Tabs](FS-056/FEATURE.md)
 - [FS-057: Astro Server Islands Optimization](FS-057/FEATURE.md)
 - [FS-058: Code Quality Cleanup P0](FS-058/FEATURE.md)
+- [FS-059: Performance Optimization - 0059](FS-059/FEATURE.md)
 
 ---
 

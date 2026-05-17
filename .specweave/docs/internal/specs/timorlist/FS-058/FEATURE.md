@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P0
 created: 2026-05-15T00:00:00.000Z
-lastUpdated: 2026-05-15
+lastUpdated: 2026-05-17
 tldr: "修复 4 类技术债：."
 complexity: high
 stakeholder_relevant: true

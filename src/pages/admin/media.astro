@@ -5,7 +5,7 @@ export const prerender = false;
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import { getDb } from '@/lib/db';
 import { media, sessions, users } from '@/db/schema';
-import { eq, like, sql, desc, isNull } from 'drizzle-orm';
+import { eq, like, sql, desc, isNull, and } from 'drizzle-orm';
 import { actions } from 'astro:actions';
 
 // Check admin auth using direct DB query
@@ -61,17 +61,15 @@ const offset = (page - 1) * limit;
 const db = await getDb();
 
 // Build query conditions
-let mediaQuery = db.select().from(media);
-
-// Apply filters
+const conditions = [];
 if (entityTypeFilter) {
-  mediaQuery = mediaQuery.where(eq(media.entityType, entityTypeFilter)) as MediaData;
+  conditions.push(eq(media.entityType, entityTypeFilter));
 }
 if (entityIdFilter) {
-  mediaQuery = mediaQuery.where(eq(media.entityId, entityIdFilter)) as MediaData;
+  conditions.push(eq(media.entityId, entityIdFilter));
 }
 if (categoryFilter) {
-  mediaQuery = mediaQuery.where(eq(media.category, categoryFilter)) as MediaData;
+  conditions.push(eq(media.purpose, categoryFilter));
 }
 
 // Get total count
@@ -79,19 +77,24 @@ const countResult = await db.select({ count: sql<number>`count(*)` }).from(media
 const total = countResult[0]?.count || 0;
 
 // Get paginated results
-const mediaItems = await mediaQuery
-  .orderBy(desc(media.createdAt))
-  .limit(limit)
-  .offset(offset)
-  .all();
+const mediaItems = conditions.length > 0
+  ? await db.select().from(media).where(and(...conditions)).orderBy(desc(media.createdAt)).limit(limit).offset(offset).all()
+  : await db.select().from(media).orderBy(desc(media.createdAt)).limit(limit).offset(offset).all();
 
 // Calculate total size
 const totalSize = mediaItems.reduce((acc, item) => acc + (item.size || 0), 0);
 const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
 
 // Get unique entity types for filter dropdown
-const entityTypes = await db.selectDistinct({ entityType: media.entityType }).from(media);
-const categories = await db.selectDistinct({ category: media.category }).from(media);
+const allMedia = await db.select({ entityType: media.entityType, purpose: media.purpose }).from(media).all();
+const entityTypesMap = new Map<string, boolean>();
+const categoriesMap = new Map<string, boolean>();
+for (const item of allMedia) {
+  if (item.entityType) entityTypesMap.set(item.entityType, true);
+  if (item.purpose) categoriesMap.set(item.purpose, true);
+}
+const entityTypes = Array.from(entityTypesMap.keys()).map(e => ({ entityType: e }));
+const categories = Array.from(categoriesMap.keys()).map(c => ({ category: c }));
 
 // Helper to format file size
 function formatSize(bytes: number | null): string {

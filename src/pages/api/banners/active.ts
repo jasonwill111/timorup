@@ -13,19 +13,27 @@ export async function GET() {
       title: adBanners.title,
       description: adBanners.description,
       imageId: adBanners.imageId,
-      linkedBusinessPageId: adBanners.linkedBusinessPageId,
-      externalUrl: adBanners.externalUrl,
+      linkUrl: adBanners.linkUrl,
+      linkType: adBanners.linkType,
     })
     .from(adBanners)
     .where(eq(adBanners.isActive, true))
     .limit(5)
     .all();
 
-    const bannersWithImages = banners.map((banner) => ({
-      ...banner,
-      imageUrl: banner.imageId ? `/api/media/${banner.imageId}` : '/images/default-banner.jpg',
-      linkUrl: banner.externalUrl || (banner.linkedBusinessPageId ? `/business/${banner.linkedBusinessPageId}` : null),
-    }));
+    const bannersWithImages = banners.map((banner) => {
+      const imageId = banner.imageId;
+      const lnkUrl = banner.linkUrl;
+      const lnkType = banner.linkType;
+      return {
+        id: banner.id,
+        title: banner.title || '',
+        description: banner.description || '',
+        imageUrl: imageId ? `/api/media/${imageId}` : '/images/default-banner.jpg',
+        linkUrl: lnkUrl || null,
+        linkType: lnkType || 'business',
+      };
+    });
 
     return new Response(JSON.stringify({ success: true, data: bannersWithImages }), {
       status: 200,

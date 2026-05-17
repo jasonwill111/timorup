@@ -1,0 +1,19 @@
+{
+  "id": "0059-performance-optimization",
+  "status": "completed",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-17T00:00:00.000Z",
+  "lastActivity": "2026-05-17T02:34:19.697Z",
+  "testMode": "none",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist",
+  "readyForReviewAt": "2026-05-17T02:34:19.657Z",
+  "approvedAt": "2026-05-17T02:34:19.697Z"
+}

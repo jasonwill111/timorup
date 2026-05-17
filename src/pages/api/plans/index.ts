@@ -48,14 +48,14 @@ export async function GET({ request }: { request: Request }) {
     // Get active plans sorted by sortOrder
     const allPlans = await db.select()
       .from(plans)
-      .where(eq(plans.active, true))
+      .where(eq(plans.isActive, true))
       .orderBy(asc(plans.sortOrder))
       .all();
 
-    // Parse features JSON for each plan
+    // Parse variants JSON for each plan
     const plansWithParsedFeatures = allPlans.map(plan => ({
       ...plan,
-      features: plan.features ? JSON.parse(plan.features) : [],
+      variants: plan.variants ? JSON.parse(plan.variants) : [],
     }));
 
     const response = new Response(JSON.stringify({
