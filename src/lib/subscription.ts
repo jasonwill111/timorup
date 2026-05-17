@@ -63,53 +63,38 @@ export interface SubscriptionInfo {
   isActive: boolean;
 }
 
+// Dashboard interface - same as SubscriptionInfo but grouped
+export interface SubscriptionDashboard {
+  businessId: string;
+  status: SubscriptionStatus;
+  planSlug: string | null;
+  skuLimit: number;
+  skuCount: number;
+  maxImages: number;
+  maxVideos: number;
+  expiresAt: Date | null;
+  gracePeriodEndDate: Date | null;
+  isInGracePeriod: boolean;
+  isActive: boolean;
+}
+
 /**
  * Get subscription info for a business
+ * Uses getSubscriptionDashboard for batching
  */
 export async function getSubscriptionInfo(businessId: string): Promise<SubscriptionInfo | null> {
-  const db = await getDb();
-
-  const business = await db.select()
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .limit(1)
-    .get();
-
-  if (!business) return null;
-
-  // Count SKUs for this business
-  const skuResult = await db.select({ count: count() })
-    .from(products)
-    .where(eq(products.businessId, businessId))
-    .get();
-
-  const skuCount = skuResult?.count ?? 0;
-  const planSlug = business.planSlug || null;
-  const planLimits = planSlug ? await getPlanLimits(planSlug) : null;
-  const skuLimit = planLimits?.skuLimit ?? 0;
-
-  // Check grace period
-  const now = new Date();
-  const gracePeriodEnd = business.gracePeriodEndDate
-    ? new Date(business.gracePeriodEndDate)
-    : null;
-  const expiresAt = business.subscriptionExpiresAt
-    ? new Date(business.subscriptionExpiresAt)
-    : null;
-
-  const isInGracePeriod = gracePeriodEnd
-    ? now < gracePeriodEnd && expiresAt && now > expiresAt
-    : false;
+  const dashboard = await getSubscriptionDashboard(businessId);
+  if (!dashboard) return null;
 
   return {
-    status: (business.subscriptionStatus as SubscriptionStatus) || 'none',
-    planSlug,
-    skuLimit,
-    skuCount,
-    expiresAt,
-    gracePeriodEndDate: gracePeriodEnd,
-    isInGracePeriod,
-    isActive: business.subscriptionStatus === 'active',
+    status: dashboard.status,
+    planSlug: dashboard.planSlug,
+    skuLimit: dashboard.skuLimit,
+    skuCount: dashboard.skuCount,
+    expiresAt: dashboard.expiresAt,
+    gracePeriodEndDate: dashboard.gracePeriodEndDate,
+    isInGracePeriod: dashboard.isInGracePeriod,
+    isActive: dashboard.isActive,
   };
 }
 
@@ -117,7 +102,7 @@ export async function getSubscriptionInfo(businessId: string): Promise<Subscript
  * Check if user can create SKU for a business
  */
 export async function canCreateSku(businessId: string): Promise<{ can: boolean; reason?: string }> {
-  const info = await getSubscriptionInfo(businessId);
+  const info = await getSubscriptionDashboard(businessId);
   if (!info) return { can: false, reason: 'Business not found' };
 
   // Non-profit or business without subscription
@@ -152,7 +137,7 @@ export async function canCreateSku(businessId: string): Promise<{ can: boolean; 
  * Check if user can edit business content
  */
 export async function canEditBusiness(businessId: string): Promise<{ can: boolean; reason?: string }> {
-  const info = await getSubscriptionInfo(businessId);
+  const info = await getSubscriptionDashboard(businessId);
   if (!info) return { can: false, reason: 'Business not found' };
 
   // In grace period - cannot edit
@@ -167,7 +152,7 @@ export async function canEditBusiness(businessId: string): Promise<{ can: boolea
  * Check if business is in grace period
  */
 export async function isInGracePeriod(businessId: string): Promise<boolean> {
-  const info = await getSubscriptionInfo(businessId);
+  const info = await getSubscriptionDashboard(businessId);
   return info?.isInGracePeriod ?? false;
 }
 
@@ -191,11 +176,116 @@ export async function getGracePeriodDaysRemaining(businessId: string): Promise<n
 }
 
 /**
+ * Get subscription dashboard - BATCHED VERSION
+ * Reduces 3+ DB calls to fewer calls for complete subscription info
+ */
+export interface SubscriptionDashboard {
+  businessId: string;
+  status: SubscriptionStatus;
+  planSlug: string | null;
+  skuLimit: number;
+  skuCount: number;
+  maxImages: number;
+  maxVideos: number;
+  expiresAt: Date | null;
+  gracePeriodEndDate: Date | null;
+  isInGracePeriod: boolean;
+  isActive: boolean;
+}
+
+/**
+ * Get full subscription dashboard for a business
+ * Batched: 1 business query + 1 SKU count + 1 plan lookup (if needed)
+ *
+ * Use this for any operation requiring full subscription context
+ */
+export async function getSubscriptionDashboard(businessId: string): Promise<SubscriptionDashboard | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  // Query 1: Get business with subscription info
+  const business = await db.select({
+    id: businesses.id,
+    planSlug: businesses.planSlug,
+    subscriptionStatus: businesses.subscriptionStatus,
+    subscriptionExpiresAt: businesses.subscriptionExpiresAt,
+    gracePeriodEndDate: businesses.gracePeriodEndDate,
+  })
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1)
+    .get();
+
+  if (!business) return null;
+
+  // Query 2: Count SKUs
+  const skuResult = await db.select({ count: count() })
+    .from(products)
+    .where(eq(products.businessId, businessId))
+    .get();
+
+  const skuCount = skuResult?.count ?? 0;
+  const planSlug = business.planSlug || null;
+
+  // Query 3: Get plan limits (only if plan exists)
+  let skuLimit = 0;
+  let maxImages = 0;
+  let maxVideos = 0;
+
+  if (planSlug) {
+    const plan = await db.select({ variants: servicePackages.variants })
+      .from(servicePackages)
+      .where(eq(servicePackages.slug, planSlug))
+      .limit(1)
+      .get();
+
+    if (plan?.variants) {
+      try {
+        const variants = JSON.parse(plan.variants);
+        if (Array.isArray(variants) && variants.length > 0) {
+          skuLimit = variants[0].limits?.skuLimit ?? 0;
+          maxImages = variants[0].limits?.maxImages ?? 0;
+          maxVideos = variants[0].limits?.maxVideos ?? 0;
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }
+
+  // Calculate grace period status
+  const now = new Date();
+  const gracePeriodEnd = business.gracePeriodEndDate
+    ? new Date(business.gracePeriodEndDate)
+    : null;
+  const expiresAt = business.subscriptionExpiresAt
+    ? new Date(business.subscriptionExpiresAt)
+    : null;
+
+  const isInGracePeriod = gracePeriodEnd
+    ? now < gracePeriodEnd && expiresAt && now > expiresAt
+    : false;
+
+  return {
+    businessId,
+    status: (business.subscriptionStatus as SubscriptionStatus) || 'none',
+    planSlug,
+    skuLimit,
+    skuCount,
+    maxImages,
+    maxVideos,
+    expiresAt,
+    gracePeriodEndDate: gracePeriodEnd,
+    isInGracePeriod,
+    isActive: business.subscriptionStatus === 'active',
+  };
+}
+
+/**
  * Check if listing is past grace period (ready for deletion)
  */
 export async function isPastGracePeriod(businessId: string): Promise<boolean> {
-  const info = await getSubscriptionInfo(businessId);
-  if (!info || !info.gracePeriodEndDate) return false;
-
-  return new Date() > info.gracePeriodEndDate;
+  const dashboard = await getSubscriptionDashboard(businessId);
+  if (!dashboard || !dashboard.gracePeriodEndDate) return false;
+  return new Date() > dashboard.gracePeriodEndDate;
 }

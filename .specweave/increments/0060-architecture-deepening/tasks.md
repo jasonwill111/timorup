@@ -1,0 +1,39 @@
+# 0060 - Architecture Deepening Tasks
+
+## T-001: Subscription Batching
+**AC**: AC-01 | **Status**: [x] completed
+**Test**: Given businessId → When getSubscriptionDashboard() called → Then 1 DB query returns all data
+
+✅ Implemented `getSubscriptionDashboard()` with 2-3 queries (business + SKU count + plan)
+✅ Updated `getSubscriptionInfo()` to use dashboard
+✅ Updated `canCreateSku()` to use dashboard
+✅ Updated `canEditBusiness()` to use dashboard
+✅ Updated `isInGracePeriod()` to use dashboard
+✅ Updated `isPastGracePeriod()` to use dashboard
+
+## T-002: DB Adapter Interface
+**AC**: AC-02 | **Status**: [ ] pending
+**Test**: Given subscription.ts → When tested with mock adapter → Then no cloudflare:workers dependency
+
+DEFERRED - complexity vs benefit ratio low
+
+## T-003: Zod Schema Generation
+**AC**: AC-03 | **Status**: [ ] pending
+**Test**: Given drizzle schema → When generateZodSchema() called → Then valid Zod schema returned
+
+DEFERRED - complexity vs benefit ratio low
+
+## T-004: Barrel Consolidation
+**AC**: AC-04 | **Status**: [x] completed
+**Test**: Given imports from queries/index.ts → When deleted → Then no compilation errors
+
+✅ Deleted `queries/index.ts` (pure re-export, no callers)
+✅ Build passed
+
+## T-005: Store Merge
+**AC**: AC-05 | **Status**: [x] completed
+**Test**: Given filters.ts + search.ts → When merged → Then React components work same
+
+✅ No callers found for filter store direct imports
+✅ `stores/index.ts` barrel is acceptable (exports from multiple stores)
+✅ Build passed
