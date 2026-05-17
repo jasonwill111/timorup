@@ -190,18 +190,42 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
 <script>
   import { getPriceUnitsForServiceType, SPECIFICATION_FIELDS } from '../../lib/constants';
-  import { Editor } from '@tiptap/core';
-  import StarterKit from '@tiptap/starter-kit';
-  import Underline from '@tiptap/extension-underline';
-  import Placeholder from '@tiptap/extension-placeholder';
   import { actions } from 'astro:actions';
+
+  // Lazy-loaded TiPTap modules
+  let Editor: any = null;
+  let StarterKit: any = null;
+  let Underline: any = null;
+  let PlaceholderExt: any = null;
+  let editor: any = null;
+  let editorLoaded = false;
+
+  async function loadEditor() {
+    if (editorLoaded) return true;
+    try {
+      const [core, starter, underline, placeholder] = await Promise.all([
+        import('@tiptap/core'),
+        import('@tiptap/starter-kit'),
+        import('@tiptap/extension-underline'),
+        import('@tiptap/extension-placeholder'),
+      ]);
+      Editor = core.Editor;
+      StarterKit = starter.default;
+      Underline = underline.default;
+      PlaceholderExt = placeholder.default;
+      editorLoaded = true;
+      return true;
+    } catch (err) {
+      console.error('[SKUs] Failed to load editor:', err);
+      return false;
+    }
+  }
 
   // Read business options from hidden JSON element
   const businessDataEl = document.getElementById('business-data');
   const businessOptions = businessDataEl ? JSON.parse(businessDataEl.textContent || '[]') : [];
 
   let editingId = null;
-  let editor = null;
   let skuMediaIds: string[] = [];
 
   // Image/video upload
@@ -306,7 +330,11 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     if (files) handleSkuImageUpload(files);
     (e.target as HTMLInputElement).value = '';
   });
-  function initEditor(initialContent = '') {
+  async function initEditor(initialContent = '') {
+    // Load editor modules first
+    const loaded = await loadEditor();
+    if (!loaded || !Editor) return null;
+
     const element = document.querySelector('#tiptap-editor');
     if (!element) return null;
 
@@ -320,7 +348,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
       extensions: [
         StarterKit,
         Underline,
-        Placeholder.configure({
+        PlaceholderExt.configure({
           placeholder: element.dataset.placeholder || 'Start writing...',
         }),
       ],

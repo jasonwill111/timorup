@@ -1,6 +1,7 @@
 {
   "main": "@astrojs/cloudflare/entrypoints/server",
   "name": "timorlist",
+  "minify": true,
   "compatibility_date": "2025-11-01",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env", "global_fetch_strictly_public"],
 
