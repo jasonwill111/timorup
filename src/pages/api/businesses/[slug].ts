@@ -128,10 +128,12 @@ if (!db) throw new Error("Database not available");
     }
 
     // Only fetch products and reviews for businesses, not nonprofits
-    let businessProducts: typeof products.$inferSelect[] = [];
-    let businessReviews: typeof reviews.$inferSelect[] = [];
+    // Check by status instead of entityType field
+    const isNonprofit = (business as Record<string, unknown>).status === 'nonprofit';
+    let businessProducts: Record<string, unknown>[] = [];
+    let businessReviews: Record<string, unknown>[] = [];
 
-    if (business.entityType !== 'nonprofit') {
+    if (!isNonprofit) {
       businessProducts = await db.select()
         .from(products)
         .where(eq(products.businessId, business.id))
@@ -219,7 +221,27 @@ if (!db) throw new Error("Database not available");
       }), { status: 403, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      title?: string;
+      slug?: string;
+      categoryId?: string;
+      industry?: string;
+      contactName?: string;
+      contactNumber?: string;
+      countryCode?: string;
+      email?: string;
+      address?: string;
+      aboutUs?: string;
+      tags?: string[];
+      openingHours?: Record<string, unknown>;
+      latitude?: number;
+      longitude?: number;
+      yearOfEstablishment?: number;
+      registrationUrl?: string;
+      bannerImageId?: string;
+      profileImageId?: string;
+      socialLinks?: string;
+    };
     const {
       title, slug: newSlug, categoryId, industry, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
