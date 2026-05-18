@@ -17,7 +17,7 @@ if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
-    const url = new URL(request.url);
+    const url = new URL(request?.url);
     const type = url.searchParams.get('type'); // 'business' | 'blog' | 'general'
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '50');

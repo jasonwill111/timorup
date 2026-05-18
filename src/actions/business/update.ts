@@ -16,9 +16,9 @@ async function purgeCache(path: string): Promise<void> {
   // This ensures updated content is served immediately after DB update
   try {
     const cacheKey = `https://timorlist.com${path}`;
-    await caches.default.delete(cacheKey);
+    await (caches as unknown as { default: Cache }).default.delete(cacheKey);
     // Also purge list pages that might include this business
-    await caches.default.delete('https://timorlist.com/businesses');
+    await (caches as unknown as { default: Cache }).default.delete('https://timorlist.com/businesses');
   } catch (e) {
     // Log but don't fail the update if cache purge fails
     if (import.meta.env.DEV) {

@@ -108,7 +108,7 @@ if (!db) throw new Error("Database not available");
 
     if (result.profileImageId) {
       const profile = await db
-        .select({ url: media.url })
+        .select({ url: media?.url })
         .from(media)
         .where(eq(media.id, result.profileImageId))
         .limit(1)
@@ -118,7 +118,7 @@ if (!db) throw new Error("Database not available");
 
     if (result.bannerImageId) {
       const banner = await db
-        .select({ url: media.url })
+        .select({ url: media?.url })
         .from(media)
         .where(eq(media.id, result.bannerImageId))
         .limit(1)

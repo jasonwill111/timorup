@@ -25,8 +25,8 @@ function getClientIP(request: Request): string {
 // Cloudflare Cache API helper
 async function getCachedResponse(cacheKey: string): Promise<Response | null> {
   try {
-    const cache = caches.default;
-    return await cache.match(cacheKey);
+    const cache = (caches as unknown as { default: Cache }).default;
+    return await cache.match(cacheKey) ?? null;
   } catch {
     return null;
   }
@@ -34,7 +34,7 @@ async function getCachedResponse(cacheKey: string): Promise<Response | null> {
 
 async function cacheResponse(cacheKey: string, response: Response, ttl: number): Promise<void> {
   try {
-    const cache = caches.default;
+    const cache = (caches as unknown as { default: Cache }).default;
     const clonedResponse = new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
@@ -51,7 +51,7 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
 
 async function purgeCache(cacheKey: string): Promise<void> {
   try {
-    const cache = caches.default;
+    const cache = (caches as unknown as { default: Cache }).default;
     await cache.delete(cacheKey);
   } catch {
     // Ignore errors

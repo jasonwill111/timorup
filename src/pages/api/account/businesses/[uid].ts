@@ -114,7 +114,7 @@ if (!db) throw new Error("Database not available");
 
     // Get category names
     const categoryMap = new Map();
-    const cats = await db.select().from(businessCategories).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
+    const cats = await db.select().from(businessCategories).all() as unknown[];
     cats.forEach((cat: { id: string; name: string }) => categoryMap.set(cat.id, cat.name));
 
     // Add category names

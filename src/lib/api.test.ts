@@ -419,7 +419,7 @@ describe('Media API', () => {
       expect(media.filename).toBeDefined();
       expect(media.mimeType).toBeDefined();
       expect(media.size).toBeGreaterThan(0);
-      expect(media.url).toBeDefined();
+      expect(media?.url).toBeDefined();
     });
   });
 });

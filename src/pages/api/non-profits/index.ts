@@ -130,7 +130,7 @@ if (!db) throw new Error("Database not available");
 
     // Get category names
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(categories).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
+    const allCategories = await db.select().from(categories).all() as unknown[];
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((np) => ({

@@ -22,7 +22,7 @@ const CACHE_TTL = 30;
 
 async function getCachedResponse(cacheKey: string): Promise<Response | null> {
   try {
-    return await caches.default.match(cacheKey);
+    return await (caches as unknown as { default: Cache }).default.match(cacheKey);
   } catch {
     return null;
   }
@@ -38,7 +38,7 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
         'Cache-Control': `public, max-age=${ttl}`,
       },
     });
-    await caches.default.put(cacheKey, clonedResponse);
+    await (caches as unknown as { default: Cache }).default.put(cacheKey, clonedResponse);
   } catch {
     // Cache API not available locally
   }
@@ -166,7 +166,7 @@ if (!db) throw new Error("Database not available");
     const total = results.length;
 
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(businessCategories).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
+    const allCategories = await db.select().from(businessCategories).all() as unknown[];
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((biz) => ({

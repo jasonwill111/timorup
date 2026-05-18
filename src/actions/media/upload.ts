@@ -100,12 +100,12 @@ if (!db) throw new Error("Database not available");
             success: true,
             data: {
               id: existing[0].id,
-              url: existing[0].url,
+              r2Key: existing[0].r2Key,
               filename: existing[0].filename,
               mimeType: existing[0].mimeType,
               size: existing[0].size,
-              type: existing[0].type,
-              typeId: existing[0].typeId,
+              entityType: existing[0].entityType,
+              entityId: existing[0].entityId,
             },
             isDuplicate: true,
           };
@@ -133,11 +133,10 @@ if (!db) throw new Error("Database not available");
 
         const limits = await getPlanLimits(business?.planType || null) || DEFAULT_LIMITS;
 
-        // Check image/video limits by type prefix
-        const imagePrefix = `${input.type.split('/').slice(0, -1).join('/')}`;
+        // Check image/video limits by entity
         const imageCountResult = await db.select({ count: count() })
           .from(media)
-          .where(and(eq(media.type, imagePrefix), eq(media.typeId, input.typeId)))
+          .where(and(eq(media.entityType, entityType), eq(media.entityId, input.typeId)))
           .get() ?? undefined;
 
         if (isImage && limits.maxBusinessImages > 0 && (imageCountResult?.count || 0) >= limits.maxBusinessImages) {
@@ -151,7 +150,7 @@ if (!db) throw new Error("Database not available");
         // Non-business entities use default limits (0 = unlimited)
         const entityMediaCount = await db.select({ count: count() })
           .from(media)
-          .where(and(eq(media.type, input.type), eq(media.typeId, input.typeId)))
+          .where(and(eq(media.entityType, entityType), eq(media.entityId, entityId)))
           .get() ?? undefined;
 
         if (isImage && limits.maxImages > 0 && (entityMediaCount?.count || 0) >= limits.maxImages) {
@@ -214,14 +213,14 @@ if (!db) throw new Error("Database not available");
         success: true,
         data: {
           id: created.id,
-          url: finalUrl,
+          r2Key: created.r2Key,
           filename: file.name,
           mimeType: finalMimeType,
           size: finalSize,
-          type: created.type,
-          typeId: created.typeId,
-          width: input.width || null,
-          height: input.height || null,
+          entityType: created.entityType,
+          entityId: created.entityId,
+          width: input.width ?? null,
+          height: input.height ?? null,
         },
         isDuplicate: false,
       };

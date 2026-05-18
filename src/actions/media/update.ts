@@ -41,11 +41,11 @@ if (!db) throw new Error("Database not available");
 
       const [updated] = await db.update(media)
         .set({
-          url: input.url || existing.url,
-          width: input.width || existing.width,
-          height: input.height || existing.height,
-          alt: input.alt || existing.alt,
-          businessId: input.businessId || existing.businessId,
+          r2Key: input?.r2Key || existing.r2Key,
+          width: input.width ?? existing.width,
+          height: input.height ?? existing.height,
+          alt: input.alt ?? existing.alt,
+          entityId: input.entityId || existing.entityId,
         })
         .where(eq(media.id, input.id))
         .returning();

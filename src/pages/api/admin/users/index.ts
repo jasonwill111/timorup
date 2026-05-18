@@ -26,7 +26,7 @@ if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
-    const url = new URL(request.url);
+    const url = new URL(request?.url);
     const { page, limit } = PaginationSchema.parse({
       page: url.searchParams.get('page') || '1',
       limit: url.searchParams.get('limit') || '20',

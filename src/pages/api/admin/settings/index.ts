@@ -14,7 +14,7 @@ if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
     // Get all settings as key-value pairs
-    const allSettings = await db.select().from(siteSettings).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
+    const allSettings = await db.select().from(siteSettings).all() as unknown[];
 
     const settingsMap: Record<string, { value: string }> = {};
     for (const s of allSettings) {

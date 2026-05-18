@@ -16,7 +16,7 @@ export const settings = {
       const db = await getDb();
 if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
-      const settingsResult = await db.select().from(siteSettings).all() as { id: string; [key: string]: unknown }[];
+      const settingsResult = await db.select().from(siteSettings).all() as unknown[];
 
       const settings: Record<string, unknown> = {};
       settingsResult.forEach((s) => {

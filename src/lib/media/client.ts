@@ -85,7 +85,7 @@ export async function uploadMedia(
         success: true,
         media: {
           id: data.data.id,
-          url: data.data.url,
+          url: data.data?.url,
           filename: data.data.filename,
           mimeType: data.data.mimeType,
           size: data.data.size,
@@ -95,7 +95,7 @@ export async function uploadMedia(
           entityType,
           entityId,
           category,
-          r2Key: data.data.url,
+          r2Key: data.data?.url,
           createdAt: new Date(),
         },
         isDuplicate: data.isDuplicate,

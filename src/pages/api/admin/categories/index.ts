@@ -23,7 +23,7 @@ if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
-    const url = new URL(request.url);
+    const url = new URL(request?.url);
     const table = url.searchParams.get('table') || 'business';
 
     if (!isValidEntityType(table)) {
@@ -97,7 +97,7 @@ if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
-    const url = new URL(request.url);
+    const url = new URL(request?.url);
     const id = url.searchParams.get('id');
     const table = url.searchParams.get('table') || 'business';
 

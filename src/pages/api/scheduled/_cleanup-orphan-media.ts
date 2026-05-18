@@ -37,7 +37,7 @@ if (!db) throw new Error("Database not available");
     const allMedia = await db
       .select({
         id: media.id,
-        url: media.url,
+        url: media?.url,
         type: media.type,
         typeId: media.typeId,
       })
@@ -48,8 +48,8 @@ if (!db) throw new Error("Database not available");
 
     for (const m of allMedia) {
       // Skip data: URLs (local dev)
-      if (m.url && !m.url.startsWith('data:')) {
-        orphans.push({ id: m.id, url: m.url });
+      if (m?.url && !m?.url.startsWith('data:')) {
+        orphans.push({ id: m.id, url: m?.url });
       }
     }
 
@@ -67,10 +67,10 @@ if (!db) throw new Error("Database not available");
     let deletedCount = 0;
     for (const o of orphans) {
       try {
-        await deleteFromR2(o.url);
+        await deleteFromR2(o?.url);
         deletedCount++;
       } catch (error) {
-        console.error(`[Cleanup-Orphan-Media] Failed to delete ${o.url}:`, error);
+        console.error(`[Cleanup-Orphan-Media] Failed to delete ${o?.url}:`, error);
       }
     }
 

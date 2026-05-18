@@ -40,12 +40,12 @@ if (!db) throw new Error("Database not available");
         return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } };
       }
 
-      // Delete from R2 if URL is R2 path
-      if (mediaItem.url && !mediaItem.url.startsWith('data:') && !mediaItem.url.startsWith('http')) {
+      // Delete from R2 if R2Key is present
+      if (mediaItem?.r2Key) {
         const bucket = getR2Bucket();
         if (bucket) {
           try {
-            await bucket.delete(mediaItem.url);
+            await bucket.delete(mediaItem.r2Key);
           } catch (e) {
             console.error('Failed to delete from R2:', e);
           }

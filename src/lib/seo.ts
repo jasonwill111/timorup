@@ -21,7 +21,7 @@ export function createBreadcrumbSchema(items: BreadcrumbItem[]) {
       "@type": "ListItem",
       "position": index + 1,
       "name": item.name,
-      ...(index < items.length - 1 ? { "item": item.url } : {})
+      ...(index < items.length - 1 ? { "item": item?.url } : {})
     }))
   };
 }
