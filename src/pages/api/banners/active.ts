@@ -8,6 +8,10 @@ import { eq } from 'drizzle-orm';
 export async function GET() {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const banners = await db.select({
       id: adBanners.id,
       title: adBanners.title,

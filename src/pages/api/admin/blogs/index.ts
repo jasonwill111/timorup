@@ -23,6 +23,10 @@ export async function GET({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).all();
 
@@ -47,6 +51,10 @@ export async function POST({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const data = createBlogSchema.parse(body);

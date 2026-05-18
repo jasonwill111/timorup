@@ -25,6 +25,10 @@ export interface ListingWithCategory {
  */
 export async function getListingBySlug(slug: string): Promise<ListingWithCategory | null> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const result = await db
     .select({
@@ -44,7 +48,7 @@ export async function getListingBySlug(slug: string): Promise<ListingWithCategor
     .leftJoin(listingCategories, eq(businesses.categoryId, listingCategories.id))
     .where(eq(businesses.slug, slug))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   return result || null;
 }
@@ -54,6 +58,10 @@ export async function getListingBySlug(slug: string): Promise<ListingWithCategor
  */
 export async function getUserListing(userId: string): Promise<ListingWithCategory | null> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const result = await db
     .select({
@@ -70,7 +78,7 @@ export async function getUserListing(userId: string): Promise<ListingWithCategor
     .from(businesses)
     .where(eq(businesses.ownerId, userId))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   return result || null;
 }
@@ -87,6 +95,10 @@ export async function getListingsByType(
   }
 ): Promise<ListingWithCategory[]> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   const { limit = 20, offset = 0, status = 'live' } = options || {};
 
   const conditions = [eq(businesses.entityType, entityType)];
@@ -128,6 +140,10 @@ export async function searchListings(
   }
 ): Promise<ListingWithCategory[]> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   const { limit = 20, entityType = 'all' } = options || {};
 
   const searchPattern = `%${query}%`;
@@ -167,12 +183,16 @@ export async function searchListings(
  */
 export async function getListingProductCount(businessId: string): Promise<number> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const result = await db
     .select({ count: count() })
     .from(products)
     .where(eq(products.businessId, businessId))
-    .get();
+    .get() ?? undefined;
 
   return result?.count || 0;
 }
@@ -182,6 +202,10 @@ export async function getListingProductCount(businessId: string): Promise<number
  */
 export async function isSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const conditions = [eq(businesses.slug, slug)];
   if (excludeId) {
@@ -193,7 +217,7 @@ export async function isSlugUnique(slug: string, excludeId?: string): Promise<bo
     .from(businesses)
     .where(and(...conditions))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   return !existing;
 }

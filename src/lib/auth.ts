@@ -203,6 +203,10 @@ export async function getAuthInstance(env?: { SESSION?: KVNamespace }): Promise<
     _initPromise ??= (async () => {
       const { getDb } = await import('./db');
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       if (!db) {
         throw new Error('[getAuthInstance] Database not available');
       }
@@ -219,6 +223,34 @@ const authSecret = process.env.BETTER_AUTH_SECRET;
 if (authSecret && authSecret.length < 32) {
   console.error('[Auth] FATTER_AUTH_SECRET must be at least 32 characters. Current length:', authSecret.length);
   throw new Error('BETTER_AUTH_SECRET must be at least 32 characters');
+}
+
+// Singleton auth instance cache
+let authInstance: BetterAuthInstance | null = null;
+
+/**
+ * Get singleton auth instance (for Server Actions)
+ */
+export async function initAuth(): Promise<BetterAuthInstance> {
+  if (authInstance) return authInstance;
+
+  // Lazy initialization with env check
+  if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
+    try {
+      const { env } = globalThis as { env: Record<string, unknown> };
+      const db = await import('./db').then(m => m.getDb());
+      authInstance = createAuthFactory().createAuth({
+        db,
+        env: env as { SESSION?: KVNamespace; [key: string]: unknown },
+        baseURL: process.env.APP_URL || process.env.BETTER_AUTH_URL || 'http://localhost:8787',
+      });
+      return authInstance;
+    } catch (e) {
+      console.warn('[Auth] initAuth failed:', e);
+    }
+  }
+
+  throw new Error('Auth not available');
 }
 
 // Export OAuth status for UI

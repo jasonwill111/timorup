@@ -25,6 +25,8 @@ export const login = defineAction({
 
       // Query DB for role (better-auth doesn't return custom fields)
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const dbUser = await db.select({ role: users.role })
         .from(users)
         .where(eq(users.id, result.user.id))

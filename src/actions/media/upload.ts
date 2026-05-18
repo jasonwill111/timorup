@@ -53,6 +53,10 @@ export const uploadMedia = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const auth = await initAuth();
     const session = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
     const user = session?.user ?? null;
@@ -134,7 +138,7 @@ export const uploadMedia = defineAction({
         const imageCountResult = await db.select({ count: count() })
           .from(media)
           .where(and(eq(media.type, imagePrefix), eq(media.typeId, input.typeId)))
-          .get();
+          .get() ?? undefined;
 
         if (isImage && limits.maxBusinessImages > 0 && (imageCountResult?.count || 0) >= limits.maxBusinessImages) {
           return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessImages} images allowed` } };
@@ -148,7 +152,7 @@ export const uploadMedia = defineAction({
         const entityMediaCount = await db.select({ count: count() })
           .from(media)
           .where(and(eq(media.type, input.type), eq(media.typeId, input.typeId)))
-          .get();
+          .get() ?? undefined;
 
         if (isImage && limits.maxImages > 0 && (entityMediaCount?.count || 0) >= limits.maxImages) {
           return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxImages} images allowed` } };

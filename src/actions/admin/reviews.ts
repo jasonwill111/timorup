@@ -21,6 +21,8 @@ export const adminReviews = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const page = input?.page ?? 1;
       const limit = input?.limit ?? 20;
       const offset = (page - 1) * limit;
@@ -51,6 +53,8 @@ export const adminReviews = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Get the review first
       const review = await db.select()

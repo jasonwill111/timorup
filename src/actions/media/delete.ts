@@ -18,6 +18,10 @@ export const deleteMedia = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const auth = await initAuth();
     const { user } = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => ({ user: null, session: null }));
 

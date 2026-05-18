@@ -54,6 +54,10 @@ export const update = defineAction({
   }),
   handler: async (input, { cookies }) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       // Authenticate
@@ -75,7 +79,7 @@ export const update = defineAction({
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       if (!existing) {
         return { success: false, error: { message: 'Business not found' } };
@@ -121,7 +125,7 @@ export const update = defineAction({
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       return { success: true, data: updated };
     } catch (error) {

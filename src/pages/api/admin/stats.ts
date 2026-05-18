@@ -24,17 +24,21 @@ export const GET: APIRoute = async ({ request }) => {
 
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const now = new Date();
     const startOfMonth = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
     const sevenDaysFromNow = Math.floor(now.getTime() / 1000) + 7 * 24 * 60 * 60;
 
     // Get total counts (sequential to avoid connection issues)
-    const totalUsersResult = await db.select({ count: sql<number>`count(*)` }).from(users).get();
-    const totalBusinessesResult = await db.select({ count: sql<number>`count(*)` }).from(businesses).get();
-    const totalNonProfitsResult = await db.select({ count: sql<number>`count(*)` }).from(nonProfits).get();
-    const totalProductsResult = await db.select({ count: sql<number>`count(*)` }).from(products).get();
-    const totalBusinessCategories = await db.select({ count: sql<number>`count(*)` }).from(businessCategories).get();
-    const totalListingCategories = await db.select({ count: sql<number>`count(*)` }).from(listingCategories).get();
+    const totalUsersResult = await db.select({ count: sql<number>`count(*)` }).from(users).get() ?? undefined;
+    const totalBusinessesResult = await db.select({ count: sql<number>`count(*)` }).from(businesses).get() ?? undefined;
+    const totalNonProfitsResult = await db.select({ count: sql<number>`count(*)` }).from(nonProfits).get() ?? undefined;
+    const totalProductsResult = await db.select({ count: sql<number>`count(*)` }).from(products).get() ?? undefined;
+    const totalBusinessCategories = await db.select({ count: sql<number>`count(*)` }).from(businessCategories).get() ?? undefined;
+    const totalListingCategories = await db.select({ count: sql<number>`count(*)` }).from(listingCategories).get() ?? undefined;
     const recentOrders = await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(20).all();
 
     // Calculate MTD metrics

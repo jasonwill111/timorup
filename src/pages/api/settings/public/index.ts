@@ -13,6 +13,10 @@ import { eq } from 'drizzle-orm';
 
 export async function GET() {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const [result] = await db
       .select({ value: siteSettings.value })

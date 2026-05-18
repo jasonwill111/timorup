@@ -35,6 +35,10 @@ export const updateBanner = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       const updated = await db.update(adBanners)
         .set({
@@ -53,7 +57,7 @@ export const updateBanner = defineAction({
         })
         .where(eq(adBanners.id, input.id))
         .returning()
-        .get();
+        .get() ?? undefined;
 
       if (!updated) {
         return { success: false, error: { code: 'NOT_FOUND', message: 'Banner not found' } };
@@ -77,6 +81,10 @@ export const deleteBanner = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       await db.delete(adBanners).where(eq(adBanners.id, id)).run();
       return { success: true };

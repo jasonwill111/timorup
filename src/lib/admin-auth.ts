@@ -19,12 +19,16 @@ export async function getAdminUser(request?: Request): Promise<AuthUser | null> 
 
     const token = tokenMatch[1];
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     const session = await db.select()
       .from(sessions)
       .where(eq(sessions.token, token))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!session) return null;
 
@@ -38,7 +42,7 @@ export async function getAdminUser(request?: Request): Promise<AuthUser | null> 
       .from(users)
       .where(eq(users.id, session.userId))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!user) return null;
 

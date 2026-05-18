@@ -11,6 +11,10 @@ export async function GET({ params, request }: { params: Record<string, string>;
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const { id } = params;
 
@@ -18,7 +22,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
       .from(orders)
       .where(eq(orders.id, id))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!order) {
       return new Response(JSON.stringify({
@@ -48,6 +52,10 @@ export async function PUT({ params, request }: { params: Record<string, string>;
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { planType, amount, status, expiryDate, adminNotes } = body;
@@ -58,7 +66,7 @@ export async function PUT({ params, request }: { params: Record<string, string>;
       .from(orders)
       .where(eq(orders.id, id))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!order) {
       return new Response(JSON.stringify({
@@ -146,6 +154,10 @@ export async function DELETE({ params, request }: { params: Record<string, strin
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const { id } = params;
 

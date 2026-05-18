@@ -31,6 +31,10 @@ export const signIn = defineAction({
     try {
       console.log('[signIn] Starting login process');
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       console.log('[signIn] getDb result:', db ? 'db available' : 'db is null');
 
       if (!db) {
@@ -53,7 +57,7 @@ export const signIn = defineAction({
         .from(users)
         .where(eq(users.email, input.email.toLowerCase()))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       // Call better-auth to verify password and create session
       const result = await authApi.signInEmail({
@@ -76,7 +80,7 @@ export const signIn = defineAction({
           .from(sessions)
           .where(and(eq(sessions.token, token!), eq(sessions.userId, newUser.id)))
           .limit(1)
-          .get();
+          .get() ?? undefined;
 
         if (session) {
           await db.update(sessions)

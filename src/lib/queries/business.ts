@@ -61,6 +61,10 @@ export async function getBusinessBySlug(
 ): Promise<Result<BusinessWithCategory | null>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const result = await db
       .select({
         id: businesses.id,
@@ -92,7 +96,7 @@ export async function getBusinessBySlug(
       .leftJoin(businessCategories, eq(businesses.categoryId, businessCategories.id))
       .where(eq(businesses.slug, slug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!result) {
       return success(null);
@@ -108,7 +112,7 @@ export async function getBusinessBySlug(
         .from(media)
         .where(eq(media.id, result.profileImageId))
         .limit(1)
-        .get();
+        .get() ?? undefined;
       profileImageUrl = profile?.url ?? null;
     }
 
@@ -118,7 +122,7 @@ export async function getBusinessBySlug(
         .from(media)
         .where(eq(media.id, result.bannerImageId))
         .limit(1)
-        .get();
+        .get() ?? undefined;
       bannerImageUrl = banner?.url ?? null;
     }
 
@@ -140,6 +144,10 @@ export async function getBusinessById(
 ): Promise<Result<BusinessWithCategory | null>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const result = await db
       .select({
         id: businesses.id,
@@ -171,7 +179,7 @@ export async function getBusinessById(
       .leftJoin(businessCategories, eq(businesses.categoryId, businessCategories.id))
       .where(eq(businesses.id, id))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return success(result ?? null);
   } catch (err) {
@@ -187,6 +195,10 @@ export async function searchBusinesses(
 ): Promise<Result<SearchBusinessesResult>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const {
       query,
       categoryId,
@@ -228,7 +240,7 @@ export async function searchBusinesses(
       .select({ count: count() })
       .from(businesses)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .get();
+      .get() ?? undefined;
     const total = countResult?.count ?? 0;
 
     // Sort order
@@ -305,6 +317,10 @@ export async function getRelatedBusinesses(
 ): Promise<Result<BusinessWithCategory[]>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const conditions = [
       eq(businesses.status, 'live'),
       sql`${businesses.slug} != ${slug}`,
@@ -362,6 +378,10 @@ export async function getBusinessesByOwnerId(
 ): Promise<Result<BusinessWithCategory[]>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const results = await db
       .select({
         id: businesses.id,
@@ -410,6 +430,10 @@ export async function isBusinessSlugUnique(
 ): Promise<Result<boolean>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const conditions = [eq(businesses.slug, slug)];
     if (excludeId) {
       conditions.push(sql`${businesses.id} != ${excludeId}`);
@@ -420,7 +444,7 @@ export async function isBusinessSlugUnique(
       .from(businesses)
       .where(and(...conditions))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return success(!existing);
   } catch (err) {

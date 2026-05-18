@@ -20,6 +20,10 @@ function getClientIP(request: Request): string {
 
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   // Rate limiting
   const clientIP = getClientIP(request);
@@ -126,7 +130,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
 
     // Get category names
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(publicSectorCategories).all();
+    const allCategories = await db.select().from(publicSectorCategories).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((ps) => ({

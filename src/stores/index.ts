@@ -7,4 +7,6 @@ export * from './auth';
 export * from './filters';
 export * from './cart';
 export * from './search';
-export * from './pagination';
+// Note: pagination has duplicate setPage export - import directly if needed
+export { setPage as setPaginationPage } from './pagination';
+export { $currentPage } from './filters';

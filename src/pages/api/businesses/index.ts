@@ -46,6 +46,10 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
 
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const clientIP = getClientIP(request);
   const rateLimit = await checkRateLimitKV(`businesses:${clientIP}`);
@@ -162,7 +166,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
     const total = results.length;
 
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(businessCategories).all();
+    const allCategories = await db.select().from(businessCategories).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((biz) => ({

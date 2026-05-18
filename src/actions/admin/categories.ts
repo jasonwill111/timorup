@@ -34,6 +34,8 @@ export const adminCategories = {
     }).optional(),
     handler: async (input) => {
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       if (input?.entityType) {
         const result = await db.select()
@@ -63,6 +65,8 @@ export const adminCategories = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const id = `cat-${Date.now()}`;
       const slug = input.slug || input.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -88,6 +92,8 @@ export const adminCategories = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       const updateData: Record<string, unknown> = {
         updatedAt: Math.floor(Date.now() / 1000),
@@ -119,6 +125,8 @@ export const adminCategories = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Check if category has children
       const children = await db.select()

@@ -38,13 +38,17 @@ export async function PATCH({ request, params }: { request: Request; params: { i
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     // Get target user
     const targetUser = await db.select()
       .from(users)
       .where(eq(users.id, targetUserId))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!targetUser) {
       return new Response(JSON.stringify({

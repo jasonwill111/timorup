@@ -18,6 +18,10 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const auth = await initAuth();
     const authApi = auth.api;
 
@@ -35,7 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
       .from(users)
       .where(eq(users.email, email.toLowerCase()))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return new Response(JSON.stringify({
       success: true,

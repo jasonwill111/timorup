@@ -6,13 +6,18 @@
 
 export const prerender = false;
 
-const SITE_URL = import.meta.env.PUBLIC_SITE_URL || 'https://timorlist.com';
+const SITE_URL = import.meta.env.PUBLIC_SITE_URL ?? 'https://timorlist.com';
 
 interface SitemapUrl {
   loc: string;
   lastmod?: string;
   changefreq?: string;
   priority?: string;
+}
+
+interface DbRow {
+  slug: string;
+  updatedAt?: string | number | null;
 }
 
 const STATIC_PAGES = [
@@ -72,48 +77,53 @@ export async function GET() {
   try {
     const { getDb } = await import('../lib/db');
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+    if (!db) throw new Error('Database not available');
 
     // Query businesses (active only)
-    const businesses = await db.all(`
+    const businesses = await db.all<DbRow>(`
       SELECT slug, updatedAt FROM businesses WHERE status = 'active' LIMIT 50000
     `);
     for (const biz of businesses) {
       urls.push({
         loc: `/business/${biz.slug}`,
-        lastmod: formatDate(biz.updatedAt),
+        lastmod: formatDate(biz.updatedAt ?? null),
         changefreq: 'weekly',
         priority: '0.8'
       });
     }
 
     // Query non-profits
-    const nonProfits = await db.all(`
+    const nonProfits = await db.all<DbRow>(`
       SELECT slug, updatedAt FROM non_profits WHERE status = 'active' LIMIT 50000
     `);
     for (const np of nonProfits) {
       urls.push({
         loc: `/non-profit/${np.slug}`,
-        lastmod: formatDate(np.updatedAt),
+        lastmod: formatDate(np.updatedAt ?? null),
         changefreq: 'weekly',
         priority: '0.8'
       });
     }
 
     // Query public sectors
-    const publicSectors = await db.all(`
+    const publicSectors = await db.all<DbRow>(`
       SELECT slug, updatedAt FROM public_sectors WHERE status = 'active' LIMIT 50000
     `);
     for (const ps of publicSectors) {
       urls.push({
         loc: `/public-sector/${ps.slug}`,
-        lastmod: formatDate(ps.updatedAt),
+        lastmod: formatDate(ps.updatedAt ?? null),
         changefreq: 'weekly',
         priority: '0.8'
       });
     }
 
     // Query listings (active and not expired)
-    const listings = await db.all(`
+    const listings = await db.all<DbRow>(`
       SELECT slug, updatedAt FROM listings
       WHERE status = 'active' AND (expiresAt IS NULL OR expiresAt > datetime('now'))
       LIMIT 50000
@@ -121,7 +131,7 @@ export async function GET() {
     for (const listing of listings) {
       urls.push({
         loc: `/listing/${listing.slug}`,
-        lastmod: formatDate(listing.updatedAt),
+        lastmod: formatDate(listing.updatedAt ?? null),
         changefreq: 'weekly',
         priority: '0.7'
       });

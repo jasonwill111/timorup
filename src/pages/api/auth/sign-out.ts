@@ -14,6 +14,10 @@ export async function POST({ request }: { request: Request }) {
     if (tokenMatch) {
       const token = tokenMatch[1];
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Delete session from database
       await db.delete(sessions).where(eq(sessions.token, token)).run();

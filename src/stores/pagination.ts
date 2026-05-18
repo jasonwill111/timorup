@@ -44,7 +44,7 @@ export const $currentRange = computed($pagination, (p) => {
 
 // Helper functions
 export function setPage(page: number): void {
-  const pagination = $pagination.get();
+  const pagination = $pagination.get() ?? undefined;
   // Guard against limit=0
   if (pagination.limit <= 0) {
     return;
@@ -55,7 +55,7 @@ export function setPage(page: number): void {
 }
 
 export function nextPage(): void {
-  const pagination = $pagination.get();
+  const pagination = $pagination.get() ?? undefined;
   const totalPages = Math.ceil(pagination.total / pagination.limit);
   if (pagination.page < totalPages) {
     $pagination.set({ ...pagination, page: pagination.page + 1 });
@@ -63,7 +63,7 @@ export function nextPage(): void {
 }
 
 export function prevPage(): void {
-  const pagination = $pagination.get();
+  const pagination = $pagination.get() ?? undefined;
   if (pagination.page > 1) {
     $pagination.set({ ...pagination, page: pagination.page - 1 });
   }
@@ -74,12 +74,12 @@ export function setLimit(limit: number): void {
   if (limit <= 0) {
     limit = 12;
   }
-  const pagination = $pagination.get();
+  const pagination = $pagination.get() ?? undefined;
   $pagination.set({ ...pagination, limit, page: 1 });
 }
 
 export function setTotal(total: number): void {
-  const pagination = $pagination.get();
+  const pagination = $pagination.get() ?? undefined;
   $pagination.set({ ...pagination, total });
 }
 

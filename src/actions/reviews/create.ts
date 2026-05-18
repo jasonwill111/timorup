@@ -21,6 +21,10 @@ export const createReview = defineAction({
   input: CreateReviewSchema,
   handler: async (input) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       // Check business exists
       const business = await db.select()

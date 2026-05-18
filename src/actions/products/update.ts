@@ -48,6 +48,10 @@ export const updateProduct = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       // Check grace period if updating business association
@@ -58,7 +62,7 @@ export const updateProduct = defineAction({
         }
       }
 
-      const existing = await db.select().from(products).where(eq(products.id, input.id)).limit(1).get();
+      const existing = await db.select().from(products).where(eq(products.id, input.id)).limit(1).get() ?? undefined;
       if (!existing) {
         return { success: false, error: { message: 'Product not found' } };
       }
@@ -88,7 +92,7 @@ export const updateProduct = defineAction({
         await db.update(products).set(updateData).where(eq(products.id, input.id)).run();
       }
 
-      const updated = await db.select().from(products).where(eq(products.id, input.id)).limit(1).get();
+      const updated = await db.select().from(products).where(eq(products.id, input.id)).limit(1).get() ?? undefined;
       const parsedUpdated = updated ? {
         ...updated,
         priceFields: updated.priceFields ? parseJsonField(updated.priceFields as string) : null,
@@ -113,6 +117,10 @@ export const deleteProduct = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       await db.delete(products).where(eq(products.id, input.id)).run();
       return { success: true };

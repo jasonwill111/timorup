@@ -14,12 +14,16 @@ export async function GET({ request }: { request: Request }) {
     if (tokenMatch) {
       const token = tokenMatch[1];
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       const session = await db.select()
         .from(sessions)
         .where(eq(sessions.token, token))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       // expiresAt in D1 is Unix timestamp (seconds), need to convert to milliseconds
       if (session && session.expiresAt) {
@@ -33,7 +37,7 @@ export async function GET({ request }: { request: Request }) {
             .from(users)
             .where(eq(users.id, session.userId))
             .limit(1)
-            .get();
+            .get() ?? undefined;
 
           if (user) {
             return new Response(JSON.stringify({

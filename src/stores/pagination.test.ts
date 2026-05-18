@@ -1,7 +1,7 @@
 /**
  * Pagination store tests
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { $pagination, setPage, nextPage, prevPage, setLimit, setTotal, resetPagination, $totalPages, $hasNextPage, $hasPrevPage, $currentRange } from './pagination';
 
 describe('Pagination Store', () => {

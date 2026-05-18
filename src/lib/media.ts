@@ -17,7 +17,7 @@ async function getSharp() {
 
 // Get R2 bucket from Workers binding
 export function getR2Bucket(): R2Bucket {
-  const bucket = env.MEDIA_BUCKET as R2Bucket | undefined;
+  const bucket = (env.MEDIA_BUCKET as string | undefined) ?? "";
   if (!bucket) {
     throw new Error('R2 bucket not configured (MEDIA_BUCKET binding missing)');
   }
@@ -192,9 +192,6 @@ export function getPublicMediaUrl(key: string): string {
   }
   return `${getR2PublicUrl()}/${key}`;
 }
-
-// Get R2 bucket (for internal use)
-export { getR2Bucket };
 
 // Transform image URL for optimization (using Cloudflare's image transformations)
 export function getOptimizedImageUrl(

@@ -6,7 +6,7 @@ import { businesses, businessCategories } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { checkRateLimitKV, getRateLimitHeaders } from '@/lib/rate-limit';
 import { z } from 'zod';
-import { auth } from '@/lib/auth';
+import { initAuth } from '@/lib/auth';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -29,8 +29,8 @@ async function requireAuth(request: Request) {
     }), { status: 401, headers: { 'Content-Type': 'application/json' } }) };
   }
   try {
-    const authApi = (auth as unknown as { api: typeof auth.api }).api;
-    const { user } = await authApi.getSession({
+    const authApi = await initAuth();
+    const { user } = await authApi.api.getSession({
       headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
     });
     if (!user) {
@@ -54,6 +54,10 @@ const ParamsSchema = z.object({
 
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   // Auth check
   const authResult = await requireAuth(request);
   if (!authResult.authorized) return authResult.error;
@@ -110,7 +114,7 @@ export async function GET({ params, request }: { params: Record<string, string>;
 
     // Get category names
     const categoryMap = new Map();
-    const cats = await db.select().from(businessCategories).all();
+    const cats = await db.select().from(businessCategories).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
     cats.forEach((cat: { id: string; name: string }) => categoryMap.set(cat.id, cat.name));
 
     // Add category names

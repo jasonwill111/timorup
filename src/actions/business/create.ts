@@ -41,6 +41,10 @@ export const create = defineAction({
 
     const userId = authResult.userId;
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       // Check one-listing-per-user limit
@@ -48,7 +52,7 @@ export const create = defineAction({
         .from(businesses)
         .where(eq(businesses.ownerId, userId))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       if (existingListing) {
         return {
@@ -71,7 +75,7 @@ export const create = defineAction({
         .from(businesses)
         .where(eq(businesses.slug, businessSlug))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       if (existingSlug) {
         return {

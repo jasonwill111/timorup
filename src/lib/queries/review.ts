@@ -49,6 +49,10 @@ export async function getReviewsByBusinessId(
 ): Promise<Result<{ reviews: ReviewWithUser[]; total: number }>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const { page = 1, limit = 10 } = options ?? {};
     const offset = (page - 1) * limit;
 
@@ -83,7 +87,7 @@ export async function getReviewsByBusinessId(
       .select({ count: count() })
       .from(reviews)
       .where(eq(reviews.businessId, businessId))
-      .get();
+      .get() ?? undefined;
 
     return success({
       reviews: results as ReviewWithUser[],
@@ -102,6 +106,10 @@ export async function getReviewStats(
 ): Promise<Result<ReviewStats>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     // Get all reviews for stats
     const allReviews = await db
@@ -147,6 +155,10 @@ export async function getUserReviewForBusiness(
 ): Promise<Result<ReviewWithUser | null>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const result = await db
       .select({
         id: reviews.id,
@@ -168,7 +180,7 @@ export async function getUserReviewForBusiness(
       .leftJoin(users, eq(reviews.userId, users.id))
       .where(and(eq(reviews.userId, userId), eq(reviews.businessId, businessId)))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return success(result ?? null);
   } catch (err) {
@@ -185,12 +197,16 @@ export async function hasUserReviewed(
 ): Promise<Result<boolean>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const existing = await db
       .select({ id: reviews.id })
       .from(reviews)
       .where(and(eq(reviews.userId, userId), eq(reviews.businessId, businessId)))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return success(!!existing);
   } catch (err) {

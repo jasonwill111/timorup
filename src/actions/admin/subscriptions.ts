@@ -39,6 +39,8 @@ export const subscriptions = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const page = input?.page || 1;
       const limit = input?.limit || 20;
       const offset = (page - 1) * limit;
@@ -83,6 +85,8 @@ export const subscriptions = {
       }
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Get current order
       const order = await db.select()
@@ -161,6 +165,8 @@ export const subscriptions = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Get current order
       const order = await db.select()
@@ -252,6 +258,8 @@ export const subscriptions = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       await db.delete(orders).where(eq(orders.id, input.id)).run();
 
       return { success: true };
@@ -266,6 +274,8 @@ export const subscriptions = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const order = await db.select()
         .from(orders)
         .where(eq(orders.id, input.id))

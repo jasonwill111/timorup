@@ -16,6 +16,10 @@ export async function PUT({ params, request }: { params: Record<string, string>;
   }
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { status, expiryDate } = body;
@@ -26,7 +30,7 @@ export async function PUT({ params, request }: { params: Record<string, string>;
       .from(orders)
       .where(eq(orders.id, id))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!order) {
       return new Response(JSON.stringify({

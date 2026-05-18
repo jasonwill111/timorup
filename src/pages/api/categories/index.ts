@@ -33,8 +33,12 @@ export async function GET({ url }: { url: URL }) {
   try {
     const entityType = url.searchParams.get('type') || 'business';
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
-    const allCategories = await db.select().from(table).all();
+    const allCategories = await db.select().from(table).all() as Record<string, unknown>[] as { id: string; [key: string]: unknown }[];
 
     // Cache in production: stale-while-revalidate for 60 seconds
     const cacheHeaders = process.env.NODE_ENV === 'production'

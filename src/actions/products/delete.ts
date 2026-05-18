@@ -22,6 +22,10 @@ export const deleteProduct = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       await db.delete(products).where(eq(products.id, input.id)).run();
       return { success: true };

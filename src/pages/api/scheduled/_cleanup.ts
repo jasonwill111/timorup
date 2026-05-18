@@ -12,6 +12,10 @@ const GRACE_PERIOD_SECONDS = 60 * 24 * 60 * 60;
 
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
   const cutoffDate = now - GRACE_PERIOD_SECONDS;
 

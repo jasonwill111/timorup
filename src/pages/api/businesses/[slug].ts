@@ -60,6 +60,10 @@ async function purgeCache(cacheKey: string): Promise<void> {
 
 export async function GET({ params, request }: { params: { slug: string }; request: Request }) {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   const { slug } = params;
   const cacheKey = `/api/businesses/${slug}`;
 
@@ -92,7 +96,7 @@ export async function GET({ params, request }: { params: { slug: string }; reque
       .from(businesses)
       .where(eq(businesses.slug, slug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!business) {
       // Cache 404s to prevent bot abuse
@@ -116,7 +120,7 @@ export async function GET({ params, request }: { params: { slug: string }; reque
         .from(businessCategories)
         .where(eq(businessCategories.id, business.categoryId))
         .limit(1)
-        .get();
+        .get() ?? undefined;
       if (cat) {
         categoryName = cat.name;
         categorySlug = cat.slug;
@@ -173,6 +177,10 @@ export async function GET({ params, request }: { params: { slug: string }; reque
 
 export async function PUT({ params, request }: { params: { slug: string }; request: Request }) {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const { slug } = params;
 
@@ -195,7 +203,7 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
       .from(businesses)
       .where(eq(businesses.slug, slug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!existing) {
       return new Response(JSON.stringify({
@@ -257,7 +265,7 @@ export async function PUT({ params, request }: { params: { slug: string }; reque
       .from(businesses)
       .where(eq(businesses.slug, slug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return new Response(JSON.stringify({
       success: true,

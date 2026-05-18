@@ -50,7 +50,9 @@ export function getUserInitials(name: string | null | undefined): string {
   // Handle "First Last" pattern
   const parts = trimmed.split(/\s+/);
   if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    const first = parts[0] ?? '';
+    const last = parts[parts.length - 1] ?? '';
+    return (first[0] + last[0]).toUpperCase();
   }
 
   // Single word - take first 2 chars

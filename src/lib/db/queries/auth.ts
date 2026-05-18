@@ -36,6 +36,10 @@ export async function getAuthenticatedUser(
   }
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   // 查询 session (只匹配 token，expiry 在 JS 中检查)
   const session = await db
@@ -43,7 +47,7 @@ export async function getAuthenticatedUser(
     .from(sessions)
     .where(eq(sessions.token, cookieValue))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   if (!session) {
     return { error: 'SESSION_EXPIRED' };
@@ -65,7 +69,7 @@ export async function getAuthenticatedUser(
     .from(users)
     .where(eq(users.id, session.userId))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   if (!user) {
     return { error: 'USER_NOT_FOUND' };
@@ -110,12 +114,16 @@ export async function getAuthenticatedUserFromRequest(
  */
 export async function hasRole(userId: string, role: string): Promise<boolean> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   const user = await db
     .select({ role: users.role })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   return user?.role === role;
 }

@@ -34,6 +34,8 @@ export const heroes = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const heroList = await db.select().from(adBanners).orderBy(desc(adBanners.createdAt)).all();
 
       return { success: true, data: heroList };
@@ -48,6 +50,8 @@ export const heroes = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const id = `hero-${Date.now()}`;
 
       await db.insert(adBanners).values({
@@ -73,6 +77,8 @@ export const heroes = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       const updateData: Record<string, unknown> = {};
       if (input.title !== undefined) updateData.title = input.title;
@@ -100,6 +106,8 @@ export const heroes = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       await db.delete(adBanners).where(eq(adBanners.id, input.id)).run();
 
       return { success: true, message: 'Hero deleted' };

@@ -8,6 +8,10 @@ import { getPlanLimits } from '@/lib/subscription';
 
 export async function GET({ params }: { params: Record<string, string> }) {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const { businessPageId } = params;
 
@@ -22,7 +26,7 @@ export async function GET({ params }: { params: Record<string, string> }) {
     .from(businesses)
     .where(eq(businesses.id, businessPageId))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
     if (!business) {
       return new Response(JSON.stringify({

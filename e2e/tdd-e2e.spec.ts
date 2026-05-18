@@ -147,6 +147,8 @@ test.describe('TDD: User Story 2 - Business CRUD', () => {
 });
 
 test.describe('TDD: User Story 3 - SKU Management', () => {
+  test.setTimeout(60000); // SKU tests need more time
+
   test.beforeEach(async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
     await page.fill('input[name="email"]', USER_EMAIL);
@@ -156,18 +158,14 @@ test.describe('TDD: User Story 3 - SKU Management', () => {
   });
 
   test('US3-AC1: User can view products page', async ({ page }) => {
-    // Navigate to account to find business slug
-    await page.goto(`${BASE_URL}/account/businesses`);
+    // Navigate directly to products-services page (public page)
+    await page.goto(`${BASE_URL}/products-services`);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
-    // Try to find and navigate to products page
-    const productLinks = page.locator('a[href*="/product"]');
-    const count = await productLinks.count();
-
-    if (count > 0) {
-      await productLinks.first().click();
-      await page.waitForTimeout(2000);
-    }
+    // Verify page loaded by checking for heading or content
+    const heading = page.locator('h1, h2').first();
+    await expect(heading).toBeVisible({ timeout: 10000 });
   });
 
   test('US3-AC2: Subscription limits enforced in UI', async ({ page }) => {

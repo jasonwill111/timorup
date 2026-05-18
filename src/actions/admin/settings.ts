@@ -14,7 +14,9 @@ export const settings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-      const settingsResult = await db.select().from(siteSettings).all();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+      const settingsResult = await db.select().from(siteSettings).all() as { id: string; [key: string]: unknown }[];
 
       const settings: Record<string, unknown> = {};
       settingsResult.forEach((s) => {
@@ -40,6 +42,8 @@ export const settings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       const existing = await db.select()
         .from(siteSettings)
@@ -78,6 +82,8 @@ export const settings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       for (const [key, valueObj] of Object.entries(input.settings)) {
         let value: string;

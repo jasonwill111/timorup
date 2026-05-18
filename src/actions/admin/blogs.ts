@@ -34,6 +34,8 @@ export const blogs = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).all();
 
       return { success: true, data: posts };
@@ -48,6 +50,8 @@ export const blogs = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const slug = input.slug || input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + nanoid(6);
 
       const newPost = {
@@ -80,6 +84,8 @@ export const blogs = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
       const updateData: Record<string, unknown> = {};
@@ -118,6 +124,8 @@ export const blogs = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       await db.delete(blogPosts).where(eq(blogPosts.id, input.id)).run();
 
       return { success: true, message: 'Blog post deleted' };

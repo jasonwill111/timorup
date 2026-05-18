@@ -33,6 +33,10 @@ export const createBanner = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       const [newBanner] = await db.insert(adBanners).values({
         title: input.title,
@@ -46,7 +50,7 @@ export const createBanner = defineAction({
         isActive: input.isActive ?? true,
         startDate: input.startDate ? new Date(input.startDate) : null,
         endDate: input.endDate ? new Date(input.endDate) : null,
-      }).returning().get();
+      }).returning().get() ?? undefined;
 
       return { success: true, data: newBanner };
     } catch (error) {

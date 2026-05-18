@@ -15,7 +15,7 @@ let counter = 0;
 
 export function addToast(message: string, type: ToastType = 'info', duration = 3000) {
   const id = `toast-${++counter}`;
-  const $toasts = toasts.get();
+  const $toasts = toasts.get() ?? undefined;
   toasts.set([...$toasts, { id, message, type, duration }]);
 
   if (duration > 0) {
@@ -26,7 +26,7 @@ export function addToast(message: string, type: ToastType = 'info', duration = 3
 }
 
 export function removeToast(id: string) {
-  const $toasts = toasts.get();
+  const $toasts = toasts.get() ?? undefined;
   toasts.set($toasts.filter(t => t.id !== id));
 }
 

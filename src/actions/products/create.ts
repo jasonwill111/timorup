@@ -39,6 +39,10 @@ export const createProduct = defineAction({
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     try {
       // Check business exists
       const business = await db.select({
@@ -47,7 +51,7 @@ export const createProduct = defineAction({
       .from(businesses)
       .where(eq(businesses.id, input.businessId))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
       if (!business) {
         return { success: false, error: { message: 'Business not found' } };

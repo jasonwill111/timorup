@@ -21,6 +21,10 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     // Upsert each setting
     for (const [key, data] of Object.entries(settingsData)) {
@@ -28,7 +32,7 @@ export async function POST({ request }: { request: Request }) {
         ? String(data.value)
         : String(data);
 
-      const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1).get();
+      const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1).get() ?? undefined;
 
       if (existing) {
         await db.update(siteSettings)

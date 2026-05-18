@@ -27,13 +27,17 @@ export interface ProductWithImages {
  */
 export async function getProductById(productId: string): Promise<ProductWithImages | null> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const product = await db
     .select()
     .from(products)
     .where(eq(products.id, productId))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   if (!product) return null;
 
@@ -65,6 +69,10 @@ export async function getBusinessProducts(
   }
 ): Promise<ProductWithImages[]> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   const { active = true, limit = 50 } = options || {};
 
   const conditions = [eq(products.businessId, businessId)];
@@ -102,6 +110,10 @@ export async function getBusinessProducts(
  */
 export async function getBusinessProductCount(businessId: string): Promise<number> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const result = await db
     .select({ count: and(eq(products.businessId, businessId)) })

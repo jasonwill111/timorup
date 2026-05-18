@@ -49,6 +49,10 @@ export async function getAllCategories(
 ): Promise<Result<CategoryInfo[]>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     const results = await db
@@ -79,6 +83,10 @@ export async function getCategoryBySlug(
 ): Promise<Result<CategoryInfo | null>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     const result = await db
@@ -93,7 +101,7 @@ export async function getCategoryBySlug(
       .from(table)
       .where(eq(table.slug, slug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return success(result ?? null);
   } catch (err) {
@@ -110,6 +118,10 @@ export async function getCategoryById(
 ): Promise<Result<CategoryInfo | null>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     const result = await db
@@ -124,7 +136,7 @@ export async function getCategoryById(
       .from(table)
       .where(eq(table.id, id))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     return success(result ?? null);
   } catch (err) {
@@ -141,6 +153,10 @@ export async function getCategoryWithChildren(
 ): Promise<Result<CategoryWithChildren | null>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     // Get parent category
@@ -156,7 +172,7 @@ export async function getCategoryWithChildren(
       .from(table)
       .where(eq(table.slug, slug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (!parent) {
       return success(null);
@@ -194,6 +210,10 @@ export async function getTopLevelCategories(
 ): Promise<Result<CategoryInfo[]>> {
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     const results = await db

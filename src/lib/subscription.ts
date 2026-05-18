@@ -19,12 +19,16 @@ export async function getPlanLimits(planSlug: string | null): Promise<PlanLimits
   if (!planSlug) return null;
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   const plan = await db.select()
     .from(servicePackages)
     .where(eq(servicePackages.slug, planSlug))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   if (!plan) return null;
 
@@ -201,6 +205,10 @@ export interface SubscriptionDashboard {
  */
 export async function getSubscriptionDashboard(businessId: string): Promise<SubscriptionDashboard | null> {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   if (!db) return null;
 
   // Query 1: Get business with subscription info
@@ -214,7 +222,7 @@ export async function getSubscriptionDashboard(businessId: string): Promise<Subs
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1)
-    .get();
+    .get() ?? undefined;
 
   if (!business) return null;
 
@@ -222,7 +230,7 @@ export async function getSubscriptionDashboard(businessId: string): Promise<Subs
   const skuResult = await db.select({ count: count() })
     .from(products)
     .where(eq(products.businessId, businessId))
-    .get();
+    .get() ?? undefined;
 
   const skuCount = skuResult?.count ?? 0;
   const planSlug = business.planSlug || null;
@@ -237,7 +245,7 @@ export async function getSubscriptionDashboard(businessId: string): Promise<Subs
       .from(servicePackages)
       .where(eq(servicePackages.slug, planSlug))
       .limit(1)
-      .get();
+      .get() ?? undefined;
 
     if (plan?.variants) {
       try {

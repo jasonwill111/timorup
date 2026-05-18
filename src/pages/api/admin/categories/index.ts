@@ -18,6 +18,10 @@ export async function GET({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const url = new URL(request.url);
     const table = url.searchParams.get('table') || 'business';
@@ -48,6 +52,10 @@ export async function POST({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { name, slug, description, icon, table = 'business', parentId } = body;
@@ -84,6 +92,10 @@ export async function DELETE({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
@@ -127,6 +139,10 @@ export async function PUT({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { id, name, slug, description, icon, table = 'business', parentId } = body;
@@ -155,7 +171,7 @@ export async function PUT({ request }: { request: Request }) {
       })
       .where(eq(config.schema.id, id))
       .returning()
-      .get();
+      .get() ?? undefined;
 
     return Response.json({ success: true, data: updated });
   } catch (error) {

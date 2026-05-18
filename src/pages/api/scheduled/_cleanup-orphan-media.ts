@@ -25,6 +25,10 @@ async function deleteFromR2(key: string): Promise<boolean> {
 
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
   // Starting cleanup silently
 

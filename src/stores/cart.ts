@@ -26,7 +26,7 @@ export const $cartTotal = computed([$cartItems], (items) =>
 
 // Actions
 export function addToCart(item: Omit<CartItem, 'quantity'>) {
-  const items = $cartItems.get();
+  const items = $cartItems.get() ?? undefined;
   const existing = items.find(i => i.productId === item.productId);
 
   if (existing) {

@@ -55,6 +55,8 @@ export const listings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       let query = db.select().from(listingsTable);
       const conditions = [];
 
@@ -84,6 +86,8 @@ export const listings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const slug = input.slug || generateSlug(input.title);
       const id = nanoid();
       const now = Math.floor(Date.now() / 1000);
@@ -134,6 +138,8 @@ export const listings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
       const updateData: Record<string, unknown> = { updatedAt: new Date() };
@@ -173,6 +179,8 @@ export const listings = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       await db.delete(listingsTable).where(eq(listings.id, input.id)).run();
 
       return { success: true };

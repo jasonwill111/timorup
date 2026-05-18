@@ -19,6 +19,8 @@ export const getSession = defineAction({
 
       const token = tokenMatch[1];
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       const session = await db.select()
         .from(sessions)

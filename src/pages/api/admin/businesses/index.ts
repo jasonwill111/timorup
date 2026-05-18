@@ -21,6 +21,10 @@ export async function GET({ request }: { request: Request }) {
 
   try {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '20');
@@ -72,7 +76,7 @@ export async function GET({ request }: { request: Request }) {
     const countResult = await db.select({ count: sql<number>`count(*)` })
       .from(businesses)
       .where(whereClause)
-      .get();
+      .get() ?? undefined;
     const total = Number(countResult?.count) || 0;
 
     return new Response(JSON.stringify({

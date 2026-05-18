@@ -8,7 +8,12 @@ export const prerender = false;
 export async function GET() {
   try {
     const db = await getDb();
-    const result = await db.select().from(users).where(eq(users.email, 'admin@timorlist.tl')).get();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+    if (!db) throw new Error('Database not available');
+    const result = await db.select().from(users).where(eq(users.email, 'admin@timorlist.tl')).get() ?? undefined;
 
     return new Response(JSON.stringify({
       directQuery: result ? { found: true, id: result.id, email: result.email } : { found: false },

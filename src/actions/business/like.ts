@@ -18,13 +18,17 @@ export const like = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       const business = await db.select()
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
         .limit(1)
-        .get();
+        .get() ?? undefined;
 
       if (!business) {
         return { success: false, error: { message: 'Business not found' } };

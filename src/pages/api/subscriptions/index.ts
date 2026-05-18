@@ -7,6 +7,10 @@ import { eq, desc } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 
 const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;

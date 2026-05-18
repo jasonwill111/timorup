@@ -62,6 +62,8 @@ export const servicePackagesAdmin = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const allPackages = await db.select()
         .from(servicePackages)
         .orderBy(asc(servicePackages.sortOrder))
@@ -86,6 +88,8 @@ export const servicePackagesAdmin = {
       if (user.role !== 'super_admin') throw new Error('Only super_admin can create packages');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Check for duplicate slug
       const existing = await db.select()
@@ -135,6 +139,8 @@ export const servicePackagesAdmin = {
       }
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
       // Check package exists
@@ -191,6 +197,8 @@ export const servicePackagesAdmin = {
       if (user.role !== 'super_admin') throw new Error('Only super_admin can delete packages');
 
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       // Check package exists
       const existing = await db.select()
@@ -225,6 +233,8 @@ export const servicePackagesAdmin = {
     }).optional(),
     handler: async (input) => {
       const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
       let query = db.select()
         .from(servicePackages)

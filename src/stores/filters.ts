@@ -60,19 +60,19 @@ export function resetFilters() {
 export function getFilterParams(): URLSearchParams {
   const params = new URLSearchParams();
 
-  const entityType = $entityType.get();
+  const entityType = $entityType.get() ?? undefined;
   if (entityType !== 'all') params.set('type', entityType);
 
-  const category = $categorySlug.get();
+  const category = $categorySlug.get() ?? undefined;
   if (category) params.set('category', category);
 
-  const search = $searchTerm.get();
+  const search = $searchTerm.get() ?? undefined;
   if (search) params.set('q', search);
 
-  const sort = $sortBy.get();
+  const sort = $sortBy.get() ?? undefined;
   if (sort !== 'recent') params.set('sort', sort);
 
-  const page = $currentPage.get();
+  const page = $currentPage.get() ?? undefined;
   if (page > 1) params.set('page', String(page));
 
   return params;

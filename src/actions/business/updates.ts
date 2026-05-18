@@ -20,6 +20,10 @@ export const createUpdate = defineAction({
   }),
   handler: async (input, { cookies }) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       // Authenticate
@@ -38,7 +42,7 @@ export const createUpdate = defineAction({
       const business = await db.select()
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
-        .get();
+        .get() ?? undefined;
 
       if (!business) {
         return { success: false, error: { message: 'Business not found' } };
@@ -92,12 +96,16 @@ export const listUpdates = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       const business = await db.select()
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
-        .get();
+        .get() ?? undefined;
 
       if (!business) {
         return { success: false, error: { message: 'Business not found' } };
@@ -130,6 +138,10 @@ export const deleteUpdate = defineAction({
   }),
   handler: async (input, { cookies }) => {
     const db = await getDb();
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
+if (!db) throw new Error("Database not available");
 
     try {
       const authApi = (await initAuth()).api;
@@ -145,7 +157,7 @@ export const deleteUpdate = defineAction({
       const business = await db.select()
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
-        .get();
+        .get() ?? undefined;
 
       if (!business) {
         return { success: false, error: { message: 'Business not found' } };
