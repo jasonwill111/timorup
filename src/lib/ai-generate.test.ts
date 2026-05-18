@@ -21,7 +21,7 @@ describe('AI Generate Action', () => {
     
     const GenerationInputSchema = z.object({
       type: z.enum(['listing', 'sku', 'blog', 'landing']),
-      data: z.record(z.unknown()),
+      data: z.record(z.string(), z.unknown()),
     });
 
     // Valid input
@@ -43,7 +43,7 @@ describe('AI Generate Action', () => {
     
     const GenerationInputSchema = z.object({
       type: z.enum(['listing', 'sku', 'blog', 'landing']),
-      data: z.record(z.unknown()),
+      data: z.record(z.string(), z.unknown()),
     });
 
     const invalidInput = {

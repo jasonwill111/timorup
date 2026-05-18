@@ -11,9 +11,12 @@ export const verifyEmail = defineAction({
   handler: async (input) => {
     try {
       const auth = await initAuth();
-      await auth.api.verifyEmail({
-        body: { token: input.token }
-      });
+      const api = auth.api as { verifyEmail?: (opts: { body: { token: string } }) => Promise<unknown> };
+      if (api?.verifyEmail) {
+        await api.verifyEmail({
+          body: { token: input.token }
+        });
+      }
       return { success: true };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

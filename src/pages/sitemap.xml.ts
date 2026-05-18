@@ -35,10 +35,10 @@ const STATIC_PAGES = [
   { loc: 'products-services', priority: '0.8', changefreq: 'daily' },
 ];
 
-function formatDate(date: Date | string | null): string {
-  if (!date) return new Date().toISOString().split('T')[0];
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toISOString().split('T')[0];
+function formatDate(date: string | number | null | undefined): string {
+  if (!date) return new Date().toISOString().split('T')[0] as string;
+  const d = typeof date === 'number' ? new Date(date * 1000) : new Date(date);
+  return d.toISOString().split('T')[0] as string;
 }
 
 function escapeXml(str: string): string {
@@ -51,7 +51,7 @@ function escapeXml(str: string): string {
 }
 
 function urlToXml(url: SitemapUrl): string {
-  const loc = `${SITE_URL}${url.loc}`;
+  const loc = `${SITE_URL}/${url.loc}`;
   return `  <url>
     <loc>${escapeXml(loc)}</loc>
     ${url.lastmod ? `<lastmod>${url.lastmod}</lastmod>` : ''}
@@ -78,10 +78,6 @@ export async function GET() {
     const { getDb } = await import('../lib/db');
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-    if (!db) throw new Error('Database not available');
 
     // Query businesses (active only)
     const businesses = await db.all<DbRow>(`

@@ -21,9 +21,6 @@ export const createUpdate = defineAction({
   handler: async (input, { cookies }) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     try {
       // Authenticate
@@ -59,8 +56,10 @@ if (!db) throw new Error("Database not available");
 
       const todayPosts = await db.select()
         .from(latestUpdates)
-        .where(eq(latestUpdates.typeId, business.id))
-        .where(eq(latestUpdates.type, 'businesses'))
+        .where(and(
+          eq(latestUpdates.typeId, business.id),
+          eq(latestUpdates.type, 'businesses')
+        ))
         .all();
 
       const businessUpdates = todayPosts.filter(u => {
@@ -76,7 +75,7 @@ if (!db) throw new Error("Database not available");
 
       await db.insert(latestUpdates).values({
         id,
-        type: 'business',
+        type: 'businesses',
         typeId: business.id,
         content: input.content,
         imageIds: input.images ? JSON.stringify(input.images) : null,
@@ -97,9 +96,6 @@ export const listUpdates = defineAction({
   handler: async (input) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     try {
       const business = await db.select()
@@ -113,15 +109,17 @@ if (!db) throw new Error("Database not available");
 
       const updates = await db.select()
         .from(latestUpdates)
-        .where(eq(latestUpdates.typeId, business.id))
-        .where(eq(latestUpdates.type, 'businesses'))
+        .where(and(
+          eq(latestUpdates.typeId, business.id),
+          eq(latestUpdates.type, 'businesses')
+        ))
         .orderBy(desc(latestUpdates.createdAt))
         .limit(4)
         .all();
 
       const updatesWithImages = updates.map(u => ({
         ...u,
-        images: u.images ? JSON.parse(u.images) : (u.imageIds ? JSON.parse(u.imageIds) : []),
+        images: u.imageIds ? JSON.parse(u.imageIds) : [],
       }));
 
       return { success: true, data: updatesWithImages };
@@ -138,9 +136,6 @@ export const deleteUpdate = defineAction({
   }),
   handler: async (input, { cookies }) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
     try {

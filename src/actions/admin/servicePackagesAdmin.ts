@@ -63,7 +63,6 @@ export const servicePackagesAdmin = {
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const allPackages = await db.select()
         .from(servicePackages)
         .orderBy(asc(servicePackages.sortOrder))
@@ -89,7 +88,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       // Check for duplicate slug
       const existing = await db.select()
@@ -111,8 +109,8 @@ if (!db) throw new Error("Database not available");
         category: input.category || null,
         description: input.description || null,
         variants: JSON.stringify(input.variants),
-        isActive: input.isActive,
-        sortOrder: input.sortOrder,
+        isActive: input.isActive ? 1 : 0,
+        sortOrder: input.sortOrder || 0,
       });
 
       return {
@@ -139,7 +137,6 @@ if (!db) throw new Error("Database not available");
       }
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
@@ -198,7 +195,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       // Check package exists
       const existing = await db.select()
@@ -233,7 +229,6 @@ if (!db) throw new Error("Database not available");
     }).optional(),
     handler: async (input) => {
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
       let query = db.select()

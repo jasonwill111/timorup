@@ -17,9 +17,6 @@ export async function PUT({ params, request }: { params: Record<string, string>;
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { status, expiryDate } = body;
@@ -40,28 +37,24 @@ if (!db) throw new Error("Database not available");
     }
 
     // Calculate expiry date if setting to paid
-    let newExpiryDate = order.expiryDate;
+    let newExpiryDate = order.expiresAt;
     let paidDate = order.paidDate;
 
+    // Parse variantSnapshot to get plan info
+    const variant = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : null;
+    const planName = variant?.name || 'basic-monthly';
+
     if (status === 'paid' && !order.paidDate) {
-      paidDate = new Date();
+      paidDate = Math.floor(Date.now() / 1000);
       // Default expiry: 30 days for monthly, 365 days for yearly
-      const planType = order.planType || 'basic';
-      const isYearly = planType.includes('yearly');
+      const isYearly = planName.includes('yearly');
       const days = isYearly ? 365 : 30;
 
       if (expiryDate) {
-        newExpiryDate = new Date(expiryDate);
+        newExpiryDate = Math.floor(expiryDate / 1000);
       } else {
-        newExpiryDate = new Date();
-        newExpiryDate.setDate(newExpiryDate.getDate() + days);
+        newExpiryDate = Math.floor((Date.now() + days * 86400000) / 1000);
       }
-    }
-
-    // Calculate timestamp for storage
-    let expiryTimestamp: number | null = null;
-    if (newExpiryDate) {
-      expiryTimestamp = Math.floor(newExpiryDate.getTime() / 1000);
     }
 
     // Update order
@@ -69,28 +62,26 @@ if (!db) throw new Error("Database not available");
       .set({
         status: status || order.status,
         paidDate,
-        expiryDate: expiryTimestamp,
-        updatedAt: new Date(),
+        expiresAt: newExpiryDate,
+        updatedAt: Math.floor(Date.now() / 1000),
       })
       .where(eq(orders.id, id))
       .run();
 
     // If payment confirmed, update business with plan info
     if (status === 'paid' && order.typeId) {
-      const planType = order.planType
+      const finalPlanType = planName
         .replace('-yearly', '')
         .replace('-monthly', '');
 
-      const expiryTimestamp = Math.floor(newExpiryDate.getTime() / 1000);
-
       await db.update(businesses)
         .set({
-          planType,
-          expiryDate: expiryTimestamp,
+          planType: finalPlanType,
+          expiresAt: newExpiryDate,
           status: 'live', // Publish the listing
           subscriptionStatus: 'active', // Activate subscription
           gracePeriodEndDate: null, // Clear grace period on renewal
-          updatedAt: new Date(),
+          updatedAt: Math.floor(Date.now() / 1000),
         })
         .where(eq(businesses.id, order.typeId))
         .run();
@@ -103,7 +94,7 @@ if (!db) throw new Error("Database not available");
 
     return new Response(JSON.stringify({
       success: true,
-      data: { id, status, expiryDate: expiryTimestamp, paidDate }
+      data: { id, status, expiresAt: newExpiryDate, paidDate }
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

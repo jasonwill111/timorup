@@ -32,7 +32,7 @@ export async function getCurrentUser(): Promise<ClientUser | null> {
       const res = await fetch('/api/auth/session', {
         credentials: 'include',
       });
-      const data = await res.json();
+      const data = await res.json() as { user?: { id: string; email: string; name: string; role?: string; image?: string | null } };
 
       if (data.user) {
         cachedUser = {
@@ -40,7 +40,7 @@ export async function getCurrentUser(): Promise<ClientUser | null> {
           email: data.user.email,
           name: data.user.name,
           role: (data.user.role as Role) || 'user',
-          image: data.user.image,
+          image: data.user.image ?? null,
         };
         return cachedUser;
       }

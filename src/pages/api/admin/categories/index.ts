@@ -19,9 +19,6 @@ export async function GET({ request }: { request: Request }) {
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const url = new URL(request?.url);
     const table = url.searchParams.get('table') || 'business';
@@ -52,9 +49,6 @@ export async function POST({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
@@ -92,9 +86,6 @@ export async function DELETE({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
     const url = new URL(request?.url);
@@ -139,9 +130,6 @@ export async function PUT({ request }: { request: Request }) {
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();

@@ -3,7 +3,7 @@ import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
 import { businessCategories as categories } from '@/db/schema';
-import { eq, desc, or, isNull } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 
 // Input validation schemas
@@ -12,7 +12,6 @@ const CreateCategorySchema = z.object({
   slug: z.string().min(1).optional(),
   description: z.string().optional().default(''),
   icon: z.string().optional().default(''),
-  entityType: z.enum(['business', 'nonprofit']).default('business'),
   parentId: z.string().optional().nullable(),
 });
 
@@ -22,7 +21,6 @@ const UpdateCategorySchema = z.object({
   slug: z.string().min(1).optional(),
   description: z.string().optional(),
   icon: z.string().optional(),
-  entityType: z.enum(['business', 'nonprofit']).optional(),
   parentId: z.string().optional().nullable(),
 });
 
@@ -32,22 +30,9 @@ export const adminCategories = {
     input: z.object({
       entityType: z.enum(['business', 'nonprofit']).optional(),
     }).optional(),
-    handler: async (input) => {
+    handler: async () => {
       const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-
-      if (input?.entityType) {
-        const result = await db.select()
-          .from(categories)
-          .where(or(
-            eq(categories.entityType, input.entityType),
-            isNull(categories.entityType)
-          ))
-          .orderBy(desc(categories.createdAt))
-          .all();
-        return { success: true, data: result };
-      }
+      if (!db) throw new Error("Database not available");
 
       const result = await db.select()
         .from(categories)
@@ -66,7 +51,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const id = `cat-${Date.now()}`;
       const slug = input.slug || input.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -76,11 +60,11 @@ if (!db) throw new Error("Database not available");
         slug,
         description: input.description,
         icon: input.icon,
-        entityType: input.entityType,
+        
         parentId: input.parentId || null,
       }).run();
 
-      return { success: true, data: { id, name: input.name, slug, entityType: input.entityType } };
+      return { success: true, data: { id, name: input.name, slug } };
     },
   }),
 
@@ -93,7 +77,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       const updateData: Record<string, unknown> = {
         updatedAt: Math.floor(Date.now() / 1000),
@@ -102,7 +85,7 @@ if (!db) throw new Error("Database not available");
       if (input.slug !== undefined) updateData.slug = input.slug;
       if (input.description !== undefined) updateData.description = input.description;
       if (input.icon !== undefined) updateData.icon = input.icon;
-      if (input.entityType !== undefined) updateData.entityType = input.entityType;
+      
       if (input.parentId !== undefined) updateData.parentId = input.parentId;
 
       const updated = await db.update(categories)
@@ -125,7 +108,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
       // Check if category has children

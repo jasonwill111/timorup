@@ -19,9 +19,6 @@ export const like = defineAction({
   handler: async (input) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     try {
       const business = await db.select()

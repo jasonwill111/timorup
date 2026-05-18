@@ -21,9 +21,6 @@ function getClientIP(request: Request): string {
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
   // Rate limiting
   const clientIP = getClientIP(request);
@@ -61,8 +58,8 @@ if (!db) throw new Error("Database not available");
         .where(eq(publicSectorCategories.slug, category))
         .limit(1)
         .all();
-      if (cat.length > 0) {
-        categoryId = cat[0].id;
+      if (cat.length > 0 && cat[0]) {
+        categoryId = cat[0].id!;
       }
     }
 
@@ -100,6 +97,7 @@ if (!db) throw new Error("Database not available");
       saves: publicSectors.saves,
       views: publicSectors.views,
       createdAt: publicSectors.createdAt,
+      categoryId: publicSectors.categoryId,
     })
     .from(publicSectors)
     .where(and(...conditions))
@@ -114,14 +112,11 @@ if (!db) throw new Error("Database not available");
           return scoreB - scoreA;
         });
         break;
-      case 'rating':
-        results.sort((a, b) => (b.ratingAverage || 0) - (a.ratingAverage || 0));
-        break;
       case 'name':
         results.sort((a, b) => a.title.localeCompare(b.title));
         break;
       default: // recent
-        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        results.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     }
 
     // Apply pagination
@@ -130,13 +125,13 @@ if (!db) throw new Error("Database not available");
 
     // Get category names
     const categoryMap = new Map<string, string>();
-    const allCategories = await db.select().from(publicSectorCategories).all() as unknown[];
+    const allCategories = await db.select().from(publicSectorCategories).all() as { id: string; name: string }[];
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
     const responseData = paginated.map((ps) => ({
       ...ps,
       tags: ps.tags ? JSON.parse(ps.tags) : [],
-      categoryName: categoryMap.get(ps.categoryId) || 'Public Sector',
+      categoryName: categoryMap.get(ps.categoryId || '') || 'Public Sector',
     }));
 
     return new Response(JSON.stringify({

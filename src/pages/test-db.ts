@@ -9,10 +9,6 @@ export async function GET() {
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-    if (!db) throw new Error('Database not available');
     const result = await db.select().from(users).where(eq(users.email, 'admin@timorlist.tl')).get() ?? undefined;
 
     return new Response(JSON.stringify({

@@ -40,7 +40,6 @@ export const subscriptions = {
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const page = input?.page || 1;
       const limit = input?.limit || 20;
       const offset = (page - 1) * limit;
@@ -86,7 +85,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       // Get current order
       const order = await db.select()
@@ -102,7 +100,7 @@ if (!db) throw new Error("Database not available");
       let paidDate = order.paidDate;
 
       if (input.status === 'paid' && !order.paidDate) {
-        paidDate = new Date();
+        paidDate = Math.floor(Date.now() / 1000);
         const variantSnapshot = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : null;
         const durationValue = variantSnapshot?.durationValue || 30;
         const durationUnit = variantSnapshot?.durationUnit || 'days';
@@ -128,7 +126,7 @@ if (!db) throw new Error("Database not available");
           status: input.status,
           paidDate,
           expiresAt: newExpiresAt,
-          updatedAt: new Date(),
+          updatedAt: Math.floor(Date.now() / 1000),
         })
         .where(eq(orders.id, input.id))
         .run();
@@ -143,11 +141,11 @@ if (!db) throw new Error("Database not available");
           .set({
             planSlug,
             limits: JSON.stringify(limits),
-            expiresAt: newExpiresAt ? new Date(newExpiresAt * 1000) : null,
+            subscriptionExpiresAt: newExpiresAt ?? null,
             status: 'live',
             subscriptionStatus: 'active',
             gracePeriodEndDate: null,
-            updatedAt: new Date(),
+            updatedAt: Math.floor(Date.now() / 1000),
           })
           .where(eq(businesses.id, order.typeId))
           .run();
@@ -166,7 +164,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       // Get current order
       const order = await db.select()
@@ -182,7 +179,7 @@ if (!db) throw new Error("Database not available");
       let paidDate = order.paidDate;
 
       if (input.status === 'paid' && order.status !== 'paid' && !order.paidDate) {
-        paidDate = new Date();
+        paidDate = Math.floor(Date.now() / 1000);
 
         if (!input.expiresAt) {
           const variantSnapshot = (input.variantSnapshot || order.variantSnapshot) ? JSON.parse(input.variantSnapshot || order.variantSnapshot) : null;
@@ -213,7 +210,7 @@ if (!db) throw new Error("Database not available");
           paidDate,
           expiresAt: newExpiresAt,
           adminNotes: input.adminNotes !== undefined ? input.adminNotes : order.adminNotes,
-          updatedAt: new Date(),
+          updatedAt: Math.floor(Date.now() / 1000),
         })
         .where(eq(orders.id, input.id))
         .run();
@@ -228,9 +225,9 @@ if (!db) throw new Error("Database not available");
           .set({
             planSlug,
             limits: JSON.stringify(limits),
-            expiresAt: newExpiresAt ? new Date(newExpiresAt * 1000) : null,
+            subscriptionExpiresAt: newExpiresAt ?? null,
             status: order.status === 'draft' ? 'live' : order.status,
-            updatedAt: new Date(),
+            updatedAt: Math.floor(Date.now() / 1000),
           })
           .where(eq(businesses.id, order.typeId))
           .run();
@@ -259,7 +256,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       await db.delete(orders).where(eq(orders.id, input.id)).run();
 
       return { success: true };
@@ -274,7 +270,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       const order = await db.select()
         .from(orders)

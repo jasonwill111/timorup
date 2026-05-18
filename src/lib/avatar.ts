@@ -52,7 +52,8 @@ export function getUserInitials(name: string | null | undefined): string {
   if (parts.length >= 2) {
     const first = parts[0] ?? '';
     const last = parts[parts.length - 1] ?? '';
-    return (first[0] + last[0]).toUpperCase();
+    const initials = (first[0] ?? '') + (last[0] ?? '');
+    return initials.toUpperCase();
   }
 
   // Single word - take first 2 chars
@@ -83,7 +84,7 @@ export function getAvatarColor(name: string | null | undefined): string {
     'bg-indigo-500',
   ];
 
-  return colors[Math.abs(hash) % colors.length];
+  return colors[Math.abs(hash) % colors.length] as string;
 }
 
 /**

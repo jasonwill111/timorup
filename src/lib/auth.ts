@@ -1,8 +1,7 @@
 // Better Auth Configuration - Environment Aware
 import { betterAuth } from 'better-auth';
-import type { BetterAuthInstance, BetterAuthConfig } from 'better-auth';
+import type { Auth } from 'better-auth';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
-import type { DrizzleAdapter } from '@better-auth/drizzle-adapter';
 import { users, sessions, accounts, verifications } from '@/db/schema';
 import { createSessionKVStore } from './auth-kv-store';
 
@@ -35,7 +34,8 @@ function convertToTimestamp(value: unknown): number | unknown {
 }
 
 // Wrapper that only intercepts insert to convert Date to timestamps
-function wrapDbForD1(db: DrizzleDbWrapper): DrizzleDbWrapper {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function wrapDbForD1(db: any): any {
   return new Proxy(db, {
     get(target, prop) {
       if (prop === 'insert') {
@@ -59,12 +59,12 @@ function wrapDbForD1(db: DrizzleDbWrapper): DrizzleDbWrapper {
       }
       return value;
     }
-  }) as DrizzleDbWrapper;
+  });
 }
 
 // Type for auth config
 export interface AuthConfig {
-  db: DrizzleDbWrapper;
+  db: unknown;
   env?: { SESSION?: KVNamespace };
   baseURL?: string;
 }
@@ -72,7 +72,7 @@ export interface AuthConfig {
 /**
  * Create Drizzle adapter for Better Auth
  */
-export function createDrizzleAuthAdapter(db: DrizzleDbWrapper): DrizzleAdapter {
+export function createDrizzleAuthAdapter(db: unknown) {
   const wrappedDb = wrapDbForD1(db);
   return drizzleAdapter(wrappedDb, {
     provider: 'sqlite',
@@ -90,19 +90,13 @@ export function createDrizzleAuthAdapter(db: DrizzleDbWrapper): DrizzleAdapter {
  */
 export function createAuthFactory() {
   return {
-    createAuth(config: AuthConfig): BetterAuthInstance {
+    createAuth(config: AuthConfig): Auth {
       const { db, env, baseURL } = config;
 
       // Wrap db to convert Date objects to timestamps for D1
       const wrappedDb = wrapDbForD1(db);
 
-      // Create secondary storage for sessions if KV available
-      const secondaryStorage = env?.SESSION
-        ? {
-            sessions: createSessionKVStore(env.SESSION, 86400), // 24 hour TTL
-          }
-        : undefined;
-
+      // Create auth instance
       return betterAuth({
         baseURL: baseURL || process.env.BETTER_AUTH_URL || 'http://localhost:8787',
 
@@ -115,9 +109,6 @@ export function createAuthFactory() {
             verification: verifications,
           },
         }),
-
-        // Secondary storage for session caching
-        secondaryStorage,
 
         // Email and password authentication
         emailAndPassword: {
@@ -146,14 +137,6 @@ export function createAuthFactory() {
           cookieCache: {
             enabled: true,
             maxAge: 60 * 5, // 5 minutes cache for session reads
-          },
-          // Explicit cookie security configuration
-          cookie: {
-            name: 'better-auth.session_token',
-            httpOnly: true,       // Prevent XSS access to cookie
-            secure: import.meta.env.PROD,  // HTTPS only in production
-            sameSite: 'strict',     // CSRF protection (strict is stronger than lax)
-            maxAge: 60 * 60 * 24 * 7, // 7 days in seconds (same as expiresIn)
           },
         },
 
@@ -192,20 +175,17 @@ export function createAuthFactory() {
 }
 
 // Module-level singleton (lazy init to avoid startup issues)
-let _authInstance: BetterAuthInstance | undefined;
-let _initPromise: Promise<BetterAuthInstance> | undefined;
+let _authInstance: Auth | undefined;
+let _initPromise: Promise<Auth> | undefined;
 
 /**
  * Get or create singleton auth instance
  */
-export async function getAuthInstance(env?: { SESSION?: KVNamespace }): Promise<BetterAuthInstance> {
+export async function getAuthInstance(env?: { SESSION?: KVNamespace }): Promise<Auth> {
   if (!_authInstance) {
     _initPromise ??= (async () => {
       const { getDb } = await import('./db');
       const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       if (!db) {
         throw new Error('[getAuthInstance] Database not available');
@@ -226,22 +206,22 @@ if (authSecret && authSecret.length < 32) {
 }
 
 // Singleton auth instance cache
-let authInstance: BetterAuthInstance | null = null;
+let authInstance: Auth | null = null;
 
 /**
  * Get singleton auth instance (for Server Actions)
  */
-export async function initAuth(): Promise<BetterAuthInstance> {
+export async function initAuth(): Promise<Auth> {
   if (authInstance) return authInstance;
 
   // Lazy initialization with env check
   if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
     try {
-      const { env } = globalThis as { env: Record<string, unknown> };
+      const cfEnv = (globalThis as unknown as { env: Record<string, unknown> }).env;
       const db = await import('./db').then(m => m.getDb());
       authInstance = createAuthFactory().createAuth({
         db,
-        env: env as { SESSION?: KVNamespace; [key: string]: unknown },
+        env: cfEnv as { SESSION?: KVNamespace; [key: string]: unknown },
         baseURL: process.env.APP_URL || process.env.BETTER_AUTH_URL || 'http://localhost:8787',
       });
       return authInstance;
@@ -260,5 +240,4 @@ export const oauthStatus = {
 };
 
 // Re-export types
-export type { BetterAuthInstance, BetterAuthConfig } from 'better-auth';
-export type { DrizzleAdapter } from '@better-auth/drizzle-adapter';
+export type { Auth } from 'better-auth';

@@ -19,9 +19,6 @@ export async function GET({ request }: { params: Record<string, string>; request
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const now = new Date();
   const nowTimestamp = Math.floor(now.getTime() / 1000);
 

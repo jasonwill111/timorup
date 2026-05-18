@@ -309,7 +309,7 @@ describe('US-007: Scheduled Cleanup Job', () => {
     status: 'active' | 'expired' | 'deleted';
     expiryDate: Date | null;
     ownerId: string;
-    createdAt: Date;
+    createdAt: Date | number;
   }
 
   interface SKU {
@@ -331,7 +331,8 @@ describe('US-007: Scheduled Cleanup Job', () => {
 
   function isPastGracePeriod(listing: Listing): boolean {
     if (!listing.expiryDate) return false;
-    const gracePeriodEnd = new Date(listing.expiryDate.getTime() + GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
+    const expiryMs = typeof listing.expiryDate === 'number' ? listing.expiryDate * 1000 : listing.expiryDate.getTime();
+    const gracePeriodEnd = new Date(expiryMs + GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
     return new Date().getTime() > gracePeriodEnd.getTime();
   }
 

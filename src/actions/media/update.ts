@@ -18,16 +18,15 @@ export const updateMedia = defineAction({
     width: z.number().optional(),
     height: z.number().optional(),
     alt: z.string().optional(),
-    businessId: z.string().optional(),
+    entityId: z.string().optional(),
+    r2Key: z.string().optional(),
   }),
   handler: async (input) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const auth = await initAuth();
-    const { user } = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => ({ user: null, session: null }));
+    const sessionResult = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
+    const user = (sessionResult as { user?: { id: string } } | null)?.user;
 
     if (!user) {
       return { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } };

@@ -23,9 +23,6 @@ export async function GET({ request }: { request: Request }) {
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const url = new URL(request?.url);
     const { page, limit } = PaginationSchema.parse({
       page: url.searchParams.get('page') || '1',

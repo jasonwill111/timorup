@@ -18,8 +18,8 @@ export interface ProductWithImages {
   images: string[];
   featured: boolean;
   active: boolean;
-  createdAt: number | Date;
-  updatedAt: number | Date;
+  createdAt: number | null;
+  updatedAt: number | null;
 }
 
 /**
@@ -27,9 +27,6 @@ export interface ProductWithImages {
  */
 export async function getProductById(productId: string): Promise<ProductWithImages | null> {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
   const product = await db
@@ -70,9 +67,6 @@ export async function getBusinessProducts(
 ): Promise<ProductWithImages[]> {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const { active = true, limit = 50 } = options || {};
 
   const conditions = [eq(products.businessId, businessId)];
@@ -111,17 +105,14 @@ if (!db) throw new Error("Database not available");
 export async function getBusinessProductCount(businessId: string): Promise<number> {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
   const result = await db
-    .select({ count: and(eq(products.businessId, businessId)) })
+    .select({ count: sql<number>`count(*)` })
     .from(products)
     .where(eq(products.businessId, businessId))
     .all();
 
-  return result.length;
+  return result[0]?.count ?? 0;
 }
 
 /**

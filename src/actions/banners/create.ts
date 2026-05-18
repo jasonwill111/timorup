@@ -34,11 +34,9 @@ export const createBanner = defineAction({
 
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     try {
-      const [newBanner] = await db.insert(adBanners).values({
+      const insertResult = await db.insert(adBanners).values({
+        id: `banner-${Date.now()}`,
         title: input.title,
         description: input.description || null,
         imageId: input.imageId || null,
@@ -47,10 +45,18 @@ if (!db) throw new Error("Database not available");
         position: input.position || 'homepage',
         sortOrder: input.sortOrder || 0,
         orderId: input.orderId || null,
-        isActive: input.isActive ?? true,
-        startDate: input.startDate ? new Date(input.startDate) : null,
-        endDate: input.endDate ? new Date(input.endDate) : null,
-      }).returning().get() ?? undefined;
+        isActive: (input.isActive ?? true) ? 1 : 0,
+        startDate: input.startDate ? Math.floor(new Date(input.startDate).getTime() / 1000) : null,
+        endDate: input.endDate ? Math.floor(new Date(input.endDate).getTime() / 1000) : null,
+        createdAt: Math.floor(Date.now() / 1000),
+        updatedAt: Math.floor(Date.now() / 1000),
+      }).returning();
+
+      const newBanner = insertResult[0];
+
+      if (!newBanner) {
+        return { success: false, error: { code: 'CREATE_ERROR', message: 'Failed to create banner' } };
+      }
 
       return { success: true, data: newBanner };
     } catch (error) {

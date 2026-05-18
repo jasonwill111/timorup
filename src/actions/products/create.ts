@@ -23,9 +23,9 @@ const CreateProductSchema = z.object({
   description: z.string().optional().nullable(),
   businessId: z.string().min(1),           // FK to businesses.id (NOT businessPageId)
   categoryId: z.string().optional().nullable(),  // FK to product_categories.id
-  priceFields: z.record(z.unknown()).optional().nullable(),  // JSON with category-specific price fields
+  priceFields: z.record(z.string(), z.unknown()).optional().nullable(),  // JSON with category-specific price fields
   productType: z.enum(['product', 'service', 'virtual', 'ticket', 'rental', 'subscription']).default('product'),
-  specifications: z.record(z.unknown()).optional().nullable(),  // JSON with category-specific specs
+  specifications: z.record(z.string(), z.unknown()).optional().nullable(),  // JSON with category-specific specs
   images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional().default(false),
 });
@@ -39,9 +39,6 @@ export const createProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     try {
       // Check business exists
@@ -76,16 +73,19 @@ if (!db) throw new Error("Database not available");
 
       await db.insert(products).values({
         id,
+        slug: `prod-${id}`,
         title: input.title,
         description: input.description ?? null,
         businessId: input.businessId,
-        categoryId: input.categoryId ?? null,
+        businessPageId: input.businessId, // Alias for compatibility
+        categoryId: input.categoryId || `cat-${Date.now()}`,
         priceFields: safeStringify(input.priceFields),
         productType: finalProductType,
+        serviceType: finalProductType,
         specifications: safeStringify(input.specifications),
         images: input.images ? JSON.stringify(input.images) : null,
-        featured: input.featured ?? false,
-        active: true,
+        featured: input.featured ? 1 : 0,
+        active: 1,
       }).run();
 
       return {

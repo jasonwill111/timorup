@@ -56,7 +56,6 @@ export const listings = {
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       let query = db.select().from(listingsTable);
       const conditions = [];
 
@@ -87,13 +86,12 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const slug = input.slug || generateSlug(input.title);
       const id = nanoid();
       const now = Math.floor(Date.now() / 1000);
 
       // Calculate expiresAt (3 days from now)
-      const expiresAt = new Date(now * 1000 + 3 * 24 * 60 * 60 * 1000);
+      const expiresAt = now + 3 * 24 * 60 * 60;
 
       const newListing = {
         id,
@@ -118,10 +116,10 @@ if (!db) throw new Error("Database not available");
         likes: 0,
         saves: 0,
         views: 0,
-        createdAt: new Date(now * 1000),
-        updatedAt: new Date(now * 1000),
+        createdAt: now,
+        updatedAt: now,
         expiresAt,
-        lastRenewedAt: new Date(now * 1000),
+        lastRenewedAt: now,
       };
 
       await db.insert(listingsTable).values(newListing);
@@ -139,10 +137,9 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
-      const updateData: Record<string, unknown> = { updatedAt: new Date() };
+      const updateData: Record<string, unknown> = { updatedAt: Math.floor(Date.now() / 1000) };
 
       if (data.title !== undefined) updateData.title = data.title;
       if (data.slug !== undefined) updateData.slug = data.slug;
@@ -180,8 +177,7 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-      await db.delete(listingsTable).where(eq(listings.id, input.id)).run();
+      await db.delete(listingsTable).where(eq(listingsTable.id, input.id)).run();
 
       return { success: true };
     },

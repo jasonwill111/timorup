@@ -9,9 +9,6 @@ import { getPlanLimits } from '@/lib/subscription';
 export async function GET({ params }: { params: Record<string, string> }) {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const { businessPageId } = params;
 
@@ -24,7 +21,7 @@ if (!db) throw new Error("Database not available");
       status: businesses.status,
     })
     .from(businesses)
-    .where(eq(businesses.id, businessPageId))
+    .where(eq(businesses.id, businessPageId!))
     .limit(1)
     .get() ?? undefined;
 
@@ -50,7 +47,7 @@ if (!db) throw new Error("Database not available");
     // Count current products
     const countResult = await db.select({ count: sql<number>`count(*)` })
       .from(products)
-      .where(eq(products.businessId, businessPageId));
+      .where(eq(products.businessId, businessPageId!));
 
     const current = Number(countResult[0]?.count) || 0;
     const remaining = Math.max(0, limit - current);

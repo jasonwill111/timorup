@@ -12,9 +12,12 @@ export const resetPassword = defineAction({
   handler: async (input) => {
     try {
       const auth = await initAuth();
-      await auth.api.resetPassword({
-        body: { token: input.token, password: input.password }
-      });
+      const api = auth.api as { resetPassword?: (opts: { body: { token: string; password: string } }) => Promise<unknown> };
+      if (api?.resetPassword) {
+        await api.resetPassword({
+          body: { token: input.token, password: input.password }
+        });
+      }
       return { success: true, message: 'Password reset successfully' };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

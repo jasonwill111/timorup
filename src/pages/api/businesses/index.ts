@@ -47,9 +47,6 @@ async function cacheResponse(cacheKey: string, response: Response, ttl: number):
 export async function GET({ url, request }: { url: URL; request: Request }) {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
   const clientIP = getClientIP(request);
   const rateLimit = await checkRateLimitKV(`businesses:${clientIP}`);
@@ -152,8 +149,7 @@ if (!db) throw new Error("Database not available");
           return scoreB - scoreA;
         });
         break;
-      case 'rating':
-        results.sort((a, b) => (b.ratingAverage || 0) - (a.ratingAverage || 0));
+      
         break;
       case 'name':
         results.sort((a, b) => (a.title || '').localeCompare(b.title || ''));

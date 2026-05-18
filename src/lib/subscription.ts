@@ -20,9 +20,6 @@ export async function getPlanLimits(planSlug: string | null): Promise<PlanLimits
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
   const plan = await db.select()
     .from(servicePackages)
@@ -205,9 +202,6 @@ export interface SubscriptionDashboard {
  */
 export async function getSubscriptionDashboard(businessId: string): Promise<SubscriptionDashboard | null> {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   if (!db) return null;
 

@@ -19,19 +19,16 @@ export const POST: APIRoute = async ({ request }) => {
 
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const auth = await initAuth();
     const authApi = auth.api;
 
     // Sign in via better-auth (this sets the session cookie)
     const result = await authApi.signInEmail({
       body: { email, password },
-    });
+    }) as { user?: { id: string; name: string }; token: string };
 
-    const user = result.user;
-    const token = result.token;
+    const user = result.user || { id: '', name: '' };
+    const token = result.token || '';
 
     // Fetch user role from database
     const dbUser = await db

@@ -25,9 +25,6 @@ export const GET: APIRoute = async ({ request }) => {
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const now = new Date();
     const startOfMonth = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000);
     const sevenDaysFromNow = Math.floor(now.getTime() / 1000) + 7 * 24 * 60 * 60;

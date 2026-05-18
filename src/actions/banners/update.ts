@@ -36,9 +36,6 @@ export const updateBanner = defineAction({
 
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     try {
       const updated = await db.update(adBanners)
         .set({
@@ -50,10 +47,10 @@ if (!db) throw new Error("Database not available");
           position: input.position,
           sortOrder: input.sortOrder,
           orderId: input.orderId,
-          isActive: input.isActive,
-          startDate: input.startDate ? new Date(input.startDate) : undefined,
-          endDate: input.endDate ? new Date(input.endDate) : undefined,
-          updatedAt: new Date(),
+          isActive: input.isActive !== undefined ? (input.isActive ? 1 : 0) : undefined,
+          startDate: input.startDate ? Math.floor(new Date(input.startDate).getTime() / 1000) : undefined,
+          endDate: input.endDate ? Math.floor(new Date(input.endDate).getTime() / 1000) : undefined,
+          updatedAt: Math.floor(Date.now() / 1000),
         })
         .where(eq(adBanners.id, input.id))
         .returning()
@@ -81,9 +78,6 @@ export const deleteBanner = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     try {
       await db.delete(adBanners).where(eq(adBanners.id, id)).run();

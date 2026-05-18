@@ -10,11 +10,10 @@ export const signOut = defineAction({
     try {
       const authApi = (await initAuth()).api;
       const cookieHeader = cookies.get('better-auth.session_token')?.value || '';
-      const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
 
-      if (tokenMatch) {
+      if (cookieHeader) {
         await authApi.signOut({
-          headers: { cookie: `better-auth.session_token=${tokenMatch[1]}` },
+          headers: { cookie: `better-auth.session_token=${cookieHeader}` },
         });
       }
 

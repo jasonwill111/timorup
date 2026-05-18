@@ -59,7 +59,6 @@ export const listing = {
     handler: async (input) => {
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const listing = await db.select()
         .from(businesses)
         .where(eq(businesses.id, input.id))
@@ -80,7 +79,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
@@ -112,7 +110,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       await db.delete(businesses).where(eq(businesses.id, input.id)).run();
 

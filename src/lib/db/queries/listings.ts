@@ -26,9 +26,6 @@ export interface ListingWithCategory {
 export async function getListingBySlug(slug: string): Promise<ListingWithCategory | null> {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
   const result = await db
     .select({
@@ -50,7 +47,7 @@ if (!db) throw new Error("Database not available");
     .limit(1)
     .get() ?? undefined;
 
-  return result || null;
+  return (result || null) as ListingWithCategory | null;
 }
 
 /**
@@ -58,9 +55,6 @@ if (!db) throw new Error("Database not available");
  */
 export async function getUserListing(userId: string): Promise<ListingWithCategory | null> {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
   const result = await db
@@ -87,7 +81,7 @@ if (!db) throw new Error("Database not available");
  * 获取 listings by entity type
  */
 export async function getListingsByType(
-  entityType: 'business' | 'nonprofit',
+  _entityType: 'business' | 'nonprofit',
   options?: {
     limit?: number;
     offset?: number;
@@ -96,12 +90,9 @@ export async function getListingsByType(
 ): Promise<ListingWithCategory[]> {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const { limit = 20, offset = 0, status = 'live' } = options || {};
 
-  const conditions = [eq(businesses.entityType, entityType)];
+  const conditions = [];
   if (status) {
     conditions.push(eq(businesses.status, status));
   }
@@ -126,7 +117,7 @@ if (!db) throw new Error("Database not available");
     .orderBy(desc(businesses.likes))
     .limit(limit)
     .offset(offset)
-    .all();
+    .all() as unknown as ListingWithCategory[];
 }
 
 /**
@@ -141,9 +132,6 @@ export async function searchListings(
 ): Promise<ListingWithCategory[]> {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const { limit = 20, entityType = 'all' } = options || {};
 
   const searchPattern = `%${query}%`;
@@ -153,8 +141,7 @@ if (!db) throw new Error("Database not available");
     like(businesses.aboutUs, searchPattern)
   );
 
-  const typeCondition = entityType !== 'all' ? eq(businesses.entityType, entityType) : undefined;
-  const whereClause = typeCondition ? and(conditions!, typeCondition) : conditions;
+  const whereClause = conditions;
 
   return db
     .select({
@@ -175,7 +162,7 @@ if (!db) throw new Error("Database not available");
     .where(and(whereClause!, eq(businesses.status, 'live')))
     .orderBy(desc(businesses.likes))
     .limit(limit)
-    .all();
+    .all() as unknown as ListingWithCategory[];
 }
 
 /**
@@ -183,9 +170,6 @@ if (!db) throw new Error("Database not available");
  */
 export async function getListingProductCount(businessId: string): Promise<number> {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
   const result = await db
@@ -202,9 +186,6 @@ if (!db) throw new Error("Database not available");
  */
 export async function isSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
   const conditions = [eq(businesses.slug, slug)];

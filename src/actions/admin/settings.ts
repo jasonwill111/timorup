@@ -15,8 +15,7 @@ export const settings = {
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-      const settingsResult = await db.select().from(siteSettings).all() as unknown[];
+      const settingsResult = await db.select().from(siteSettings).all() as { key: string; value: string }[];
 
       const settings: Record<string, unknown> = {};
       settingsResult.forEach((s) => {
@@ -43,7 +42,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       const existing = await db.select()
         .from(siteSettings)
@@ -53,7 +51,7 @@ if (!db) throw new Error("Database not available");
 
       if (existing) {
         await db.update(siteSettings)
-          .set({ value: input.value, updatedAt: new Date() })
+          .set({ value: input.value, updatedAt: Math.floor(Date.now() / 1000) })
           .where(eq(siteSettings.key, input.key))
           .run();
       } else {
@@ -71,7 +69,7 @@ if (!db) throw new Error("Database not available");
   // Save all settings at once
   saveAll: defineAction({
     input: z.object({
-      settings: z.record(z.union([
+      settings: z.record(z.string(), z.union([
         z.string(),
         z.object({ value: z.string().optional() }),
         z.object({ qrCode: z.string().optional() }),
@@ -82,7 +80,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
       for (const [key, valueObj] of Object.entries(input.settings)) {
@@ -103,7 +100,7 @@ if (!db) throw new Error("Database not available");
 
         if (existing) {
           await db.update(siteSettings)
-            .set({ value, updatedAt: new Date() })
+            .set({ value, updatedAt: Math.floor(Date.now() / 1000) })
             .where(eq(siteSettings.key, key))
             .run();
         } else {

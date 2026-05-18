@@ -11,12 +11,9 @@ export async function GET({ request }: { request: Request }) {
   try {
     const tokenMatch = cookieHeader?.match(/better-auth\.session_token=([^;]+)/);
 
-    if (tokenMatch) {
+    if (tokenMatch?.[1]) {
       const token = tokenMatch[1];
       const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
       const session = await db.select()

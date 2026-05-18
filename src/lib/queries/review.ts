@@ -50,9 +50,6 @@ export async function getReviewsByBusinessId(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const { page = 1, limit = 10 } = options ?? {};
     const offset = (page - 1) * limit;
 
@@ -107,9 +104,6 @@ export async function getReviewStats(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     // Get all reviews for stats
     const allReviews = await db
@@ -156,9 +150,6 @@ export async function getUserReviewForBusiness(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const result = await db
       .select({
         id: reviews.id,
@@ -197,9 +188,6 @@ export async function hasUserReviewed(
 ): Promise<Result<boolean>> {
   try {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     const existing = await db
       .select({ id: reviews.id })

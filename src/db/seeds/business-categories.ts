@@ -26,7 +26,7 @@ export const businessCategories = [
     icon: '🍽️',
     parentId: null,
     sortOrder: 1,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'cuisineType', type: 'select', label: 'Cuisine Type', required: true, options: ['Timorese', 'Portuguese', 'Indonesian', 'Chinese', 'Indian', 'Italian', 'Fast Food', 'Seafood', 'Western', 'Fusion', 'Other'] },
       { name: 'priceRange', type: 'select', label: 'Price Range', options: ['$', '$$', '$$$', '$$$$'] },
@@ -44,7 +44,7 @@ export const businessCategories = [
     icon: '🏨',
     parentId: null,
     sortOrder: 2,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'accommodationType', type: 'select', label: 'Type', required: true, options: ['Hotel', 'Guesthouse', 'Homestay', 'Hostel', 'Resort', 'Villa', 'Lodge', 'Apartment'] },
       { name: 'starRating', type: 'select', label: 'Star Rating', options: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars', 'Unrated'] },
@@ -65,7 +65,7 @@ export const businessCategories = [
     icon: '🏪',
     parentId: null,
     sortOrder: 3,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'retailType', type: 'select', label: 'Store Type', required: true, options: ['Grocery', 'Clothing', 'Electronics', 'Furniture', 'Hardware', 'Pharmacy', 'Books', 'Sports', 'Beauty', 'Jewelry', 'Souvenirs', 'Other'] },
       { name: 'parkingAvailable', type: 'boolean', label: 'Parking Available' },
@@ -80,7 +80,7 @@ export const businessCategories = [
     icon: '🚗',
     parentId: null,
     sortOrder: 4,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'transportType', type: 'select', label: 'Service Type', required: true, options: ['Taxi', 'Rent-a-Car', 'Motorcycle Rental', 'Bus', 'Boat/Ferry', 'Airport Transfer', 'Trucking', 'Logistics', 'Driving School'] },
       { name: 'fleetSize', type: 'number', label: 'Fleet Size' },
@@ -96,7 +96,7 @@ export const businessCategories = [
     icon: '💼',
     parentId: null,
     sortOrder: 5,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', required: true, options: ['Legal', 'Accounting', 'Consulting', 'IT Services', 'Marketing', 'Architecture', 'Engineering', 'Insurance', 'Real Estate', 'Other'] },
       { name: 'languages', type: 'text', label: 'Languages Spoken' },
@@ -112,7 +112,7 @@ export const businessCategories = [
     icon: '🏥',
     parentId: null,
     sortOrder: 6,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'healthType', type: 'select', label: 'Service Type', required: true, options: ['Hospital', 'Clinic', 'Pharmacy', 'Dental', 'Optical', 'Laboratory', 'Physiotherapy', 'Mental Health', 'Traditional Medicine', 'Gym/Fitness', 'Spa', 'Beauty Salon', 'Barbershop'] },
       { name: 'emergencyService', type: 'boolean', label: '24/7 Emergency' },
@@ -128,7 +128,7 @@ export const businessCategories = [
     icon: '🎓',
     parentId: null,
     sortOrder: 7,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'educationType', type: 'select', label: 'Institution Type', required: true, options: ['University', 'School', 'Vocational Training', 'Language School', 'Driving School', 'Music School', 'Art School', 'Tutoring Center', 'Online Platform', 'Other'] },
       { name: 'accreditation', type: 'text', label: 'Accreditation' },
@@ -144,7 +144,7 @@ export const businessCategories = [
     icon: '🏗️',
     parentId: null,
     sortOrder: 8,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'tradeType', type: 'select', label: 'Service Type', required: true, options: ['General Contractor', 'Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Roofing', 'Landscaping', 'Cleaning', 'Pest Control', 'AC Repair', 'Security Systems', 'Masonry', 'Other'] },
       { name: 'licensed', type: 'boolean', label: 'Licensed & Insured' },
@@ -160,7 +160,7 @@ export const businessCategories = [
     icon: '🎭',
     parentId: null,
     sortOrder: 9,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'entertainmentType', type: 'select', label: 'Service Type', required: true, options: ['Cinema', 'Theater', 'Nightclub', 'Bar', 'Karaoke', 'Bowling', 'Arcade', 'Events Venue', 'Photography', 'Videography', 'DJ Services', 'Event Planning', 'Catering', 'Other'] },
       { name: 'capacity', type: 'number', label: 'Capacity (people)' },
@@ -176,7 +176,7 @@ export const businessCategories = [
     icon: '🌾',
     parentId: null,
     sortOrder: 10,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'agriType', type: 'select', label: 'Type', required: true, options: ['Farm', 'Nursery', 'AgriSupplier', 'Livestock', 'Fishery', 'Coffee Farm', 'Organic Farm', 'AgriProcessing', 'Other'] },
       { name: 'organicCertified', type: 'boolean', label: 'Organic Certified' },
@@ -192,7 +192,7 @@ export const businessCategories = [
     icon: '💻',
     parentId: null,
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'techType', type: 'select', label: 'Service Type', required: true, options: ['Computer Shop', 'Phone Shop', 'Repair Service', 'Software Development', 'Web Design', 'IT Support', 'Network Installation', 'CCTV Installation', 'Gaming', 'Other'] },
       { name: 'warrantyOffered', type: 'boolean', label: 'Warranty Offered' },
@@ -207,7 +207,7 @@ export const businessCategories = [
     icon: '👗',
     parentId: null,
     sortOrder: 12,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'fashionType', type: 'select', label: 'Business Type', required: true, options: ['Clothing Store', 'Shoes', 'Accessories', 'Tailoring', 'Laundry/Dry Clean', 'Hair Salon', 'Nail Salon', 'Barbershop', 'Spa', 'Makeup Artist', 'Fashion Designer', 'Other'] },
       { name: 'customOrders', type: 'boolean', label: 'Custom Orders' },
@@ -226,7 +226,7 @@ export const businessCategories = [
     icon: '🍲',
     parentId: 'bc-1',
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'traditionalDishes', type: 'text', label: 'Traditional Dishes' },
       { name: 'regionalSpecialty', type: 'text', label: 'Regional Specialty' }
@@ -240,7 +240,7 @@ export const businessCategories = [
     icon: '☕',
     parentId: 'bc-1',
     sortOrder: 12,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'coffeeOrigin', type: 'text', label: 'Coffee Origin' },
       { name: 'beansAvailable', type: 'select', label: 'Beans Available', options: ['Local Timor', 'Imported', 'Both'] }
@@ -254,7 +254,7 @@ export const businessCategories = [
     icon: '🍟',
     parentId: 'bc-1',
     sortOrder: 13,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'chainName', type: 'text', label: 'Chain Name' },
       { name: 'deliveryAvailable', type: 'boolean', label: 'Delivery Available' }
@@ -270,7 +270,7 @@ export const businessCategories = [
     icon: '🏨',
     parentId: 'bc-2',
     sortOrder: 21,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'starRating', type: 'select', label: 'Star Rating', options: ['2 Stars', '3 Stars', '4 Stars', '5 Stars'] },
       { name: 'roomCount', type: 'number', label: 'Number of Rooms' },
@@ -285,7 +285,7 @@ export const businessCategories = [
     icon: '🏠',
     parentId: 'bc-2',
     sortOrder: 22,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'roomCount', type: 'number', label: 'Number of Rooms' },
       { name: 'mealsAvailable', type: 'boolean', label: 'Meals Available' },
@@ -302,7 +302,7 @@ export const businessCategories = [
     icon: '🩺',
     parentId: 'bc-6',
     sortOrder: 61,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'specialty', type: 'text', label: 'Medical Specialty' },
       { name: 'operatingHours', type: 'text', label: 'Operating Hours' },
@@ -317,7 +317,7 @@ export const businessCategories = [
     icon: '💊',
     parentId: 'bc-6',
     sortOrder: 62,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'nightService', type: 'boolean', label: '24/7 Service' },
       { name: 'prescriptionRequired', type: 'boolean', label: 'Prescription Required for Some Items' }
@@ -333,7 +333,7 @@ export const businessCategories = [
     icon: '🗣️',
     parentId: 'bc-7',
     sortOrder: 71,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'languagesTaught', type: 'text', label: 'Languages Taught' },
       { name: 'classSizes', type: 'text', label: 'Class Sizes' },
@@ -348,7 +348,7 @@ export const businessCategories = [
     icon: '🔧',
     parentId: 'bc-7',
     sortOrder: 72,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'coursesOffered', type: 'text', label: 'Courses Offered' },
       { name: 'internshipAvailable', type: 'boolean', label: 'Internship Available' },

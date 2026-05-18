@@ -98,11 +98,11 @@ export function getMediaLimits(entityType: string, planType?: string): MediaLimi
   if (entityType === 'businesses' && planType) {
     // Plan-based limits are handled in upload.ts
     // Return base limits here
-    return ENTITY_LIMITS.businesses;
+    return ENTITY_LIMITS.businesses ?? DEFAULT_LIMITS;
   }
 
   // Return entity-specific or default
-  return ENTITY_LIMITS[entityType] || DEFAULT_LIMITS;
+  return ENTITY_LIMITS[entityType] ?? DEFAULT_LIMITS;
 }
 
 /**

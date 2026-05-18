@@ -9,9 +9,6 @@ export async function GET({ request }: { request: Request }) {
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     const allProducts = await db.select({
       id: products.id,

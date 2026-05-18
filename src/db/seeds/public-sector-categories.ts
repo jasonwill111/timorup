@@ -13,7 +13,7 @@ export const publicSectorCategories = [
     icon: '🏛️',
     parentId: null,
     sortOrder: 1,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'ministryName', type: 'text', label: 'Ministry Name', required: true },
       { name: 'ministerName', type: 'text', label: 'Minister' },
@@ -30,7 +30,7 @@ export const publicSectorCategories = [
     icon: '🏢',
     parentId: null,
     sortOrder: 2,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'adminLevel', type: 'select', label: 'Admin Level', required: true, options: ['Municipality', 'Administrative Post', 'Suco/Suburb', 'Aldeia'] },
       { name: 'population', type: 'number', label: 'Population Served' },
@@ -46,7 +46,7 @@ export const publicSectorCategories = [
     icon: '⚖️',
     parentId: null,
     sortOrder: 3,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'justiceType', type: 'select', label: 'Type', required: true, options: ['Court', 'Prosecutor Office', 'Public Defender', 'Police Station', 'Prison', 'Legal Aid', 'Alternative Dispute Resolution'] },
       { name: 'jurisdiction', type: 'text', label: 'Jurisdiction Area' },
@@ -62,7 +62,7 @@ export const publicSectorCategories = [
     icon: '🏫',
     parentId: null,
     sortOrder: 4,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'schoolType', type: 'select', label: 'Type', required: true, options: ['Primary School', 'Secondary School', 'Technical School', 'University', 'Vocational Training Center', 'Teacher Training'] },
       { name: 'level', type: 'text', label: 'Education Level' },
@@ -79,7 +79,7 @@ export const publicSectorCategories = [
     icon: '🏥',
     parentId: null,
     sortOrder: 5,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'healthType', type: 'select', label: 'Type', required: true, options: ['National Hospital', 'Referral Hospital', 'Municipal Health Center', 'Community Health Center', 'Health Post', 'Maternal & Child Health', 'Laboratory', 'Pharmacy'] },
       { name: 'bedsAvailable', type: 'number', label: 'Number of Beds' },
@@ -96,7 +96,7 @@ export const publicSectorCategories = [
     icon: '🌾',
     parentId: null,
     sortOrder: 6,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'agriServiceType', type: 'select', label: 'Type', required: true, options: ['Agriculture Extension', 'Livestock', 'Fisheries', 'Forestry', 'Cooperatives', 'Rural Development', 'Irrigation', 'Agricultural Research'] },
       { name: 'serviceArea', type: 'text', label: 'Service Area' },
@@ -112,7 +112,7 @@ export const publicSectorCategories = [
     icon: '🔧',
     parentId: null,
     sortOrder: 7,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'infraType', type: 'select', label: 'Type', required: true, options: ['Roads & Bridges', 'Water Supply', 'Electricity', 'Telecommunications', 'Port Authority', 'Airport', 'Public Transport', 'Waste Management'] },
       { name: 'serviceArea', type: 'text', label: 'Service Area' },
@@ -128,7 +128,7 @@ export const publicSectorCategories = [
     icon: '🤝',
     parentId: null,
     sortOrder: 8,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'socialType', type: 'select', label: 'Type', required: true, options: ['Social Security', 'Pensions', 'Disability Benefits', 'Child Protection', 'Elderly Care', 'Food Assistance', 'Housing Support', 'Veteran Services', 'Refugee Services'] },
       { name: 'eligibilityCriteria', type: 'text', label: 'Eligibility Criteria' },
@@ -144,7 +144,7 @@ export const publicSectorCategories = [
     icon: '💰',
     parentId: null,
     sortOrder: 9,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'financeType', type: 'select', label: 'Type', required: true, options: ['Tax Office', 'Customs', 'Treasury', 'National Bank', 'Revenue Authority', 'Customs Authority'] },
       { name: 'servicesOffered', type: 'text', label: 'Services' },
@@ -160,7 +160,7 @@ export const publicSectorCategories = [
     icon: '🛂',
     parentId: null,
     sortOrder: 10,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Type', required: true, options: ['Passport Office', 'Visa Services', 'Emigration', 'Consular Affairs', 'Foreign Embassy', 'Immigration Control'] },
       { name: 'processingTime', type: 'text', label: 'Processing Time' },
@@ -176,7 +176,7 @@ export const publicSectorCategories = [
     icon: '🌳',
     parentId: null,
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'envType', type: 'select', label: 'Type', required: true, options: ['Environmental Agency', 'Land Registry', 'Cadastral Office', 'Spatial Planning', 'Geology & Mines', 'Water Resources', 'Meteorology'] },
       { name: 'serviceArea', type: 'text', label: 'Service Area' },
@@ -192,7 +192,7 @@ export const publicSectorCategories = [
     icon: '👷',
     parentId: null,
     sortOrder: 12,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'laborType', type: 'select', label: 'Type', required: true, options: ['Labor Office', 'Employment Agency', 'Vocational Training', 'Social Security Institute', 'Workers Union', 'Occupational Safety'] },
       { name: 'jobSeekersRegistered', type: 'number', label: 'Job Seekers Registered' },
@@ -210,7 +210,7 @@ export const publicSectorCategories = [
     icon: '🏥',
     parentId: 'psc-5',
     sortOrder: 51,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'bedsAvailable', type: 'number', label: 'Number of Beds', required: true },
       { name: 'specialties', type: 'text', label: 'Medical Specialties' },
@@ -226,7 +226,7 @@ export const publicSectorCategories = [
     icon: '🏃',
     parentId: 'psc-5',
     sortOrder: 52,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'servicesOffered', type: 'text', label: 'Services', required: true },
       { name: 'staffCount', type: 'number', label: 'Staff Count' },
@@ -241,7 +241,7 @@ export const publicSectorCategories = [
     icon: '🩺',
     parentId: 'psc-1',
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'healthPrograms', type: 'text', label: 'Health Programs' },
       { name: 'nationalHospitals', type: 'number', label: 'National Hospitals' },
@@ -257,7 +257,7 @@ export const publicSectorCategories = [
     icon: '📖',
     parentId: 'psc-1',
     sortOrder: 12,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'educationPrograms', type: 'text', label: 'Education Programs' },
       { name: 'schoolsNationally', type: 'number', label: 'Total Schools' },

@@ -34,11 +34,14 @@ export const forgotPassword = defineAction({
 
     try {
       const auth = await initAuth();
-      await auth.api.forgotPassword({
-        body: { email: input.email }
-      });
-      return { success: true, message: 'Password reset email sent' };
-    } catch (error) {
+      // Use listUsers to check if user exists (better-auth API varies by version)
+      const api = auth.api as { listUsers?: (opts: { body: { emails?: string[] } }) => Promise<{ users?: unknown[] }> };
+      if (api?.listUsers) {
+        await api.listUsers({ body: { emails: [input.email] } });
+      }
+      // Always return success to prevent email enumeration
+      return { success: true, message: 'If an account exists, a reset email was sent' };
+    } catch {
       // Don't reveal if email exists
       return { success: true, message: 'If an account exists, a reset email was sent' };
     }

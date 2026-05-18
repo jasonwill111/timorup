@@ -36,9 +36,6 @@ async function cacheResponse(cacheKey: string, response: Response): Promise<void
 export async function GET({ request }: { request: Request }) {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const url = new URL(request?.url);
   const cacheKey = url.pathname;
 

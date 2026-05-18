@@ -3,8 +3,10 @@
  * 统一 session 认证逻辑，替代散落的重复代码
  */
 import { getDb } from '@/lib/db';
-import { sessions, users, type User } from '@/db/schema';
+import { sessions, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+type User = typeof users.$inferSelect;
 
 export interface AuthResult {
   userId: string;
@@ -36,9 +38,6 @@ export async function getAuthenticatedUser(
   }
 
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
   // 查询 session (只匹配 token，expiry 在 JS 中检查)
@@ -83,7 +82,7 @@ if (!db) throw new Error("Database not available");
  * 支持 Astro actions 的 cookies 参数格式
  */
 export async function getAuthenticatedUserFromCookies(
-  cookies: Record<string, string> | Request['cookies']
+  cookies: Record<string, string> | { get(name: string): { value: string | undefined } | undefined }
 ): Promise<AuthResult | AuthError> {
   const cookieValue = 'get' in cookies
     ? cookies.get('better-auth.session_token')?.value
@@ -114,9 +113,6 @@ export async function getAuthenticatedUserFromRequest(
  */
 export async function hasRole(userId: string, role: string): Promise<boolean> {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   const user = await db
     .select({ role: users.role })

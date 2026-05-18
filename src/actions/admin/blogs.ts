@@ -35,7 +35,6 @@ export const blogs = {
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).all();
 
       return { success: true, data: posts };
@@ -51,7 +50,6 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const slug = input.slug || input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + nanoid(6);
 
       const newPost = {
@@ -63,11 +61,12 @@ if (!db) throw new Error("Database not available");
         status: input.status,
         tags: input.tags ? JSON.stringify(input.tags) : null,
         coverImageId: input.coverImageId || null,
+        authorId: user.id,
         authorName: input.authorName || user.name, // Default to current user's name
         metaTitle: input.metaTitle || null,
         metaDescription: input.metaDescription || null,
         canonicalUrl: input.canonicalUrl || null,
-        publishedAt: input.status === 'published' ? new Date() : null,
+        publishedAt: input.status === 'published' ? Math.floor(Date.now() / 1000) : null,
       };
 
       await db.insert(blogPosts).values(newPost);
@@ -84,7 +83,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       const { id, ...data } = input;
 
@@ -124,7 +122,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       await db.delete(blogPosts).where(eq(blogPosts.id, input.id)).run();
 

@@ -42,9 +42,6 @@ export const create = defineAction({
     const userId = authResult.userId;
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     try {
       // Check one-listing-per-user limit

@@ -33,7 +33,7 @@ export const servicePackages = [
         features: ['7-day listing visibility', 'Up to 4 images', '1 video']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 1
   },
   {
@@ -57,7 +57,7 @@ export const servicePackages = [
         features: ['30-day listing visibility', 'Up to 6 images', '1 video', 'Basic stats']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 2
   },
   {
@@ -81,7 +81,7 @@ export const servicePackages = [
         features: ['365-day listing visibility', 'Up to 8 images', '1 video', 'Full stats', 'Priority support']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 3
   },
 
@@ -112,7 +112,7 @@ export const servicePackages = [
         features: ['Basic listing for 3 days', 'Up to 4 images', '1 video', 'Category selection']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 10
   },
   {
@@ -154,7 +154,7 @@ export const servicePackages = [
         features: ['Up to 10 products/services', 'Up to 5 images per product', '12 business images', 'Featured in category (7 days/month)', 'Basic analytics', 'Save 20%']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 11
   },
   {
@@ -196,7 +196,7 @@ export const servicePackages = [
         features: ['Up to 30 products/services', 'Up to 8 images per product', '24 business images', 'Featured in category (15 days/month)', 'Homepage featured (7 days/month)', 'Advanced analytics', 'Priority support', 'Verified badge', 'Save 25%']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 20
   },
   {
@@ -238,7 +238,7 @@ export const servicePackages = [
         features: ['Up to 60 products/services', 'Up to 10 images per product', '2 videos per product', '32 business images', '3 business videos', 'Featured in category (30 days/month)', 'Homepage featured (14 days/month)', 'Premium analytics', '24/7 priority support', 'Verified badge', 'Custom branding', 'Save 20%']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 30
   },
 
@@ -272,7 +272,7 @@ export const servicePackages = [
         features: ['Featured in category listing', 'Priority placement', 'Badge highlight']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 100
   },
   {
@@ -302,7 +302,7 @@ export const servicePackages = [
         features: ['Homepage featured section', 'Large banner display', 'Priority over regular featured']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 101
   },
 
@@ -329,7 +329,7 @@ export const servicePackages = [
         features: ['Add 4 images to your business gallery', 'Valid for 1 month']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 200
   },
   {
@@ -352,7 +352,7 @@ export const servicePackages = [
         features: ['Add 1 video to your business gallery', 'Valid for 1 month']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 201
   },
 
@@ -386,7 +386,7 @@ export const servicePackages = [
         features: ['Homepage banner position', 'High visibility placement', 'Click tracking', 'Save 25%']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 300
   },
   {
@@ -416,7 +416,7 @@ export const servicePackages = [
         features: ['Business or Listings category pages', 'Moderate visibility', 'Click tracking', 'Save 20%']
       }
     ]),
-    isActive: true,
+    isActive: 1,
     sortOrder: 301
   }
 ];

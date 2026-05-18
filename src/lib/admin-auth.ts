@@ -17,11 +17,10 @@ export async function getAdminUser(request?: Request): Promise<AuthUser | null> 
     const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
     if (!tokenMatch) return null;
 
-    const token = tokenMatch[1];
+    const token = tokenMatch?.[1];
+    if (!token) return null;
+
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
     const session = await db.select()

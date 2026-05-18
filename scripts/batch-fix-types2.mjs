@@ -8,29 +8,17 @@ import { join, extname } from 'path';
 const ROOT = 'src';
 
 const patterns = [
-  // Fix CacheStorage.caches.default access - use double assertion
+  // Fix CacheStorage type cast
   {
-    regex: /\(caches as \{ default: Cache \}\)\.default/g,
+    regex: /caches\.default/g,
     replacement: '(caches as unknown as { default: Cache }).default',
     description: 'Fix CacheStorage type cast'
   },
-  // Fix db.all() type - add as unknown array
+  // Fix .get() with explicit type assertion
   {
-    regex: /await db\.all<Record<string, unknown>>\(`/g,
-    replacement: 'await db.all(`',
-    description: 'Remove redundant generic from db.all'
-  },
-  // Fix db.select().all() with type cast
-  {
-    regex: /\.from\((\w+)\)\.all\(\) as Record<string, unknown>\[\]/g,
-    replacement: '.from($1).all()',
-    description: 'Simplify type cast'
-  },
-  // Fix result type inference for Drizzle
-  {
-    regex: /as \{ id: string; \[key: string\]: unknown \}\[\]/g,
-    replacement: 'as unknown[]',
-    description: 'Simplify result types'
+    regex: /\.get\(\);(\n)/g,
+    replacement: '.get() as unknown;$1',
+    description: 'Add type assertion to .get()'
   }
 ];
 
@@ -45,7 +33,7 @@ function processFile(filePath) {
 
     if (content !== original) {
       writeFileSync(filePath, content);
-      console.log(`Fixed: ${filePath}`);
+      console.log('Fixed:', filePath);
       return true;
     }
     return false;
@@ -83,5 +71,5 @@ let fixed = 0;
 for (const file of files) {
   if (processFile(file)) fixed++;
 }
-console.log(`\nDone! Fixed ${fixed} files.`);
+console.log('\nDone! Fixed', fixed, 'files.');
 console.log('Run `npx tsc --noEmit` to check.');

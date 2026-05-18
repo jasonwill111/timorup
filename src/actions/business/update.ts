@@ -55,9 +55,6 @@ export const update = defineAction({
   handler: async (input, { cookies }) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     try {
       // Authenticate

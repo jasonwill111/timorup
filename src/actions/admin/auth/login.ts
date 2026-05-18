@@ -26,7 +26,6 @@ export const login = defineAction({
       // Query DB for role (better-auth doesn't return custom fields)
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const dbUser = await db.select({ role: users.role })
         .from(users)
         .where(eq(users.id, result.user.id))
@@ -39,18 +38,20 @@ if (!db) throw new Error("Database not available");
         return { success: false, error: { message: 'Access denied. Admin role required.' } };
       }
 
+      const sessionResult = result as { user: { id: string; name: string; email: string }; session?: { id: string; userId: string; expiresAt: number } };
+
       return {
         success: true,
         user: {
-          id: result.user.id,
-          name: result.user.name,
-          email: result.user.email,
+          id: sessionResult.user.id,
+          name: sessionResult.user.name,
+          email: sessionResult.user.email,
           role: userRole
         },
-        session: result.session ? {
-          id: result.session.id,
-          userId: result.session.userId,
-          expiresAt: result.session.expiresAt
+        session: sessionResult.session ? {
+          id: sessionResult.session.id,
+          userId: sessionResult.session.userId,
+          expiresAt: sessionResult.session.expiresAt
         } : null
       };
     } catch (error) {

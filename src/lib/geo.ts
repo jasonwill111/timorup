@@ -104,7 +104,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
     return null;
   }
 
-  const first = results[0];
+  const first = results[0]!;
   return {
     lat: parseFloat(first.lat),
     lng: parseFloat(first.lon),

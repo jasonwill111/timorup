@@ -19,11 +19,9 @@ export const deleteMedia = defineAction({
   handler: async (input) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const auth = await initAuth();
-    const { user } = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => ({ user: null, session: null }));
+    const sessionResult = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
+    const user = (sessionResult as { user?: { id: string; role?: string } } | null)?.user;
 
     if (!user) {
       return { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } };
@@ -31,12 +29,13 @@ if (!db) throw new Error("Database not available");
 
     try {
       const item = await db.select().from(media).where(eq(media.id, input.id)).limit(1);
-      if (item.length === 0) {
+      if (item.length === 0 || !item[0]) {
         return { success: false, error: { code: 'NOT_FOUND', message: 'Media not found' } };
       }
 
-      const mediaItem = item[0];
-      if (mediaItem.createdById !== user.id && user.role !== 'admin' && user.role !== 'super_admin') {
+      const mediaItem = item[0]!;
+      const userRole = (user as { role?: string }).role;
+      if (mediaItem.createdById !== user.id && userRole !== 'admin' && userRole !== 'super_admin') {
         return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } };
       }
 

@@ -62,9 +62,6 @@ export async function getBusinessBySlug(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const result = await db
       .select({
         id: businesses.id,
@@ -145,9 +142,6 @@ export async function getBusinessById(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const result = await db
       .select({
         id: businesses.id,
@@ -195,9 +189,6 @@ export async function searchBusinesses(
 ): Promise<Result<SearchBusinessesResult>> {
   try {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     const {
       query,
@@ -318,9 +309,6 @@ export async function getRelatedBusinesses(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const conditions = [
       eq(businesses.status, 'live'),
       sql`${businesses.slug} != ${slug}`,
@@ -379,9 +367,6 @@ export async function getBusinessesByOwnerId(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const results = await db
       .select({
         id: businesses.id,
@@ -430,9 +415,6 @@ export async function isBusinessSlugUnique(
 ): Promise<Result<boolean>> {
   try {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     const conditions = [eq(businesses.slug, slug)];
     if (excludeId) {

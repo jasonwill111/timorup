@@ -22,9 +22,6 @@ export async function POST({ request }: { request: Request }) {
 
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     // Upsert each setting
     for (const [key, data] of Object.entries(settingsData)) {
@@ -43,7 +40,7 @@ if (!db) throw new Error("Database not available");
         await db.insert(siteSettings).values({
           key,
           value,
-          createdAt: Math.floor(Date.now() / 1000),
+          createdAt: Math.floor(Date.now() / 1000) as any,
           updatedAt: Math.floor(Date.now() / 1000),
         }).run();
       }

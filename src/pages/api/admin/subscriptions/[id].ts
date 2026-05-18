@@ -12,9 +12,6 @@ export async function GET({ params, request }: { params: Record<string, string>;
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const { id } = params;
 
@@ -53,9 +50,6 @@ export async function PUT({ params, request }: { params: Record<string, string>;
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { planType, amount, status, expiryDate, adminNotes } = body;
@@ -76,18 +70,19 @@ if (!db) throw new Error("Database not available");
     }
 
     // Calculate expiry date if setting to paid
-    let newExpiryDate = expiryDate ? new Date(expiryDate) : order.expiryDate;
+    const variant = order.variantSnapshot ? JSON.parse(order.variantSnapshot) : null;
+    const planName = variant?.name || 'basic-monthly';
+    let newExpiryDate = expiryDate ? Math.floor(expiryDate / 1000) : order.expiresAt;
     let paidDate = order.paidDate;
 
     if (status === 'paid' && order.status !== 'paid' && !order.paidDate) {
-      paidDate = new Date();
+      paidDate = Math.floor(Date.now() / 1000);
 
       // Calculate expiry if not provided
       if (!expiryDate) {
-        const isYearly = planType?.includes('yearly') || order.planType.includes('yearly');
+        const isYearly = planType?.includes('yearly') || planName.includes('yearly');
         const days = isYearly ? 365 : 30;
-        newExpiryDate = new Date();
-        newExpiryDate.setDate(newExpiryDate.getDate() + days);
+        newExpiryDate = Math.floor((Date.now() + days * 86400000) / 1000);
       }
     }
 
@@ -100,34 +95,33 @@ if (!db) throw new Error("Database not available");
       'max-monthly': 89,
       'max-yearly': 890,
     };
-    const finalAmount = amount ?? planAmounts[planType || order.planType] ?? order.amount;
+    const finalAmount = amount ?? planAmounts[planType || planName] ?? order.amount;
 
     // Update order
     await db.update(orders)
       .set({
-        planType: planType || order.planType,
         amount: finalAmount,
         status: status || order.status,
         paidDate,
-        expiryDate: newExpiryDate,
+        expiresAt: newExpiryDate,
         adminNotes: adminNotes !== undefined ? adminNotes : order.adminNotes,
-        updatedAt: new Date(),
+        updatedAt: Math.floor(Date.now() / 1000),
       })
       .where(eq(orders.id, id))
       .run();
 
     // If payment confirmed, update business with plan info
     if (status === 'paid' && order.typeId) {
-      const finalPlanType = (planType || order.planType)
+      const finalPlanType = (planType || planName)
         .replace('-yearly', '')
         .replace('-monthly', '');
 
       await db.update(businesses)
         .set({
           planType: finalPlanType,
-          expiryDate: newExpiryDate,
+          expiresAt: newExpiryDate,
           status: order.status === 'draft' ? 'live' : order.status,
-          updatedAt: new Date(),
+          updatedAt: Math.floor(Date.now() / 1000),
         })
         .where(eq(businesses.id, order.typeId))
         .run();
@@ -135,7 +129,7 @@ if (!db) throw new Error("Database not available");
 
     return new Response(JSON.stringify({
       success: true,
-      data: { id, planType, amount: finalAmount, status, expiryDate: newExpiryDate, paidDate }
+      data: { id, planType: planType || planName, amount: finalAmount, status, expiresAt: newExpiryDate, paidDate }
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -154,9 +148,6 @@ export async function DELETE({ params, request }: { params: Record<string, strin
   if (!user) return unauthorizedResponse();
 
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
     const { id } = params;

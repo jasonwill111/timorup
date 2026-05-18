@@ -25,9 +25,6 @@ const ParamsSchema = z.object({
 export async function GET({ params, request }: { params: Record<string, string>; request: Request }) {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   // Rate limiting
   const clientIP = getClientIP(request);
   const rateLimit = await checkRateLimitKV(`profile:${clientIP}`);

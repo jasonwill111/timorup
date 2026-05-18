@@ -1,22 +1,22 @@
 // Business logic utilities
-import { db } from './db';
+import { getDb } from './db';
 import { businesses } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import type { Role } from './permissions';
+
+// Role type
+type Role = 'user' | 'admin' | 'super_admin' | 'editor';
 
 /**
  * Check if a user already has a LIVE business page.
  * Filters by status='live' to exclude deleted/archived businesses.
  *
- * @param dbInstance - The Drizzle DB instance
  * @param userId - The user's ID
  * @returns The user's business record if found and live, null otherwise
  */
-export async function hasUserBusiness(
-  dbInstance: typeof db,
-  userId: string
-) {
-  const [result] = await dbInstance
+export async function hasUserBusiness(userId: string) {
+  const db = await getDb();
+if (!db) return null;
+  const [result] = await db
     .select({
       id: businesses.id,
       title: businesses.title,

@@ -45,7 +45,7 @@ export const aiTools = {
   use: defineAction({
     input: z.object({
       toolId: z.string(),
-      input: z.record(z.unknown()).optional(),
+      input: z.record(z.string(), z.unknown()).optional(),
     }),
     handler: async (input) => {
       const user = await getAdminUser();

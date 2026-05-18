@@ -10,9 +10,10 @@ const CreateHeroSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional().default(''),
   imageId: z.string().optional().nullable(),
-  ctaText: z.string().optional().default(''),
   ctaLink: z.string().optional().default(''),
-  order: z.number().int().optional().default(0),
+  linkType: z.enum(['business', 'listing', 'product']).optional(),
+  position: z.enum(['homepage', 'businesses', 'products-services', 'listings']).optional(),
+  sortOrder: z.number().int().optional().default(0),
 });
 
 const UpdateHeroSchema = z.object({
@@ -20,9 +21,10 @@ const UpdateHeroSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
   imageId: z.string().optional().nullable(),
-  ctaText: z.string().optional(),
   ctaLink: z.string().optional(),
-  order: z.number().int().optional(),
+  linkType: z.enum(['business', 'listing', 'product']).optional(),
+  position: z.enum(['homepage', 'businesses', 'products-services', 'listings']).optional(),
+  sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -34,7 +36,6 @@ export const heroes = {
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       const heroList = await db.select().from(adBanners).orderBy(desc(adBanners.createdAt)).all();
 
@@ -51,18 +52,18 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       const id = `hero-${Date.now()}`;
 
       await db.insert(adBanners).values({
         id,
         title: input.title,
-        description: input.description,
+        description: input.description || null,
         imageId: input.imageId || null,
-        ctaText: input.ctaText,
-        ctaLink: input.ctaLink,
-        order: input.order,
-        isActive: true,
+        linkUrl: input.ctaLink || null,
+        linkType: input.linkType || 'business',
+        position: input.position || 'homepage',
+        sortOrder: input.sortOrder || 0,
+        isActive: 1,
       }).run();
 
       return { success: true, data: { id, title: input.title } };
@@ -78,16 +79,16 @@ if (!db) throw new Error("Database not available");
 
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
       const updateData: Record<string, unknown> = {};
       if (input.title !== undefined) updateData.title = input.title;
       if (input.description !== undefined) updateData.description = input.description;
       if (input.imageId !== undefined) updateData.imageId = input.imageId;
-      if (input.ctaText !== undefined) updateData.ctaText = input.ctaText;
-      if (input.ctaLink !== undefined) updateData.ctaLink = input.ctaLink;
-      if (input.order !== undefined) updateData.order = input.order;
-      if (input.isActive !== undefined) updateData.isActive = input.isActive;
+      if (input.ctaLink !== undefined) updateData.linkUrl = input.ctaLink;
+      if (input.linkType !== undefined) updateData.linkType = input.linkType;
+      if (input.position !== undefined) updateData.position = input.position;
+      if (input.sortOrder !== undefined) updateData.sortOrder = input.sortOrder;
+      if (input.isActive !== undefined) updateData.isActive = input.isActive ? 1 : 0;
 
       await db.update(adBanners)
         .set(updateData)
@@ -106,7 +107,6 @@ if (!db) throw new Error("Database not available");
       if (!user) throw new Error('Unauthorized');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
       await db.delete(adBanners).where(eq(adBanners.id, input.id)).run();
 

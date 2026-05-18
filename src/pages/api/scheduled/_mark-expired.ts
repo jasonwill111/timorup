@@ -20,9 +20,6 @@ export async function GET({ request }: { params: Record<string, string>; request
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const now = new Date();
   const nowTimestamp = Math.floor(now.getTime() / 1000);
 
@@ -53,7 +50,7 @@ if (!db) throw new Error("Database not available");
           .set({
             subscriptionStatus: 'expired',
             gracePeriodEndDate: gracePeriodEnd,
-            updatedAt: new Date(),
+            updatedAt: Math.floor(Date.now() / 1000),
           })
           .where(eq(businesses.id, listing.id))
           .run();

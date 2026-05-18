@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Sign up via better-auth
     const result = await authApi.signUpEmail({
       body: { email, password, name },
-    });
+    }) as { user: { id: string; email: string; name: string } };
 
     return new Response(JSON.stringify({
       success: true,

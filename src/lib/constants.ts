@@ -198,7 +198,7 @@ export const SPECIFICATION_FIELDS: Record<string, Array<{ key: string; label: st
 };
 
 // Get relevant price units for a service type
-export function getPriceUnitsForServiceType(productType: string): typeof PRICE_UNITS {
+export function getPriceUnitsForServiceType(productType: string): typeof PRICE_UNITS[number][] {
   const unitMap: Record<string, string[]> = {
     product: ['/piece', '/kg', '/liter', '/pack', '/set', '/unit', ''],
     service: ['/hour', '/day', '/session', '/person', '/table', '/group', ''],

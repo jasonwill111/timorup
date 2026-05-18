@@ -54,9 +54,6 @@ export const uploadMedia = defineAction({
   handler: async (input) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const auth = await initAuth();
     const session = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
     const user = session?.user ?? null;
@@ -95,17 +92,18 @@ if (!db) throw new Error("Database not available");
       // Check deduplication by hash
       if (input.hash) {
         const existing = await db.select().from(media).where(eq(media.hash, input.hash)).limit(1);
-        if (existing.length > 0) {
+        if (existing.length > 0 && existing[0]) {
+          const rec = existing[0];
           return {
             success: true,
             data: {
-              id: existing[0].id,
-              r2Key: existing[0].r2Key,
-              filename: existing[0].filename,
-              mimeType: existing[0].mimeType,
-              size: existing[0].size,
-              entityType: existing[0].entityType,
-              entityId: existing[0].entityId,
+              id: rec.id,
+              r2Key: rec.r2Key,
+              filename: rec.filename,
+              mimeType: rec.mimeType,
+              size: rec.size,
+              entityType: rec.entityType,
+              entityId: rec.entityId,
             },
             isDuplicate: true,
           };
@@ -127,7 +125,7 @@ if (!db) throw new Error("Database not available");
           return { success: false, error: { code: 'NOT_FOUND', message: 'Business not found' } };
         }
 
-        if (business.ownerId !== user.id && user.role !== 'admin' && user.role !== 'super_admin') {
+        if (business.ownerId !== user.id && (user as { role?: string }).role !== 'admin' && (user as { role?: string }).role !== 'super_admin') {
           return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied to this business' } };
         }
 
@@ -150,7 +148,7 @@ if (!db) throw new Error("Database not available");
         // Non-business entities use default limits (0 = unlimited)
         const entityMediaCount = await db.select({ count: count() })
           .from(media)
-          .where(and(eq(media.entityType, entityType), eq(media.entityId, entityId)))
+          .where(and(eq(media.entityType, entityType), eq(media.entityId, input.typeId)))
           .get() ?? undefined;
 
         if (isImage && limits.maxImages > 0 && (entityMediaCount?.count || 0) >= limits.maxImages) {
@@ -196,18 +194,22 @@ if (!db) throw new Error("Database not available");
 
       const [created] = await db.insert(media).values({
         id,
-        url: storedPath,
+        r2Key: storedPath,
         filename: file.name,
         mimeType: finalMimeType,
         size: finalSize,
         width: input.width || null,
         height: input.height || null,
-        type: input.type,
-        typeId: input.typeId,
+        entityType: input.type,
+        entityId: input.typeId,
+        purpose: 'content',
         createdById: user.id,
         hash: input.hash || null,
-        r2Key: storedPath,
       }).returning();
+
+      if (!created) {
+        return { success: false, error: { code: 'INSERT_ERROR', message: 'Failed to create media record' } };
+      }
 
       return {
         success: true,

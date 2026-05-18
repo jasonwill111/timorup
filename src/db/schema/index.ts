@@ -247,7 +247,7 @@ export const businesses = sqliteTable("businesses", {
   limits: text(),
   planSlug: text("plan_slug"),
   registrationUrl: text("registration_url"),
-  verifiedBadge: integer("verified_badge").default(false),
+  verifiedBadge: integer("verified_badge").default(0),
   socialLinks: text("social_links"),
   photoGallery: text("photo_gallery"),
   latestUpdate: text("latest_update"),
@@ -307,7 +307,7 @@ export const nonProfits = sqliteTable("non_profits", {
   latestUpdateDate: integer("latest_update_date"),
   // 免费 - 无订阅
   registrationUrl: text("registration_url"),
-  verifiedBadge: integer("verified_badge").default(false),
+  verifiedBadge: integer("verified_badge").default(0),
   socialLinks: text("social_links"),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
@@ -363,7 +363,7 @@ export const publicSectors = sqliteTable("public_sectors", {
   governmentData: text("government_data"),
   // 免费 - 无订阅
   registrationUrl: text("registration_url"),
-  verifiedBadge: integer("verified_badge").default(false),
+  verifiedBadge: integer("verified_badge").default(0),
   socialLinks: text("social_links"),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
@@ -403,7 +403,7 @@ export const listings = sqliteTable("listings", {
   expiresAt: integer("expires_at"),
   lastRenewedAt: integer("last_renewed_at"),
   // Admin 设置
-  featured: integer().default(false),
+  featured: integer().default(0),
   featuredUntil: integer("featured_until"),
   // 分类特有字段 - JSON 存储
   extraData: text("extra_data"),
@@ -487,8 +487,8 @@ export const products = sqliteTable("products", {
   priceFields: text("price_fields"),
   specifications: text(),
   images: text().default("[]"),
-  featured: integer().default(false),
-  active: integer().default(true),
+  featured: integer().default(0),
+  active: integer().default(1),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at"),
   updatedAt: integer("updated_at"),
@@ -701,7 +701,7 @@ export const siteSettings = sqliteTable("site_settings", {
   value: text(),
   type: text().default("string"),
   description: text(),
-  isPublic: integer("is_public").default(false),
+  isPublic: integer("is_public").default(0),
   updatedAt: integer("updated_at"),
 },
 (table) => [

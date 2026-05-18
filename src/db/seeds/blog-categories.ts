@@ -12,7 +12,7 @@ export const blogCategories = [
     icon: '📰',
     parentId: null,
     sortOrder: 1,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-2',
@@ -22,7 +22,7 @@ export const blogCategories = [
     icon: '💼',
     parentId: null,
     sortOrder: 2,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-3',
@@ -32,7 +32,7 @@ export const blogCategories = [
     icon: '✈️',
     parentId: null,
     sortOrder: 3,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-4',
@@ -42,7 +42,7 @@ export const blogCategories = [
     icon: '🎭',
     parentId: null,
     sortOrder: 4,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-5',
@@ -52,7 +52,7 @@ export const blogCategories = [
     icon: '🍽️',
     parentId: null,
     sortOrder: 5,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-6',
@@ -62,7 +62,7 @@ export const blogCategories = [
     icon: '📅',
     parentId: null,
     sortOrder: 6,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-7',
@@ -72,7 +72,7 @@ export const blogCategories = [
     icon: '👥',
     parentId: null,
     sortOrder: 7,
-    isActive: true
+    isActive: 1
   },
   {
     id: 'blc-8',
@@ -82,7 +82,7 @@ export const blogCategories = [
     icon: '💡',
     parentId: null,
     sortOrder: 8,
-    isActive: true
+    isActive: 1
   }
 ];
 

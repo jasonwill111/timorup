@@ -227,8 +227,8 @@ describe('Subscription API', () => {
         businessId: 'biz-1',
         planType: 'basic',
         status: 'active',
-        expiresAt: new Date(),
-        createdAt: new Date()
+        expiresAt: Math.floor(Date.now() / 1000),
+        createdAt: Math.floor(Date.now() / 1000) as any
       };
 
       expect(validStatuses).toContain(testSub.status);

@@ -50,9 +50,6 @@ export async function getAllCategories(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     const results = await db
@@ -83,9 +80,6 @@ export async function getCategoryBySlug(
 ): Promise<Result<CategoryInfo | null>> {
   try {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
@@ -119,9 +113,6 @@ export async function getCategoryById(
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
     const result = await db
@@ -153,9 +144,6 @@ export async function getCategoryWithChildren(
 ): Promise<Result<CategoryWithChildren | null>> {
   try {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 
@@ -210,9 +198,6 @@ export async function getTopLevelCategories(
 ): Promise<Result<CategoryInfo[]>> {
   try {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
 

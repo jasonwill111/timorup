@@ -21,9 +21,9 @@ const UpdateProductSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
-  priceFields: z.record(z.unknown()).optional().nullable(),
+  priceFields: z.record(z.string(), z.unknown()).optional().nullable(),
   productType: z.enum(['product', 'service', 'virtual', 'ticket', 'rental', 'subscription']).optional(),
-  specifications: z.record(z.unknown()).optional().nullable(),
+  specifications: z.record(z.string(), z.unknown()).optional().nullable(),
   images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional(),
   active: z.boolean().optional(),
@@ -48,9 +48,6 @@ export const updateProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
     try {
@@ -117,9 +114,6 @@ export const deleteProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
     try {
       await db.delete(products).where(eq(products.id, input.id)).run();

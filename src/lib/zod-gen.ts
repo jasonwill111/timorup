@@ -25,7 +25,7 @@ function drizzleTypeToZod(column: SQLiteColumn): z.ZodTypeAny {
     case 'timestamp':
       return column.notNull ? z.date() : z.date().nullable();
     case 'json':
-      return z.record(z.unknown());
+      return z.record(z.string(), z.unknown());
     default:
       return z.unknown();
   }

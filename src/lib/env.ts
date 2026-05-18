@@ -7,7 +7,7 @@ interface Env {
 
 export function getEnv(): Env {
   if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
-    return globalThis.env as Env;
+    return (globalThis as unknown as { env: Env }).env;
   }
   return {};
 }

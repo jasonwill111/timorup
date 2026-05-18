@@ -9,9 +9,6 @@ export async function GET({ request }: { request: Request }) {
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     // Get all settings as key-value pairs
     const allSettings = await db.select().from(siteSettings).all() as unknown[];

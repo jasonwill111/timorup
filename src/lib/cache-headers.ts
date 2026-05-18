@@ -21,9 +21,6 @@ export const API_CACHE = 'public, s-maxage=60, stale-while-revalidate=30';
 /**
  * Set cache headers on Astro response
  */
-export function setCacheHeaders(cacheType: string): void {
-  // This will be called from page components
-  if (typeof Astro !== 'undefined') {
-    Astro.response.headers.set('Cache-Control', cacheType);
-  }
+export function setCacheHeaders(response: Response, cacheType: string): void {
+  response.headers.set('Cache-Control', cacheType);
 }

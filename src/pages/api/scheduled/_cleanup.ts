@@ -1,7 +1,9 @@
 // Scheduled cleanup - runs weekly to delete expired businesses (60+ days after expiry)
 export const prerender = false;
 
-import type { ScheduledHandler } from '@cloudflare/workers-types';
+// Cloudflare Workers scheduled handler type
+type ScheduledHandler = (event: { scheduledTime: number; cron: string }) => Promise<Response>;
+
 import { getDb } from '@/lib/db';
 import { businesses, media, products } from '@/db/schema';
 import { lt, and, inArray, eq } from 'drizzle-orm';
@@ -10,11 +12,8 @@ import { getR2Bucket, deleteFolderFromR2 } from '@/lib/media';
 // 60 days grace period in seconds
 const GRACE_PERIOD_SECONDS = 60 * 24 * 60 * 60;
 
-export const onRequest: ScheduledHandler = async (context) => {
+export const onRequest: ScheduledHandler = async (_event) => {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
   const cutoffDate = now - GRACE_PERIOD_SECONDS;

@@ -8,9 +8,6 @@ import { eq, sql } from 'drizzle-orm';
 export async function GET() {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const featuredBusinesses = await db.select({
       id: businesses.id,
       title: businesses.title,

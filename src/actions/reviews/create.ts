@@ -22,9 +22,6 @@ export const createReview = defineAction({
   handler: async (input) => {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     try {
       // Check business exists
       const business = await db.select()
@@ -42,13 +39,13 @@ if (!db) throw new Error("Database not available");
         businessId: input.businessId,
         userId: input.userId,
         rating: input.rating,
-        comment: input.comment || '',
+        content: input.content || '',
       }).returning();
 
       // Update business rating average
       const avgResult = await db.select({ avg: sql`AVG(${reviews.rating})`, count: sql`COUNT(*)` })
         .from(reviews)
-        .where(eq(reviews.businessPageId, input.businessId));
+        .where(eq(reviews.businessId, input.businessId));
 
       await db.update(businesses)
         .set({

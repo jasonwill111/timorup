@@ -25,7 +25,7 @@ export const productCategories = [
     icon: '📱',
     parentId: null,
     sortOrder: 1,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'brand', type: 'text', label: 'Brand', required: true },
       { name: 'model', type: 'text', label: 'Model' },
@@ -41,7 +41,7 @@ export const productCategories = [
     icon: '👗',
     parentId: null,
     sortOrder: 2,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'brand', type: 'text', label: 'Brand' },
       { name: 'size', type: 'text', label: 'Size' },
@@ -58,7 +58,7 @@ export const productCategories = [
     icon: '🍔',
     parentId: null,
     sortOrder: 3,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'unit', type: 'text', label: 'Unit (kg, liter, piece)' },
       { name: 'organic', type: 'boolean', label: 'Organic' },
@@ -74,7 +74,7 @@ export const productCategories = [
     icon: '💄',
     parentId: null,
     sortOrder: 4,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'brand', type: 'text', label: 'Brand' },
       { name: 'skinType', type: 'text', label: 'Skin Type' },
@@ -90,7 +90,7 @@ export const productCategories = [
     icon: '🏠',
     parentId: null,
     sortOrder: 5,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'material', type: 'text', label: 'Material' },
       { name: 'dimensions', type: 'text', label: 'Dimensions' },
@@ -106,7 +106,7 @@ export const productCategories = [
     icon: '⚽',
     parentId: null,
     sortOrder: 6,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'sportType', type: 'select', label: 'Sport', options: ['Football', 'Basketball', 'Tennis', 'Swimming', 'Cycling', 'Gym', 'Hiking', 'Fishing', 'Other'] },
       { name: 'brand', type: 'text', label: 'Brand' },
@@ -121,7 +121,7 @@ export const productCategories = [
     icon: '👶',
     parentId: null,
     sortOrder: 7,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'ageRange', type: 'text', label: 'Age Range' },
       { name: 'gender', type: 'select', label: 'Gender', options: ['Boy', 'Girl', 'Unisex'] },
@@ -136,7 +136,7 @@ export const productCategories = [
     icon: '📎',
     parentId: null,
     sortOrder: 8,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'category', type: 'select', label: 'Category', options: ['Stationery', 'Printer Supplies', 'Office Furniture', 'Electronics', 'Other'] }
     ])
@@ -149,7 +149,7 @@ export const productCategories = [
     icon: '🚗',
     parentId: null,
     sortOrder: 9,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'compatibleMake', type: 'text', label: 'Compatible Make' },
       { name: 'compatibleModel', type: 'text', label: 'Compatible Model' },
@@ -165,7 +165,7 @@ export const productCategories = [
     icon: '🌾',
     parentId: null,
     sortOrder: 10,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'productType', type: 'select', label: 'Product Type', options: ['Seeds', 'Fertilizer', 'Equipment', 'Crop', 'Livestock', 'Other'] },
       { name: 'organic', type: 'boolean', label: 'Organic' },
@@ -185,7 +185,7 @@ export const productCategories = [
     icon: '💼',
     parentId: null,
     sortOrder: 20,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['Legal', 'Accounting', 'Consulting', 'IT Services', 'Marketing', 'Photography', 'Other'] },
       { name: 'hourlyRate', type: 'number', label: 'Hourly Rate (USD)' },
@@ -201,7 +201,7 @@ export const productCategories = [
     icon: '🔧',
     parentId: null,
     sortOrder: 21,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'repairType', type: 'select', label: 'Repair Type', options: ['Phone', 'Laptop', 'Vehicle', 'Plumbing', 'Electrical', 'Appliance', 'Other'] },
       { name: 'diagnosticFee', type: 'number', label: 'Diagnostic Fee (USD)' },
@@ -217,7 +217,7 @@ export const productCategories = [
     icon: '🧹',
     parentId: null,
     sortOrder: 22,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['House', 'Office', 'Deep Cleaning', 'Move-in/out', 'Post-construction'] },
       { name: 'pricePerHour', type: 'number', label: 'Price per Hour (USD)' },
@@ -233,7 +233,7 @@ export const productCategories = [
     icon: '💆',
     parentId: null,
     sortOrder: 23,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['Hair', 'Makeup', 'Nails', 'Spa', 'Massage', 'Facial', 'Eyebrow', 'Other'] },
       { name: 'pricePerSession', type: 'number', label: 'Price per Session (USD)' },
@@ -249,7 +249,7 @@ export const productCategories = [
     icon: '📚',
     parentId: null,
     sortOrder: 24,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'subjects', type: 'text', label: 'Subjects/Training Areas' },
       { name: 'teachingMode', type: 'select', label: 'Teaching Mode', options: ['In Person', 'Online', 'Both'] },
@@ -266,7 +266,7 @@ export const productCategories = [
     icon: '🎉',
     parentId: null,
     sortOrder: 25,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['Catering', 'Event Planning', 'Decoration', 'Photography', 'Entertainment', 'Rentals'] },
       { name: 'minGuests', type: 'number', label: 'Minimum Guests' },
@@ -282,7 +282,7 @@ export const productCategories = [
     icon: '🚚',
     parentId: null,
     sortOrder: 26,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['Courier', 'Moving', 'Food Delivery', 'Cargo', 'Passenger'] },
       { name: 'coverageArea', type: 'text', label: 'Coverage Area' },
@@ -298,7 +298,7 @@ export const productCategories = [
     icon: '🏗️',
     parentId: null,
     sortOrder: 27,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['New Build', 'Renovation', 'Interior Design', 'Electrical', 'Plumbing', 'Painting', 'Roofing'] },
       { name: 'quoteType', type: 'select', label: 'Quote Type', options: ['Fixed Price', 'Estimate', 'Hourly Rate'] },
@@ -314,7 +314,7 @@ export const productCategories = [
     icon: '🏥',
     parentId: null,
     sortOrder: 28,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['General Practice', 'Dental', 'Optical', 'Physiotherapy', 'Alternative Medicine', 'Home Care'] },
       { name: 'consultationFee', type: 'number', label: 'Consultation Fee (USD)' },
@@ -330,7 +330,7 @@ export const productCategories = [
     icon: '🐾',
     parentId: null,
     sortOrder: 29,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service Type', options: ['Grooming', 'Veterinary', 'Boarding', 'Training', 'Day Care', 'Walking'] },
       { name: 'pricePerSession', type: 'number', label: 'Price per Session (USD)' },
@@ -350,7 +350,7 @@ export const productCategories = [
     icon: '🏨',
     parentId: null,
     sortOrder: 30,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'roomType', type: 'select', label: 'Room Type', options: ['Standard', 'Deluxe', 'Suite', 'Family Room', 'Dormitory'] },
       { name: 'bedType', type: 'select', label: 'Bed Type', options: ['Single', 'Double', 'Twin', 'Queen', 'King'] },
@@ -368,7 +368,7 @@ export const productCategories = [
     icon: '🏡',
     parentId: null,
     sortOrder: 31,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'bedrooms', type: 'number', label: 'Bedrooms' },
       { name: 'bathrooms', type: 'number', label: 'Bathrooms' },
@@ -386,7 +386,7 @@ export const productCategories = [
     icon: '🍽️',
     parentId: null,
     sortOrder: 32,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'cuisineType', type: 'select', label: 'Cuisine Type', options: ['Timorese', 'Indonesian', 'Chinese', 'Western', 'Japanese', 'Indian', 'Italian', 'Fast Food', 'Seafood', 'Other'] },
       { name: 'priceRange', type: 'select', label: 'Price Range', options: ['$', '$$', '$$$', '$$$$'] },
@@ -403,7 +403,7 @@ export const productCategories = [
     icon: '🍴',
     parentId: null,
     sortOrder: 33,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'cuisineType', type: 'select', label: 'Cuisine Type', options: ['Timorese', 'Indonesian', 'Chinese', 'Western', 'Fusion', 'Other'] },
       { name: 'minGuests', type: 'number', label: 'Minimum Guests' },
@@ -423,7 +423,7 @@ export const productCategories = [
     icon: '💻',
     parentId: null,
     sortOrder: 40,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'licenseType', type: 'select', label: 'License Type', options: ['Perpetual', 'Subscription', 'Lifetime'] },
       { name: 'platform', type: 'text', label: 'Platform' },
@@ -439,7 +439,7 @@ export const productCategories = [
     icon: '🎓',
     parentId: null,
     sortOrder: 41,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'duration', type: 'text', label: 'Course Duration' },
       { name: 'level', type: 'select', label: 'Level', options: ['Beginner', 'Intermediate', 'Advanced', 'All Levels'] },
@@ -455,7 +455,7 @@ export const productCategories = [
     icon: '🎨',
     parentId: null,
     sortOrder: 42,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'format', type: 'select', label: 'Format', options: ['PDF', 'EPUB', 'MOBI', 'MP3', 'MP4', 'JPG', 'PNG', 'SVG', 'Other'] },
       { name: 'instantDelivery', type: 'boolean', label: 'Instant Download' }
@@ -473,7 +473,7 @@ export const productCategories = [
     icon: '🔧',
     parentId: null,
     sortOrder: 50,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'equipmentType', type: 'select', label: 'Equipment Type', options: ['Power Tools', 'Electronics', 'Party Equipment', 'Sports Equipment', 'Other'] },
       { name: 'deposit', type: 'number', label: 'Deposit (USD)' },
@@ -489,7 +489,7 @@ export const productCategories = [
     icon: '🚗',
     parentId: null,
     sortOrder: 51,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'vehicleType', type: 'select', label: 'Vehicle Type', options: ['Car', 'Motorcycle', 'Bicycle', 'Van', 'Truck'] },
       { name: 'pricePerDay', type: 'number', label: 'Price per Day (USD)' },
@@ -505,7 +505,7 @@ export const productCategories = [
     icon: '🏛️',
     parentId: null,
     sortOrder: 52,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'venueType', type: 'select', label: 'Venue Type', options: ['Meeting Room', 'Conference Hall', 'Wedding Venue', 'Party Space', 'Co-working'] },
       { name: 'capacity', type: 'number', label: 'Capacity (people)' },
@@ -525,7 +525,7 @@ export const productCategories = [
     icon: '🎫',
     parentId: null,
     sortOrder: 60,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'eventType', type: 'select', label: 'Event Type', options: ['Concert', 'Sports', 'Theater', 'Festival', 'Conference', 'Other'] },
       { name: 'eventDate', type: 'date', label: 'Event Date', required: true },
@@ -541,7 +541,7 @@ export const productCategories = [
     icon: '✈️',
     parentId: null,
     sortOrder: 61,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'transportType', type: 'select', label: 'Transport Type', options: ['Bus', 'Ferry', 'Flight', 'Taxi'] },
       { name: 'route', type: 'text', label: 'Route' },
@@ -561,7 +561,7 @@ export const productCategories = [
     icon: '📱',
     parentId: 'pc-1',
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'brand', type: 'text', label: 'Brand', required: true },
       { name: 'model', type: 'text', label: 'Model', required: true },
@@ -580,7 +580,7 @@ export const productCategories = [
     icon: '💻',
     parentId: 'pc-1',
     sortOrder: 12,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'brand', type: 'text', label: 'Brand', required: true },
       { name: 'model', type: 'text', label: 'Model' },
@@ -599,7 +599,7 @@ export const productCategories = [
     icon: '📷',
     parentId: 'pc-1',
     sortOrder: 13,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'brand', type: 'text', label: 'Brand', required: true },
       { name: 'model', type: 'text', label: 'Model' },
@@ -617,7 +617,7 @@ export const productCategories = [
     icon: '👕',
     parentId: 'pc-2',
     sortOrder: 21,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'gender', type: 'select', label: 'Gender', options: ['Men', 'Women', 'Unisex'], required: true },
       { name: 'size', type: 'text', label: 'Size', required: true },
@@ -635,7 +635,7 @@ export const productCategories = [
     icon: '👟',
     parentId: 'pc-2',
     sortOrder: 22,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'gender', type: 'select', label: 'Gender', options: ['Men', 'Women', 'Kids', 'Unisex'], required: true },
       { name: 'size', type: 'text', label: 'Size', required: true },
@@ -651,7 +651,7 @@ export const productCategories = [
     icon: '🎒',
     parentId: 'pc-2',
     sortOrder: 23,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'bagType', type: 'select', label: 'Type', options: ['Backpack', 'Handbag', 'Wallet', 'Travel Bag', 'Luggage'] },
       { name: 'brand', type: 'text', label: 'Brand' },
@@ -669,7 +669,7 @@ export const productCategories = [
     icon: '☕',
     parentId: 'pc-3',
     sortOrder: 31,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'productType', type: 'select', label: 'Type', options: ['Coffee Beans', 'Ground Coffee', 'Tea', 'Instant Coffee'], required: true },
       { name: 'origin', type: 'text', label: 'Origin' },
@@ -686,7 +686,7 @@ export const productCategories = [
     icon: '🏺',
     parentId: 'pc-3',
     sortOrder: 32,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'productType', type: 'select', label: 'Type', options: ['Handicraft', 'Textiles', 'Honey', 'Candles', 'Soap', 'Other'], required: true },
       { name: 'handmade', type: 'boolean', label: 'Handmade' },
@@ -703,7 +703,7 @@ export const productCategories = [
     icon: '💻',
     parentId: 'pc-20',
     sortOrder: 201,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'serviceType', type: 'select', label: 'Service', options: ['Web Development', 'App Development', 'IT Support', 'Consulting', 'Data Analysis', 'Other'], required: true },
       { name: 'hourlyRate', type: 'number', label: 'Hourly Rate (USD)' },
@@ -719,7 +719,7 @@ export const productCategories = [
     icon: '⚖️',
     parentId: 'pc-20',
     sortOrder: 202,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'practiceArea', type: 'select', label: 'Practice Area', options: ['Corporate', 'Family', 'Criminal', 'Property', 'Immigration', 'General'], required: true },
       { name: 'consultationFee', type: 'number', label: 'Consultation Fee (USD)' },

@@ -119,7 +119,7 @@ async function uploadDirect(
   formData.append('height', String(height));
 
   try {
-    return await actions.media.uploadMedia(formData) as UploadResult;
+    return await actions.media.uploadMedia(formData) as unknown as UploadResult;
   } catch (error) {
     return {
       success: false,
@@ -154,7 +154,9 @@ export async function uploadFiles(
   const total = files.length;
 
   for (let i = 0; i < files.length; i++) {
-    const result = await uploadFile(files[i], options);
+    const file = files[i];
+    if (!file) continue;
+    const result = await uploadFile(file, options);
     results.push(result);
 
     onProgress?.(i + 1, total);

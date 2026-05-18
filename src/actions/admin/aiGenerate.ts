@@ -9,7 +9,7 @@ const AI_TIMEOUT = 120000; // 2 minutes
 export const aiGenerate = defineAction({
   input: z.object({
     type: z.enum(['listing', 'sku', 'blog', 'landing']),
-    data: z.record(z.unknown()),
+    data: z.record(z.string(), z.unknown()),
   }),
   handler: async (input, context) => {
     const request = context?.request;
@@ -136,7 +136,7 @@ IMPORTANT: Return ONLY valid JSON. Format:
         throw new Error(`API error: ${response.status} - ${errorBody}`);
       }
 
-      const result = await response.json();
+      const result = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
 
       const text = result.choices?.[0]?.message?.content || '';
 

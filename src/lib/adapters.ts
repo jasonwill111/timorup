@@ -2,7 +2,7 @@
  * Database Adapter Interface
  * Enables test mocking and alternate DB implementations
  */
-import type { BetterAuth, BetterAuthConfig, BetterAuthOptions, Session } from 'better-auth';
+import type { Auth, BetterAuthOptions, Session } from 'better-auth';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 
 // Drizzle table type for schema inference
@@ -78,4 +78,4 @@ export interface AuthAdapter {
 
 // Factory function types
 export type DatabaseAdapterFactory = (env: unknown) => DatabaseAdapter;
-export type AuthAdapterFactory = (config: BetterAuthConfig, options?: BetterAuthOptions) => AuthAdapter;
+export type AuthAdapterFactory = (config: { database: unknown }, options?: BetterAuthOptions) => AuthAdapter;

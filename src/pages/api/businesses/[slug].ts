@@ -61,9 +61,6 @@ async function purgeCache(cacheKey: string): Promise<void> {
 export async function GET({ params, request }: { params: { slug: string }; request: Request }) {
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   const { slug } = params;
   const cacheKey = `/api/businesses/${slug}`;
 
@@ -179,9 +176,6 @@ if (!db) throw new Error("Database not available");
 
 export async function PUT({ params, request }: { params: { slug: string }; request: Request }) {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
   try {
     const { slug } = params;

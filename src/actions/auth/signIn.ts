@@ -32,9 +32,6 @@ export const signIn = defineAction({
       console.log('[signIn] Starting login process');
       const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
       console.log('[signIn] getDb result:', db ? 'db available' : 'db is null');
 
       if (!db) {

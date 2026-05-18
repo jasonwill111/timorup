@@ -13,7 +13,7 @@ export const nonProfitCategories = [
     icon: '❤️',
     parentId: null,
     sortOrder: 1,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'focusArea', type: 'select', label: 'Focus Area', required: true, options: ['Emergency Response', 'Food Security', 'Shelter', 'Health', 'Education', 'Water & Sanitation', 'Protection', 'Multiple'] },
       { name: 'targetGroup', type: 'text', label: 'Primary Beneficiaries' },
@@ -29,7 +29,7 @@ export const nonProfitCategories = [
     icon: '📚',
     parentId: null,
     sortOrder: 2,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'educationType', type: 'select', label: 'Type', required: true, options: ['Formal Education', 'Non-Formal Education', 'Vocational Training', 'Teacher Training', 'Scholarship Programs', 'Literacy Programs', 'Early Childhood', 'Multiple'] },
       { name: 'ageGroups', type: 'text', label: 'Age Groups Served' },
@@ -45,7 +45,7 @@ export const nonProfitCategories = [
     icon: '🏥',
     parentId: null,
     sortOrder: 3,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'healthType', type: 'select', label: 'Type', required: true, options: ['Hospital', 'Clinic', 'Mobile Clinic', 'Community Health', 'Mental Health', 'Maternal Health', 'HIV/AIDS', 'Malaria', 'Tuberculosis', 'Vaccination', 'Nutrition', 'Multiple'] },
       { name: 'serviceArea', type: 'text', label: 'Service Area' },
@@ -61,7 +61,7 @@ export const nonProfitCategories = [
     icon: '🌍',
     parentId: null,
     sortOrder: 4,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'environmentType', type: 'select', label: 'Focus', required: true, options: ['Conservation', 'Reforestation', 'Marine Protection', 'Wildlife', 'Climate Change', 'Waste Management', 'Water Conservation', 'Sustainable Energy', 'Environmental Education', 'Multiple'] },
       { name: 'projectAreas', type: 'text', label: 'Project Areas' },
@@ -76,7 +76,7 @@ export const nonProfitCategories = [
     icon: '👶',
     parentId: null,
     sortOrder: 5,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Gender Equality', 'Violence Prevention', 'Women\'s Rights', 'Child Protection', 'Orphan Support', 'Youth Development', 'Early Childhood Development', 'Multiple'] },
       { name: 'ageGroups', type: 'text', label: 'Age Groups' },
@@ -91,7 +91,7 @@ export const nonProfitCategories = [
     icon: '🌟',
     parentId: null,
     sortOrder: 6,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'programType', type: 'select', label: 'Program Type', required: true, options: ['Skills Training', 'Sports', 'Arts & Culture', 'Leadership', 'Entrepreneurship', 'Volunteer Programs', 'Mentorship', 'Civic Engagement', 'Multiple'] },
       { name: 'ageRange', type: 'text', label: 'Age Range' },
@@ -106,7 +106,7 @@ export const nonProfitCategories = [
     icon: '🌾',
     parentId: null,
     sortOrder: 7,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'agriType', type: 'select', label: 'Type', required: true, options: ['Food Security', 'Sustainable Agriculture', 'Livestock', 'Fishing', 'Nutrition', 'Food Distribution', 'Agricultural Training', 'Seed Distribution', 'Multiple'] },
       { name: 'farmersReached', type: 'number', label: 'Farmers Reached' },
@@ -121,7 +121,7 @@ export const nonProfitCategories = [
     icon: '⚖️',
     parentId: null,
     sortOrder: 8,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Human Rights', 'Democracy', 'Transparency', 'Anti-Corruption', 'Civic Education', 'Justice', 'Good Governance', 'Research & Advocacy', 'Multiple'] },
       { name: 'policyAreas', type: 'text', label: 'Policy Areas' },
@@ -136,7 +136,7 @@ export const nonProfitCategories = [
     icon: '♿',
     parentId: null,
     sortOrder: 9,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Physical Disability', 'Visual Impairment', 'Hearing Impairment', 'Intellectual Disability', 'Multiple Disabilities', 'Inclusion Advocacy', 'Assistive Technology', 'Rehabilitation', 'Multiple'] },
       { name: 'servicesOffered', type: 'text', label: 'Services Offered' },
@@ -151,7 +151,7 @@ export const nonProfitCategories = [
     icon: '🚨',
     parentId: null,
     sortOrder: 10,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'preparednessType', type: 'select', label: 'Type', required: true, options: ['Disaster Response', 'Disaster Preparedness', 'Search & Rescue', 'First Aid', 'Emergency Shelter', 'Early Warning Systems', 'Climate Adaptation', 'Multiple'] },
       { name: 'responseTime', type: 'text', label: 'Response Time Capacity' },
@@ -166,7 +166,7 @@ export const nonProfitCategories = [
     icon: '🏘️',
     parentId: null,
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Infrastructure', 'Water & Sanitation', 'Energy Access', 'Income Generation', 'Local Governance', 'Social Cohesion', 'Cultural Preservation', 'Multiple'] },
       { name: 'villagesCovered', type: 'number', label: 'Villages Covered' },
@@ -181,7 +181,7 @@ export const nonProfitCategories = [
     icon: '🎨',
     parentId: null,
     sortOrder: 12,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'cultureType', type: 'select', label: 'Type', required: true, options: ['Traditional Arts', 'Performing Arts', 'Visual Arts', 'Music', 'Film & Media', 'Heritage Preservation', 'Cultural Education', 'Crafts & Textiles', 'Multiple'] },
       { name: 'culturalFocus', type: 'text', label: 'Cultural Focus' },
@@ -198,7 +198,7 @@ export const nonProfitCategories = [
     icon: '🍚',
     parentId: 'npc-1',
     sortOrder: 11,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'beneficiaries', type: 'number', label: 'Monthly Beneficiaries' },
       { name: 'foodType', type: 'text', label: 'Type of Food Aid' },
@@ -213,7 +213,7 @@ export const nonProfitCategories = [
     icon: '🆘',
     parentId: 'npc-5',
     sortOrder: 51,
-    isActive: true,
+    isActive: 1,
     formFields: JSON.stringify([
       { name: 'servicesType', type: 'select', label: 'Services', required: true, options: ['Shelter', 'Hotline', 'Counseling', 'Legal Aid', 'Medical Support', 'Rehabilitation', 'Awareness Programs', 'Multiple'] },
       { name: 'confidentialService', type: 'boolean', label: 'Confidential Service' },

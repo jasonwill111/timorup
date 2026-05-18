@@ -3,6 +3,7 @@
  * Implements DatabaseAdapter for unit tests without D1 dependency
  */
 import type { DatabaseAdapter } from './adapters';
+import type { AnyDrizzleTable } from 'drizzle-orm/sqlite-core';
 
 // Simple in-memory storage
 type TableData = Map<string, Record<string, unknown>[]>;
@@ -24,15 +25,18 @@ export class InMemoryAdapter implements DatabaseAdapter {
     return new InMemorySelectBuilder(this.tables);
   }
 
-  insert<T extends { tableName: string }>(table: T): InMemoryInsertBuilder<T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  insert<T extends AnyDrizzleTable>(table: T): any {
     return new InMemoryInsertBuilder(this.tables, table.tableName, () => this.nextId++);
   }
 
-  update<T extends { tableName: string }>(table: T): InMemoryUpdateBuilder<T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  update<T extends AnyDrizzleTable>(table: T): any {
     return new InMemoryUpdateBuilder(this.tables, table.tableName);
   }
 
-  delete<T extends { tableName: string }>(table: T): InMemoryDeleteBuilder<T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  delete<T extends AnyDrizzleTable>(table: T): any {
     return new InMemoryDeleteBuilder(this.tables, table.tableName);
   }
 
@@ -56,7 +60,7 @@ class InMemorySelectBuilder {
   private tables: TableData;
   private tableName: string = '';
   private conditions: Array<{ column: string; value: unknown; op: string }> = [];
-  private orderBy: Array<{ column: string; dir: 'asc' | 'desc' }> = [];
+  private orderByCols: Array<{ column: string; dir: 'asc' | 'desc' }> = [];
   private limitValue?: number;
   private offsetValue?: number;
 
@@ -75,8 +79,8 @@ class InMemorySelectBuilder {
     return this;
   }
 
-  orderBy(column: string, dir: 'asc' | 'desc' = 'asc'): this {
-    this.orderBy.push({ column, dir });
+  order(column: string, dir: 'asc' | 'desc' = 'asc'): this {
+    this.orderByCols.push({ column, dir });
     return this;
   }
 
@@ -101,11 +105,11 @@ class InMemorySelectBuilder {
     });
 
     // Apply ordering
-    if (this.orderBy.length > 0) {
+    if (this.orderByCols.length > 0) {
       rows.sort((a, b) => {
-        for (const { column, dir } of this.orderBy) {
-          const aVal = a[column];
-          const bVal = b[column];
+        for (const { column, dir } of this.orderByCols) {
+          const aVal = (a as Record<string, unknown>)[column];
+          const bVal = (b as Record<string, unknown>)[column];
           if (aVal < bVal) return dir === 'asc' ? -1 : 1;
           if (aVal > bVal) return dir === 'asc' ? 1 : -1;
         }
@@ -210,14 +214,18 @@ class InMemoryUpdateWhereBuilder<T> {
   }
 
   returning() {
+    const tablesRef = this.tables;
+    const tableNameRef = this.tableName;
+    const setValuesRef = this.setValues;
+    const conditionsRef = this.conditions;
     return {
       async get(): Promise<unknown | undefined> {
-        const rows = this.tables.get(this.tableName) || [];
-        const idx = rows.findIndex(row =>
-          this.conditions.every(c => row[c.column] === c.value)
+        const rows = tablesRef.get(tableNameRef) || [];
+        const idx = rows.findIndex((row: Record<string, unknown>) =>
+          conditionsRef.every(c => row[c.column] === c.value)
         );
         if (idx === -1) return undefined;
-        Object.assign(rows[idx], this.setValues);
+        Object.assign(rows[idx], setValuesRef);
         return rows[idx];
       }
     };
@@ -225,7 +233,7 @@ class InMemoryUpdateWhereBuilder<T> {
 
   async run(): Promise<void> {
     const rows = this.tables.get(this.tableName) || [];
-    rows.forEach((row, idx) => {
+    rows.forEach((row: Record<string, unknown>, idx: number) => {
       if (this.conditions.every(c => row[c.column] === c.value)) {
         Object.assign(rows[idx], this.setValues);
       }

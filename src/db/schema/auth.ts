@@ -4,12 +4,12 @@ import { sqliteTable, text, integer, customType, index } from 'drizzle-orm/sqlit
 // Custom timestamp type that handles Date -> Unix timestamp conversion for D1
 const timestamp = () => customType<{ data: number; notNull: false; hasDefault: true }>({
   dataType: () => 'integer',
-  toDriver: (value: Date | number | null) => {
+  toDriver: (value: unknown) => {
     if (value === null || value === undefined) return null;
     if (value instanceof Date) return Math.floor(value.getTime() / 1000);
     return typeof value === 'number' ? value : null;
   },
-  fromDriver: (value: number | null) => value,
+  fromDriver: (value: unknown): number => value as number,
 });
 
 // Sessions table - D1 compatible with custom timestamp handling

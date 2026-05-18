@@ -39,9 +39,6 @@ export async function PATCH({ request, params }: { request: Request; params: { i
 
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 
     // Get target user
     const targetUser = await db.select()

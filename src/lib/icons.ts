@@ -53,7 +53,7 @@ export type ParsedIcon = { type: IconType; value: string } | null;
  * Get Lucide icon SVG path
  */
 export function getLucideIconPath(name: string): string {
-  return LUCIDE_SVG_PATHS[name] || LUCIDE_SVG_PATHS.building;
+  return LUCIDE_SVG_PATHS[name] ?? LUCIDE_SVG_PATHS.building ?? '';
 }
 
 /**

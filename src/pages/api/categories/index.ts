@@ -34,9 +34,6 @@ export async function GET({ url }: { url: URL }) {
     const entityType = url.searchParams.get('type') || 'business';
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
     const table = getCategoryTable(entityType);
     const allCategories = await db.select().from(table).all() as unknown[];
 

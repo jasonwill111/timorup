@@ -23,14 +23,14 @@ export async function getDb(): Promise<ReturnType<typeof drizzle<typeof schema>>
   // Always check env first - don't rely on cached _db
   try {
     // Try to get env from cloudflare:workers module
-    let cfEnv: CfEnv | null = null;
+    let cfEnv: { DB?: D1Database } | null = null;
 
     try {
       const { env: workersEnv } = await import('cloudflare:workers');
-      cfEnv = workersEnv as CfEnv;
+      cfEnv = workersEnv as { DB?: D1Database };
     } catch {
       // cloudflare:workers not available, try globalThis
-      cfEnv = (globalThis as any).env;
+      cfEnv = (globalThis as unknown as { env?: { DB?: D1Database } }).env;
     }
 
     if (cfEnv?.DB) {

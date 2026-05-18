@@ -4,7 +4,9 @@
 
 export const prerender = false;
 
-import type { ScheduledHandler } from '@cloudflare/workers-types';
+// Cloudflare Workers scheduled handler type
+type ScheduledHandler = (event: { scheduledTime: number; cron: string }) => Promise<Response>;
+
 import { getDb } from '@/lib/db';
 import { media } from '@/db/schema';
 import { getR2Bucket, deleteFromR2 as deleteFromR2Media } from '@/lib/media';
@@ -23,11 +25,8 @@ async function deleteFromR2(key: string): Promise<boolean> {
   }
 }
 
-export const onRequest: ScheduledHandler = async (context) => {
+export const onRequest: ScheduledHandler = async (_event) => {
   const db = await getDb();
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
 if (!db) throw new Error("Database not available");
 
   // Starting cleanup silently
@@ -37,19 +36,19 @@ if (!db) throw new Error("Database not available");
     const allMedia = await db
       .select({
         id: media.id,
-        url: media?.url,
-        type: media.type,
-        typeId: media.typeId,
+        r2Key: media.r2Key,
+        entityType: media.entityType,
+        entityId: media.entityId,
       })
       .from(media)
       .all();
 
-    const orphans: { id: string; url: string }[] = [];
+    const orphans: { id: string; r2Key: string }[] = [];
 
     for (const m of allMedia) {
       // Skip data: URLs (local dev)
-      if (m?.url && !m?.url.startsWith('data:')) {
-        orphans.push({ id: m.id, url: m?.url });
+      if (m?.r2Key && !m?.r2Key.startsWith('data:')) {
+        orphans.push({ id: m.id, r2Key: m?.r2Key });
       }
     }
 
@@ -67,10 +66,10 @@ if (!db) throw new Error("Database not available");
     let deletedCount = 0;
     for (const o of orphans) {
       try {
-        await deleteFromR2(o?.url);
+        await deleteFromR2(o?.r2Key);
         deletedCount++;
       } catch (error) {
-        console.error(`[Cleanup-Orphan-Media] Failed to delete ${o?.url}:`, error);
+        console.error(`[Cleanup-Orphan-Media] Failed to delete ${o?.r2Key}:`, error);
       }
     }
 

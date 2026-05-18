@@ -13,9 +13,6 @@ export async function GET({ request }: { request: Request }) {
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const heroList = await db.select().from(adBanners).orderBy(desc(adBanners.createdAt)).all();
 
@@ -42,9 +39,6 @@ export async function POST({ request }: { request: Request }) {
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const body = await request.json();
     const { title, description, imageId, ctaText, ctaLink, order } = body;
@@ -59,7 +53,7 @@ if (!db) throw new Error("Database not available");
       ctaText: ctaText || '',
       ctaLink: ctaLink || '',
       order: order || 0,
-      isActive: true,
+      isActive: 1,
     }).run();
 
     return new Response(JSON.stringify({

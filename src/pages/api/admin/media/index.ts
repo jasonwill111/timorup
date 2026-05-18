@@ -13,9 +13,6 @@ export async function GET({ request }: { request: Request }) {
 
   const db = await getDb();
 if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
-if (!db) throw new Error("Database not available");
   try {
     const url = new URL(request?.url);
     const type = url.searchParams.get('type'); // 'business' | 'blog' | 'general'

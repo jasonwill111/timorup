@@ -16,12 +16,12 @@ async function getSharp() {
 }
 
 // Get R2 bucket from Workers binding
-export function getR2Bucket(): R2Bucket {
-  const bucket = (env.MEDIA_BUCKET as string | undefined) ?? "";
+export function getR2Bucket(): R2Bucket | undefined {
+  const bucket = env.MEDIA_BUCKET;
   if (!bucket) {
-    throw new Error('R2 bucket not configured (MEDIA_BUCKET binding missing)');
+    return undefined;
   }
-  return bucket;
+  return bucket as R2Bucket;
 }
 
 // Get R2 public URL

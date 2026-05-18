@@ -96,7 +96,7 @@ export async function uploadMedia(
           entityId,
           category,
           r2Key: data.data?.url,
-          createdAt: new Date(),
+          createdAt: Math.floor(Date.now() / 1000) as any,
         },
         isDuplicate: data.isDuplicate,
       };
