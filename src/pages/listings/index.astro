@@ -22,12 +22,12 @@ interface CategoryRecord {
   parentId: string | null;
 }
 let parentCats: CategoryRecord[] = [];
-let getChildren = (_pid: string): CategoryRecord[] = [];
+let getChildCategories = (_pid: string): CategoryRecord[] => [];
 const categoryMap: Record<string, string> = {};
 try {
   const allCats = await db.select().from(listingCategories).all();
   parentCats = allCats.filter((c: CategoryRecord) => !c.parentId);
-  getChildren = (pid: string) => allCats.filter((c: CategoryRecord) => c.parentId === pid);
+  getChildCategories = (pid: string) => allCats.filter((c: CategoryRecord) => c.parentId === pid);
   allCats.forEach((c: CategoryRecord) => { categoryMap[c.id] = c.name; });
 } catch (e) { console.log('Categories error:', e); }
 
@@ -63,7 +63,7 @@ try {
       e.description?.toLowerCase().includes(searchLower);
     const catMatch = !childCat || e.categoryId === childCat;
     if (parentCat && !childCat) {
-      const childIds = getChildren(parentCat).map((c: CategoryRecord) => c.id);
+      const childIds = getChildCategories(parentCat).map((c: CategoryRecord) => c.id);
       if (childIds.length > 0 && !childIds.includes(e.categoryId)) return false;
     }
     return statusOk && searchMatch && catMatch;
@@ -124,7 +124,7 @@ const typeConfig: Record<string, { icon: string; color: string; bg: string }> = 
             class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
             data-animate-select>
             <option value="">Subcategory</option>
-            {getChildren(parentCat).map(c => <option value={c.id} selected={childCat===c.id}>{c.name}</option>)}
+            {getChildCategories(parentCat).map(c => <option value={c.id} selected={childCat===c.id}>{c.name}</option>)}
           </select>
         </div>
       </div>

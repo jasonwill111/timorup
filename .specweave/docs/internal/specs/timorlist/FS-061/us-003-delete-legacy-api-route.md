@@ -2,7 +2,7 @@
 id: US-003
 feature: FS-061
 title: "Delete Legacy API Route"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-18
 tldr: "**As a** developer."
@@ -21,8 +21,8 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: `src/pages/api/media/upload.ts` deleted
-- [ ] **AC-US3-02**: No remaining imports from the deleted route
+- [x] **AC-US3-01**: `src/pages/api/media/upload.ts` deleted
+- [x] **AC-US3-02**: No remaining imports from the deleted route
 
 ---
 

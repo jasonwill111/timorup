@@ -2,7 +2,7 @@
 id: US-004
 feature: FS-061
 title: "Update Scheduled Cleanup Endpoints"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-18
 tldr: "**As a** developer."
@@ -21,9 +21,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US4-01**: `api/scheduled/_cleanup.ts` imports from `src/lib/media.ts`
-- [ ] **AC-US4-02**: `api/scheduled/_cleanup-orphan-media.ts` imports from `src/lib/media.ts`
-- [ ] **AC-US4-03**: No inline `getR2Bucket()`, `deleteFromR2()`, `deleteFolderFromR2()` in cleanup files
+- [x] **AC-US4-01**: `api/scheduled/_cleanup.ts` imports from `src/lib/media.ts`
+- [x] **AC-US4-02**: `api/scheduled/_cleanup-orphan-media.ts` imports from `src/lib/media.ts`
+- [x] **AC-US4-03**: No inline `getR2Bucket()`, `deleteFromR2()`, `deleteFolderFromR2()` in cleanup files
 
 ---
 

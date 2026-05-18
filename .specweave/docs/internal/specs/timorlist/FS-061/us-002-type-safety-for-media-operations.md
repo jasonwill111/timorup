@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-061
 title: "Type Safety for Media Operations"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-18
 tldr: "**As a** developer."
@@ -21,9 +21,9 @@ project: timorlist
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: `EntityType`, `MediaCategory`, `MediaType` enums properly exported
-- [ ] **AC-US2-02**: `MediaUploadParams` interface clearly defines required fields
-- [ ] **AC-US2-03**: Upload/delete functions return typed results (`UploadResult`, `boolean`)
+- [x] **AC-US2-01**: `EntityType`, `MediaCategory`, `MediaType` enums properly exported
+- [x] **AC-US2-02**: `MediaUploadParams` interface clearly defines required fields
+- [x] **AC-US2-03**: Upload/delete functions return typed results (`UploadResult`, `boolean`)
 
 ---
 
