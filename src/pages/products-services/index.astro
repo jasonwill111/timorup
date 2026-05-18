@@ -84,20 +84,20 @@ const productsWithBusiness = allProducts
   })
   .filter((p: any) => p.businessTitle !== 'Unknown');
 
-// Serialize for client - ensure all values are strings or primitives
+// Serialize for client - ensure all values are JSON-safe primitives
 const safeBusinesses = allBusinesses.map((b: any) => ({
-  id: String(b.id || ''),
-  title: String(b.title || ''),
-  slug: String(b.slug || ''),
+  id: typeof b.id === 'object' ? String(Object.values(b)[0]) : String(b.id || ''),
+  title: typeof b.title === 'object' ? String(b.title?.toString() || '') : String(b.title || ''),
+  slug: typeof b.slug === 'object' ? String(b.slug?.toString() || '') : String(b.slug || ''),
 }));
 
 const safeProducts = productsWithBusiness.map((p: any) => ({
-  id: String(p.id || ''),
-  title: String(p.title || ''),
-  price: p.price ? String(p.price) : null,
-  priceFields: p.priceFields ? String(p.priceFields) : null,
-  productType: p.productType ? String(p.productType) : null,
-  businessId: String(p.businessId || ''),
+  id: typeof p.id === 'object' ? String(p.id?.toString() || '') : String(p.id || ''),
+  title: typeof p.title === 'object' ? String(p.title?.toString() || '') : String(p.title || ''),
+  price: p.price != null ? (typeof p.price === 'object' ? String(p.price?.toString() || '') : String(p.price)) : null,
+  priceFields: p.priceFields != null ? String(p.priceFields) : null,
+  productType: p.productType != null ? String(p.productType) : null,
+  businessId: typeof p.businessId === 'object' ? String(p.businessId?.toString() || '') : String(p.businessId || ''),
   businessTitle: String(p.businessTitle || ''),
   businessSlug: String(p.businessSlug || ''),
   businessType: String(p.businessType || 'business'),

@@ -48,14 +48,21 @@ function wrapDbForD1(db: any): any {
                   return qTarget.values.call(qTarget, convertToTimestamp(data));
                 };
               }
-              return qTarget[qProp as keyof typeof qTarget];
+              // Return method directly without binding - Cloudflare Workers requires native functions to keep their original `this`
+              const method = qTarget[qProp];
+              if (typeof method === 'function') {
+                return method;
+              }
+              return method;
             }
           });
         };
       }
       const value = target[prop as keyof typeof target];
+      // Don't bind native functions - they must keep their original `this` in Cloudflare Workers
+      // Binding native functions like fetch, JSON.stringify, etc. causes "Illegal invocation" errors
       if (typeof value === 'function') {
-        return value.bind(target);
+        return value;
       }
       return value;
     }
