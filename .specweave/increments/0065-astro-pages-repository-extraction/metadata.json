@@ -1,0 +1,17 @@
+{
+  "id": "0065-astro-pages-repository-extraction",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-18T01:53:47.426Z",
+  "lastActivity": "2026-05-18T01:53:47.427Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}

@@ -4,7 +4,8 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import { getDb } from '@/lib/db';
 import { businesses, businessCategories } from '@/db/schema';
-import { eq, desc, or, sql } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
+import type { BusinessListing } from '@/lib/listing-types';
 
 const db = await getDb();
 const searchParams = Astro.url.searchParams;
@@ -23,18 +24,39 @@ Astro.response.headers.set('Cache-Control', hasSearchParams
 );
 
 // Get categories
-let parentCats: any[] = [];
-let getChildren = (pid: string) => [];
-let categoryMap: Record<string, string> = {};
+interface CategoryRecord {
+  id: string;
+  name: string;
+  parentId: string | null;
+}
+let parentCats: CategoryRecord[] = [];
+let getChildren = (_pid: string): CategoryRecord[] => [];
+const categoryMap: Record<string, string> = {};
 try {
   const allCats = await db.select().from(businessCategories).all();
-  parentCats = allCats.filter((c: any) => !c.parentId);
-  getChildren = (pid: string) => allCats.filter((c: any) => c.parentId === pid);
-  allCats.forEach((c: any) => categoryMap[c.id] = c.name);
+  parentCats = allCats.filter((c: CategoryRecord) => !c.parentId);
+  getChildren = (pid: string) => allCats.filter((c: CategoryRecord) => c.parentId === pid);
+  allCats.forEach((c: CategoryRecord) => { categoryMap[c.id] = c.name; });
 } catch (e) { console.error('Categories error:', e instanceof Error ? e.message : String(e)); }
 
 // Get all matching entities first
-let allEntities: any[] = [];
+interface BusinessRecord {
+  id: string;
+  title: string;
+  slug: string;
+  categoryId: string | null;
+  address: string | null;
+  tags: string[];
+  likes: number;
+  saves: number;
+  views: number;
+  ratingAverage: number;
+  ratingCount: number;
+  status: string;
+  aboutUs: string | null;
+  createdAt: number;
+}
+let allEntities: BusinessRecord[] = [];
 try {
   const searchLower = search.toLowerCase();
   allEntities = await db.select()
@@ -43,7 +65,7 @@ try {
     .all();
 
   // Filter
-  allEntities = allEntities.filter((e: any) => {
+  allEntities = allEntities.filter((e: BusinessRecord) => {
     const statusOk = e.status === 'live' || e.status === 'published';
     const searchMatch = !search ||
       e.title?.toLowerCase().includes(searchLower) ||
@@ -51,7 +73,7 @@ try {
       e.tags?.toLowerCase().includes(searchLower);
     const catMatch = !childCat || e.categoryId === childCat;
     if (parentCat && !childCat) {
-      const childIds = getChildren(parentCat).map((c: any) => c.id);
+      const childIds = getChildren(parentCat).map((c: CategoryRecord) => c.id);
       if (childIds.length > 0 && !childIds.includes(e.categoryId)) return false;
     }
     return statusOk && searchMatch && catMatch;

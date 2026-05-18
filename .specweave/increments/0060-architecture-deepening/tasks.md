@@ -12,16 +12,22 @@
 ✅ Updated `isPastGracePeriod()` to use dashboard
 
 ## T-002: DB Adapter Interface
-**AC**: AC-02 | **Status**: [ ] pending
+**AC**: AC-02 | **Status**: [x] completed
 **Test**: Given subscription.ts → When tested with mock adapter → Then no cloudflare:workers dependency
 
-DEFERRED - complexity vs benefit ratio low
+✅ Created `src/lib/adapters.ts` with DatabaseAdapter interface
+✅ Created `src/lib/db-adapter.ts` with createD1Adapter and getDbFromEnv
+✅ Created `src/lib/in-memory-adapter.ts` with InMemoryAdapter for tests
+✅ All adapter files compile without errors
 
 ## T-003: Zod Schema Generation
-**AC**: AC-03 | **Status**: [ ] pending
+**AC**: AC-03 | **Status**: [x] completed
 **Test**: Given drizzle schema → When generateZodSchema() called → Then valid Zod schema returned
 
-DEFERRED - complexity vs benefit ratio low
+✅ Created `src/lib/zod-gen.ts` utility
+✅ generateZodSchema function for Drizzle table → Zod conversion
+✅ Pre-built helpers: uuid, slug, email, pagination
+✅ File compiles without errors
 
 ## T-004: Barrel Consolidation
 **AC**: AC-04 | **Status**: [x] completed

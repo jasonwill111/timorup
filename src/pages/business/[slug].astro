@@ -102,10 +102,22 @@ const openingHours = safeJsonParse(business.openingHours, null);
 const socialLinks = safeJsonParse(business.socialLinks, {}) as Record<string, string>;
 
 // Load related data with error handling
+interface ReviewRecord {
+  id: string;
+  rating: number;
+  comment: string | null;
+  userName: string | null;
+  createdAt: number;
+}
+interface UpdateRecord {
+  id: string;
+  content: string;
+  createdAt: number;
+}
 let category = null;
-let businessReviews: any[] = [];
+let businessReviews: ReviewRecord[] = [];
 let galleryImages: { id: string; url: string }[] = [];
-let updates: any[] = [];
+let updates: UpdateRecord[] = [];
 
 try {
   category = business.categoryId

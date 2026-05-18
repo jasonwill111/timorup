@@ -17,7 +17,12 @@ if (!db) {
 }
 
 // Get all businesses for filter
-let allBusinesses: any[] = [];
+interface BusinessRecord {
+  id: string;
+  title: string;
+  slug: string;
+}
+let allBusinesses: BusinessRecord[] = [];
 try {
   allBusinesses = await db
     .select({
@@ -34,7 +39,22 @@ try {
 }
 
 // Get all products with business info
-let allProducts: any[] = [];
+interface ProductRecord {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  price: number | null;
+  priceUnit: string | null;
+  priceFields: string | null;
+  productType: string | null;
+  businessId: string;
+  categoryId: string | null;
+  tags: string[];
+  status: string;
+  createdAt: number;
+}
+let allProducts: ProductRecord[] = [];
 try {
   allProducts = await db
     .select()
@@ -48,8 +68,8 @@ try {
 
 // Join with business data
 const productsWithBusiness = allProducts
-  .map((p: any) => {
-    const business = allBusinesses.find((b: any) => b.id === p.businessId);
+  .map((p: ProductRecord) => {
+    const business = allBusinesses.find((b: BusinessRecord) => b.id === p.businessId);
     return {
       id: p.id,
       title: p.title,

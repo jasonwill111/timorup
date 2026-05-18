@@ -2,23 +2,15 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { businessCategories, nonProfitCategories, publicSectorCategories, listingCategories } from '@/db/schema';
+import {
+  CATEGORY_TABLE_MAP,
+  isValidEntityType,
+  getCategoryTable,
+  getValidEntityTypesMessage,
+  type EntityType,
+} from '@/lib/category-registry';
 import { eq, desc, sql } from 'drizzle-orm';
 import { getAdminUser, unauthorizedResponse } from '@/lib/admin-auth';
-
-const TABLE_MAP: Record<string, any> = {
-  'business': businessCategories,
-  'non_profit': nonProfitCategories,
-  'public_sector': publicSectorCategories,
-  'listing': listingCategories,
-};
-
-const TABLE_NAMES = {
-  'business': 'business_categories',
-  'non_profit': 'non_profit_categories',
-  'public_sector': 'public_sector_categories',
-  'listing': 'listing_categories',
-};
 
 // GET - List categories by table
 export async function GET({ request }: { request: Request }) {
@@ -29,15 +21,18 @@ export async function GET({ request }: { request: Request }) {
   try {
     const url = new URL(request.url);
     const table = url.searchParams.get('table') || 'business';
-    const tableSchema = TABLE_MAP[table];
 
-    if (!tableSchema) {
-      return Response.json({ success: false, error: { message: 'Invalid table' } }, { status: 400 });
+    if (!isValidEntityType(table)) {
+      return Response.json(
+        { success: false, error: { message: `Invalid table. Valid values: ${getValidEntityTypesMessage()}` } },
+        { status: 400 }
+      );
     }
 
+    const config = getCategoryTable(table);
     const categories = await db.select()
-      .from(tableSchema)
-      .orderBy(desc(tableSchema.createdAt))
+      .from(config.schema)
+      .orderBy(desc(config.schema.createdAt))
       .all();
 
     return Response.json({ success: true, data: categories });
@@ -56,15 +51,18 @@ export async function POST({ request }: { request: Request }) {
   try {
     const body = await request.json();
     const { name, slug, description, icon, table = 'business', parentId } = body;
-    const tableSchema = TABLE_MAP[table];
 
-    if (!tableSchema) {
-      return Response.json({ success: false, error: { message: 'Invalid table' } }, { status: 400 });
+    if (!isValidEntityType(table)) {
+      return Response.json(
+        { success: false, error: { message: `Invalid table. Valid values: ${getValidEntityTypesMessage()}` } },
+        { status: 400 }
+      );
     }
 
+    const config = getCategoryTable(table);
     const id = `cat-${Date.now()}`;
 
-    await db.insert(tableSchema).values({
+    await db.insert(config.schema).values({
       id,
       name,
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
@@ -90,23 +88,31 @@ export async function DELETE({ request }: { request: Request }) {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
     const table = url.searchParams.get('table') || 'business';
-    const tableSchema = TABLE_MAP[table];
 
-    if (!id || !tableSchema) {
-      return Response.json({ success: false, error: { message: 'ID and table required' } }, { status: 400 });
+    if (!id) {
+      return Response.json({ success: false, error: { message: 'ID required' } }, { status: 400 });
     }
+
+    if (!isValidEntityType(table)) {
+      return Response.json(
+        { success: false, error: { message: `Invalid table. Valid values: ${getValidEntityTypesMessage()}` } },
+        { status: 400 }
+      );
+    }
+
+    const config = getCategoryTable(table);
 
     // Check children
     const children = await db.select()
-      .from(tableSchema)
-      .where(eq(tableSchema.parentId, id))
+      .from(config.schema)
+      .where(eq(config.schema.parentId, id))
       .all();
 
     if (children.length > 0) {
       return Response.json({ success: false, error: { message: 'Cannot delete category with children' } }, { status: 409 });
     }
 
-    await db.delete(tableSchema).where(eq(tableSchema.id, id)).run();
+    await db.delete(config.schema).where(eq(config.schema.id, id)).run();
 
     return Response.json({ success: true, message: 'Category deleted' });
   } catch (error) {
@@ -124,13 +130,21 @@ export async function PUT({ request }: { request: Request }) {
   try {
     const body = await request.json();
     const { id, name, slug, description, icon, table = 'business', parentId } = body;
-    const tableSchema = TABLE_MAP[table];
 
-    if (!id || !tableSchema) {
-      return Response.json({ success: false, error: { message: 'ID and table required' } }, { status: 400 });
+    if (!id) {
+      return Response.json({ success: false, error: { message: 'ID required' } }, { status: 400 });
     }
 
-    const updated = await db.update(tableSchema)
+    if (!isValidEntityType(table)) {
+      return Response.json(
+        { success: false, error: { message: `Invalid table. Valid values: ${getValidEntityTypesMessage()}` } },
+        { status: 400 }
+      );
+    }
+
+    const config = getCategoryTable(table);
+
+    const updated = await db.update(config.schema)
       .set({
         ...(name && { name }),
         ...(slug && { slug }),
@@ -139,7 +153,7 @@ export async function PUT({ request }: { request: Request }) {
         ...(parentId !== undefined && { parentId }),
         updatedAt: sql`(strftime('%s', 'now'))`,
       })
-      .where(eq(tableSchema.id, id))
+      .where(eq(config.schema.id, id))
       .returning()
       .get();
 
