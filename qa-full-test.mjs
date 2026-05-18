@@ -15,19 +15,19 @@ async function runFullTest() {
     // ========== PUBLIC PAGES ==========
     log('\n=== PUBLIC PAGES ===');
     
-    await page.goto('http://localhost:4322/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/', { waitUntil: 'networkidle' });
     log(`✓ Homepage: ${page.url()}`);
     
-    await page.goto('http://localhost:4322/businesses', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/businesses', { waitUntil: 'networkidle' });
     log(`✓ Businesses: ${page.url()}`);
     
-    await page.goto('http://localhost:4322/listings', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/listings', { waitUntil: 'networkidle' });
     log(`✓ Listings: ${page.url()}`);
     
     // ========== USER REGISTRATION ==========
     log('\n=== USER REGISTRATION ===');
     
-    await page.goto('http://localhost:4322/register', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/register', { waitUntil: 'networkidle' });
     log(`✓ Register page: ${page.url()}`);
     
     // Check if form exists
@@ -59,7 +59,7 @@ async function runFullTest() {
     // ========== USER LOGIN ==========
     log('\n=== USER LOGIN ===');
     
-    await page.goto('http://localhost:4322/login', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/login', { waitUntil: 'networkidle' });
     log(`✓ Login page: ${page.url()}`);
     
     await page.fill('#email', 'user@timorlist.com');
@@ -75,13 +75,13 @@ async function runFullTest() {
     // ========== ACCOUNT PAGE ==========
     log('\n=== ACCOUNT PAGE ===');
     
-    await page.goto('http://localhost:4322/account', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/account', { waitUntil: 'networkidle' });
     log(`✓ Account page: ${page.url()}`);
     
     // ========== ADMIN LOGIN ==========
     log('\n=== ADMIN LOGIN ===');
 
-    await page.goto('http://localhost:4322/admin/login', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4321/admin/login', { waitUntil: 'networkidle' });
     log(`✓ Admin login page: ${page.url()}`);
 
     await page.fill('#email', 'admin@timorlist.com');
@@ -119,7 +119,7 @@ async function runFullTest() {
     ];
     
     for (const adminPage of adminPages) {
-      await page.goto(`http://localhost:4322${adminPage}`, { waitUntil: 'networkidle' });
+      await page.goto(`http://localhost:4321${adminPage}`, { waitUntil: 'networkidle' });
       const title = await page.title();
       log(`✓ ${adminPage} - "${title}"`);
     }

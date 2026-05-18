@@ -5,15 +5,11 @@ import { getDb } from '@/lib/db';
 import { media } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
-import { env } from 'cloudflare:workers';
+import { getR2Bucket } from '@/lib/media';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
-}
-
-function getR2Bucket(): R2Bucket | undefined {
-  return env.MEDIA_BUCKET as R2Bucket | undefined;
 }
 
 export const deleteMedia = defineAction({

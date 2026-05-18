@@ -5,23 +5,15 @@ import { getDb } from '@/lib/db';
 import { media, businesses } from '@/db/schema';
 import { eq, and, sql, count } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
-import { env } from 'cloudflare:workers';
 import { getPlanLimits } from '@/lib/subscription';
 import { getMediaLimits, isAllowedImageType, isAllowedVideoType } from '@/lib/media-limits';
+import { getR2PublicUrl, isR2Available, getR2Bucket } from '@/lib/media';
 
 const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1, maxBusinessImages: 16, maxBusinessVideos: 2 };
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
-}
-
-function getR2Bucket(): R2Bucket | undefined {
-  return env.MEDIA_BUCKET as R2Bucket | undefined;
-}
-
-function getR2PublicUrl(): string {
-  return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
 }
 
 // Build R2 key from type and typeId
@@ -34,7 +26,7 @@ function buildR2Key(params: {
   timestamp: number;
   id: string;
 }): string {
-  const { type, typeId, filename, timestamp, id } = params;
+  const { type, filename, timestamp, id } = params;
   const ext = filename.split('.').pop() || 'webp';
   const safeFilename = `${timestamp}-${id}.${ext}`;
 

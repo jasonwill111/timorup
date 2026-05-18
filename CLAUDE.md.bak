@@ -179,6 +179,21 @@ SpecWeave learns from corrections. Learnings saved here automatically. Edit or d
 **Load context**: `/sw:docs <topic>` loads relevant living docs into conversation
 <!-- SW:END:context -->
 
+## Agent skills
+
+### Issue tracker
+
+Issues tracked in GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical label vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (global CONTEXT.md + ADRs). See `docs/agents/domain.md`.
+<!-- SW:END:agent-skills -->
+
 <!-- SW:SECTION:structure version="1.0.585" -->
 ## Structure
 
@@ -412,7 +427,7 @@ See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **timorlist** (3040 symbols, 4703 relationships, 154 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **timorlist** (2923 symbols, 4422 relationships, 138 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

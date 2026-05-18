@@ -7,17 +7,12 @@ export const prerender = false;
 import type { ScheduledHandler } from '@cloudflare/workers-types';
 import { getDb } from '@/lib/db';
 import { media } from '@/db/schema';
-import { env } from 'cloudflare:workers';
-
-function getR2Bucket(): R2Bucket | undefined {
-  return env.MEDIA_BUCKET as R2Bucket | undefined;
-}
+import { getR2Bucket, deleteFromR2 as deleteFromR2Media } from '@/lib/media';
 
 async function deleteFromR2(key: string): Promise<boolean> {
   try {
     const bucket = getR2Bucket();
     if (!bucket) {
-      // R2 bucket check silent
       return false;
     }
     await bucket.delete(key);

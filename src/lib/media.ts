@@ -193,6 +193,9 @@ export function getPublicMediaUrl(key: string): string {
   return `${getR2PublicUrl()}/${key}`;
 }
 
+// Get R2 bucket (for internal use)
+export { getR2Bucket };
+
 // Transform image URL for optimization (using Cloudflare's image transformations)
 export function getOptimizedImageUrl(
   originalUrl: string,
@@ -273,4 +276,52 @@ export function isR2Available(): boolean {
   } catch {
     return false;
   }
+}
+
+// Build R2 key from upload parameters
+// Structure:
+// - general/{category}/{filename}
+// - listings/business/{id}/{category}/{filename}
+// - listings/nonprofit/{id}/{category}/{filename}
+// - blogs/{id}/{filename}
+// - pages/{slug}/{filename}
+export function buildR2Key(params: {
+  entityType: string;
+  entityId: string;
+  category: string;
+  filename: string;
+}): string {
+  const { entityType, entityId, category, filename } = params;
+
+  // Sanitize filename - remove path traversal, keep extension
+  const safeFilename = filename.split('/').pop()?.replace(/\.\./g, '').replace(/[<>:"|?*]/g, '_') || `media-${Date.now()}`;
+
+  if (entityType === 'general') {
+    return `general/${category}/${safeFilename}`;
+  }
+
+  if (entityType === 'business' || entityType === 'nonprofit') {
+    const folder = `listings/${entityType}/${entityId}`;
+
+    // SKU images get their own subfolder
+    if (category === 'sku') {
+      return `${folder}/sku-${entityId}/${safeFilename}`;
+    }
+
+    return `${folder}/${category}/${safeFilename}`;
+  }
+
+  if (entityType === 'blog') {
+    return `blogs/${entityId}/${safeFilename}`;
+  }
+
+  // pages
+  return `pages/${entityId}/${safeFilename}`;
+}
+
+// List files with a given prefix
+export async function listByPrefix(prefix: string, limit = 100): Promise<R2Object[]> {
+  const bucket = getR2Bucket();
+  const result = await bucket.list({ prefix, limit });
+  return result.objects;
 }

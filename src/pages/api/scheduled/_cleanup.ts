@@ -4,41 +4,11 @@ export const prerender = false;
 import type { ScheduledHandler } from '@cloudflare/workers-types';
 import { getDb } from '@/lib/db';
 import { businesses, media, products } from '@/db/schema';
-import { lt, and, inArray } from 'drizzle-orm';
-import { env } from 'cloudflare:workers';
+import { lt, and, inArray, eq } from 'drizzle-orm';
+import { getR2Bucket, deleteFolderFromR2 } from '@/lib/media';
 
 // 60 days grace period in seconds
 const GRACE_PERIOD_SECONDS = 60 * 24 * 60 * 60;
-
-function getR2Bucket(): R2Bucket | undefined {
-  return env.MEDIA_BUCKET as R2Bucket | undefined;
-}
-
-async function deleteFolderFromR2(prefix: string): Promise<boolean> {
-  try {
-    const bucket = getR2Bucket();
-    if (!bucket) {
-      // Debug info removed for production
-      return false;
-    }
-
-    let cursor: string | undefined;
-    do {
-      const result = await bucket.list({ prefix, cursor, limit: 1000 });
-      for (const obj of result.objects ?? []) {
-        if (obj.key) {
-          await bucket.delete(obj.key);
-        }
-      }
-      cursor = result.truncated ? result.cursor : undefined;
-    } while (cursor);
-
-    return true;
-  } catch (error) {
-    console.error('[Cleanup] Error deleting folder from R2:', error);
-    return false;
-  }
-}
 
 export const onRequest: ScheduledHandler = async (context) => {
   const db = await getDb();

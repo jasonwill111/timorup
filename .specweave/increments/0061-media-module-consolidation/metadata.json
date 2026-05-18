@@ -1,0 +1,17 @@
+{
+  "id": "0061-media-module-consolidation",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-18T00:49:44.147Z",
+  "lastActivity": "2026-05-18T00:49:44.151Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}
