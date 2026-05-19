@@ -38,8 +38,8 @@ export default defineConfig({
         '@': new URL('./src', import.meta.url).pathname,
       },
     },
-    prebundle: {
-      ignore: ['better-auth-cloudflare'],
+    optimizeDeps: {
+      enabled: false,
     },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
