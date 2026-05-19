@@ -31,11 +31,16 @@ export default defineConfig({
       tailwindcss(),
     ],
     ssr: {
-      external: ['cloudflare:workers', 'better-auth-cloudflare'],
+      external: ['cloudflare:workers'],
     },
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,
+      },
+    },
+    build: {
+      rollupOptions: {
+        external: ['better-auth-cloudflare'],
       },
     },
     // Disable all caching in development for real-time updates
