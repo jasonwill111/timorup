@@ -31,21 +31,17 @@ export default defineConfig({
       tailwindcss(),
     ],
     ssr: {
-      external: ['cloudflare:workers', 'better-auth-cloudflare'],
-      noExternal: ['better-auth'],
+      external: ['cloudflare:workers'],
+      noExternal: ['better-auth', 'better-auth-cloudflare', '@better-auth/drizzle-adapter'],
     },
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,
-      },
-    },
-    build: {
-      rollupOptions: {
-        external: ['better-auth-cloudflare'],
+        'better-auth-cloudflare': new URL('./node_modules/better-auth-cloudflare/dist/index.mjs', import.meta.url).pathname,
       },
     },
     optimizeDeps: {
-      exclude: ['@astrojs/cloudflare', 'better-auth', '@better-auth/drizzle-adapter'],
+      exclude: [],
     },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
