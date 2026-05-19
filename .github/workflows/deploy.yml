@@ -32,10 +32,6 @@ jobs:
           rm -rf node_modules .pnpm-store
           pnpm install
 
-      - name: Prebundle dependencies
-        run: |
-          npx vite optimize --force
-
       - name: Build for Cloudflare Workers
         run: pnpm build
         env:
