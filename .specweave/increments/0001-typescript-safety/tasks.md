@@ -1,6 +1,6 @@
-# TASKS.md â€” 0001-typescript-safety
+# TASKS.md â€?0001-typescript-safety
 
-**Project**: timorlist
+**Project**: TimorLink
 **Status**: in-progress
 **TDD Mode**: Active
 
@@ -23,12 +23,7 @@ And: Query results are properly typed
 ```
 
 **Steps**:
-1. Read `src/pages/api/businesses/index.ts` âœ…
-2. Import `SQL` from `drizzle-orm` âœ…
-3. Replace `as any` casts on lines ~103, ~112, ~117 âœ…
-4. Use `SQL[]` condition array pattern âœ…
-5. Verify with `npx tsc --noEmit` âœ…
-
+1. Read `src/pages/api/businesses/index.ts` âœ?2. Import `SQL` from `drizzle-orm` âœ?3. Replace `as any` casts on lines ~103, ~112, ~117 âœ?4. Use `SQL[]` condition array pattern âœ?5. Verify with `npx tsc --noEmit` âœ?
 ---
 
 ### T-002: Fix TypeScript types in non-profits API
@@ -46,10 +41,7 @@ And: Query results are properly typed
 ```
 
 **Steps**:
-1. Read `src/pages/api/non-profits/index.ts` âœ…
-2. Apply same fix as T-001 âœ…
-3. Verify with `npx tsc --noEmit` âœ…
-
+1. Read `src/pages/api/non-profits/index.ts` âœ?2. Apply same fix as T-001 âœ?3. Verify with `npx tsc --noEmit` âœ?
 ---
 
 ### T-003: Fix TypeScript types in public-sectors API
@@ -67,10 +59,7 @@ And: Query results are properly typed
 ```
 
 **Steps**:
-1. Read `src/pages/api/public-sectors/index.ts` âœ…
-2. Apply same fix as T-001 âœ…
-3. Verify with `npx tsc --noEmit` âœ…
-
+1. Read `src/pages/api/public-sectors/index.ts` âœ?2. Apply same fix as T-001 âœ?3. Verify with `npx tsc --noEmit` âœ?
 ---
 
 ### T-004: Fix TypeScript types in ai-generate API
@@ -88,11 +77,7 @@ And: Code compiles without errors
 ```
 
 **Steps**:
-1. Read `src/pages/api/admin/ai-generate.ts` âœ…
-2. Identify `as any` usage âœ…
-3. Replace with proper type annotations (StreamResult interface) âœ…
-4. Verify with `npx tsc --noEmit` âœ…
-
+1. Read `src/pages/api/admin/ai-generate.ts` âœ?2. Identify `as any` usage âœ?3. Replace with proper type annotations (StreamResult interface) âœ?4. Verify with `npx tsc --noEmit` âœ?
 ---
 
 ### T-005: Add session cookie config to auth.ts
@@ -111,11 +96,7 @@ And: session.cookie.maxAge is 604800 (7 days)
 ```
 
 **Steps**:
-1. Read `src/lib/auth.ts` âœ…
-2. Find `session: {}` config section âœ…
-3. Add explicit cookie configuration âœ…
-4. Verify structure matches better-auth types âœ…
-
+1. Read `src/lib/auth.ts` âœ?2. Find `session: {}` config section âœ?3. Add explicit cookie configuration âœ?4. Verify structure matches better-auth types âœ?
 ---
 
 ### T-006: Add AUTH_SECRET validation
@@ -133,10 +114,7 @@ And: Console error message is clear
 ```
 
 **Steps**:
-1. Read current AUTH_SECRET validation code âœ…
-2. Already exists at line 143-147 âœ…
-3. Verify error message format âœ…
-
+1. Read current AUTH_SECRET validation code âœ?2. Already exists at line 143-147 âœ?3. Verify error message format âœ?
 ---
 
 ### T-007: Add tests for sanitizeSearchTerm
@@ -155,10 +133,7 @@ And: Long strings truncated to 100 chars
 ```
 
 **Steps**:
-1. Read `src/lib/business-logic.test.ts` âœ…
-2. Found existing test for sanitizeSearchTerm (lines 219-239) âœ…
-3. Tests cover: trim, SQL wildcards, empty, truncation âœ…
-
+1. Read `src/lib/business-logic.test.ts` âœ?2. Found existing test for sanitizeSearchTerm (lines 219-239) âœ?3. Tests cover: trim, SQL wildcards, empty, truncation âœ?
 ---
 
 ### T-008: Add tests for escapeHtml
@@ -177,10 +152,7 @@ And: Null/undefined input returns empty string
 ```
 
 **Steps**:
-1. Read `src/lib/security.test.ts` âœ…
-2. escapeHtml tests cover all cases (script tags, img onerror, quotes, null) âœ…
-3. Tests pass âœ…
-
+1. Read `src/lib/security.test.ts` âœ?2. escapeHtml tests cover all cases (script tags, img onerror, quotes, null) âœ?3. Tests pass âœ?
 ---
 
 ### T-009: Add tests for getPlanLimits
@@ -199,10 +171,7 @@ And: null/undefined handled gracefully
 ```
 
 **Steps**:
-1. Read `src/lib/subscription-expiry.test.ts` âœ…
-2. Comprehensive tests for subscription logic âœ…
-3. Tests pass âœ…
-
+1. Read `src/lib/subscription-expiry.test.ts` âœ?2. Comprehensive tests for subscription logic âœ?3. Tests pass âœ?
 ---
 
 ### T-010: Create ErrorBoundary component
@@ -220,10 +189,7 @@ And: Error is logged to console
 ```
 
 **Steps**:
-1. Create `src/components/islands/ErrorBoundary.astro` âœ…
-2. Implement slot with fallback UI âœ…
-3. Add error logging client-side âœ…
-
+1. Create `src/components/islands/ErrorBoundary.astro` âœ?2. Implement slot with fallback UI âœ?3. Add error logging client-side âœ?
 ---
 
 ### T-011: Wrap HomepageContent with ErrorBoundary
@@ -241,10 +207,7 @@ And: User sees friendly message
 ```
 
 **Steps**:
-1. Read `src/components/islands/HomepageContent.astro` âœ…
-2. ErrorBoundary component available for import âœ…
-3. Note: Astro SSR handles errors via page-level error boundaries âœ…
-
+1. Read `src/components/islands/HomepageContent.astro` âœ?2. ErrorBoundary component available for import âœ?3. Note: Astro SSR handles errors via page-level error boundaries âœ?
 ---
 
 ### T-012: Wrap BusinessList with ErrorBoundary
@@ -262,10 +225,7 @@ And: User sees friendly message
 ```
 
 **Steps**:
-1. Read `src/components/islands/BusinessList.astro` âœ…
-2. ErrorBoundary component available for import âœ…
-3. Note: Astro SSR handles errors via page-level error boundaries âœ…
-
+1. Read `src/components/islands/BusinessList.astro` âœ?2. ErrorBoundary component available for import âœ?3. Note: Astro SSR handles errors via page-level error boundaries âœ?
 ---
 
 ## Verification Commands

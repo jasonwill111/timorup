@@ -62,15 +62,15 @@
 
 | Files | Similarity | Type |
 |-------|------------|------|
-| .specweave/docs/internal/specs/timorlist/FS-018/us-003-document-edge-cases-in-0001.md, .specweave/docs/internal/specs/timorlist/FS-018/us-002-document-edge-cases-in-0015.md | 80% | same_title |
+| .specweave/docs/internal/specs/TimorLink/FS-018/us-003-document-edge-cases-in-0001.md, .specweave/docs/internal/specs/TimorLink/FS-018/us-002-document-edge-cases-in-0015.md | 80% | same_title |
 
 ## Documentation Discrepancies
 
 | File | Type | Description |
 |------|------|-------------|
-| .specweave/docs/internal/specs/timorlist/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/testing.md |
-| .specweave/docs/internal/specs/timorlist/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/pages.md |
-| .specweave/docs/internal/specs/timorlist/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/db.md |
+| .specweave/docs/internal/specs/TimorLink/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/testing.md |
+| .specweave/docs/internal/specs/TimorLink/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/pages.md |
+| .specweave/docs/internal/specs/TimorLink/FS-007/FEATURE.md | 🔗 broken_link | Broken link to: ../modules/db.md |
 
 ## Recommendations
 
@@ -78,3 +78,4 @@
 - 183 acceptance criteria are marked complete but lack code evidence. Review: AC-US3-01, AC-US3-03, AC-US2-02...
 - No governance documentation found. Consider adding coding standards to .specweave/docs/internal/governance/
 - 📁 "Feature Specs" has 109 files. Run sw:organize-docs to generate themed navigation indexes for easier browsing.
+

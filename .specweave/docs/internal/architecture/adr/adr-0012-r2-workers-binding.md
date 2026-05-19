@@ -47,7 +47,7 @@ await bucket.put(key, body);
 ```toml
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
-bucket_name = "timorlist-media"
+bucket_name = "TimorLink-media"
 ```
 
 2. Update src/lib/media.ts:
@@ -74,3 +74,4 @@ export async function uploadMedia(file: File, userId: string): Promise<string> {
 **References**:
 - [Cloudflare R2 Docs](https://developers.cloudflare.com/r2/)
 - [Workers Binding](https://developers.cloudflare.com/workers/runtime-apis/r2/)
+

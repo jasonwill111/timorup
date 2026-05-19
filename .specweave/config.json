@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "project": {
-    "name": "timorlist",
+    "name": "TimorLink",
     "version": "0.1.0"
   },
   "quality": {
@@ -95,7 +95,7 @@
     "enabled": false
   },
   "workspace": {
-    "name": "timorlist",
+    "name": "TimorLink",
     "repos": []
   }
 }

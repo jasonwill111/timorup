@@ -3,7 +3,7 @@
  *
  * Centralized geocoding module for OpenStreetMap Nominatim API.
  * Implements 1100ms debounce to respect Nominatim's 1 req/sec rate limit.
- * Client-side compatible â€” uses only standard browser APIs (fetch, Promise, Date).
+ * Client-side compatible â€?uses only standard browser APIs (fetch, Promise, Date).
  *
  * Usage in Astro <script> blocks:
  *   import { geocodeAddress } from '@/lib/geo';
@@ -17,7 +17,7 @@ const DEBOUNCE_MS = 1100;
 
 let lastCallTime = 0;
 
-// For testing only â€” resets debounce state between test runs
+// For testing only â€?resets debounce state between test runs
 export function __resetGeoState() {
   lastCallTime = 0;
 }
@@ -82,7 +82,7 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   let response: Response;
   try {
     response = await fetch(url, {
-      headers: { 'User-Agent': 'TimorList/1.0' },
+      headers: { 'User-Agent': 'TimorLink/1.0' },
     });
   } catch {
     // Network error
@@ -110,3 +110,4 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
     lng: parseFloat(first.lon),
   };
 }
+

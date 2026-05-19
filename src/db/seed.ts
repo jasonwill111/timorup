@@ -1,4 +1,4 @@
-// Comprehensive seed script for TimorLIST
+// Comprehensive seed script for TimorLink
 // Use better-sqlite3 directly (same as getDb() for local dev)
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import SQLite from 'better-sqlite3';
@@ -18,7 +18,7 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 // Use the same DB path as getDb() in src/lib/db.ts
-const localDbPath = process.env.LOCAL_DB_PATH || './.wrangler/state/v3/d1/timorlist-db.sqlite';
+const localDbPath = process.env.LOCAL_DB_PATH || './.wrangler/state/v3/d1/TimorLink-db.sqlite';
 const sqlite = new SQLite(localDbPath);
 const db = drizzle(sqlite, { schema });
 
@@ -26,7 +26,7 @@ const db = drizzle(sqlite, { schema });
 // CATEGORIES
 // ========================
 const categories = [
-  { id: 'cat-1', name: 'Restaurants & Cafes', slug: 'restaurants-cafes', description: 'Food and beverage establishments', icon: '🍽️' },
+  { id: 'cat-1', name: 'Restaurants & Cafes', slug: 'restaurants-cafes', description: 'Food and beverage establishments', icon: '🍽�? },
   { id: 'cat-2', name: 'Hotels & Accommodation', slug: 'hotels-accommodation', description: 'Hotels, hostels, and lodging', icon: '🏨' },
   { id: 'cat-3', name: 'Shopping', slug: 'shopping', description: 'Retail stores and shops', icon: '🛒' },
   { id: 'cat-4', name: 'Health & Beauty', slug: 'health-beauty', description: 'Healthcare and beauty services', icon: '💆' },
@@ -35,7 +35,7 @@ const categories = [
   { id: 'cat-7', name: 'Education', slug: 'education', description: 'Schools, tutoring, training', icon: '📚' },
   { id: 'cat-8', name: 'Entertainment', slug: 'entertainment', description: 'Bars, clubs, venues', icon: '🎉' },
   { id: 'cat-9', name: 'Travel & Tours', slug: 'travel-tours', description: 'Tour operators, travel agencies', icon: '✈️' },
-  { id: 'cat-10', name: 'Construction', slug: 'construction', description: 'Builders, contractors, hardware', icon: '🏗️' },
+  { id: 'cat-10', name: 'Construction', slug: 'construction', description: 'Builders, contractors, hardware', icon: '🏗�? },
   { id: 'cat-11', name: 'Supermarkets', slug: 'supermarkets', description: 'Grocery stores and supermarkets', icon: '🏪' },
   { id: 'cat-12', name: 'Electronics', slug: 'electronics', description: 'Phones, computers, gadgets', icon: '📱' },
 ];
@@ -44,9 +44,9 @@ const categories = [
 // USERS
 // ========================
 const users = [
-  { id: 'user-0', email: 'user@timorlist.com', name: 'Test User', role: 'user', phone: '+6707700001' },
+  { id: 'user-0', email: 'user@TimorLink.com', name: 'Test User', role: 'user', phone: '+6707700001' },
   { id: 'user-1', email: 'joao.silva@cafetimor.tl', name: 'João Silva', role: 'user', phone: '+6707701234' },
-  { id: 'user-4', email: 'admin@timorlist.com', name: 'Admin User', role: 'admin', phone: '+6707700000' },
+  { id: 'user-4', email: 'admin@TimorLink.com', name: 'Admin User', role: 'admin', phone: '+6707700000' },
 ];
 
 // ========================
@@ -99,7 +99,7 @@ const businesses = [
       instagram: 'https://instagram.com/cafetimordili',
       tiktok: null,
     }),
-    latestUpdate: '☕ Now serving breakfast menu! Try our new avocado toast with Timor coffee.',
+    latestUpdate: '�?Now serving breakfast menu! Try our new avocado toast with Timor coffee.',
     latestUpdateDate: new Date('2026-04-25'),
   },
   {
@@ -620,7 +620,7 @@ const businesses = [
       instagram: 'https://instagram.com/tourstimetor',
       tiktok: 'https://tiktok.com/@tourstimetor',
     }),
-    latestUpdate: '🏔️ New adventure! Mountain sunrise tours now available. Limited spots!',
+    latestUpdate: '🏔�?New adventure! Mountain sunrise tours now available. Limited spots!',
     latestUpdateDate: new Date('2026-04-24'),
   },
   {
@@ -1262,7 +1262,7 @@ async function seed() {
   }
 
   // Batch insert organizations
-  console.log('🏛️ Inserting organizations...');
+  console.log('🏛�?Inserting organizations...');
   if (organizations.length > 0) {
     await db.insert(schema.businessPages).values(organizations);
   }
@@ -1274,12 +1274,12 @@ async function seed() {
   }
 
   // Batch insert reviews
-  console.log('⭐ Inserting reviews...');
+  console.log('�?Inserting reviews...');
   if (reviews.length > 0) {
     await db.insert(schema.reviews).values(reviews);
   }
 
-  console.log('✅ Seed completed!');
+  console.log('�?Seed completed!');
   console.log('');
   console.log('📊 Summary:');
   console.log(`   - ${categories.length} categories`);
@@ -1292,3 +1292,4 @@ async function seed() {
 }
 
 seed().catch(console.error);
+

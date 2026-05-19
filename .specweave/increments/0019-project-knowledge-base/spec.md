@@ -11,7 +11,7 @@ created: 2026-04-30T00:00:00.000Z
 
 ## Overview
 
-Created local knowledge base for timorlist project to ensure best practices.
+Created local knowledge base for TimorLink project to ensure best practices.
 
 ## Created Files
 
@@ -38,3 +38,4 @@ Created local knowledge base for timorlist project to ensure best practices.
 | Zod | 4.3.6 |
 | Mastra | 1.28.0 |
 | Playwright | 1.58.2 |
+

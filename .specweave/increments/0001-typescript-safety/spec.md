@@ -1,6 +1,6 @@
-# SPEC.md â€” 0001-typescript-safety
+# SPEC.md â€?0001-typescript-safety
 
-**Project**: timorlist
+**Project**: TimorLink
 **Type**: refactor
 **Status**: in-progress
 
@@ -14,10 +14,10 @@
 **So that** TypeScript strict mode catches type errors at compile time
 
 **Acceptance Criteria**:
-- [x] **AC-US1-01**: `src/pages/api/businesses/index.ts` â€” Remove 3 `as any` casts, use `SQL[]` condition array
-- [x] **AC-US1-02**: `src/pages/api/non-profits/index.ts` â€” Remove 3 `as any` casts, use `SQL[]` condition array
-- [x] **AC-US1-03**: `src/pages/api/public-sectors/index.ts` â€” Remove 3 `as any` casts, use `SQL[]` condition array
-- [x] **AC-US1-04**: `src/pages/api/admin/ai-generate.ts` â€” Remove 2 `as any` casts, use proper type parameters
+- [x] **AC-US1-01**: `src/pages/api/businesses/index.ts` â€?Remove 3 `as any` casts, use `SQL[]` condition array
+- [x] **AC-US1-02**: `src/pages/api/non-profits/index.ts` â€?Remove 3 `as any` casts, use `SQL[]` condition array
+- [x] **AC-US1-03**: `src/pages/api/public-sectors/index.ts` â€?Remove 3 `as any` casts, use `SQL[]` condition array
+- [x] **AC-US1-04**: `src/pages/api/admin/ai-generate.ts` â€?Remove 2 `as any` casts, use proper type parameters
 
 ---
 
@@ -27,7 +27,7 @@
 **So that** the app is protected against XSS and CSRF attacks
 
 **Acceptance Criteria**:
-- [x] **AC-US2-01**: `src/lib/auth.ts` â€” Add explicit `session.cookie` config with `httpOnly: true`, `secure: true`, `sameSite: 'lax'`
+- [x] **AC-US2-01**: `src/lib/auth.ts` â€?Add explicit `session.cookie` config with `httpOnly: true`, `secure: true`, `sameSite: 'lax'`
 - [x] **AC-US2-02**: Session cookie maxAge set to 7 days (604800 seconds)
 - [x] **AC-US2-03**: AUTH_SECRET validation at startup (minimum 32 characters)
 
@@ -88,7 +88,7 @@
 ---
 
 ## Dependencies
-None â€” this is a standalone refactor increment.
+None â€?this is a standalone refactor increment.
 
 ---
 

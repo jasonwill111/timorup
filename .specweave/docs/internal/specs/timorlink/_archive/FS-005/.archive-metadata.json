@@ -1,0 +1,11 @@
+{
+  "id": "FS-005",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:13.842Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/specs/TimorLink/FS-005",
+  "linkedIncrements": [
+    "0005-tiptap-rich-editor"
+  ]
+}

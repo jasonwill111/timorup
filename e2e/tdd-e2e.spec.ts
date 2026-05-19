@@ -10,9 +10,9 @@
 import { test, expect, Page, Request } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8787';
-const ADMIN_EMAIL = 'admin@timorlist.com';
+const ADMIN_EMAIL = 'admin@TimorLink.com';
 const ADMIN_PASSWORD = 'admin12345';
-const USER_EMAIL = 'user@timorlist.com';
+const USER_EMAIL = 'user@TimorLink.com';
 const USER_PASSWORD = 'user12345';
 
 // ==================== HELPERS ====================
@@ -486,3 +486,4 @@ test.describe('TDD: Integration with External Services', () => {
     console.log('Map container visible:', hasMap);
   });
 });
+

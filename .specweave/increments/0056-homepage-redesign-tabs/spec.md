@@ -7,7 +7,7 @@ Redesigned homepage to show 3 content types with tab navigation. Each tab displa
 ## User Stories
 
 ### US-001: Tab Navigation
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** to switch between Featured Businesses, Classified Ads, and Products & Services
@@ -19,7 +19,7 @@ Redesigned homepage to show 3 content types with tab navigation. Each tab displa
 - [x] AC-US1-03: Active tab has border-primary indicator
 
 ### US-002: Content Display
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** 12 cards per tab with "View All" button
@@ -32,7 +32,7 @@ Redesigned homepage to show 3 content types with tab navigation. Each tab displa
 - [x] AC-US2-04: Each tab has "View All" button linking to respective list page
 
 ### US-003: Removed Sections
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** cleaner homepage

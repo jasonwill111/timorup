@@ -20,7 +20,7 @@ Remove React/shadcn dependencies from the project and add Astro-native alternati
 ## User Stories
 
 ### US-001: Remove React Dependencies
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to remove all React dependencies from package.json
@@ -36,7 +36,7 @@ Remove React/shadcn dependencies from the project and add Astro-native alternati
 - [x] **AC-US1-07**: `sonner` removed from dependencies
 
 ### US-002: Add Astro-Native Dependencies
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to add Astro-native icon library
@@ -48,7 +48,7 @@ Remove React/shadcn dependencies from the project and add Astro-native alternati
 - [x] **AC-US2-03**: `nanostores` added (retained from existing)
 
 ### US-003: Update Astro Configuration
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to remove React integration from astro.config.mjs
@@ -60,7 +60,7 @@ Remove React/shadcn dependencies from the project and add Astro-native alternati
 - [x] **AC-US3-03**: tsconfig.json updated to remove React JSX settings
 
 ### US-004: Verify Build Works
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to ensure the project builds successfully after dependency changes
@@ -87,3 +87,4 @@ None (this is the first increment in the migration)
 - `lucide-astro` was deprecated, replaced with `@lucide/astro`
 - `nanostores` added for state management (replacing React state)
 - Build will fail until UI components are migrated in 0004
+

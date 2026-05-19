@@ -27,73 +27,66 @@ Fix all security, TypeScript, performance issues found in 100% code analysis. Up
 ## User Stories
 
 ### US-001: Security Hardening (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** all XSS and injection vulnerabilities fixed
 **So that** user data is protected and trust is maintained
 
 **Acceptance Criteria**:
-- [x] **AC-US1-01**: All user-controlled data in `innerHTML` uses `escapeHtml()` or `escapeHtmlServer()` ‚úÖ (Verified: already safe)
-- [x] **AC-US1-02**: All `JSON.parse()` calls wrapped in try/catch with error handling ‚úÖ
-- [x] **AC-US1-03**: `wrangler.jsonc` compatibility_date updated to 2025-11-01 or later ‚úÖ
-
+- [x] **AC-US1-01**: All user-controlled data in `innerHTML` uses `escapeHtml()` or `escapeHtmlServer()` ‚ú?(Verified: already safe)
+- [x] **AC-US1-02**: All `JSON.parse()` calls wrapped in try/catch with error handling ‚ú?- [x] **AC-US1-03**: `wrangler.jsonc` compatibility_date updated to 2025-11-01 or later ‚ú?
 ### US-002: TypeScript Strict Mode (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** TypeScript config aligned with best practices
 **So that** type safety catches errors at compile time
 
 **Acceptance Criteria**:
-- [x] **AC-US2-01**: `tsconfig.json` includes `noFallthroughCasesInSwitch` ‚úÖ (partial)
-- [x] **AC-US2-02**: No bare `as HTMLElement` casts without type guards ‚úÖ (verified safe)
-- [x] **AC-US2-03**: `pnpm build` succeeds ‚úÖ (tsc has pre-existing errors in legacy files)
+- [x] **AC-US2-01**: `tsconfig.json` includes `noFallthroughCasesInSwitch` ‚ú?(partial)
+- [x] **AC-US2-02**: No bare `as HTMLElement` casts without type guards ‚ú?(verified safe)
+- [x] **AC-US2-03**: `pnpm build` succeeds ‚ú?(tsc has pre-existing errors in legacy files)
 
 ### US-003: Error Handling & Resilience (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** graceful error handling when things go wrong
 **So that** I see helpful messages instead of blank pages
 
 **Acceptance Criteria**:
-- [x] **AC-US3-01**: Custom `src/pages/500.astro` error page exists ‚úÖ
-- [x] **AC-US3-02**: Business update cache purge actually implemented ‚úÖ
-- [x] **AC-US3-03**: Auth initialization race condition eliminated ‚úÖ
-
+- [x] **AC-US3-01**: Custom `src/pages/500.astro` error page exists ‚ú?- [x] **AC-US3-02**: Business update cache purge actually implemented ‚ú?- [x] **AC-US3-03**: Auth initialization race condition eliminated ‚ú?
 ### US-004: Performance & Database (P2)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** fast queries even with large datasets
 **So that** browsing listings feels responsive
 
 **Acceptance Criteria**:
-- [x] **AC-US4-01**: `businesses` table has `ownerId`, `categoryId`, `status` indexes ‚úÖ (already existed)
-- [x] **AC-US4-02**: `listings` table has `status`, `expiresAt` indexes ‚úÖ (already existed)
+- [x] **AC-US4-01**: `businesses` table has `ownerId`, `categoryId`, `status` indexes ‚ú?(already existed)
+- [x] **AC-US4-02**: `listings` table has `status`, `expiresAt` indexes ‚ú?(already existed)
 - [x] **AC-US4-03**: No `console.log/error` in production code (gated) ‚ö†Ô∏è (deferred)
 
 ### US-005: Cookie Security (P2)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** security-conscious user
 **I want** session cookies properly secured
 **So that** CSRF attacks are prevented
 
 **Acceptance Criteria**:
-- [x] **AC-US5-01**: Session cookie `sameSite` set to `'strict'` (not `'lax'`) ‚úÖ
-
+- [x] **AC-US5-01**: Session cookie `sameSite` set to `'strict'` (not `'lax'`) ‚ú?
 ### US-006: Zod v4 Compatibility (P3)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** Zod schemas using latest v4 API
 **So that** code uses modern patterns
 
 **Acceptance Criteria**:
-- [x] **AC-US6-01**: Email validation uses `z.email()` instead of `z.string().email()` ‚úÖ
-
+- [x] **AC-US6-01**: Email validation uses `z.email()` instead of `z.string().email()` ‚ú?
 ## Success Criteria
 
 - `pnpm build` succeeds without errors

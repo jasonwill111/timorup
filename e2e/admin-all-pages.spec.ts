@@ -1,8 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Use PRODUCTION environment for testing
-const BASE_URL = 'https://timorlist.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@timorlist.com';
+const BASE_URL = 'https://TimorLink.jasonwill.workers.dev';
+const ADMIN_EMAIL = 'admin@TimorLink.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 // Helper to login
@@ -348,3 +348,4 @@ test.describe('Route Redirects (Old -> New)', () => {
     console.log('/admin/heroes status:', status);
   });
 });
+

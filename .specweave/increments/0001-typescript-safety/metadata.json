@@ -5,7 +5,7 @@
   "description": "Fix as any casts, verify auth cookie config, improve test coverage, add error boundaries. Tech: Astro SSR + Cloudflare Workers + Drizzle ORM + Zod v4",
   "type": "refactor",
   "status": "completed",
-  "project": "timorlist",
+  "project": "TimorLink",
   "priority": "P1",
   "created": "2026-05-13T11:15:00.000Z",
   "updated": "2026-05-13T11:45:00.000Z",

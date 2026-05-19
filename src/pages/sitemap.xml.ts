@@ -6,7 +6,7 @@
 
 export const prerender = false;
 
-const SITE_URL = import.meta.env.PUBLIC_SITE_URL ?? 'https://timorlist.com';
+const SITE_URL = import.meta.env.PUBLIC_SITE_URL ?? 'https://TimorLink.com';
 
 interface SitemapUrl {
   loc: string;

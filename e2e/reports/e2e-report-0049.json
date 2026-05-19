@@ -2,7 +2,7 @@
   "incrementId": "0049-0040-admin-auth-cookie-middleware",
   "timestamp": "2026-05-13T12:30:00.000Z",
   "mode": "run",
-  "playwrightConfig": "/home/jasonwill/dev-projects/timorlist/playwright.config.ts",
+  "playwrightConfig": "/home/jasonwill/dev-projects/TimorLink/playwright.config.ts",
   "summary": {
     "total": 58,
     "passed": 57,

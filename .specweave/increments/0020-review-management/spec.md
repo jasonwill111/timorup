@@ -20,7 +20,7 @@ Business owners can reply to reviews (edit/delete their reply). Admins can manag
 ## User Stories
 
 ### US-001: User replies to reviews
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** business owner **I want** to reply to reviews **So that** I can engage with customers
 
@@ -35,7 +35,7 @@ Business owners can reply to reviews (edit/delete their reply). Admins can manag
 ---
 
 ### US-002: Admin manages reviews
-**Project**: timorlist
+**Project**: TimorLink
 
 **As an** admin **I want** to view and delete reviews **So that** I can moderate the platform
 
@@ -51,7 +51,7 @@ Business owners can reply to reviews (edit/delete their reply). Admins can manag
 ---
 
 ### US-003: Reply API endpoints
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer **I want** CRUD endpoints **So that** the frontend can use them
 
@@ -88,23 +88,23 @@ ALTER TABLE reviews ADD COLUMN replied_by TEXT;
 
 ```
 User visits /account or /business/:slug
-  â†’ Views reviews for their business
-  â†’ Clicks "Reply" on a review
-  â†’ Submits reply via POST /api/reviews/:id/reply
-  â†’ Reply saved (can reply once per review)
-  â†’ User can Edit/Delete reply via PUT/DELETE
-  â†’ Reply displays on business page
+  â†?Views reviews for their business
+  â†?Clicks "Reply" on a review
+  â†?Submits reply via POST /api/reviews/:id/reply
+  â†?Reply saved (can reply once per review)
+  â†?User can Edit/Delete reply via PUT/DELETE
+  â†?Reply displays on business page
 ```
 
 ## Admin Delete Flow
 
 ```
 Admin visits /admin/reviews
-  â†’ Searches/filter reviews
-  â†’ Clicks "Delete" on a review
-  â†’ Confirms in modal
-  â†’ DELETE /api/admin/reviews/:id
-  â†’ Review deleted, rating updated
+  â†?Searches/filter reviews
+  â†?Clicks "Delete" on a review
+  â†?Confirms in modal
+  â†?DELETE /api/admin/reviews/:id
+  â†?Review deleted, rating updated
 ```
 
 ## Out of Scope
@@ -113,3 +113,4 @@ Admin visits /admin/reviews
 - Reply notifications
 - Admin editing/deleting replies
 - Batch delete by admin
+

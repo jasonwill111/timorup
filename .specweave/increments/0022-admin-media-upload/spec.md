@@ -21,7 +21,7 @@ Add image upload UI to Admin Categories and Heroes pages.
 ## User Stories
 
 ### US-001: Add Image Upload to Admin Categories
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** admin user
 **I want** to upload images for categories
@@ -36,7 +36,7 @@ Add image upload UI to Admin Categories and Heroes pages.
 ---
 
 ### US-002: Add Image Upload to Admin Heroes
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** admin user
 **I want** to upload images for hero banners
@@ -56,3 +56,4 @@ Add image upload UI to Admin Categories and Heroes pages.
 - Follow pattern from `admin/skus.astro` and `admin/blogs.astro`
 - Upload folder: `category` for categories, `hero` for heroes
 - Single image only (not multiple/gallery)
+

@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** TimorList
+**Project:** TimorLink
 **Generated:** 2026-05-11 14:46:00
 **Category:** Membership/Community
 
@@ -173,17 +173,17 @@
 
 ## Anti-Patterns (Do NOT Use)
 
-- ‚ùå Hidden benefits
-- ‚ùå No community proof
+- ‚ù?Hidden benefits
+- ‚ù?No community proof
 
 ### Additional Forbidden Patterns
 
-- ‚ùå **Emojis as icons** ‚Äî Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ‚ùå **Missing cursor:pointer** ‚Äî All clickable elements must have cursor:pointer
-- ‚ùå **Layout-shifting hovers** ‚Äî Avoid scale transforms that shift layout
-- ‚ùå **Low contrast text** ‚Äî Maintain 4.5:1 minimum contrast ratio
-- ‚ùå **Instant state changes** ‚Äî Always use transitions (150-300ms)
-- ‚ùå **Invisible focus states** ‚Äî Focus states must be visible for a11y
+- ‚ù?**Emojis as icons** ‚Ä?Use SVG icons (Heroicons, Lucide, Simple Icons)
+- ‚ù?**Missing cursor:pointer** ‚Ä?All clickable elements must have cursor:pointer
+- ‚ù?**Layout-shifting hovers** ‚Ä?Avoid scale transforms that shift layout
+- ‚ù?**Low contrast text** ‚Ä?Maintain 4.5:1 minimum contrast ratio
+- ‚ù?**Instant state changes** ‚Ä?Always use transitions (150-300ms)
+- ‚ù?**Invisible focus states** ‚Ä?Focus states must be visible for a11y
 
 ---
 
@@ -201,3 +201,4 @@ Before delivering any UI code, verify:
 - [ ] Responsive: 375px, 768px, 1024px, 1440px
 - [ ] No content hidden behind fixed navbars
 - [ ] No horizontal scroll on mobile
+

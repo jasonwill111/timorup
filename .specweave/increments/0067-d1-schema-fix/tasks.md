@@ -11,7 +11,7 @@
 3. Delete duplicate records
 
 **Test Plan**:
-- **Command**: `wrangler d1 execute timorlist-db --remote --command "..."`
+- **Command**: `wrangler d1 execute TimorLink-db --remote --command "..."`
 - **TC-001**: Verify duplicates removed
   - Given duplicate saved_items exist
   - When cleanup runs
@@ -28,7 +28,7 @@
 3. Delete duplicate records
 
 **Test Plan**:
-- **Command**: `wrangler d1 execute timorlist-db --remote --command "..."`
+- **Command**: `wrangler d1 execute TimorLink-db --remote --command "..."`
 - **TC-002**: Verify duplicates removed
   - Given duplicate reviews exist
   - When cleanup runs
@@ -47,7 +47,7 @@ CREATE UNIQUE INDEX saved_items_user_type_typeId_idx ON saved_items(user_id, typ
 ```
 
 **Test Plan**:
-- **Command**: `wrangler d1 execute timorlist-db --remote --command "CREATE UNIQUE INDEX..."`
+- **Command**: `wrangler d1 execute TimorLink-db --remote --command "CREATE UNIQUE INDEX..."`
 - **TC-003**: Verify constraint works
   - Given UNIQUE index created
   - When duplicate insert attempted
@@ -64,7 +64,7 @@ CREATE UNIQUE INDEX reviews_user_business_idx ON reviews(user_id, business_id);
 ```
 
 **Test Plan**:
-- **Command**: `wrangler d1 execute timorlist-db --remote --command "CREATE UNIQUE INDEX..."`
+- **Command**: `wrangler d1 execute TimorLink-db --remote --command "CREATE UNIQUE INDEX..."`
 - **TC-004**: Verify constraint works
   - Given UNIQUE index created
   - When duplicate insert attempted

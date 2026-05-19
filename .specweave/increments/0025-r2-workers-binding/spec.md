@@ -28,7 +28,7 @@ Refactor R2 storage access from AWS SDK (S3-compatible API requiring credentials
 ## User Stories
 
 ### US-001: Local Development R2 Access
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to access R2 storage during local development without configuring credentials
@@ -41,10 +41,10 @@ Refactor R2 storage access from AWS SDK (S3-compatible API requiring credentials
 - [x] **AC-US1-04**: `bucket.list()` works for listing objects
 
 ### US-002: Codebase Alignment
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
-**I want** timorlist and timorbuy to use the same R2 access pattern
+**I want** TimorLink and timorbuy to use the same R2 access pattern
 **So that** maintenance and knowledge transfer are easier
 
 **Acceptance Criteria**:
@@ -82,7 +82,7 @@ const client = new S3Client({
 });
 
 await client.send(new PutObjectCommand({
-  Bucket: 'timorlist-media',
+  Bucket: 'TimorLink-media',
   Key: key,
   Body: data,
   ContentType: mimeType

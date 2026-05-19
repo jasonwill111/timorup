@@ -2,7 +2,7 @@
 
 ## Overview
 
-Refactor R2 access to use Cloudflare Workers native R2 binding (`env.MEDIA_BUCKET`) instead of AWS SDK S3-compatible API. This aligns timorlist architecture with timorbuy and eliminates credential dependencies for local development.
+Refactor R2 access to use Cloudflare Workers native R2 binding (`env.MEDIA_BUCKET`) instead of AWS SDK S3-compatible API. This aligns TimorLink architecture with timorbuy and eliminates credential dependencies for local development.
 
 ## Architecture
 

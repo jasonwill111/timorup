@@ -13,7 +13,7 @@
   "planning": {
     "parallel": false
   },
-  "project": "timorlist",
+  "project": "TimorLink",
   "completedAt": "2026-05-15T07:25:00.000Z",
   "summary": "Server Islands enabled with server:defer directive, skeleton fallback, and public blog pages (list + detail) with 3 test posts."
 }

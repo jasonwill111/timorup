@@ -19,7 +19,7 @@ Fix stringly-typed TABLE_MAP in admin categories API with inconsistent entity ty
 ## User Stories
 
 ### US-001: Type-Safe Category Table Registry
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** a typed table registry with consistent entity type naming
@@ -34,7 +34,7 @@ Fix stringly-typed TABLE_MAP in admin categories API with inconsistent entity ty
 ---
 
 ### US-002: Consistent Entity Type Validation
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** API consumer
 **I want** clear error messages when passing invalid table names

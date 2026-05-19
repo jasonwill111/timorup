@@ -2,13 +2,13 @@
 
 ## Context
 
-TimorList needs to expand from business/nonprofit listings to include personal listings with a subscription system.
+TimorLink needs to expand from business/nonprofit listings to include personal listings with a subscription system.
 
 **Current State** (`src/db/schema/index.ts`):
-- `business_pages.entityType`: `'business' | 'nonprofit'` â€” needs `'personal'`
+- `business_pages.entityType`: `'business' | 'nonprofit'` â€?needs `'personal'`
 - `business_pages.planType`: exists but not enforced
-- `business_pages.subscriptionStatus`: `'none' | 'active' | 'expired' | 'cancelled'` â€” needs `'trial'`
-- `plans` table: exists with `period` â€” needs new periods: `trial_3d`, `weekly`
+- `business_pages.subscriptionStatus`: `'none' | 'active' | 'expired' | 'cancelled'` â€?needs `'trial'`
+- `plans` table: exists with `period` â€?needs new periods: `trial_3d`, `weekly`
 
 ---
 
@@ -83,7 +83,7 @@ if (status) query = query.where(eq(businessPages.subscriptionStatus, status));
 **File**: `src/pages/api/plans/active.ts` (new)
 
 ```typescript
-// GET /api/plans/active â€” for pricing page
+// GET /api/plans/active â€?for pricing page
 // Returns only active plans with public fields
 ```
 
@@ -94,7 +94,7 @@ if (status) query = query.where(eq(businessPages.subscriptionStatus, status));
 1. **Extend enum, don't replace**: Adding `'personal'` to entityType keeps business/nonprofit working unchanged
 2. **Trial period via subscriptionExpiresAt**: When trial starts, set expires_at = now + 3 days
 3. **Index on subscriptionStatus**: Critical for search performance
-4. **Scheduled job for expiry**: Already exists at `/api/scheduled/_mark-expired` â€” extend it
+4. **Scheduled job for expiry**: Already exists at `/api/scheduled/_mark-expired` â€?extend it
 
 ---
 
@@ -109,3 +109,4 @@ if (status) query = query.where(eq(businessPages.subscriptionStatus, status));
 | `src/pages/api/admin/listings/index.ts` | Filter support |
 | `src/pages/api/plans/active.ts` | New public endpoint |
 | `src/pages/api/scheduled/_mark-expired.ts` | Extend for trial expiry |
+

@@ -1,6 +1,6 @@
 /**
  * Blog Categories Seed Data
- * TimorLIST - Blog/News Categories
+ * TimorLink - Blog/News Categories
  */
 
 export const blogCategories = [
@@ -49,7 +49,7 @@ export const blogCategories = [
     name: 'Food',
     slug: 'food',
     description: 'Food and recipes',
-    icon: '🍽️',
+    icon: '🍽�?,
     parentId: null,
     sortOrder: 5,
     isActive: 1

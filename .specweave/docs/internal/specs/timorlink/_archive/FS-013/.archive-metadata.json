@@ -1,0 +1,11 @@
+{
+  "id": "FS-013",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:15.787Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/specs/TimorLink/FS-013",
+  "linkedIncrements": [
+    "0013-business-detail-enhancement"
+  ]
+}

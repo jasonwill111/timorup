@@ -52,7 +52,7 @@
 - Implemented `purgeCache()` using Cloudflare Cache API:
   ```typescript
   await caches.default.delete(cacheKey);
-  await caches.default.delete('https://timorlist.com/businesses');
+  await caches.default.delete('https://TimorLink.com/businesses');
   ```
 - Note: update.ts uses `JSON.stringify()` on arrays, not `JSON.parse()`, so no try/catch needed there
 
@@ -107,8 +107,7 @@ Note: Added `noFallthroughCasesInSwitch`. Did NOT add `exactOptionalPropertyType
 - `e2e/*.spec.ts` - Type-only imports
 - `src/actions/admin/` - Various type issues
 
-**Build status**: `pnpm build` succeeds âœ…
-
+**Build status**: `pnpm build` succeeds âœ?
 ---
 
 ## Phase 3: Error Handling (US-003)
@@ -156,19 +155,14 @@ export async function initAuth(env?: { SESSION?: KVNamespace }) {
 **User Story**: US-004 | **Satisfies ACs**: AC-US4-01 | **Status**: [~] already exists
 
 **Analysis**: All required indexes already exist:
-- `businesses_owner_idx` âœ…
-- `businesses_category_idx` âœ…
-- `businesses_status_idx` âœ…
-
+- `businesses_owner_idx` âœ?- `businesses_category_idx` âœ?- `businesses_status_idx` âœ?
 ---
 
 ### T-013: Add listings table indexes
 **User Story**: US-004 | **Satisfies ACs**: AC-US4-02 | **Status**: [~] already exists
 
 **Analysis**: All required indexes already exist:
-- `listings_status_idx` âœ…
-- `listings_expires_idx` âœ…
-
+- `listings_status_idx` âœ?- `listings_expires_idx` âœ?
 ---
 
 ### T-014: Gate console.log statements
@@ -217,8 +211,7 @@ export async function initAuth(env?: { SESSION?: KVNamespace }) {
 
 ## Phase 7: Verification
 
-### T-018: Run build âœ…
-**Status**: [x] completed
+### T-018: Run build âœ?**Status**: [x] completed
 
 `pnpm build` - Build completed successfully.
 

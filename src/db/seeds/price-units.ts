@@ -1,6 +1,6 @@
 /**
  * Price Units Seed Data
- * TimorLIST - Pre-defined price units for various industries
+ * TimorLink - Pre-defined price units for various industries
  *
  * Structure:
  * - category: Industry category

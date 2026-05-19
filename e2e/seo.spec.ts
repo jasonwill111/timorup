@@ -24,7 +24,7 @@ test.describe('SEO: Sitemap & Breadcrumb', () => {
     expect(text).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
 
     // Check homepage URL
-    expect(text).toContain('<loc>https://timorlist.com/</loc>');
+    expect(text).toContain('<loc>https://TimorLink.com/</loc>');
 
     // Check changefreq and priority for homepage
     expect(text).toContain('<changefreq>daily</changefreq>');
@@ -51,7 +51,7 @@ test.describe('SEO: Sitemap & Breadcrumb', () => {
     ];
 
     for (const page2 of staticPages) {
-      expect(text).toContain(`<loc>https://timorlist.com${page2}</loc>`);
+      expect(text).toContain(`<loc>https://TimorLink.com${page2}</loc>`);
     }
 
     console.log('All static pages in sitemap: YES');
@@ -144,7 +144,7 @@ test.describe('SEO: Sitemap & Breadcrumb', () => {
     const text = await response.text();
 
     // Check sitemap reference
-    expect(text).toContain('Sitemap: https://timorlist.com/sitemap.xml');
+    expect(text).toContain('Sitemap: https://TimorLink.com/sitemap.xml');
 
     // Check admin disallow
     expect(text).toContain('Disallow: /admin/');

@@ -1,15 +1,12 @@
 // Cloudflare Workers Environment Access - type-safe wrapper
 // Replaces (globalThis as any).env pattern
-
-interface Env {
-  MINIMAX_API_KEY?: string;
-}
+// Env bindings defined in wrangler.jsonc and src/types/global.d.ts
 
 export function getEnv(): Env {
   if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
     return (globalThis as unknown as { env: Env }).env;
   }
-  return {};
+  return {} as Env;
 }
 
 export function getMinimaxApiKey(): string {

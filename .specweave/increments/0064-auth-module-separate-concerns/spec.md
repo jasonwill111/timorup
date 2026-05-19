@@ -19,7 +19,7 @@ Refactor auth module to separate concerns: replace proxy wrapping with explicit 
 ## User Stories
 
 ### US-001: Explicit Auth Factory
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to create auth instances via factory
@@ -33,7 +33,7 @@ Refactor auth module to separate concerns: replace proxy wrapping with explicit 
 ---
 
 ### US-002: Expose Drizzle Adapter
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** the Drizzle adapter to be accessible

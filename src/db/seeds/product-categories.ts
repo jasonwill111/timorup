@@ -1,6 +1,6 @@
 /**
  * Product Categories Seed Data
- * TimorLIST - Business SKUs / Products & Services Categories
+ * TimorLink - Business SKUs / Products & Services Categories
  *
  * Each category has:
  * - name: Display name
@@ -103,7 +103,7 @@ export const productCategories = [
     name: 'Sports & Outdoors',
     slug: 'sports-outdoors',
     description: 'Sports equipment and outdoor gear',
-    icon: '⚽',
+    icon: '�?,
     parentId: null,
     sortOrder: 6,
     isActive: 1,
@@ -295,7 +295,7 @@ export const productCategories = [
     name: 'Construction & Renovation',
     slug: 'construction-renovation',
     description: 'Building, renovation, and interior design',
-    icon: '🏗️',
+    icon: '🏗�?,
     parentId: null,
     sortOrder: 27,
     isActive: 1,
@@ -383,7 +383,7 @@ export const productCategories = [
     name: 'Restaurants & Dining',
     slug: 'restaurants-dining',
     description: 'Restaurant menu items and dining services',
-    icon: '🍽️',
+    icon: '🍽�?,
     parentId: null,
     sortOrder: 32,
     isActive: 1,
@@ -502,7 +502,7 @@ export const productCategories = [
     name: 'Venue Rental',
     slug: 'venue-rental',
     description: 'Spaces for events and meetings',
-    icon: '🏛️',
+    icon: '🏛�?,
     parentId: null,
     sortOrder: 52,
     isActive: 1,
@@ -666,7 +666,7 @@ export const productCategories = [
     name: 'Coffee & Tea',
     slug: 'coffee-tea',
     description: 'Coffee and tea products',
-    icon: '☕',
+    icon: '�?,
     parentId: 'pc-3',
     sortOrder: 31,
     isActive: 1,
@@ -745,3 +745,4 @@ export const insertProductCategoriesSQL = productCategories.map(cat => `
 `).join('\n');
 
 export default productCategories;
+

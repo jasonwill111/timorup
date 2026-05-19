@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "/home/jasonwill/dev-projects/timorlist/playwright.config.ts",
-    "rootDir": "/home/jasonwill/dev-projects/timorlist/e2e",
+    "configFile": "D:\\Dev Projects\\TimorLink\\playwright.config.ts",
+    "rootDir": "D:/Dev Projects/TimorLink/e2e",
     "forbidOnly": false,
     "fullyParallel": false,
     "globalSetup": null,
@@ -10,22 +10,26 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 1
+    },
     "preserveOutput": "always",
     "projects": [
       {
-        "outputDir": "/home/jasonwill/dev-projects/timorlist/test-results",
+        "outputDir": "D:/Dev Projects/TimorLink/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/home/jasonwill/dev-projects/timorlist/e2e",
+        "testDir": "D:/Dev Projects/TimorLink/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
         ],
-        "timeout": 30000
+        "timeout": 120000
       }
     ],
     "quiet": false,
@@ -53,129 +57,1033 @@
     "workers": 1,
     "webServer": null
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/comprehensive.spec.ts:33:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/comprehensive.spec.ts",
-        "column": 6,
-        "line": 33
-      },
-      "snippet": "\u001b[90m   at \u001b[39mcomprehensive.spec.ts:33\n\n  31 | // ==================== PUBLIC PAGES ====================\n  32 |\n> 33 | test.describe('Public Pages', () => {\n     |      ^\n  34 |   test('Homepage loads', async ({ page }) => {\n  35 |     const response = await page.goto(BASE_URL);\n  36 |     expect(response?.status()).toBe(200);"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/full-flow.spec.ts:23:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/full-flow.spec.ts",
-        "column": 6,
-        "line": 23
-      },
-      "snippet": "\u001b[90m   at \u001b[39mfull-flow.spec.ts:23\n\n  21 | // ==================== TESTS ====================\n  22 |\n> 23 | test.describe('User Registration Flow', () => {\n     |      ^\n  24 |   test('register new user', async ({ page }) => {\n  25 |     await page.goto(`${BASE_URL}/register`);\n  26 |"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/seo.spec.ts:5:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/seo.spec.ts",
-        "column": 6,
-        "line": 5
-      },
-      "snippet": "\u001b[90m   at \u001b[39mseo.spec.ts:5\n\n  3 | const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8787';\n  4 |\n> 5 | test.describe('SEO: Sitemap & Breadcrumb', () => {\n    |      ^\n  6 |\n  7 |   test('sitemap.xml returns valid XML', async ({ page }) => {\n  8 |     const response = await page.request.get(`${BASE_URL}/sitemap.xml`);"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/tdd-e2e.spec.ts:27:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/tdd-e2e.spec.ts",
-        "column": 6,
-        "line": 27
-      },
-      "snippet": "\u001b[90m   at \u001b[39mtdd-e2e.spec.ts:27\n\n  25 | // ==================== TDD: RED (Write failing tests first) ====================\n  26 |\n> 27 | test.describe('TDD: User Story 1 - Authentication', () => {\n     |      ^\n  28 |   // Given: A user visits the login page\n  29 |   // When: They enter valid credentials\n  30 |   // Then: They should be logged in and redirected"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-001.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-001.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-001.spec.ts:9\n\n   7 |  * So that system maintains clean data model\n   8 |  */\n>  9 | test.describe('US-001: One Listing Per User', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US1-01: User without listing sees both Business and Non-Profit options when creating', async ({ page }) => {\n  12 |     // Given: a logged-in user with no existing listing"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-002.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-002.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-002.spec.ts:9\n\n   7 |  * So that government agencies and NGOs can list free\n   8 |  */\n>  9 | test.describe('US-002: Non-Profit Listing (Free, Immediate)', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US2-01: Non-profit listing becomes status published immediately after creation', async ({ page }) => {\n  12 |     // Given: a logged-in user with no existing listing"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-003.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-003.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-003.spec.ts:9\n\n   7 |  * So that only paid listings are visible\n   8 |  */\n>  9 | test.describe('US-003: Business Listing Requires Subscription', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US3-01: New business listing created with status pending_payment', async ({ page }) => {\n  12 |     // Given: a logged-in user with no existing listing"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-004.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-004.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-004.spec.ts:9\n\n   7 |  * So that I don't waste SKU quota before business is live\n   8 |  */\n>  9 | test.describe('US-004: SKU Creation After Activation', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US4-01: SKU creation page/API blocked if business status != published', async ({ page }) => {\n  12 |     // Given: a business listing with `status: 'pending_payment'` or `'expired'`"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-005.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-005.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-005.spec.ts:9\n\n   7 |  * So that users have time to renew without immediate data loss\n   8 |  */\n>  9 | test.describe('US-005: Grace Period (60 Days)', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US5-01: When subscription expires, listing status set to expired', async ({ page }) => {\n  12 |     // Given: a business listing with an active subscription"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-006.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-006.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-006.spec.ts:9\n\n   7 |  * So that access control reflects payment status\n   8 |  */\n>  9 | test.describe('US-006: Subscription Expiry Sync', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US6-01: Listing checks subscription status before allowing SKU operations', async ({ page }) => {\n  12 |     // Given: a business listing with an expired subscription"
-    },
-    {
-      "message": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.",
-      "stack": "Error: Playwright Test did not expect test.describe() to be called here.\nMost common reasons include:\n- You are calling test.describe() in a configuration file.\n- You are calling test.describe() in a file that is imported by the configuration file.\n- You have two different versions of @playwright/test. This usually happens\n  when one of the dependencies in your package.json depends on @playwright/test.\n    at TestTypeImpl._currentSuite (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:75:13)\n    at TestTypeImpl._describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/common/testType.js:115:24)\n    at Function.describe (/home/jasonwill/dev-projects/timorlist/node_modules/.pnpm/playwright@1.59.1/node_modules/playwright/lib/transform/transform.js:275:12)\n    at /home/jasonwill/dev-projects/timorlist/e2e/us-007.spec.ts:9:6",
-      "location": {
-        "file": "/home/jasonwill/dev-projects/timorlist/e2e/us-007.spec.ts",
-        "column": 6,
-        "line": 9
-      },
-      "snippet": "\u001b[90m   at \u001b[39mus-007.spec.ts:9\n\n   7 |  * So that database stays clean\n   8 |  */\n>  9 | test.describe('US-007: Scheduled Cleanup Job', () => {\n     |      ^\n  10 |\n  11 |   test('AC-US7-01: Scheduled job runs daily (or on demand)', async ({ page }) => {\n  12 |     // Given: a scheduled job is configured for cleanup"
-    },
-    {
-      "message": "Error: No tests found",
-      "stack": "Error: No tests found"
+      "title": "admin-all-pages.spec.ts",
+      "file": "admin-all-pages.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Admin Dashboard & Navigation",
+          "file": "admin-all-pages.spec.ts",
+          "line": 46,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Dashboard loads with stats",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4781,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Dashboard has stats: \u001b[33mtrue\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:40:47.349Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-e03723a21de6dc0323a9",
+              "file": "admin-all-pages.spec.ts",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "Sidebar navigation is visible",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 14865,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]').first()\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]').first()\u001b[22m\n\u001b[2m    3 Ã— locator resolved to <nav class=\"p-4 space-y-1\" data-astro-cid-2kanml4j=\"\">â€?/nav>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\u001b[2m    - waiting for\" https://TimorLink.jasonwill.workers.dev/admin/login?redirect=/admin\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"https://TimorLink.jasonwill.workers.dev/admin/login?redirect=/admin\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]').first()\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]').first()\u001b[22m\n\u001b[2m    3 Ã— locator resolved to <nav class=\"p-4 space-y-1\" data-astro-cid-2kanml4j=\"\">â€?/nav>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\u001b[2m    - waiting for\" https://TimorLink.jasonwill.workers.dev/admin/login?redirect=/admin\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"https://TimorLink.jasonwill.workers.dev/admin/login?redirect=/admin\"\u001b[22m\n\n    at D:\\Dev Projects\\TimorLink\\e2e\\admin-all-pages.spec.ts:63:35",
+                        "location": {
+                          "file": "D:\\Dev Projects\\TimorLink\\e2e\\admin-all-pages.spec.ts",
+                          "column": 35,
+                          "line": 63
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 61 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m`${BASE_URL}/admin`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 62 |\u001b[39m     \u001b[36mconst\u001b[39m sidebar \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 63 |\u001b[39m     \u001b[36mawait\u001b[39m expect(sidebar\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 64 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 65 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 66 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\Dev Projects\\TimorLink\\e2e\\admin-all-pages.spec.ts",
+                            "column": 35,
+                            "line": 63
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]').first()\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]').first()\u001b[22m\n\u001b[2m    3 Ã— locator resolved to <nav class=\"p-4 space-y-1\" data-astro-cid-2kanml4j=\"\">â€?/nav>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\u001b[2m    - waiting for\" https://TimorLink.jasonwill.workers.dev/admin/login?redirect=/admin\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"https://TimorLink.jasonwill.workers.dev/admin/login?redirect=/admin\"\u001b[22m\n\n\n  61 |     await page.goto(`${BASE_URL}/admin`);\n  62 |     const sidebar = page.locator('nav, aside, [class*=\"sidebar\"], [class*=\"nav\"]');\n> 63 |     await expect(sidebar.first()).toBeVisible();\n     |                                   ^\n  64 |   });\n  65 | });\n  66 |\n    at D:\\Dev Projects\\TimorLink\\e2e\\admin-all-pages.spec.ts:63:35"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:40:52.339Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\Dev Projects\\TimorLink\\test-results\\admin-all-pages-Admin-Dash-4fab8-debar-navigation-is-visible-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\Dev Projects\\TimorLink\\test-results\\admin-all-pages-Admin-Dash-4fab8-debar-navigation-is-visible-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\Dev Projects\\TimorLink\\e2e\\admin-all-pages.spec.ts",
+                        "column": 35,
+                        "line": 63
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-386beb88ed1560e9c08f",
+              "file": "admin-all-pages.spec.ts",
+              "line": 60,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Businesses",
+          "file": "admin-all-pages.spec.ts",
+          "line": 69,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Businesses page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5052,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Businesses page loaded, length: \u001b[33m32811\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:08.310Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-d49f4e90d1d3771e4a66",
+              "file": "admin-all-pages.spec.ts",
+              "line": 74,
+              "column": 3
+            },
+            {
+              "title": "Can view business details",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7821,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Business rows/items found: \u001b[33m52\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:13.549Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-64136412bc66d0f99b58",
+              "file": "admin-all-pages.spec.ts",
+              "line": 83,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Non-Profits",
+          "file": "admin-all-pages.spec.ts",
+          "line": 94,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Non-Profits page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4706,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:21.424Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-e71aa314727de65fc6c9",
+              "file": "admin-all-pages.spec.ts",
+              "line": 99,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Public Sectors",
+          "file": "admin-all-pages.spec.ts",
+          "line": 105,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Public Sectors page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5659,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:26.168Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-0cca767d83ec9253ff76",
+              "file": "admin-all-pages.spec.ts",
+              "line": 110,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Listings",
+          "file": "admin-all-pages.spec.ts",
+          "line": 116,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Listings page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4787,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:31.865Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-5c6b1f2581ade143afa9",
+              "file": "admin-all-pages.spec.ts",
+              "line": 121,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Products",
+          "file": "admin-all-pages.spec.ts",
+          "line": 129,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Products page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5633,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Products page loaded, checking for \"Products\" title...\n"
+                        },
+                        {
+                          "text": "Page title: \n                    Error\n                    1102\n                    Ray ID: 9fe27dbb1e475027 â€?2026-05-19 10:41:47 UTC\n                \n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:36.668Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-256aa4141a3c74e56b90",
+              "file": "admin-all-pages.spec.ts",
+              "line": 134,
+              "column": 3
+            },
+            {
+              "title": "Products add button exists",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6954,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Add/Create buttons found: \u001b[33m2\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:42.316Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-2460a13d529e4edca7d7",
+              "file": "admin-all-pages.spec.ts",
+              "line": 147,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Orders (renamed from Subscriptions)",
+          "file": "admin-all-pages.spec.ts",
+          "line": 157,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Orders page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5802,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Orders page loaded, checking for \"Orders\" title...\n"
+                        },
+                        {
+                          "text": "Page title: Orders\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:49.288Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-d025dbdaeabf1172fa7f",
+              "file": "admin-all-pages.spec.ts",
+              "line": 162,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Ad Banners (renamed from Heroes)",
+          "file": "admin-all-pages.spec.ts",
+          "line": 177,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Ad Banners page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5714,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Page title: Ad Banners\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:41:55.107Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-528179f991d4b187c4bd",
+              "file": "admin-all-pages.spec.ts",
+              "line": 182,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Service Packages",
+          "file": "admin-all-pages.spec.ts",
+          "line": 192,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Service Packages page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5087,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:00.836Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-dab918d8383eeab0b668",
+              "file": "admin-all-pages.spec.ts",
+              "line": 197,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Blogs",
+          "file": "admin-all-pages.spec.ts",
+          "line": 205,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Blogs page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7281,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:05.938Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-e5e27ebb8a1862569732",
+              "file": "admin-all-pages.spec.ts",
+              "line": 210,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Media",
+          "file": "admin-all-pages.spec.ts",
+          "line": 216,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Media page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4478,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:13.235Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-322083f25d18e7863634",
+              "file": "admin-all-pages.spec.ts",
+              "line": 221,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Categories",
+          "file": "admin-all-pages.spec.ts",
+          "line": 227,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Categories page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5209,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:17.730Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-83cee46c8fe304eff6ac",
+              "file": "admin-all-pages.spec.ts",
+              "line": 232,
+              "column": 3
+            },
+            {
+              "title": "Categories formFields section exists when selecting Listing type",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7955,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Modal visible: \u001b[33mtrue\u001b[39m\n"
+                        },
+                        {
+                          "text": "Has formFields section: \u001b[33mtrue\u001b[39m\n"
+                        },
+                        {
+                          "text": "formFields is hidden: \u001b[33mfalse\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:22.957Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-e711b6cbaa2047ff9d3e",
+              "file": "admin-all-pages.spec.ts",
+              "line": 237,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Users",
+          "file": "admin-all-pages.spec.ts",
+          "line": 280,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Users page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7342,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:30.927Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-158219a7e51fecd4edbd",
+              "file": "admin-all-pages.spec.ts",
+              "line": 285,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Reviews",
+          "file": "admin-all-pages.spec.ts",
+          "line": 291,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Reviews page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4591,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:38.283Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-06ef36d1976bad9cf975",
+              "file": "admin-all-pages.spec.ts",
+              "line": 296,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - Settings",
+          "file": "admin-all-pages.spec.ts",
+          "line": 304,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Settings page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6380,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:42.896Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-4e9a84d56e30f324cf21",
+              "file": "admin-all-pages.spec.ts",
+              "line": 309,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Admin - AI Tools",
+          "file": "admin-all-pages.spec.ts",
+          "line": 315,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AI Tools page loads",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6802,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:49.297Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-a2b198d3a5f95bf7b26d",
+              "file": "admin-all-pages.spec.ts",
+              "line": 320,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Route Redirects (Old -> New)",
+          "file": "admin-all-pages.spec.ts",
+          "line": 328,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Old subscriptions route should 404 or redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4942,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "/admin/subscriptions status: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:42:56.129Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-cee159ab311032ea2332",
+              "file": "admin-all-pages.spec.ts",
+              "line": 333,
+              "column": 3
+            },
+            {
+              "title": "Old skus route should 404 or redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5068,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "/admin/skus status: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:43:01.094Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-f8ff8207f2b4587dd8b8",
+              "file": "admin-all-pages.spec.ts",
+              "line": 339,
+              "column": 3
+            },
+            {
+              "title": "Old heroes route should 404 or redirect",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4681,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "/admin/heroes status: \u001b[33m404\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-19T10:43:06.188Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "78b561e21e550c1632a0-054e4f25e1fdf42e595b",
+              "file": "admin-all-pages.spec.ts",
+              "line": 345,
+              "column": 3
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2026-05-16T00:36:16.904Z",
-    "duration": 157.17100000000005,
-    "expected": 0,
+    "startTime": "2026-05-19T10:40:46.410Z",
+    "duration": 144598.75600000002,
+    "expected": 22,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 1,
     "flaky": 0
   }
 }

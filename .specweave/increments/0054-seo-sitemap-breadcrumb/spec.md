@@ -23,32 +23,23 @@ robots.txt references `sitemap-index.xml` but the file doesn't exist. Detail pag
 ## User Stories
 
 ### US-001: Sitemap Generation (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** search engine crawler
 **I want** to discover all public pages via sitemap
 **So that** all content gets indexed
 
 **Acceptance Criteria**:
-- [x] **AC-US1-01**: `/sitemap.xml` returns valid XML with all public pages ‚úÖ
-- [x] **AC-US1-02**: Sitemap includes static pages (homepage, about, contact, pricing, faq, blog) ‚úÖ
-- [x] **AC-US1-03**: Sitemap includes business/non-profit/public-sector detail pages ‚úÖ
-- [x] **AC-US1-04**: Sitemap includes lastmod timestamp for each entry ‚úÖ
-- [x] **AC-US1-05**: Sitemap includes changefreq and priority based on page type ‚úÖ
-
+- [x] **AC-US1-01**: `/sitemap.xml` returns valid XML with all public pages ‚ú?- [x] **AC-US1-02**: Sitemap includes static pages (homepage, about, contact, pricing, faq, blog) ‚ú?- [x] **AC-US1-03**: Sitemap includes business/non-profit/public-sector detail pages ‚ú?- [x] **AC-US1-04**: Sitemap includes lastmod timestamp for each entry ‚ú?- [x] **AC-US1-05**: Sitemap includes changefreq and priority based on page type ‚ú?
 ### US-002: BreadcrumbList JSON-LD (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** search engine
 **I want** to understand page hierarchy via breadcrumbs
 **So that** rich snippets display correctly in search results
 
 **Acceptance Criteria**:
-- [x] **AC-US2-01**: Business detail pages include BreadcrumbList JSON-LD ‚úÖ
-- [x] **AC-US2-02**: Non-profit detail pages include BreadcrumbList JSON-LD ‚úÖ
-- [x] **AC-US2-03**: Public sector detail pages include BreadcrumbList JSON-LD ‚úÖ
-- [x] **AC-US2-04**: Product/SKU detail pages include BreadcrumbList JSON-LD ‚úÖ
-- [ ] **AC-US2-05**: Blog article pages include BreadcrumbList JSON-LD ‚ö†Ô∏è (blog pages don't exist)
+- [x] **AC-US2-01**: Business detail pages include BreadcrumbList JSON-LD ‚ú?- [x] **AC-US2-02**: Non-profit detail pages include BreadcrumbList JSON-LD ‚ú?- [x] **AC-US2-03**: Public sector detail pages include BreadcrumbList JSON-LD ‚ú?- [x] **AC-US2-04**: Product/SKU detail pages include BreadcrumbList JSON-LD ‚ú?- [ ] **AC-US2-05**: Blog article pages include BreadcrumbList JSON-LD ‚ö†Ô∏è (blog pages don't exist)
 
 ## Technical Requirements
 
@@ -57,7 +48,7 @@ robots.txt references `sitemap-index.xml` but the file doesn't exist. Detail pag
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://timorlist.com/</loc>
+    <loc>https://TimorLink.com/</loc>
     <lastmod>2026-05-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -71,8 +62,8 @@ robots.txt references `sitemap-index.xml` but the file doesn't exist. Detail pag
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://timorlist.com/"},
-    {"@type": "ListItem", "position": 2, "name": "Businesses", "item": "https://timorlist.com/businesses"},
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://TimorLink.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Businesses", "item": "https://TimorLink.com/businesses"},
     {"@type": "ListItem", "position": 3, "name": "Business Name"}
   ]
 }

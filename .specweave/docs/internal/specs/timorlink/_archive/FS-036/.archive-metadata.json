@@ -1,0 +1,11 @@
+{
+  "id": "FS-036",
+  "type": "feature",
+  "archivedAt": "2026-05-07T15:31:20.729Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/specs/TimorLink/FS-036",
+  "linkedIncrements": [
+    "0036-type-refactor"
+  ]
+}

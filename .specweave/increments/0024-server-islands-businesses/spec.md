@@ -4,7 +4,7 @@ title: "Server Islands for Businesses"
 type: refactor
 priority: P2
 status: completed
-project: timorlist
+project: TimorLink
 created: 2026-05-03
 structure: user-stories
 test_mode: TDD
@@ -20,7 +20,7 @@ Extract business list and category filter to Server Islands with server-side pag
 ## User Stories
 
 ### US-001: Business Directory with Server-Side Pagination
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** visitor
 **I want** to browse businesses with proper pagination
@@ -33,7 +33,7 @@ Extract business list and category filter to Server Islands with server-side pag
 - [x] **AC-US1-04**: Result count shows "Showing X-Y of Z businesses"
 
 ### US-002: Server-Side Category Filter
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** visitor
 **I want** to filter businesses by category via URL
@@ -45,7 +45,7 @@ Extract business list and category filter to Server Islands with server-side pag
 - [x] **AC-US2-03**: Category persists across pagination
 
 ### US-003: Server-Side Sort Options
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** visitor
 **I want** to sort businesses by popularity, recency, or name
@@ -57,7 +57,7 @@ Extract business list and category filter to Server Islands with server-side pag
 - [x] **AC-US3-03**: Sort applies correctly to paginated results
 
 ### US-004: Search Functionality
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** visitor
 **I want** to search businesses by keyword
@@ -88,3 +88,4 @@ Extract business list and category filter to Server Islands with server-side pag
 - Existing `BusinessCard` component
 - `getDb()` pattern for D1 access
 - Astro Server Islands architecture
+

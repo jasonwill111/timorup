@@ -16,19 +16,19 @@ async function runFullTest() {
     log('\n=== PUBLIC PAGES ===');
     
     await page.goto('http://localhost:4321/', { waitUntil: 'networkidle' });
-    log(`âœ“ Homepage: ${page.url()}`);
+    log(`âœ?Homepage: ${page.url()}`);
     
     await page.goto('http://localhost:4321/businesses', { waitUntil: 'networkidle' });
-    log(`âœ“ Businesses: ${page.url()}`);
+    log(`âœ?Businesses: ${page.url()}`);
     
     await page.goto('http://localhost:4321/listings', { waitUntil: 'networkidle' });
-    log(`âœ“ Listings: ${page.url()}`);
+    log(`âœ?Listings: ${page.url()}`);
     
     // ========== USER REGISTRATION ==========
     log('\n=== USER REGISTRATION ===');
     
     await page.goto('http://localhost:4321/register', { waitUntil: 'networkidle' });
-    log(`âœ“ Register page: ${page.url()}`);
+    log(`âœ?Register page: ${page.url()}`);
     
     // Check if form exists
     const nameInput = await page.$('#name');
@@ -47,51 +47,51 @@ async function runFullTest() {
         if (submitBtn) {
           await submitBtn.click();
           await page.waitForTimeout(3000);
-          log(`âœ“ After registration submit: ${page.url()}`);
+          log(`âœ?After registration submit: ${page.url()}`);
         }
       } else {
-        log(`âš  Password field not found`);
+        log(`âš?Password field not found`);
       }
     } else {
-      log(`âš  Name input not found`);
+      log(`âš?Name input not found`);
     }
     
     // ========== USER LOGIN ==========
     log('\n=== USER LOGIN ===');
     
     await page.goto('http://localhost:4321/login', { waitUntil: 'networkidle' });
-    log(`âœ“ Login page: ${page.url()}`);
+    log(`âœ?Login page: ${page.url()}`);
     
-    await page.fill('#email', 'user@timorlist.com');
+    await page.fill('#email', 'user@TimorLink.com');
     await page.fill('#password', 'user12345');
     
     const loginBtn = await page.$('#submit-btn');
     if (loginBtn) {
       await loginBtn.click();
       await page.waitForTimeout(3000);
-      log(`âœ“ After user login: ${page.url()}`);
+      log(`âœ?After user login: ${page.url()}`);
     }
     
     // ========== ACCOUNT PAGE ==========
     log('\n=== ACCOUNT PAGE ===');
     
     await page.goto('http://localhost:4321/account', { waitUntil: 'networkidle' });
-    log(`âœ“ Account page: ${page.url()}`);
+    log(`âœ?Account page: ${page.url()}`);
     
     // ========== ADMIN LOGIN ==========
     log('\n=== ADMIN LOGIN ===');
 
     await page.goto('http://localhost:4321/admin/login', { waitUntil: 'networkidle' });
-    log(`âœ“ Admin login page: ${page.url()}`);
+    log(`âœ?Admin login page: ${page.url()}`);
 
-    await page.fill('#email', 'admin@timorlist.com');
+    await page.fill('#email', 'admin@TimorLink.com');
     await page.fill('#password', 'admin12345');
 
     // Admin login uses button[type="submit"]
     await page.click('button[type="submit"]');
     await page.waitForTimeout(5000);  // Wait longer for admin auth
 
-    log(`âœ“ After admin login: ${page.url()}`);
+    log(`âœ?After admin login: ${page.url()}`);
 
     // Only check error message if still on login page
     if (page.url().includes('/admin/login')) {
@@ -121,13 +121,13 @@ async function runFullTest() {
     for (const adminPage of adminPages) {
       await page.goto(`http://localhost:4321${adminPage}`, { waitUntil: 'networkidle' });
       const title = await page.title();
-      log(`âœ“ ${adminPage} - "${title}"`);
+      log(`âœ?${adminPage} - "${title}"`);
     }
     
     log('\n=== ALL TESTS COMPLETE ===');
     
   } catch (error) {
-    log(`\nâŒ ERROR: ${error.message}`);
+    log(`\nâ?ERROR: ${error.message}`);
   } finally {
     await browser.close();
   }
@@ -138,3 +138,4 @@ async function runFullTest() {
 runFullTest().then(() => {
   console.log('\n========== TEST COMPLETE ==========');
 }).catch(console.error);
+

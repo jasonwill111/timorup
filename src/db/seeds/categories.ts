@@ -1,6 +1,6 @@
 /**
  * Listing Categories Seed Data
- * TimorLIST - Classification Ads Categories
+ * TimorLink - Classification Ads Categories
  *
  * Each category has:
  * - name: Display name
@@ -47,7 +47,7 @@ export const listingCategories = [
     name: 'For Sale',
     slug: 'for-sale',
     description: 'Items for sale by individuals',
-    icon: '🏷️',
+    icon: '🏷�?,
     parentId: null,
     sortOrder: 2,
     isActive: 1,
@@ -257,7 +257,7 @@ export const listingCategories = [
     name: 'Sports',
     slug: 'sports-equipment',
     description: 'Sports gear and equipment',
-    icon: '⚽',
+    icon: '�?,
     parentId: 'lc-2',
     sortOrder: 24,
     isActive: 1,
@@ -374,7 +374,7 @@ export const listingCategories = [
     name: 'Land',
     slug: 'land-for-sale',
     description: 'Land and plots for sale',
-    icon: '🏔️',
+    icon: '🏔�?,
     parentId: 'lc-4',
     sortOrder: 43,
     isActive: 1,
@@ -412,7 +412,7 @@ export const listingCategories = [
     name: 'Motorcycles',
     slug: 'motorcycles',
     description: 'Motorcycles and scooters',
-    icon: '🏍️',
+    icon: '🏍�?,
     parentId: 'lc-3',
     sortOrder: 32,
     isActive: 1,
@@ -444,3 +444,4 @@ export const insertListingCategoriesSQL = listingCategories.map(cat => `
 `).join('\n');
 
 export default listingCategories;
+

@@ -8,7 +8,7 @@
   "lastActivity": "2026-05-04T10:45:00.000Z",
   "testMode": "none",
   "coverageTarget": 80,
-  "project": "timorlist",
+  "project": "TimorLink",
   "board": "development",
   "summary": "Componentize auth forms to reduce code duplication",
   "filesModified": [

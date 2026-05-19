@@ -19,7 +19,7 @@ Replace stateful singleton rate limiter with injectable adapter pattern. Elimina
 ## User Stories
 
 ### US-001: Testable Rate Limiter
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to inject rate limiter implementations
@@ -34,7 +34,7 @@ Replace stateful singleton rate limiter with injectable adapter pattern. Elimina
 ---
 
 ### US-002: Race Condition Fix
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** atomic rate limit checks

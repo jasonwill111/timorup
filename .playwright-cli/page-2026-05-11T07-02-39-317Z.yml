@@ -1,10 +1,10 @@
 - generic [active] [ref=e1]:
   - banner [ref=e2]:
     - generic [ref=e4]:
-      - link "T TimorList" [ref=e5] [cursor=pointer]:
+      - link "T TimorLink" [ref=e5] [cursor=pointer]:
         - /url: /
         - generic [ref=e7]: T
-        - generic [ref=e8]: TimorList
+        - generic [ref=e8]: TimorLink
       - navigation [ref=e9]:
         - link "Businesses" [ref=e10] [cursor=pointer]:
           - /url: /businesses
@@ -30,8 +30,8 @@
   - main [ref=e28]:
     - generic [ref=e29]:
       - generic [ref=e37]:
-        - heading "TimorList" [level=1] [ref=e38]:
-          - generic [ref=e39]: TimorList
+        - heading "TimorLink" [level=1] [ref=e38]:
+          - generic [ref=e39]: TimorLink
         - paragraph [ref=e40]: Discover Local Businesses in Timor-Leste
         - generic [ref=e41]:
           - link "Browse Directory" [ref=e42] [cursor=pointer]:
@@ -79,10 +79,10 @@
     - generic [ref=e174]:
       - generic [ref=e175]:
         - generic [ref=e176]:
-          - link "T TimorList" [ref=e177] [cursor=pointer]:
+          - link "T TimorLink" [ref=e177] [cursor=pointer]:
             - /url: /
             - generic [ref=e179]: T
-            - generic [ref=e180]: TimorList
+            - generic [ref=e180]: TimorLink
           - paragraph [ref=e181]: Your trusted business directory in Timor-Leste. Discover local businesses, connect with customers, and grow your business.
           - generic [ref=e182]:
             - link [ref=e183] [cursor=pointer]:
@@ -125,7 +125,7 @@
               - link "Contact" [ref=e213] [cursor=pointer]:
                 - /url: /contact
       - generic [ref=e214]:
-        - paragraph [ref=e215]: © 2026 TimorList. All rights reserved.
+        - paragraph [ref=e215]: © 2026 TimorLink. All rights reserved.
         - generic [ref=e216]:
           - link "Privacy Policy" [ref=e217] [cursor=pointer]:
             - /url: /privacy

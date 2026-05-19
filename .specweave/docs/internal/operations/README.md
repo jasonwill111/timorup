@@ -12,10 +12,10 @@
 
 ```bash
 # Check workers health
-curl -I https://timorlist.jasonwill.workers.dev
+curl -I https://TimorLink.jasonwill.workers.dev
 
 # Check API
-curl https://timorlist.jasonwill.workers.dev/api/products
+curl https://TimorLink.jasonwill.workers.dev/api/products
 ```
 
 ## Scheduled Tasks
@@ -53,7 +53,7 @@ curl https://timorlist.jasonwill.workers.dev/api/products
 npx drizzle-kit push
 
 # Or sync with production
-npx wrangler d1 execute timorlist-db --remote --command "SELECT 1"
+npx wrangler d1 execute TimorLink-db --remote --command "SELECT 1"
 ```
 
 ### Wrangler port conflict

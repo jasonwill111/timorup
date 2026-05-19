@@ -2,7 +2,7 @@
   "incrementId": "0053",
   "timestamp": "2026-05-14T01:32:00.000Z",
   "mode": "run",
-  "playwrightConfig": "/home/jasonwill/dev-projects/timorlist/playwright.config.ts",
+  "playwrightConfig": "/home/jasonwill/dev-projects/TimorLink/playwright.config.ts",
   "summary": {
     "total": 131,
     "passed": 85,
@@ -190,7 +190,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "page.fill: locator('input[name=\"email\"], input[type=\"email\"]') timeout. Page snapshot shows generic island shell before form inputs hydrate. Root cause: Astro hydration race â€” Playwright fills before the login form island fully hydrates.",
+      "error": "page.fill: locator('input[name=\"email\"], input[type=\"email\"]') timeout. Page snapshot shows generic island shell before form inputs hydrate. Root cause: Astro hydration race â€?Playwright fills before the login form island fully hydrates.",
       "fix": "Add page.waitForSelector('#login-form input[name=\"email\"]', { timeout: 5000 }) before page.fill() in the loginAs helper. Or add { state: 'attached' } to the fill call.",
       "a11y": null
     },
@@ -199,7 +199,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "Same as auth-user-login â€” loginAs() helper timeout",
+      "error": "Same as auth-user-login â€?loginAs() helper timeout",
       "fix": "Same as above",
       "a11y": null
     },
@@ -208,7 +208,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "Same as auth-user-login â€” loginAs() helper timeout",
+      "error": "Same as auth-user-login â€?loginAs() helper timeout",
       "fix": "Same as above",
       "a11y": null
     },
@@ -217,7 +217,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "Same root cause â€” inline login flow, same selector timeout",
+      "error": "Same root cause â€?inline login flow, same selector timeout",
       "fix": "Add waitForSelector before fill",
       "a11y": null
     },
@@ -226,7 +226,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -235,7 +235,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -244,7 +244,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -253,7 +253,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -262,7 +262,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -271,7 +271,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -280,7 +280,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -289,7 +289,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -298,7 +298,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -307,7 +307,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -316,7 +316,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -325,7 +325,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -334,7 +334,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -343,7 +343,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -352,7 +352,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -361,7 +361,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -370,7 +370,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -379,7 +379,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -388,7 +388,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -397,7 +397,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -406,7 +406,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -415,7 +415,7 @@
       "testFile": "e2e/comprehensive.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -514,7 +514,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -523,7 +523,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -532,7 +532,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -541,7 +541,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -550,7 +550,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -559,7 +559,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -568,7 +568,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -577,7 +577,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -586,7 +586,7 @@
       "testFile": "e2e/tdd-e2e.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -595,7 +595,7 @@
       "testFile": "e2e/us-001.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -604,7 +604,7 @@
       "testFile": "e2e/us-002.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -613,7 +613,7 @@
       "testFile": "e2e/us-003.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -622,7 +622,7 @@
       "testFile": "e2e/us-004.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -631,7 +631,7 @@
       "testFile": "e2e/us-005.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -640,7 +640,7 @@
       "testFile": "e2e/us-006.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     },
@@ -649,7 +649,7 @@
       "testFile": "e2e/us-007.spec.ts",
       "status": "fail",
       "duration": 30000,
-      "error": "beforeEach hook fails â€” loginAs() times out",
+      "error": "beforeEach hook fails â€?loginAs() times out",
       "fix": "Same as above",
       "a11y": null
     }
@@ -658,6 +658,6 @@
     "violations": [],
     "passes": 0
   },
-  "rootCause": "Astro hydration race condition â€” all 46 failures stem from the same issue: login form inputs not in DOM when Playwright attempts page.fill(). The server returns HTTP 200 for /login, but the Astro island shell (generic [active] [ref=e1]) renders before the form's <input name=\"email\"> elements appear in the DOM. This is a test infrastructure issue, not an application bug â€” the login page works correctly in real browsers. All 9 public page tests pass, confirming the server is healthy.",
+  "rootCause": "Astro hydration race condition â€?all 46 failures stem from the same issue: login form inputs not in DOM when Playwright attempts page.fill(). The server returns HTTP 200 for /login, but the Astro island shell (generic [active] [ref=e1]) renders before the form's <input name=\"email\"> elements appear in the DOM. This is a test infrastructure issue, not an application bug â€?the login page works correctly in real browsers. All 9 public page tests pass, confirming the server is healthy.",
   "fix": "In e2e/comprehensive.spec.ts, update the loginAs helper to wait for the form to hydrate before filling:\n\nasync function loginAs(page: Page, email: string, password: string) {\n  await page.goto(`${BASE_URL}/login`);\n  // Wait for the login form input to be attached to DOM\n  await page.waitForSelector('input[name=\"email\"]', { timeout: 5000, state: 'attached' });\n  await page.fill('input[name=\"email\"]', email);\n  await page.fill('input[name=\"password\"]', password);\n  await page.click('button[type=\"submit\"]');\n  await page.waitForTimeout(2000);\n}\n\nAfter applying this fix, re-run: sw:e2e --run 0053"
 }

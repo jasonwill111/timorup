@@ -1,6 +1,6 @@
-# timorlist - Living Documentation
+# TimorLink - Living Documentation
 
-This directory contains the living documentation for **timorlist**.
+This directory contains the living documentation for **TimorLink**.
 
 ## Structure
 
@@ -28,3 +28,4 @@ This directory contains the living documentation for **timorlist**.
 This documentation structure was created by [SpecWeave](https://github.com/specweave/specweave).
 
 Last updated: 2026-03-22
+

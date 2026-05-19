@@ -35,7 +35,7 @@ Fix QA CONCERNS flagged by quality gate on increments 0015 and 0001:
 ## User Stories
 
 ### US-001: Add BDD test scenarios to 0015
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer **I want** BDD scenarios documented **So that** expected behavior is clear
 
@@ -47,7 +47,7 @@ Fix QA CONCERNS flagged by quality gate on increments 0015 and 0001:
 ---
 
 ### US-002: Document edge cases in 0015
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer **I want** edge cases documented **So that** behavior under edge conditions is clear
 
@@ -58,7 +58,7 @@ Fix QA CONCERNS flagged by quality gate on increments 0015 and 0001:
 ---
 
 ### US-003: Document edge cases in 0001
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer **I want** edge cases documented **So that** race conditions are understood
 
@@ -80,3 +80,4 @@ Fix QA CONCERNS flagged by quality gate on increments 0015 and 0001:
 - Code changes
 - Test implementation
 - Breaking API changes
+

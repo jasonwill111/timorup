@@ -5,7 +5,7 @@ type: refactor
 priority: P2
 status: completed
 created: "2026-05-04"
-project: "timorlist"
+project: "TimorLink"
 board: "development"
 ---
 
@@ -18,7 +18,7 @@ Componentize auth forms to reduce code duplication across login, register, forgo
 ## User Stories
 
 ### US-001: Componentize Auth Pages
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to reuse form components across auth pages
@@ -37,7 +37,7 @@ Componentize auth forms to reduce code duplication across login, register, forgo
 - [x] **AC-US1-10**: All auth pages render correctly
 
 ### US-002: Fix D1 Schema Issues
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** D1 schema to use snake_case column names
@@ -68,5 +68,5 @@ Componentize auth forms to reduce code duplication across login, register, forgo
 ### Results
 - Lines removed: ~400
 - Components added: 5
-- Build status: âœ… Pass
-- Auth APIs: âœ… Working
+- Build status: âœ?Pass
+- Auth APIs: âœ?Working

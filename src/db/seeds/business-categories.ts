@@ -1,6 +1,6 @@
 /**
  * Business Industry Categories Seed Data
- * TimorLIST - Business Directory Categories
+ * TimorLink - Business Directory Categories
  *
  * Each category has:
  * - name: Display name
@@ -23,7 +23,7 @@ export const businessCategories = [
     name: 'Restaurants & Cafés',
     slug: 'restaurants-cafes',
     description: 'Food service establishments',
-    icon: '🍽️',
+    icon: '🍽�?,
     parentId: null,
     sortOrder: 1,
     isActive: 1,
@@ -141,7 +141,7 @@ export const businessCategories = [
     name: 'Construction & Trades',
     slug: 'construction-trades',
     description: 'Building and home services',
-    icon: '🏗️',
+    icon: '🏗�?,
     parentId: null,
     sortOrder: 8,
     isActive: 1,
@@ -237,7 +237,7 @@ export const businessCategories = [
     name: 'Coffee Shops',
     slug: 'coffee-shops',
     description: 'Coffee shops and cafés',
-    icon: '☕',
+    icon: '�?,
     parentId: 'bc-1',
     sortOrder: 12,
     isActive: 1,
@@ -330,7 +330,7 @@ export const businessCategories = [
     name: 'Language Schools',
     slug: 'language-schools',
     description: 'Language learning centers',
-    icon: '🗣️',
+    icon: '🗣�?,
     parentId: 'bc-7',
     sortOrder: 71,
     isActive: 1,

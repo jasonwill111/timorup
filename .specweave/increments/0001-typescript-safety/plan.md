@@ -1,6 +1,6 @@
-# PLAN.md â€” 0001-typescript-safety
+# PLAN.md â€?0001-typescript-safety
 
-**Project**: timorlist
+**Project**: TimorLink
 **Status**: in-progress
 
 ---
@@ -95,7 +95,7 @@ better-auth defaults are reasonable but explicit config is better for security a
 Astro server islands are already SSR components. Adding error boundaries here provides graceful degradation without affecting static parts of the page.
 
 ### Why Test Coverage Now
-Before refactoring type safety, we need tests to catch regressions. Tests for `sanitizeSearchTerm` and `escapeHtml` already exist in test files â€” we just need to ensure they're comprehensive.
+Before refactoring type safety, we need tests to catch regressions. Tests for `sanitizeSearchTerm` and `escapeHtml` already exist in test files â€?we just need to ensure they're comprehensive.
 
 ---
 
@@ -119,8 +119,8 @@ Before refactoring type safety, we need tests to catch regressions. Tests for `s
 
 ## Verification
 
-1. Run `npx tsc --noEmit` â€” no type errors
-2. Run `npx vitest run` â€” all tests pass
+1. Run `npx tsc --noEmit` â€?no type errors
+2. Run `npx vitest run` â€?all tests pass
 3. Check auth.ts cookie config is present
 4. Verify error boundary renders on test page
 
@@ -128,5 +128,5 @@ Before refactoring type safety, we need tests to catch regressions. Tests for `s
 
 ## Dependencies
 
-- None â€” uses existing test infrastructure (Vitest)
+- None â€?uses existing test infrastructure (Vitest)
 - No new packages required

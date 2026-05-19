@@ -2,7 +2,7 @@
 name: Performance Optimization
 description: Bundle size reduction and loading performance improvements
 status: completed
-author: timorlist
+author: TimorLink
 created: 2026-05-17T00:00:00.000Z
 completed: 2026-05-17T00:00:00.000Z
 ---
@@ -29,7 +29,7 @@ Reduce client bundle size and improve initial page load performance.
 
 - [x] **Wrangler minify**: `minify: true` added to wrangler.jsonc
 - [x] **Vite minify**: `minify: 'terser'` in astro.config.mjs
-- [x] **TiPTap optimization**: Converted to dynamic imports in skus.astro (369KB â†’ 23KB)
+- [x] **TiPTap optimization**: Converted to dynamic imports in skus.astro (369KB â†?23KB)
 - [x] **Motion**: Already lazy-loaded via component
 
 ### P2 - Important
@@ -47,5 +47,6 @@ Reduce client bundle size and improve initial page load performance.
 
 - [x] AC-01: Wrangler minify enabled, verified via `wrangler deploy --dry-run`
 - [x] AC-02: Motion library loads on-demand, not on every page (motion already lazy)
-- [x] AC-03: Client JS reduced by 30%+ (369KB â†’ <260KB) - TiPTap now lazy loaded
+- [x] AC-03: Client JS reduced by 30%+ (369KB â†?<260KB) - TiPTap now lazy loaded
 - [ ] AC-04: No regression in functionality
+

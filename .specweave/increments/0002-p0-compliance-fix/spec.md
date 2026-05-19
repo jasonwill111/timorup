@@ -15,11 +15,10 @@ plan_optional: true
 
 ## Overview
 
-修复 G-02 和 G-03 两个 P0 合规问题。两者都是面向用户的前端增强加后端 API 改动。
-
+修复 G-02 �?G-03 两个 P0 合规问题。两者都是面向用户的前端增强加后�?API 改动�?
 | Gap | 问题 | 修复范围 |
 |-----|------|---------|
-| **G-02** | `/subscribe` 硬编码支付二维码，Admin 无法动态更新 | `subscribe.astro` + 新建 `/api/settings/public` 端点 |
+| **G-02** | `/subscribe` 硬编码支付二维码，Admin 无法动态更�?| `subscribe.astro` + 新建 `/api/settings/public` 端点 |
 | **G-03** | 商家创建/编辑页面 Nominatim 调用无防抖，逻辑分散 | 新建 `src/lib/geo.ts` + 完善 `create.astro` + 新建 `edit.astro` |
 
 > **Note**: `plan.md` is optional for this increment per the 2-feature scope. The Architect skill can create it on demand.
@@ -27,7 +26,7 @@ plan_optional: true
 ## User Stories
 
 ### US-001: Dynamic Payment QR Code
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** business owner visiting the subscribe page
 **I want** to see the current payment QR code configured by the admin
@@ -36,13 +35,13 @@ plan_optional: true
 **Acceptance Criteria**:
 - [x] **AC-US1-01**: The `/subscribe` page fetches the payment QR image URL from the `/api/settings/public` endpoint on page load
 - [x] **AC-US1-02**: If the QR code URL is not yet configured (null, empty, or key missing), the QR section shows a placeholder message ("Payment QR code not yet configured") instead of a broken image
-- [x] **AC-US1-03**: The `/api/settings/public` endpoint returns a JSON object with at least `{ payment_qr: string | null }` — accessible to unauthenticated users, no session required
+- [x] **AC-US1-03**: The `/api/settings/public` endpoint returns a JSON object with at least `{ payment_qr: string | null }` �?accessible to unauthenticated users, no session required
 - [x] **AC-US1-04**: The existing `/api/admin/settings` (authenticated) continues to work for Admin to save the `payment_qr` URL via the site settings form
 
 ---
 
 ### US-002: Nominatim Address Auto-Parse
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** business owner creating or editing my business page
 **I want** the system to automatically find my latitude and longitude from my typed address
@@ -54,7 +53,7 @@ plan_optional: true
 - [x] **AC-US2-03**: When Nominatim returns a result, the latitude and longitude fields are automatically populated and the Leaflet map shows a marker at the resolved location
 - [x] **AC-US2-04**: When Nominatim returns no results, a user-friendly message is displayed ("Address not found. Please try a more specific address or enter coordinates manually")
 - [x] **AC-US2-05**: The "Get coordinates from address" button is disabled during the API call and re-enabled on completion or error
-- [x] **AC-US2-06**: All geocoding logic is centralized in `src/lib/geo.ts` — no inline Nominatim fetch calls in Astro page scripts
+- [x] **AC-US2-06**: All geocoding logic is centralized in `src/lib/geo.ts` �?no inline Nominatim fetch calls in Astro page scripts
 
 ## Functional Requirements
 
@@ -73,7 +72,7 @@ plan_optional: true
 
 ## Out of Scope
 
-- Admin UI for uploading R2 images and saving `payment_qr` URL (handled in existing admin settings form — no new UI needed)
+- Admin UI for uploading R2 images and saving `payment_qr` URL (handled in existing admin settings form �?no new UI needed)
 - Nominatim reverse geocoding (lat/lng to address)
 - Changing the map tile provider (continues to use OpenStreetMap)
 - Editing the business create form's existing "one business per user" logic
@@ -96,3 +95,4 @@ plan_optional: true
 | **NFR-GEO-02** | Nominatim requests must append `, Timor-Leste` to the query for better local results |
 | **NFR-QR-01** | The QR image should load with `loading="lazy"` attribute |
 | **NFR-QR-02** | The subscribe page should show a skeleton/loading state while fetching settings |
+

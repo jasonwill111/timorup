@@ -19,7 +19,7 @@ Replace `any[]` arrays in 6 listing pages with typed interfaces and repository f
 ## User Stories
 
 ### US-001: Typed Listing Interfaces
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** typed interfaces for all entity listings
@@ -33,7 +33,7 @@ Replace `any[]` arrays in 6 listing pages with typed interfaces and repository f
 ---
 
 ### US-002: Consistent Data Fetching
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** consistent data fetching patterns

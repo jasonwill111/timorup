@@ -1,6 +1,6 @@
-# RUBRIC.md â€” 0001-typescript-safety
+# RUBRIC.md â€?0001-typescript-safety
 
-**Project**: timorlist
+**Project**: TimorLink
 **Status**: in-progress
 
 ---

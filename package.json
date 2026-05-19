@@ -1,5 +1,5 @@
 {
-  "name": "timorlist",
+  "name": "TimorLink",
   "version": "1.0.0",
   "description": "Business Directory Platform for Timor-Leste",
   "type": "module",
@@ -24,10 +24,10 @@
     "db:push": "drizzle-kit push",
     "db:push:remote": "drizzle-kit push --remote",
     "db:studio": "drizzle-kit studio",
-    "db:setup-local": "wrangler d1 execute timorlist-db --remote --command \"SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL AND name NOT LIKE '_cf_%'\" --json 2>/dev/null | wrangler d1 execute timorlist-db --local --file=/dev/stdin --persist-to=.wrangler/state || echo 'Setup local D1 from remote schema'",
-    "db:seed": "node scripts/generate-seed.js > src/db/seed.sql && wrangler d1 execute timorlist-db --remote --file=src/db/seed.sql && rm src/db/seed.sql",
+    "db:setup-local": "wrangler d1 execute TimorLink-db --remote --command \"SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL AND name NOT LIKE '_cf_%'\" --json 2>/dev/null | wrangler d1 execute TimorLink-db --local --file=/dev/stdin --persist-to=.wrangler/state || echo 'Setup local D1 from remote schema'",
+    "db:seed": "node scripts/generate-seed.js > src/db/seed.sql && wrangler d1 execute TimorLink-db --remote --file=src/db/seed.sql && rm src/db/seed.sql",
     "db:seed:dry": "node scripts/generate-seed.js",
-    "deploy": "echo '‚ùå Deploy is CI/CD only. Use: git push' && exit 1",
+    "deploy": "echo '‚ù?Deploy is CI/CD only. Use: git push' && exit 1",
     "deploy:dry": "USE_CLOUDFLARE=1 wrangler deploy --dry-run",
     "wrangler": "wrangler",
     "prepare": "husky"
@@ -56,6 +56,7 @@
     "astro": "^6.3.2",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.11",
+    "better-auth-cloudflare": "^0.3.0",
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
@@ -72,6 +73,7 @@
   "devDependencies": {
     "@astrojs/compiler-rs": "^0.1.10",
     "@astrojs/node": "^10.0.6",
+    "@cloudflare/workers-types": "^4.20260518.1",
     "@noble/hashes": "^2.2.0",
     "@playwright/test": "^1.60.0",
     "@testing-library/dom": "^10.4.1",
@@ -95,3 +97,4 @@
   },
   "packageManager": "pnpm@9.15.0"
 }
+

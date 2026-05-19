@@ -1,4 +1,4 @@
-# timorlist
+# TimorLink
 
 ## Codebase Overview
 

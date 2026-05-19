@@ -21,7 +21,7 @@ Review all frontend/backend API endpoints across `src/pages/api/` and `src/serve
 ## User Stories
 
 ### US-001: API Consistency Audit (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** consistent API patterns across all endpoints
@@ -35,7 +35,7 @@ Review all frontend/backend API endpoints across `src/pages/api/` and `src/serve
 - [x] **AC-US1-05**: HTTP status codes follow REST conventions (200/201/400/401/403/404/500)
 
 ### US-002: Authentication Standardization (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** unified authentication patterns
@@ -49,7 +49,7 @@ Review all frontend/backend API endpoints across `src/pages/api/` and `src/serve
 - [x] **AC-US2-05**: All protected endpoints return 401 for unauthenticated users
 
 ### US-003: Input Validation (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** Zod validation on all API endpoints
@@ -62,7 +62,7 @@ Review all frontend/backend API endpoints across `src/pages/api/` and `src/serve
 - [x] **AC-US3-04**: Slug uniqueness validated with proper error codes
 
 ### US-004: API Endpoint Deduplication (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** clear separation between Astro API routes and Hono routes
@@ -75,7 +75,7 @@ Review all frontend/backend API endpoints across `src/pages/api/` and `src/serve
 - [x] **AC-US4-04**: Cache headers applied consistently to list endpoints
 
 ### US-005: Performance Optimization (P2)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** optimized database queries
@@ -147,3 +147,4 @@ Review all frontend/backend API endpoints across `src/pages/api/` and `src/serve
 - better-auth 1.5.3
 - Drizzle 0.45.1
 - Zod 4.3.6
+

@@ -2,40 +2,12 @@
 
 ## System Overview
 
-TimorList is a multi-tenant business listing platform built on Cloudflare Workers with edge-native databases.
+TimorLink is a multi-tenant business listing platform built on Cloudflare Workers with edge-native databases.
 
 ## High-Level Architecture
 
 ```
-                    ┌─────────────────────────────┐
-                    │     Cloudflare Workers     │
-                    │                             │
-                    │  ┌────────────────────────┐ │
-                    │  │      Astro SSR/SSG      │ │
-                    │  │  (Pages + API Routes)  │ │
-                    │  └────────────────────────┘ │
-                    │                             │
-                    │  ┌────────────────────────┐ │
-                    │  │     better-auth        │ │
-                    │  │   (Session + OAuth)    │ │
-                    │  └────────────────────────┘ │
-                    │                             │
-                    │  ┌────────────────────────┐ │
-                    │  │    Server Islands      │ │
-                    │  │ (Deferred DB Queries)  │ │
-                    │  └────────────────────────┘ │
-                    └─────────────────────────────┘
-                              │    │    │
-                    ┌─────────┴┐  ┌┴────────┐
-                    │    D1    │  │   KV    │
-                    │  (SQLite)│  │(Session)│
-                    └──────────┘  └─────────┘
-                              │
-                         ┌────┴────┐
-                         │   R2    │
-                         │ (Media) │
-                         └─────────┘
-```
+                    ┌─────────────────────────────�?                    �?    Cloudflare Workers     �?                    �?                            �?                    �? ┌────────────────────────�?�?                    �? �?     Astro SSR/SSG      �?�?                    �? �? (Pages + API Routes)  �?�?                    �? └────────────────────────�?�?                    �?                            �?                    �? ┌────────────────────────�?�?                    �? �?    better-auth        �?�?                    �? �?  (Session + OAuth)    �?�?                    �? └────────────────────────�?�?                    �?                            �?                    �? ┌────────────────────────�?�?                    �? �?   Server Islands      �?�?                    �? �?(Deferred DB Queries)  �?�?                    �? └────────────────────────�?�?                    └─────────────────────────────�?                              �?   �?   �?                    ┌─────────┴┐  ┌┴────────�?                    �?   D1    �? �?  KV    �?                    �? (SQLite)�? �?Session)�?                    └──────────�? └─────────�?                              �?                         ┌────┴────�?                         �?  R2    �?                         �?(Media) �?                         └─────────�?```
 
 **Rendering Strategy**:
 - SSG + Islands: Homepage, Businesses, Listing, Categories, Search, Organization
@@ -46,11 +18,11 @@ TimorList is a multi-tenant business listing platform built on Cloudflare Worker
 
 | ADR | Decision | Status |
 |-----|----------|--------|
-| ADR-0001 | Cloudflare Workers runtime | ✅ Implemented |
-| ADR-0010 | Server Islands (hybrid mode) | ✅ Implemented |
-| ADR-0011 | Industry-specific product specs | ✅ Implemented |
-| ADR-0012 | R2 via Workers binding | ✅ Implemented |
-| ADR-0013 | SSG + Islands for high-traffic pages | ✅ Implemented |
+| ADR-0001 | Cloudflare Workers runtime | �?Implemented |
+| ADR-0010 | Server Islands (hybrid mode) | �?Implemented |
+| ADR-0011 | Industry-specific product specs | �?Implemented |
+| ADR-0012 | R2 via Workers binding | �?Implemented |
+| ADR-0013 | SSG + Islands for high-traffic pages | �?Implemented |
 
 ## Module Structure
 
@@ -58,15 +30,15 @@ TimorList is a multi-tenant business listing platform built on Cloudflare Worker
 src/
 ├── pages/          # Astro pages (SSG + SSR + Islands)
 ├── components/
-│   ├── ui/        # UI primitives (Button, Card, Input)
-│   ├── business/  # BusinessCard, ProductCard
-│   └── islands/    # Server Islands (deferred components)
-│       ├── HomepageContent.astro
-│       ├── BusinessList.astro
-│       ├── ListingContent.astro
-│       ├── CategoryFilter.astro
-│       ├── ProductsSection.astro
-│       └── BusinessSidebar.astro
+�?  ├── ui/        # UI primitives (Button, Card, Input)
+�?  ├── business/  # BusinessCard, ProductCard
+�?  └── islands/    # Server Islands (deferred components)
+�?      ├── HomepageContent.astro
+�?      ├── BusinessList.astro
+�?      ├── ListingContent.astro
+�?      ├── CategoryFilter.astro
+�?      ├── ProductsSection.astro
+�?      └── BusinessSidebar.astro
 ├── db/           # Drizzle schema
 ├── lib/          # Utilities (auth, media, constants)
 └── server/       # Hono route handlers
@@ -74,11 +46,11 @@ src/
 
 ## Data Flow
 
-1. **Request** → Cloudflare Workers
-2. **Auth** → better-auth validates session
-3. **Route** → Astro page or API handler
-4. **DB** → Drizzle ORM → D1
-5. **Response** → JSON or HTML
+1. **Request** �?Cloudflare Workers
+2. **Auth** �?better-auth validates session
+3. **Route** �?Astro page or API handler
+4. **DB** �?Drizzle ORM �?D1
+5. **Response** �?JSON or HTML
 
 ## External Services
 

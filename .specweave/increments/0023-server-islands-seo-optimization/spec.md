@@ -19,7 +19,7 @@ Componentize dynamic pages using Astro Server Islands, add FAQ JSON-LD structure
 ## User Stories
 
 ### US-001: Server Islands for Dynamic Content
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** to componentize dynamic content using Server Islands
@@ -33,7 +33,7 @@ Componentize dynamic pages using Astro Server Islands, add FAQ JSON-LD structure
 ---
 
 ### US-002: FAQ JSON-LD Schema
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** SEO specialist
 **I want** FAQ page to have proper JSON-LD structured data
@@ -47,7 +47,7 @@ Componentize dynamic pages using Astro Server Islands, add FAQ JSON-LD structure
 ---
 
 ### US-003: CDN Cache Optimization
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** performance engineer
 **I want** static pages to have optimal CDN cache
@@ -63,11 +63,11 @@ Componentize dynamic pages using Astro Server Islands, add FAQ JSON-LD structure
 
 | Test | Result |
 |------|--------|
-| pnpm build | âœ… Exit 0 |
-| Homepage 200 | âœ… |
-| FAQ JSON-LD present | âœ… |
-| Business page SSR | âœ… 302â†’200 |
-| CDN Cache headers | âœ… max-age=300 |
-| Products Server Island | âœ… server:defer="2min" |
+| pnpm build | âœ?Exit 0 |
+| Homepage 200 | âœ?|
+| FAQ JSON-LD present | âœ?|
+| Business page SSR | âœ?302â†?00 |
+| CDN Cache headers | âœ?max-age=300 |
+| Products Server Island | âœ?server:defer="2min" |
 
 **Final Score**: 90/100

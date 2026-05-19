@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-Production: https://timorlist.jasonwill.workers.dev
+Production: https://TimorLink.jasonwill.workers.dev
 Local:      http://localhost:8787
 ```
 
@@ -24,7 +24,7 @@ Most endpoints require authentication via better-auth session cookie.
 ```bash
 curl -X POST http://localhost:8787/api/auth/sign-in \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@timorlist.test","password":"TestPassword123!"}'
+  -d '{"email":"admin@TimorLink.test","password":"TestPassword123!"}'
 ```
 
 ### Response

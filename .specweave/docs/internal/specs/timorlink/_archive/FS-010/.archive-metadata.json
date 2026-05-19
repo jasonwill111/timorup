@@ -1,0 +1,11 @@
+{
+  "id": "FS-010",
+  "type": "feature",
+  "archivedAt": "2026-05-07T11:56:15.102Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/specs/TimorLink/FS-010",
+  "linkedIncrements": [
+    "0010-descriptive-industry-images"
+  ]
+}

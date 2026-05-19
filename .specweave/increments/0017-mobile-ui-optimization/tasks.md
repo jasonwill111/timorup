@@ -29,15 +29,16 @@
 ## Test Results
 
 ```
-âœ… Homepage: 200 OK, displays 2-column grid
-âœ… /listing: 2-column grid, compact filters
-âœ… /products-services: 2-column grid, compact cards
-âœ… Mobile images: aspect-square (1:1)
-âœ… SKU detail: /business/cafe-timor/product/prod-1 - 200 OK
+âœ?Homepage: 200 OK, displays 2-column grid
+âœ?/listing: 2-column grid, compact filters
+âœ?/products-services: 2-column grid, compact cards
+âœ?Mobile images: aspect-square (1:1)
+âœ?SKU detail: /business/cafe-timor/product/prod-1 - 200 OK
 ```
 
 ## Deployment
 
-- **Workers URL**: https://timorlist.jasonwill.workers.dev
+- **Workers URL**: https://TimorLink.jasonwill.workers.dev
 - **Version**: a52856e6-e029-44bf-873d-9f80104d6748
 - **Commit**: d29aa09
+

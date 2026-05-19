@@ -41,19 +41,19 @@ BASE_URL=http://localhost:4323
 
 | Test ID | Description | Status |
 |---------|-------------|--------|
-| GOV-001 | Government type shows free listing option | âœ… |
-| GOV-002 | Nonprofit type shows free listing option | âœ… |
-| GOV-003 | Create government listing for free | âœ… |
-| GOV-004 | Create nonprofit listing for free | âœ… |
-| GOV-005 | Government shows Publish (Free) button | âœ… |
-| PLAN-001 | Show subscription page | âœ… |
-| PLAN-002 | Load subscribe page with plan param | âœ… |
-| ADMIN-001 | Admin sees pending subscriptions | âœ… |
-| ADMIN-002 | Admin confirms subscription | âœ… |
-| SKU-001 | Show SKU section in account | âœ… |
-| SKU-002 | Create SKU via admin panel | âœ… |
-| SKU-003 | Display created SKUs in account | âœ… |
-| FLOW-001 | Complete gov page â†’ plan â†’ admin â†’ SKU | âœ… |
+| GOV-001 | Government type shows free listing option | âœ?|
+| GOV-002 | Nonprofit type shows free listing option | âœ?|
+| GOV-003 | Create government listing for free | âœ?|
+| GOV-004 | Create nonprofit listing for free | âœ?|
+| GOV-005 | Government shows Publish (Free) button | âœ?|
+| PLAN-001 | Show subscription page | âœ?|
+| PLAN-002 | Load subscribe page with plan param | âœ?|
+| ADMIN-001 | Admin sees pending subscriptions | âœ?|
+| ADMIN-002 | Admin confirms subscription | âœ?|
+| SKU-001 | Show SKU section in account | âœ?|
+| SKU-002 | Create SKU via admin panel | âœ?|
+| SKU-003 | Display created SKUs in account | âœ?|
+| FLOW-001 | Complete gov page â†?plan â†?admin â†?SKU | âœ?|
 
 **Total**: 14 tests, all passing
 
@@ -119,5 +119,6 @@ const hash = await hashPassword('TestPassword123!');
 
 **Run seed**:
 ```bash
-cd /home/jasonwill/dev-projects/timorlist && node seed-wrangler.cjs
+cd /home/jasonwill/dev-projects/TimorLink && node seed-wrangler.cjs
 ```
+

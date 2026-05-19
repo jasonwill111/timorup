@@ -37,7 +37,7 @@ const waLink = contactNumber
   ? `https://wa.me/${countryCode.replace('+', '')}${waNumber}?text=${encodeURIComponent('Hi, I saw your listing: ' + listing.title)}`
   : '';
 
-const shareUrl = `${import.meta.env.SITE || 'https://timorlist.com'}/listing/${listing.slug}`;
+const shareUrl = `${import.meta.env.SITE || 'https://timorlink.com'}/listing/${listing.slug}`;
 
 const parsedImages = typeof imageIds === 'string' ? JSON.parse(imageIds) : imageIds;
 const createdAt = listing.createdAt ? new Date(listing.createdAt as unknown as number * 1000) : null;
@@ -57,7 +57,7 @@ const daysRemaining = gracePeriodEndDate
   : 0;
 ---
 
-<Layout title={`${listing.title} - TimorList`} description={listing.description?.slice(0,160)}>
+<Layout title={`${listing.title} - TimorLink`} description={listing.description?.slice(0,160)}>
   <!-- Grace Period / Expired - Show only title, hide all other content -->
   {(isInGracePeriod || isExpiredBeyondGrace) && (
     <div class="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm">

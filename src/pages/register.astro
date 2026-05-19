@@ -8,10 +8,10 @@ import LoadingButton from '../components/forms/LoadingButton.astro';
 import PasswordInput from '../components/forms/PasswordInput.astro';
 ---
 
-<Layout title="Register - TimorList">
+<Layout title="Register - TimorLink">
   <AuthCard
     title="Create an Account"
-    description="Join TimorList to promote your business"
+    description="Join TimorLink to promote your business"
     footerText="Already have an account?"
     footerLink={{ href: '/login', text: 'Sign in' }}
   >
@@ -54,14 +54,14 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
         id="password"
         name="password"
         label="Password (min 8 characters)"
-        placeholder="••••••••"
+        placeholder="•••••••�?
       />
 
       <PasswordInput
         id="confirmPassword"
         name="confirmPassword"
         label="Confirm Password"
-        placeholder="••••••••"
+        placeholder="•••••••�?
       />
 
       <LoadingButton id="submit-btn" defaultText="Create Account" loadingText="Creating account..." />
@@ -187,3 +187,4 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     }
   });
 </script>
+

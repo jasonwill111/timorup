@@ -7,5 +7,6 @@
   "lastActivity": "2026-05-17T12:00:00.000Z",
   "testMode": "TDD",
   "coverageTarget": 80,
-  "project": "timorlist"
+  "project": "TimorLink",
+  "externalLinks": {}
 }

@@ -21,12 +21,12 @@
 
 ### Step 2: Local D1 Migration
 **Action**: Migrate 30 products to new format
-**Command**: `npx wrangler d1 execute timorlist-db --local --file=/tmp/updates.sql`
+**Command**: `npx wrangler d1 execute TimorLink-db --local --file=/tmp/updates.sql`
 **Verify**: `SELECT price_fields FROM products LIMIT 3` shows new format
 
 ### Step 3: Remote D1 Migration
 **Action**: Migrate 20 products to new format
-**Command**: `npx wrangler d1 execute timorlist-db --remote --file=/tmp/updates-remote.sql`
+**Command**: `npx wrangler d1 execute TimorLink-db --remote --file=/tmp/updates-remote.sql`
 **Verify**: Remote query shows new format
 
 ### Step 4: Frontend Update
@@ -48,7 +48,7 @@ UPDATE products SET price_fields = '[{"label":"","value":"3.50","unit":"cup"}]' 
 
 ```bash
 # Check no old format remaining
-npx wrangler d1 execute timorlist-db --local --command="SELECT COUNT(*) FROM products WHERE price_fields LIKE '{\"price\":\"%';"
+npx wrangler d1 execute TimorLink-db --local --command="SELECT COUNT(*) FROM products WHERE price_fields LIKE '{\"price\":\"%';"
 
 # Test price display
 curl -s "http://localhost:4324/business/cafe-timor/product/prod-cafe-2" | grep -oE '\$[0-9]+\.[0-9]+ / [^"]*'

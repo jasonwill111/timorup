@@ -216,9 +216,9 @@
     }
   },
   "foundationPaths": [
-    "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/architecture/overview.md",
-    "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/architecture/tech-stack.md",
-    "/home/jasonwill/dev-projects/timorlist/.specweave/docs/internal/architecture/modules-skeleton.md"
+    "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/architecture/overview.md",
+    "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/architecture/tech-stack.md",
+    "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/architecture/modules-skeleton.md"
   ],
   "matchingStats": {
     "totalWorkItems": 82,

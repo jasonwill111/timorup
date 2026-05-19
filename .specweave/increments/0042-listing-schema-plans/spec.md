@@ -21,7 +21,7 @@ New database schema for listings with personal subscription system. Adds `entity
 ## User Stories
 
 ### US-001: Personal Listing Creation (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** individual user
 **I want** create a personal listing with my name
@@ -36,7 +36,7 @@ New database schema for listings with personal subscription system. Adds `entity
 ---
 
 ### US-002: Subscription Plan Selection (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** choose between trial, weekly, monthly, yearly subscription periods
@@ -51,7 +51,7 @@ New database schema for listings with personal subscription system. Adds `entity
 ---
 
 ### US-003: Subscription Status Tracking (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** system
 **I want** track subscription lifecycle
@@ -66,7 +66,7 @@ New database schema for listings with personal subscription system. Adds `entity
 ---
 
 ### US-004: Listing Access Control (P2)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** visitor
 **I want** view only active listings
@@ -103,7 +103,7 @@ New database schema for listings with personal subscription system. Adds `entity
 
 | Metric | Target |
 |--------|--------|
-| Trial â†’ Active conversion | > 60% |
+| Trial â†?Active conversion | > 60% |
 | Subscription expiry job | Runs daily, < 1s execution |
 | Schema migration | Zero data loss |
 
@@ -123,3 +123,4 @@ New database schema for listings with personal subscription system. Adds `entity
 - Existing `business_pages` table schema
 - Existing `plans` table schema
 - Scheduled job infrastructure (`/api/scheduled/*`)
+

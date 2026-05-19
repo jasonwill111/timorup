@@ -1,6 +1,6 @@
 /**
  * Non-Profit Categories Seed Data
- * TimorLIST - NGOs, Charities, Community Organizations
+ * TimorLink - NGOs, Charities, Community Organizations
  */
 
 export const nonProfitCategories = [
@@ -133,7 +133,7 @@ export const nonProfitCategories = [
     name: 'Disability Inclusion',
     slug: 'disability-inclusion',
     description: 'Organizations supporting people with disabilities',
-    icon: '♿',
+    icon: '�?,
     parentId: null,
     sortOrder: 9,
     isActive: 1,
@@ -163,7 +163,7 @@ export const nonProfitCategories = [
     name: 'Community Development',
     slug: 'community-development',
     description: 'Local community development organizations',
-    icon: '🏘️',
+    icon: '🏘�?,
     parentId: null,
     sortOrder: 11,
     isActive: 1,

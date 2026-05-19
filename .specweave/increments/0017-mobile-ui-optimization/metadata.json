@@ -16,6 +16,6 @@
   "testMode": "manual",
   "coverageTarget": 100,
   "externalLinks": {
-    "workers": "https://timorlist.jasonwill.workers.dev"
+    "workers": "https://TimorLink.jasonwill.workers.dev"
   }
 }

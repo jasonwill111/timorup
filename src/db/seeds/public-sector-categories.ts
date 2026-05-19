@@ -1,6 +1,6 @@
 /**
  * Public Sector Categories Seed Data
- * TimorLIST - Government, Ministries, and Public Services
+ * TimorLink - Government, Ministries, and Public Services
  */
 
 export const publicSectorCategories = [
@@ -10,7 +10,7 @@ export const publicSectorCategories = [
     name: 'National Government',
     slug: 'national-government',
     description: 'National ministries and government agencies',
-    icon: '🏛️',
+    icon: '🏛�?,
     parentId: null,
     sortOrder: 1,
     isActive: 1,

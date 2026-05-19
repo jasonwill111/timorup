@@ -19,7 +19,7 @@ Consolidate fragmented R2 utilities across `media/index.ts`, `media/r2.ts`, `med
 ## User Stories
 
 ### US-001: Single Media Module Interface
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** one module with consistent interface for all R2 operations
@@ -32,7 +32,7 @@ Consolidate fragmented R2 utilities across `media/index.ts`, `media/r2.ts`, `med
 - [x] **AC-US1-04**: `media/index.ts` and `media/r2.ts` removed after migration
 
 ### US-002: Type Safety for Media Operations
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** strongly-typed media interfaces
@@ -44,7 +44,7 @@ Consolidate fragmented R2 utilities across `media/index.ts`, `media/r2.ts`, `med
 - [x] **AC-US2-03**: Upload/delete functions return typed results (`UploadResult`, `boolean`)
 
 ### US-003: Delete Legacy API Route
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** the legacy `pages/api/media/upload.ts` removed
@@ -55,7 +55,7 @@ Consolidate fragmented R2 utilities across `media/index.ts`, `media/r2.ts`, `med
 - [x] **AC-US3-02**: No remaining imports from the deleted route
 
 ### US-004: Update Scheduled Cleanup Endpoints
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** scheduled cleanup endpoints to import from consolidated media module
@@ -69,13 +69,13 @@ Consolidate fragmented R2 utilities across `media/index.ts`, `media/r2.ts`, `med
 ## Technical Notes
 
 **Files to consolidate**:
-- `src/lib/media/index.ts` â€” re-export barrel (DELETE)
-- `src/lib/media/r2.ts` â€” R2 utilities (DELETE, move to media.ts)
-- `src/lib/media.ts` â€” parallel utilities + S3 + sharp (KEEP, enhance)
-- `src/actions/media/upload.ts` â€” primary upload (KEEP, update imports)
-- `src/pages/api/media/upload.ts` â€” legacy API (DELETE, safe: no module imports)
-- `src/pages/api/scheduled/_cleanup.ts` â€” inline R2 (UPDATE imports)
-- `src/pages/api/scheduled/_cleanup-orphan-media.ts` â€” inline R2 (UPDATE imports)
+- `src/lib/media/index.ts` â€?re-export barrel (DELETE)
+- `src/lib/media/r2.ts` â€?R2 utilities (DELETE, move to media.ts)
+- `src/lib/media.ts` â€?parallel utilities + S3 + sharp (KEEP, enhance)
+- `src/actions/media/upload.ts` â€?primary upload (KEEP, update imports)
+- `src/pages/api/media/upload.ts` â€?legacy API (DELETE, safe: no module imports)
+- `src/pages/api/scheduled/_cleanup.ts` â€?inline R2 (UPDATE imports)
+- `src/pages/api/scheduled/_cleanup-orphan-media.ts` â€?inline R2 (UPDATE imports)
 
 **Key signature to standardize**:
 ```typescript
@@ -91,9 +91,9 @@ export function buildR2Key(params: MediaUploadParams): string
 ```
 
 **Deletion test results**:
-- `pages/api/media/upload.ts` â€” **CAN DELETE** (no module imports, only HTTP handler)
-- `media/index.ts` â€” DELETE after updating imports
-- `media/r2.ts` â€” DELETE after moving functions to media.ts
+- `pages/api/media/upload.ts` â€?**CAN DELETE** (no module imports, only HTTP handler)
+- `media/index.ts` â€?DELETE after updating imports
+- `media/r2.ts` â€?DELETE after moving functions to media.ts
 
 ## Out of Scope
 

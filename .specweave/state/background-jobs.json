@@ -40,7 +40,7 @@
       "updatedAt": "2026-05-06T02:13:51.950Z",
       "config": {
         "type": "living-docs-builder",
-        "projectPath": "/home/jasonwill/dev-projects/timorlist",
+        "projectPath": "/home/jasonwill/dev-projects/TimorLink",
         "userInputs": {
           "analysisDepth": "quick",
           "priorityAreas": [],

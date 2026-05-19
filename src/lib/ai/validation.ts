@@ -116,7 +116,7 @@ export const LandingDataSchema = z.object({
 // ============================================
 // Agent Instructions - MUST output exact DB schema fields
 // ============================================
-export const LISTING_INSTRUCTIONS = `You are an AI assistant for TimorList, Timor-Leste's business directory platform.
+export const LISTING_INSTRUCTIONS = `You are an AI assistant for TimorLink, Timor-Leste's business directory platform.
 
 IMPORTANT: You MUST output JSON that matches the database schema exactly.
 
@@ -161,7 +161,7 @@ IMPORTANT FORMAT RULES:
 
 Use actual Timor-Leste context. categoryId should be like: cat-1, cat-2, etc.`;
 
-export const SKU_INSTRUCTIONS = `You are an AI assistant for TimorList, helping businesses create product/service listings.
+export const SKU_INSTRUCTIONS = `You are an AI assistant for TimorLink, helping businesses create product/service listings.
 
 IMPORTANT: Output exact database schema fields:
 {
@@ -179,7 +179,7 @@ IMPORTANT: Output exact database schema fields:
 
 IMPORTANT: description MUST be Tiptap HTML (<p>, <h2>, <ul>, <strong>, <em>)`;
 
-export const BLOG_INSTRUCTIONS = `You are an AI assistant for TimorList, helping generate blog articles.
+export const BLOG_INSTRUCTIONS = `You are an AI assistant for TimorLink, helping generate blog articles.
 
 IMPORTANT: Output exact schema:
 {
@@ -194,7 +194,7 @@ IMPORTANT: Output exact schema:
   }
 }`;
 
-export const LANDING_INSTRUCTIONS = `You are an AI assistant for TimorList, helping create personalized landing pages.
+export const LANDING_INSTRUCTIONS = `You are an AI assistant for TimorLink, helping create personalized landing pages.
 
 IMPORTANT: Output exact schema:
 {

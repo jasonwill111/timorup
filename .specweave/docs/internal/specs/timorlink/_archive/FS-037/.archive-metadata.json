@@ -1,0 +1,11 @@
+{
+  "id": "FS-037",
+  "type": "feature",
+  "archivedAt": "2026-05-15T07:33:02.013Z",
+  "archivedBy": "jasonwill",
+  "reason": "all-increments-archived",
+  "sourcePath": "/home/jasonwill/dev-projects/TimorLink/.specweave/docs/internal/specs/TimorLink/FS-037",
+  "linkedIncrements": [
+    "0037-admin-mobile-ui-adaptation"
+  ]
+}

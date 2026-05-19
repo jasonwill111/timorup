@@ -26,12 +26,16 @@ export function getR2Bucket(): R2Bucket | undefined {
 
 // Get R2 public URL
 export function getR2PublicUrl(): string {
-  return (env.R2_PUBLIC_URL as string) || `https://timorlist-media.r2.cloudflarestorage.com`;
+  // R2_PUBLIC_URL is optional - cast through unknown for type safety
+  const r2Url = (env as unknown as Record<string, string | undefined>)['R2_PUBLIC_URL'];
+  return r2Url || `https://TimorLink-media.r2.cloudflarestorage.com`;
 }
 
 // File size limits (in bytes)
 export const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 export const MAX_VIDEO_SIZE = 8 * 1024 * 1024; // 8MB
+export const MAX_IMAGE_WIDTH = 1920;
+export const IMAGE_QUALITY = 80;
 
 export const PLAN_LIMITS = {
   basic: { maxProducts: 10, maxImages: 10, maxVideos: 1 },
@@ -215,7 +219,7 @@ export function getOptimizedImageUrl(
   if (originalUrl.includes(r2PublicUrl)) {
     key = originalUrl.replace(`${r2PublicUrl}/`, '');
   } else if (originalUrl.includes('r2.cloudflarestorage.com')) {
-    const match = originalUrl.match(/timorlist-media\.r2\.cloudflarestorage\.com\/(.+)/);
+    const match = originalUrl.match(/TimorLink-media\.r2\.cloudflarestorage\.com\/(.+)/);
     if (match) key = match[1];
   }
 
@@ -225,7 +229,7 @@ export function getOptimizedImageUrl(
   transforms.push(`quality=${quality}`);
   transforms.push(`format=${format}`);
 
-  return `${env.SITE_URL || 'https://timorlist.com'}/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
+  return `${env.SITE_URL || 'https://TimorLink.com'}/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
 }
 
 // Check if running in Cloudflare environment

@@ -1,5 +1,18 @@
-// Global type declarations
+// Global type declarations for Cloudflare Workers + Astro
+// This file extends the base Env interface with project-specific bindings
+
+export {};
+
 declare global {
+  // Cloudflare Workers environment - extended with project bindings
+  interface Env {
+    ASSETS: Fetcher;
+    DB: D1Database;
+    SESSION: KVNamespace;
+    MEDIA_BUCKET: R2Bucket;
+    R2_PUBLIC_URL?: string;
+    MINIMAX_API_KEY?: string;
+  }
   interface Window {
     authFetch: (url: string, options?: RequestInit) => Promise<Response>;
     editCategory: (id: string) => void;

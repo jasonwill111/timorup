@@ -22,7 +22,7 @@ Fix critical data integrity issues discovered during schema audit:
 ## User Stories
 
 ### US-001: Prevent Duplicate Saved Items (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** system
 **I want** to enforce UNIQUE constraint on `saved_items(user_id, type, type_id)`
@@ -36,7 +36,7 @@ Fix critical data integrity issues discovered during schema audit:
 ---
 
 ### US-002: Prevent Duplicate Reviews (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** system
 **I want** to enforce UNIQUE constraint on `reviews(user_id, business_id)`
@@ -50,7 +50,7 @@ Fix critical data integrity issues discovered during schema audit:
 ---
 
 ### US-003: Add Missing Columns (P1)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** system
 **I want** to add missing columns to match schema definitions
@@ -64,7 +64,7 @@ Fix critical data integrity issues discovered during schema audit:
 ---
 
 ### US-004: Add Performance Indexes (P2)
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** system
 **I want** to add indexes for frequently queried columns

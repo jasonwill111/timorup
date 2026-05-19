@@ -14,7 +14,7 @@
   "planning": {
     "parallel": false
   },
-  "project": "timorlist",
+  "project": "TimorLink",
   "score": 90,
   "changes": [
     "src/components/islands/ProductsSection.astro",

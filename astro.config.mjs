@@ -9,7 +9,7 @@ export default defineConfig({
     kvNamespaces: [],
     imageService: 'passthrough',
   }),
-  site: 'https://timorlist.com',
+  site: 'https://TimorLink.com',
 
   prefetch: {
     defaultStrategy: 'viewport',
@@ -19,7 +19,7 @@ export default defineConfig({
   // compressHTML: 'jsx', // ⚠️暂禁用，CI环境schema验证问题
 
   server: {
-    allowedHosts: ['timorlist.com', 'www.timorlist.com', 'localhost', '127.0.0.1'],
+    allowedHosts: ['TimorLink.com', 'www.TimorLink.com', 'localhost', '127.0.0.1'],
   },
 
   integrations: [

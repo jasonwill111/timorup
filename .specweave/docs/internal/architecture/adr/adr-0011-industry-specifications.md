@@ -5,7 +5,7 @@
 
 ## Context
 
-The TimorList product/SKU system needed to support industry-specific fields. Different business types (restaurants, hotels, car rentals, clinics) require different data points to describe their offerings.
+The TimorLink product/SKU system needed to support industry-specific fields. Different business types (restaurants, hotels, car rentals, clinics) require different data points to describe their offerings.
 
 ## Decision
 

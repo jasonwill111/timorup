@@ -21,7 +21,7 @@ Fix admin sidebar dark/light theme sync and integrate sidebar with content area.
 ## User Stories
 
 ### US-001: Theme Toggle Sync
-**Project**: timorlist
+**Project**: TimorLink
 
 **As an** admin user **I want** the theme to remain consistent between sidebar and content area **So that** I have a cohesive experience regardless of which toggle I use
 
@@ -34,7 +34,7 @@ Fix admin sidebar dark/light theme sync and integrate sidebar with content area.
 ---
 
 ### US-002: Consistent Admin Styling
-**Project**: timorlist
+**Project**: TimorLink
 
 **As an** admin user **I want** all admin pages to have consistent visual styling **So that** the admin dashboard feels cohesive and professional
 
@@ -47,7 +47,7 @@ Fix admin sidebar dark/light theme sync and integrate sidebar with content area.
 ---
 
 ### US-003: Mobile Sidebar UX
-**Project**: timorlist
+**Project**: TimorLink
 
 **As an** admin user on mobile **I want** the sidebar menu to be easily accessible and dismissible **So that** I can navigate the admin panel comfortably on my phone
 
@@ -118,3 +118,4 @@ Mobile sidebar animations:
 | Mobile sidebar animation FPS | 60fps |
 | Touch target size compliance | 100% of nav items |
 | Cross-browser theme consistency | Chrome, Firefox, Safari |
+

@@ -1,0 +1,17 @@
+{
+  "id": "0069-rename-to-timorlink",
+  "status": "planned",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-19T10:55:31.396Z",
+  "lastActivity": "2026-05-19T10:55:31.397Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorLink"
+}

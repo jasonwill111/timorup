@@ -98,7 +98,7 @@ const buildUrl = (params: Record<string, string>) => {
 };
 ---
 
-<Layout title="Businesses - TimorList">
+<Layout title="Businesses - TimorLink">
   <div class="container py-4 sm:py-8" data-page-content>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl sm:text-3xl font-bold">Businesses</h1>
@@ -202,7 +202,7 @@ const buildUrl = (params: Record<string, string>) => {
           <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
             <a href={buildUrl({ page: String(page - 1) })}
                class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1 ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
-              ‚Üê Prev
+              ‚Ü?Prev
             </a>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const p = i + 1;
@@ -215,8 +215,7 @@ const buildUrl = (params: Record<string, string>) => {
             })}
             <a href={buildUrl({ page: String(page + 1) })}
                class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
-              Next ‚Üí
-            </a>
+              Next ‚Ü?            </a>
           </nav>
         )}
       </>
@@ -231,3 +230,4 @@ const buildUrl = (params: Record<string, string>) => {
     )}
   </div>
 </Layout>
+

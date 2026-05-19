@@ -185,26 +185,26 @@ describe('Media Constants', async () => {
 
     it('should add width transformation', async () => {
       const { getOptimizedImageUrl } = await import('../lib/media');
-      const result = getOptimizedImageUrl('https://timorlist-media.r2.cloudflarestorage.com/test.jpg', { width: 800 });
+      const result = getOptimizedImageUrl('https://TimorLink-media.r2.cloudflarestorage.com/test.jpg', { width: 800 });
       expect(result).toContain('width=800');
     });
 
     it('should add height transformation', async () => {
       const { getOptimizedImageUrl } = await import('../lib/media');
-      const result = getOptimizedImageUrl('https://timorlist-media.r2.cloudflarestorage.com/test.jpg', { height: 600 });
+      const result = getOptimizedImageUrl('https://TimorLink-media.r2.cloudflarestorage.com/test.jpg', { height: 600 });
       expect(result).toContain('height=600');
     });
 
     it('should use default quality and format', async () => {
       const { getOptimizedImageUrl } = await import('../lib/media');
-      const result = getOptimizedImageUrl('https://timorlist-media.r2.cloudflarestorage.com/test.jpg');
+      const result = getOptimizedImageUrl('https://TimorLink-media.r2.cloudflarestorage.com/test.jpg');
       expect(result).toContain('quality=80');
       expect(result).toContain('format=webp');
     });
 
     it('should allow custom quality and format', async () => {
       const { getOptimizedImageUrl } = await import('../lib/media');
-      const result = getOptimizedImageUrl('https://timorlist-media.r2.cloudflarestorage.com/test.jpg', { 
+      const result = getOptimizedImageUrl('https://TimorLink-media.r2.cloudflarestorage.com/test.jpg', { 
         quality: 60, 
         format: 'avif' 
       });
@@ -290,3 +290,4 @@ describe('Media Constants', async () => {
     });
   });
 });
+

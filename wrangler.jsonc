@@ -1,9 +1,12 @@
 {
   "main": "@astrojs/cloudflare/entrypoints/server",
-  "name": "timorlist",
+  "name": "timorlink",
   "minify": true,
   "compatibility_date": "2025-11-01",
-  "compatibility_flags": ["nodejs_compat_populate_process_env", "global_fetch_strictly_public"],
+  "compatibility_flags": [
+    "nodejs_compat_v2",
+    "global_fetch_strictly_public"
+  ],
 
   "assets": {
     "binding": "ASSETS",
@@ -14,7 +17,7 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "timorlist-db",
+      "database_name": "timorlink-db",
       "database_id": "e7e1e025-7ba2-4106-a905-bbcd8038b3e4",
       "remote": false
     }
@@ -31,8 +34,8 @@
   "r2_buckets": [
     {
       "binding": "MEDIA_BUCKET",
-      "bucket_name": "timorlist-media",
-      "preview_bucket_name": "timorlist-media"
+      "bucket_name": "timorlink-media",
+      "preview_bucket_name": "timorlink-media"
     }
   ]
 }

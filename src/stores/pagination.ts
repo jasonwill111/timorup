@@ -44,14 +44,19 @@ export const $currentRange = computed($pagination, (p) => {
 
 // Helper functions
 export function setPage(page: number): void {
-  const pagination = $pagination.get() ?? undefined;
+  const pagination = $pagination.get();
   // Guard against limit=0
   if (pagination.limit <= 0) {
     return;
   }
-  const totalPages = Math.ceil(pagination.total / pagination.limit) || 1;
-  const validPage = Math.max(1, Math.min(page, totalPages));
-  $pagination.set({ ...pagination, page: validPage });
+  // When total is 0, allow any valid page (data not loaded yet)
+  if (pagination.total > 0) {
+    const totalPages = Math.ceil(pagination.total / pagination.limit) || 1;
+    page = Math.max(1, Math.min(page, totalPages));
+  } else {
+    page = Math.max(1, page);
+  }
+  $pagination.set({ ...pagination, page });
 }
 
 export function nextPage(): void {

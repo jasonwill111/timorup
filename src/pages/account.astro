@@ -234,7 +234,7 @@ const entityLabels: Record<string, string> = {
 };
 ---
 
-<Layout title="My Account - TimorList">
+<Layout title="My Account - TimorLink">
   <div class="container py-8">
     <div class="flex items-center justify-between mb-8">
       <h1 class="text-3xl font-bold">My Account</h1>
@@ -309,7 +309,7 @@ const entityLabels: Record<string, string> = {
                                 <span class="font-medium">{review.reviewerName}</span>
                                 <div class="flex">
                                   {Array.from({ length: 5 }).map((_, i) => (
-                                    <span key={i} class={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>â˜…</span>
+                                    <span key={i} class={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>â˜?/span>
                                   ))}
                                 </div>
                               </div>
@@ -558,3 +558,4 @@ const entityLabels: Record<string, string> = {
     });
   </script>
 </Layout>
+

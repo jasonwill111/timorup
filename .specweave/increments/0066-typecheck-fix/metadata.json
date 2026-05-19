@@ -1,10 +1,10 @@
 {
   "id": "0066-typecheck-fix",
-  "status": "planned",
+  "status": "completed",
   "type": "refactor",
   "priority": "P1",
   "created": "2026-05-18T04:42:38.933Z",
-  "lastActivity": "2026-05-18T04:42:38.934Z",
+  "lastActivity": "2026-05-18T12:47:04.677Z",
   "testMode": "TDD",
   "coverageTarget": 80,
   "feature_id": null,
@@ -13,5 +13,7 @@
   "planning": {
     "parallel": false
   },
-  "project": "timorlist"
+  "project": "TimorLink",
+  "readyForReviewAt": "2026-05-18T12:46:08.646Z",
+  "approvedAt": "2026-05-18T12:47:04.678Z"
 }

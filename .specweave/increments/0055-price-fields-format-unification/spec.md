@@ -2,7 +2,7 @@
 
 ## Overview
 
-Unify price display format across entire application: schema â†’ database â†’ frontend. Single format `$X.XX / unit` with no redundancy.
+Unify price display format across entire application: schema â†?database â†?frontend. Single format `$X.XX / unit` with no redundancy.
 
 ## Context
 
@@ -19,7 +19,7 @@ Now:
 ## User Stories
 
 ### US-001: Schema Simplification
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** developer
 **I want** single price format in schema
@@ -31,7 +31,7 @@ Now:
 - [x] AC-US1-03: Build passes with new schema
 
 ### US-002: Database Migration
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** database admin
 **I want** all existing data migrated to new format
@@ -43,7 +43,7 @@ Now:
 - [x] AC-US2-03: No remaining old format `{"price":"X"}` entries
 
 ### US-003: Frontend Display
-**Project**: timorlist
+**Project**: TimorLink
 
 **As a** user
 **I want** consistent price format everywhere

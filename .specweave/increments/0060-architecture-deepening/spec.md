@@ -2,7 +2,7 @@
 name: Architecture Deepening
 description: Improve codebase architecture - DB adapter, subscription batching, Zod generation, barrel consolidation, store merge
 status: completed
-author: timorlist
+author: TimorLink
 created: 2026-05-17
 ---
 
@@ -36,7 +36,7 @@ Improve codebase architecture by deepening shallow modules and creating proper s
 - [x] Update imports
 
 ### 5. Store Merge
-- [x] Merge `filters.ts` + `search.ts` â†’ `filter-store.ts`
+- [x] Merge `filters.ts` + `search.ts` â†?`filter-store.ts`
 - [x] Keep `auth.ts`, `cart.ts`, `toast.ts` separate
 
 ## Acceptance Criteria

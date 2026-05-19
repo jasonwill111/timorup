@@ -1,9 +1,9 @@
 import { test, expect, Page, request } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8787';
-const ADMIN_EMAIL = 'admin@timorlist.com';
+const ADMIN_EMAIL = 'admin@TimorLink.com';
 const ADMIN_PASSWORD = 'admin12345';
-const USER_EMAIL = 'user@timorlist.com';
+const USER_EMAIL = 'user@TimorLink.com';
 const USER_PASSWORD = 'user12345';
 
 // ==================== HELPERS ====================
@@ -399,7 +399,7 @@ test.describe('Mobile Responsiveness', () => {
     await page.waitForLoadState('networkidle');
 
     // Click hamburger menu
-    const menuBtn = page.locator('#mobile-menu-btn, button:has-text("☰"), button[aria-label="Open menu"]').first();
+    const menuBtn = page.locator('#mobile-menu-btn, button:has-text("�?), button[aria-label="Open menu"]').first();
     if (await menuBtn.isVisible()) {
       await menuBtn.click();
       await page.waitForTimeout(500);
@@ -421,7 +421,7 @@ test.describe('Theme Toggle', () => {
     await page.goto(BASE_URL);
     await page.waitForLoadState('networkidle');
 
-    const themeBtn = page.locator('[data-testid="theme-toggle"], button[aria-label*="theme"], button:has-text("☀️"), button:has-text("🌙")').first();
+    const themeBtn = page.locator('[data-testid="theme-toggle"], button[aria-label*="theme"], button:has-text("☀�?), button:has-text("🌙")').first();
     const isVisible = await themeBtn.isVisible().catch(() => false);
     console.log('Theme toggle visible:', isVisible);
   });
@@ -510,3 +510,4 @@ test.describe('Footer Navigation', () => {
     await page.waitForLoadState('networkidle');
   });
 });
+

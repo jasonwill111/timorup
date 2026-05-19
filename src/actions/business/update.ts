@@ -15,10 +15,10 @@ async function purgeCache(path: string): Promise<void> {
   // Use Cloudflare Cache API to purge CDN cache
   // This ensures updated content is served immediately after DB update
   try {
-    const cacheKey = `https://timorlist.com${path}`;
+    const cacheKey = `https://TimorLink.com${path}`;
     await (caches as unknown as { default: Cache }).default.delete(cacheKey);
     // Also purge list pages that might include this business
-    await (caches as unknown as { default: Cache }).default.delete('https://timorlist.com/businesses');
+    await (caches as unknown as { default: Cache }).default.delete('https://TimorLink.com/businesses');
   } catch (e) {
     // Log but don't fail the update if cache purge fails
     if (import.meta.env.DEV) {
