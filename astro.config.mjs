@@ -32,11 +32,15 @@ export default defineConfig({
     ],
     ssr: {
       external: ['cloudflare:workers'],
-      noExternal: [/^better-auth/, /^@better-auth/],
     },
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,
+      },
+    },
+    build: {
+      commonjsOptions: {
+        transformMixedEsModules: true,
       },
     },
     // Disable all caching in development for real-time updates
