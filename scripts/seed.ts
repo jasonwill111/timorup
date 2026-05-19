@@ -10,7 +10,7 @@ async function seed() {
   const db = drizzle({ schema });
 
   console.log('Seed script ready. Run with:');
-  console.log('  npx wrangler d1 execute TimorLink-db --local --command "SELECT 1"');
+  console.log('  npx wrangler d1 execute TimorUp-db --local --command "SELECT 1"');
   console.log('Then manually import data using wrangler d1 execute');
 }
 

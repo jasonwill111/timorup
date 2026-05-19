@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const db = await getDb();
 if (!db) throw new Error("Database not available");
-    const result = await db.select().from(users).where(eq(users.email, 'admin@TimorLink.tl')).get() ?? undefined;
+    const result = await db.select().from(users).where(eq(users.email, 'admin@TimorUp.tl')).get() ?? undefined;
 
     return new Response(JSON.stringify({
       directQuery: result ? { found: true, id: result.id, email: result.email } : { found: false },

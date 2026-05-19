@@ -1,8 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Use PRODUCTION environment for testing
-const BASE_URL = 'https://TimorLink.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@TimorLink.com';
+const BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
+const ADMIN_EMAIL = 'admin@TimorUp.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 // Helper to login

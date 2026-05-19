@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
-const BASE_URL = 'https://TimorLink.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@TimorLink.com';
+const BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
+const ADMIN_EMAIL = 'admin@TimorUp.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 async function runTests() {
@@ -124,7 +124,7 @@ async function runTests() {
 
     if (url.includes('/login') && cookies.length === 0) {
       console.log('\n‚ù?LOGIN FAILED - Possible causes:');
-      console.log('   1. User admin@TimorLink.com does not exist in database');
+      console.log('   1. User admin@TimorUp.com does not exist in database');
       console.log('   2. Password incorrect');
       console.log('   3. Auth API returning error (check console logs)');
       console.log('   4. Rate limiting blocking requests');

@@ -17,7 +17,7 @@ import { eq, desc, inArray } from 'drizzle-orm';
 const db = await getDb();
 
 const { slug } = Astro.params;
-const siteUrl = import.meta.env.SITE || 'https://timorlink.com';
+const siteUrl = import.meta.env.SITE || 'https://timorup.com';
 const canonicalUrl = `${siteUrl}/public-sector/${slug}`;
 
 // SSR: Load public sector data
@@ -66,7 +66,7 @@ const updates = updatesData.map(u => ({
   images: u.imageIds ? JSON.parse(u.imageIds) : [],
 }));
 
-const pageTitle = `${org.title} - TimorLink`;
+const pageTitle = `${org.title} - TimorUp`;
 const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - Public Sector in Timor-Leste`;
 
 // JSON-Ld type

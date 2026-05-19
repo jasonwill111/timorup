@@ -21,7 +21,7 @@ const pathParts = Astro.url.pathname.split('/').filter(Boolean);
 const productIdIndex = pathParts.indexOf('product');
 const productId = productIdIndex >= 0 ? pathParts[productIdIndex + 1] : '';
 
-const siteUrl = import.meta.env.SITE || 'https://timorlink.com';
+const siteUrl = import.meta.env.SITE || 'https://timorup.com';
 
 // SSR: Load product
 const product = productId
@@ -53,7 +53,7 @@ const category = business.categoryId
 const canonicalUrl = `${siteUrl}/business/${slug}/product/${productId}`;
 
 // Title & description
-const pageTitle = `${product.title} - TimorLink`;
+const pageTitle = `${product.title} - TimorUp`;
 const pageDesc = product.description?.substring(0, 160) || `${product.title} - ${business.title}`;
 
 // Parse specifications and price fields

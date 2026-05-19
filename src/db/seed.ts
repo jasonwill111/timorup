@@ -1,4 +1,4 @@
-// Comprehensive seed script for TimorLink
+// Comprehensive seed script for TimorUp
 // Use better-sqlite3 directly (same as getDb() for local dev)
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import SQLite from 'better-sqlite3';
@@ -18,7 +18,7 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 // Use the same DB path as getDb() in src/lib/db.ts
-const localDbPath = process.env.LOCAL_DB_PATH || './.wrangler/state/v3/d1/TimorLink-db.sqlite';
+const localDbPath = process.env.LOCAL_DB_PATH || './.wrangler/state/v3/d1/TimorUp-db.sqlite';
 const sqlite = new SQLite(localDbPath);
 const db = drizzle(sqlite, { schema });
 
@@ -44,9 +44,9 @@ const categories = [
 // USERS
 // ========================
 const users = [
-  { id: 'user-0', email: 'user@TimorLink.com', name: 'Test User', role: 'user', phone: '+6707700001' },
+  { id: 'user-0', email: 'user@TimorUp.com', name: 'Test User', role: 'user', phone: '+6707700001' },
   { id: 'user-1', email: 'joao.silva@cafetimor.tl', name: 'João Silva', role: 'user', phone: '+6707701234' },
-  { id: 'user-4', email: 'admin@TimorLink.com', name: 'Admin User', role: 'admin', phone: '+6707700000' },
+  { id: 'user-4', email: 'admin@TimorUp.com', name: 'Admin User', role: 'admin', phone: '+6707700000' },
 ];
 
 // ========================

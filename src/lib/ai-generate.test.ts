@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/admin-auth', () => ({
   getAdminUser: vi.fn().mockResolvedValue({
     id: 'admin-1',
-    email: 'admin@TimorLink.com',
+    email: 'admin@TimorUp.com',
     name: 'Admin',
     role: 'admin'
   })

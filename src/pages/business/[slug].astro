@@ -19,7 +19,7 @@ import { businesses, businessCategories, reviews, media, latestUpdates } from '@
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const { slug } = Astro.params;
-const siteUrl = import.meta.env.SITE || 'https://timorlink.com';
+const siteUrl = import.meta.env.SITE || 'https://timorup.com';
 const canonicalUrl = `${siteUrl}/business/${slug}`;
 
 // SSR: Load business data from businesses table with error handling
@@ -166,7 +166,7 @@ try {
   console.error('Updates query failed:', e);
 }
 
-const pageTitle = `${business.title} - TimorLink`;
+const pageTitle = `${business.title} - TimorUp`;
 const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${category?.name || 'Business'} in Timor-Leste`;
 ---
 

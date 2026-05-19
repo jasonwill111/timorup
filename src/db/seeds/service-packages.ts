@@ -1,6 +1,6 @@
 /**
  * Service Packages Seed Data
- * TimorLink - Plans/Packages for Businesses
+ * TimorUp - Plans/Packages for Businesses
  *
  * Schema (2026-05-14):
  * - type: 'subscription' | 'listing_renewal' | 'featured' | 'addon'

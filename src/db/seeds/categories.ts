@@ -1,6 +1,6 @@
 /**
  * Listing Categories Seed Data
- * TimorLink - Classification Ads Categories
+ * TimorUp - Classification Ads Categories
  *
  * Each category has:
  * - name: Display name

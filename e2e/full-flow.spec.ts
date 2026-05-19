@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:8787';
-const USER_EMAIL = 'user@TimorLink.com';
+const USER_EMAIL = 'user@TimorUp.com';
 const USER_PASSWORD = 'user12345';
-const ADMIN_EMAIL = 'admin@TimorLink.com';
+const ADMIN_EMAIL = 'admin@TimorUp.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 // ==================== HELPERS ====================

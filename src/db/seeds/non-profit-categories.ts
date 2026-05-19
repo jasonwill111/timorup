@@ -1,6 +1,6 @@
 /**
  * Non-Profit Categories Seed Data
- * TimorLink - NGOs, Charities, Community Organizations
+ * TimorUp - NGOs, Charities, Community Organizations
  */
 
 export const nonProfitCategories = [

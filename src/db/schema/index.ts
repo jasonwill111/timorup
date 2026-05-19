@@ -1,6 +1,6 @@
 /**
  * Unified Database Schema
- * TimorLink
+ * TimorUp
  * Last updated: 2026-05-14
  *
  * Key changes:

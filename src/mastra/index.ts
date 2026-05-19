@@ -11,7 +11,7 @@ export type ProviderName = typeof providers.default;
 export const mastra = new Mastra({
   agents,
   deployer: new CloudflareDeployer({
-    name: 'TimorLink-ai',
+    name: 'TimorUp-ai',
     vars: {
       NODE_ENV: 'production',
     },

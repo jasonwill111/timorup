@@ -1,6 +1,6 @@
 /**
  * Blog Categories Seed Data
- * TimorLink - Blog/News Categories
+ * TimorUp - Blog/News Categories
  */
 
 export const blogCategories = [

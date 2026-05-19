@@ -1,6 +1,6 @@
 /**
  * Business Industry Categories Seed Data
- * TimorLink - Business Directory Categories
+ * TimorUp - Business Directory Categories
  *
  * Each category has:
  * - name: Display name

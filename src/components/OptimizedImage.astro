@@ -15,7 +15,7 @@ interface Props {
 
 // R2 public URL from environment
 const R2_PUBLIC_URL = import.meta.env.PUBLIC_R2_PUBLIC_URL || 
-  `https://${import.meta.env.PUBLIC_R2_BUCKET || 'TimorLink-media'}.r2.cloudflarestorage.com`;
+  `https://${import.meta.env.PUBLIC_R2_BUCKET || 'TimorUp-media'}.r2.cloudflarestorage.com`;
 
 // Generate responsive srcset for R2 images
 function generateSrcset(src: string): string {
@@ -38,7 +38,7 @@ function generateSrcset(src: string): string {
   const widths = [320, 640, 960, 1280];
   const srcsetParts = widths.map(w => {
     // If using Cloudflare Images CDN transformation
-    const cdnUrl = `https://TimorLink.com/cdn-cgi/image/width=${w},quality=75,format=webp/${R2_PUBLIC_URL}/${key} ${w}w`;
+    const cdnUrl = `https://TimorUp.com/cdn-cgi/image/width=${w},quality=75,format=webp/${R2_PUBLIC_URL}/${key} ${w}w`;
     return cdnUrl;
   });
   

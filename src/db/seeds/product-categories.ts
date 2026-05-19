@@ -1,6 +1,6 @@
 /**
  * Product Categories Seed Data
- * TimorLink - Business SKUs / Products & Services Categories
+ * TimorUp - Business SKUs / Products & Services Categories
  *
  * Each category has:
  * - name: Display name

@@ -17,7 +17,7 @@ interface CfProperties {
 }
 
 // Base URL fallback
-const DEFAULT_BASE_URL = 'https://TimorLink.jasonwill.workers.dev';
+const DEFAULT_BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
 
 /**
  * Cloudflare adapter configuration for better-auth

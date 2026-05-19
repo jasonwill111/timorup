@@ -62,7 +62,7 @@ async function runFullTest() {
     await page.goto('http://localhost:4321/login', { waitUntil: 'networkidle' });
     log(`âœ?Login page: ${page.url()}`);
     
-    await page.fill('#email', 'user@TimorLink.com');
+    await page.fill('#email', 'user@TimorUp.com');
     await page.fill('#password', 'user12345');
     
     const loginBtn = await page.$('#submit-btn');
@@ -84,7 +84,7 @@ async function runFullTest() {
     await page.goto('http://localhost:4321/admin/login', { waitUntil: 'networkidle' });
     log(`âœ?Admin login page: ${page.url()}`);
 
-    await page.fill('#email', 'admin@TimorLink.com');
+    await page.fill('#email', 'admin@TimorUp.com');
     await page.fill('#password', 'admin12345');
 
     // Admin login uses button[type="submit"]

@@ -54,7 +54,7 @@ async function runFullTest() {
     await page.goto('http://localhost:4322/login', { waitUntil: 'networkidle' });
     log(`âœ?Login page: ${page.url()}`);
     
-    await page.fill('#email', 'user@TimorLink.com');
+    await page.fill('#email', 'user@TimorUp.com');
     await page.fill('#password', 'user12345');
     await page.click('#submit-btn');
     await page.waitForTimeout(2000);
@@ -78,7 +78,7 @@ async function runFullTest() {
     await page.goto('http://localhost:4322/admin/login', { waitUntil: 'networkidle' });
     log(`âœ?Admin login page: ${page.url()}`);
     
-    await page.fill('#email', 'admin@TimorLink.com');
+    await page.fill('#email', 'admin@TimorUp.com');
     await page.fill('#password', 'admin12345');
     await page.click('#submit-btn');
     await page.waitForTimeout(2000);

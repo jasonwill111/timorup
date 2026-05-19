@@ -1,6 +1,6 @@
 /**
  * Public Sector Categories Seed Data
- * TimorLink - Government, Ministries, and Public Services
+ * TimorUp - Government, Ministries, and Public Services
  */
 
 export const publicSectorCategories = [

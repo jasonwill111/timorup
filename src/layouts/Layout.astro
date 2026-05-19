@@ -18,7 +18,7 @@ interface Props {
 
 const {
   title,
-  description = 'Discover local businesses in Timor-Leste. Find restaurants, hotels, shops, and more on TimorLink - the premier business directory for Timor-Leste.',
+  description = 'Discover local businesses in Timor-Leste. Find restaurants, hotels, shops, and more on TimorUp - the premier business directory for Timor-Leste.',
   image = '/images/og-default.jpg',
   type = 'website',
   publishedTime,
@@ -28,10 +28,10 @@ const {
   noFollow = false
 } = Astro.props;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://TimorLink.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://TimorUp.com';
 const currentPath = Astro.url.pathname;
 const canonicalUrl = `${siteUrl}${currentPath}`;
-const fullTitle = title.includes('TimorLink') ? title : `${title} | TimorLink`;
+const fullTitle = title.includes('TimorUp') ? title : `${title} | TimorUp`;
 
 // Robots meta
 const robotsContent = [
@@ -43,7 +43,7 @@ const robotsContent = [
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "TimorLink",
+  "name": "TimorUp",
   "url": siteUrl,
   "logo": `${siteUrl}/images/logo.png`,
   "description": "Business directory for Timor-Leste",
@@ -67,12 +67,12 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "TimorLink",
+  "name": "TimorUp",
   "url": siteUrl,
   "description": "Discover local businesses in Timor-Leste",
   "publisher": {
     "@type": "Organization",
-    "name": "TimorLink"
+    "name": "TimorUp"
   },
   "potentialAction": {
     "@type": "SearchAction",
@@ -97,8 +97,8 @@ const websiteSchema = {
     <link rel="preload" href="/fonts/Oswald-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Preconnect to external resources (reduce DNS/connection time) -->
-    <link rel="preconnect" href="https://TimorLink-media.r2.cloudflarestorage.com" crossorigin />
-    <link rel="dns-prefetch" href="https://TimorLink-media.r2.cloudflarestorage.com" />
+    <link rel="preconnect" href="https://TimorUp-media.r2.cloudflarestorage.com" crossorigin />
+    <link rel="dns-prefetch" href="https://TimorUp-media.r2.cloudflarestorage.com" />
 
     <!-- Inline theme script - prevents flash of wrong theme (must be blocking for FOUC prevention) -->
     <script is:inline>
@@ -141,7 +141,7 @@ const websiteSchema = {
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={`${siteUrl}${image}`} />
-    <meta property="og:site_name" content="TimorLink" />
+    <meta property="og:site_name" content="TimorUp" />
     <meta property="og:locale" content="en_US" />
 
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
@@ -172,7 +172,7 @@ const websiteSchema = {
     <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 
     <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://TimorLink-media.r2.cloudflarestorage.com" />
+    <link rel="preconnect" href="https://TimorUp-media.r2.cloudflarestorage.com" />
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
