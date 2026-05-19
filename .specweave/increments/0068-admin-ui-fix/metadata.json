@@ -1,0 +1,17 @@
+{
+  "id": "0068-admin-ui-fix",
+  "status": "ready_for_review",
+  "type": "bug",
+  "priority": "P1",
+  "created": "2026-05-19T08:15:03.939Z",
+  "lastActivity": "2026-05-19T08:15:03.940Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "timorlist"
+}
