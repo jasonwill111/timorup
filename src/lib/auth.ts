@@ -1,9 +1,9 @@
 // Better Auth Configuration - Cloudflare Workers Compatible
-// Using better-auth-cloudflare for native CF Workers support
+// Using local cloudflare module for CF Workers support
 
 import { betterAuth } from 'better-auth';
 import type { Auth } from 'better-auth';
-import { withCloudflare } from 'better-auth-cloudflare';
+import { withCloudflare } from './lib/auth/cloudflare';
 import { drizzle } from 'drizzle-orm/d1';
 import { users, sessions, accounts, verifications } from '@/db/schema';
 
