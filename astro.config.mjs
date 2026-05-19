@@ -41,12 +41,6 @@ export default defineConfig({
         '@': new URL('./src', import.meta.url).pathname,
       },
     },
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-        include: [/better-auth/, /node_modules/],
-      },
-    },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
       build: {
