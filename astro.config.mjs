@@ -5,6 +5,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare({
+    // Astro sessions disabled - better-auth handles its own sessions
     kvNamespaces: [],
     imageService: 'passthrough',
   }),
@@ -30,12 +31,17 @@ export default defineConfig({
       tailwindcss(),
     ],
     ssr: {
-      external: ['cloudflare:workers'],
+      external: ['cloudflare:workers', 'better-auth-cloudflare'],
       noExternal: ['better-auth'],
     },
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,
+      },
+    },
+    build: {
+      rollupOptions: {
+        external: ['better-auth-cloudflare'],
       },
     },
     optimizeDeps: {
