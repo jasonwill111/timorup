@@ -30,7 +30,13 @@ jobs:
       - name: Install dependencies
         run: |
           rm -rf node_modules .pnpm-store
-          pnpm install --shamefully-hoist
+          pnpm install
+
+      - name: Debug node_modules
+        run: |
+          ls -la node_modules/ | grep better
+          ls -la node_modules/better-auth-cloudflare 2>/dev/null || echo "not in root"
+          ls -la node_modules/.pnpm/ | grep better | head -5
 
       - name: Build for Cloudflare Workers
         run: pnpm build
