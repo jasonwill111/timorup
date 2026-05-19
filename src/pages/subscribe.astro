@@ -92,7 +92,7 @@ let PLAN_INFO: Record<string, {
     currency: string;
     durationValue: number;
     durationUnit: string;
-    limits: { skuLimit?: number; maxImages?: number; maxVideos?: number; maxBusinessImages?: number; maxBusinessVideos?: number };
+    limits: { skuLimit: number; maxImages: number; maxVideos: number; maxBusinessImages: number; maxBusinessVideos: number };
     features: string[];
   }>;
   description: string;
@@ -130,7 +130,7 @@ try {
 
 // Get first variant as default for display
 const getFirstVariant = (pkg: typeof PLAN_INFO[string]) => {
-  return pkg?.variants?.[0] || { name: 'Default', price: 0, currency: 'USD', durationValue: 1, durationUnit: 'month', limits: {}, features: [] };
+  return pkg.variants[0] || { name: 'Default', price: 0, currency: 'USD', durationValue: 1, durationUnit: 'month', limits: {}, features: [] };
 };
 
 const selectedPlan = PLAN_INFO[planParam] || PLAN_INFO['sp-business-free'] || {
@@ -151,18 +151,19 @@ try {
   const { getDb } = await import('@/lib/db');
   const db = await getDb();
   const { orders } = await import('@/db/schema');
-  const { eq, and } = await import('drizzle-orm');
+  const { eq } = await import('drizzle-orm');
 
-  // Check for existing unpaid order
-  const existingOrder = await db.select({ id: orders.id })
-    .from(orders)
-    .where(and(
-      eq(orders.userId, user.id),
-      eq(orders.servicePackageId, planParam),
-      eq(orders.status, 'pending')
-    ))
-    .limit(1)
-    .get();
+  // Check for existing unpaid order (simplified)
+  let existingOrder = null;
+  try {
+    const allOrders = await db.select({ id: orders.id, status: orders.status })
+      .from(orders)
+      .all();
+    const matching = allOrders.filter(o => o.userId === user.id && o.status === 'pending');
+    existingOrder = matching.length > 0 ? matching[0] : null;
+  } catch (e) {
+    console.error('Order query failed:', e);
+  }
 
   if (existingOrder) {
     orderId = existingOrder.id;
@@ -200,7 +201,7 @@ const adminInfo = {
   <div class="container py-8 md:py-12">
     <div class="max-w-2xl mx-auto">
 
-      {!userBusiness ? (
+      {!userBusiness && (
         <!-- No business created -->
         <div class="text-center py-12">
           <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
@@ -210,12 +211,12 @@ const adminInfo = {
           </div>
           <h1 class="text-2xl font-bold mb-2">Create Business First</h1>
           <p class="text-muted-foreground mb-6">You need to create a business listing before subscribing.</p>
-          <a href="/listings/create?type=business">
+          <a href="/listings/createtype=business">
             <Button>Create Business Listing</Button>
           </a>
         </div>
 
-      ) : !isConfirmed ? (
+      ) : !isConfirmed && (
         <!-- Step 1: Review and confirm subscription -->
         <div>
           <div class="text-center mb-8">
@@ -258,7 +259,7 @@ const adminInfo = {
                 <span class="text-muted-foreground">Phone</span>
                 <span class="font-medium">
                   {userBusiness.contactNumber
-                    ? `${userBusiness.countryCode || '+670'} ${userBusiness.contactNumber}`
+                     ? `${userBusiness.countryCode || '+670'} ${userBusiness.contactNumber}`
                     : '-'}
                 </span>
               </div>
@@ -276,7 +277,7 @@ const adminInfo = {
             </CardHeader>
             <CardContent>
               <div class="flex justify-between items-center mb-4">
-                <span class="text-3xl font-bold text-primary">${firstVariant.price}</span>
+                <span class="text-3xl font-bold text-primary">{firstVariant.price}</span>
                 <span class="text-muted-foreground">/{firstVariant.durationValue} {firstVariant.durationUnit}</span>
               </div>
 
@@ -297,14 +298,14 @@ const adminInfo = {
             <CardFooter class="bg-muted/30">
               <div class="flex justify-between w-full text-sm">
                 <span class="text-muted-foreground">SKU Limit</span>
-                <span class="font-medium">{firstVariant.limits?.skuLimit ?? 0} products</span>
+                <span class="font-medium">{firstVariant.limits.skuLimit > 0 ? firstVariant.limits.skuLimit : 0} products</span>
               </div>
             </CardFooter>
           </Card>
 
           <!-- Confirm Button -->
           <div class="text-center">
-            <a href={`/subscribe?plan=${planParam}&confirmed=true`}>
+            <a href={`/subscribeplan=${planParam}&confirmed=true`}>
               <Button size="lg" class="px-8">
                 Confirm Subscription
               </Button>
@@ -315,7 +316,7 @@ const adminInfo = {
           <!-- Back to pricing -->
           <div class="text-center mt-4">
             <a href="/pricing" class="text-sm text-muted-foreground hover:text-foreground">
-              �?Change plan
+              â†Change plan
             </a>
           </div>
         </div>
@@ -373,9 +374,9 @@ const adminInfo = {
                   Send your payment proof and we'll confirm within 24 hours
                 </p>
                 <a
-                  href={`https://wa.me/${adminInfo.whatsapp}?text=${encodeURIComponent(
+                  href={`https://wa.me/${adminInfo.whatsapp}text=${encodeURIComponent(
                     `Hi, I want to confirm my TimorUp subscription.\n\n` +
-                    `Order ID: ${orderId?.slice(0, 20)}...\n` +
+                    `Order ID: ${orderId.slice(0, 20)}...\n` +
                     `Plan: ${selectedPlan.name} - ${firstVariant.name}\n` +
                     `Amount: $${firstVariant.price} ${firstVariant.currency}\n` +
                     `Business: ${userBusiness.title}`
@@ -454,7 +455,7 @@ const adminInfo = {
           <!-- Back to account -->
           <div class="text-center mt-4">
             <a href="/account" class="text-sm text-muted-foreground hover:text-foreground">
-              �?Go to My Account
+              â†Go to My Account
             </a>
           </div>
         </div>

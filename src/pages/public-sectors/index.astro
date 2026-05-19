@@ -18,7 +18,7 @@ const offset = (page - 1) * LIMIT;
 // CDN Cache: 60s for filtered, 120s for main list
 const hasSearchParams = search || parentCat || childCat;
 Astro.response.headers.set('Cache-Control', hasSearchParams
-  ? 'public, max-age=30, s-maxage=60, stale-while-revalidate=120'
+   'public, max-age=30, s-maxage=60, stale-while-revalidate=120'
   : 'public, max-age=60, s-maxage=120, stale-while-revalidate=300'
 );
 
@@ -66,8 +66,8 @@ try {
   allEntities = allEntities.filter((e: PublicSectorRecord) => {
     const statusOk = e.status === 'live' || e.status === 'published';
     const searchMatch = !search ||
-      e.title?.toLowerCase().includes(searchLower) ||
-      e.aboutUs?.toLowerCase().includes(searchLower);
+      e.title.toLowerCase().includes(searchLower) ||
+      e.aboutUs.toLowerCase().includes(searchLower);
     const catMatch = !childCat || e.categoryId === childCat;
     if (parentCat && !childCat) {
       const childIds = getChildCategories(parentCat).map((c: CategoryRecord) => c.id);
@@ -91,7 +91,7 @@ const buildUrl = (params: Record<string, string>) => {
   Object.entries(params).forEach(([k, v]) => {
     if (v) p.set(k, v);
   });
-  return `/public-sectors?${p.toString()}`;
+  return `/public-sectors${p.toString()}`;
 };
 ---
 
@@ -126,14 +126,14 @@ const buildUrl = (params: Record<string, string>) => {
     </form>
 
     {/* Results */}
-    {entities.length > 0 ? (
+    {entities.length > 0  (
       <>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {entities.map(e => (
             <a href={`/public-sector/${e.slug}`} data-animate-card class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
               {/* Image/Icon Area */}
               <div class="aspect-[4/3] bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 relative overflow-hidden">
-                {e.profileImageId ? (
+                {e.profileImageId  (
                   <img src={`/api/media/${e.profileImageId}`} alt={e.title} class="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <div class="absolute inset-0 flex items-center justify-center">
@@ -170,7 +170,7 @@ const buildUrl = (params: Record<string, string>) => {
                   {/* Views */}
                   <span class="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    {e.views > 999 ? `${(e.views/1000).toFixed(1)}k` : e.views}
+                    {e.views > 999  `${(e.views/1000).toFixed(1)}k` : e.views}
                   </span>
                 </div>
               </div>
@@ -182,21 +182,21 @@ const buildUrl = (params: Record<string, string>) => {
         {totalPages > 1 && (
           <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
             <a href={buildUrl({ page: String(page - 1) })}
-               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1 ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
-              �?Prev
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1  "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+              â†Prev
             </a>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const p = i + 1;
               return (
                 <a href={buildUrl({ page: String(p) })}
-                   class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", p === page ? "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary cursor-pointer"]}>
+                   class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", p === page  "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary cursor-pointer"]}>
                   {p}
                 </a>
               );
             })}
             <a href={buildUrl({ page: String(page + 1) })}
-               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
-              Next �?            </a>
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages  "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+              Next â†            </a>
           </nav>
         )}
       </>

@@ -27,13 +27,13 @@
     "db:setup-local": "wrangler d1 execute TimorUp-db --remote --command \"SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL AND name NOT LIKE '_cf_%'\" --json 2>/dev/null | wrangler d1 execute TimorUp-db --local --file=/dev/stdin --persist-to=.wrangler/state || echo 'Setup local D1 from remote schema'",
     "db:seed": "node scripts/generate-seed.js > src/db/seed.sql && wrangler d1 execute TimorUp-db --remote --file=src/db/seed.sql && rm src/db/seed.sql",
     "db:seed:dry": "node scripts/generate-seed.js",
-    "deploy": "echo '‚ù?Deploy is CI/CD only. Use: git push' && exit 1",
+    "deploy": "echo 'ÔøΩ?Deploy is CI/CD only. Use: git push' && exit 1",
     "deploy:dry": "USE_CLOUDFLARE=1 wrangler deploy --dry-run",
     "wrangler": "wrangler",
     "prepare": "husky"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.5.1",
+    "@astrojs/cloudflare": "^13.5.2",
     "@astrojs/sitemap": "^3.7.2",
     "@better-auth/drizzle-adapter": "^1.6.11",
     "@ffmpeg/ffmpeg": "^0.12.15",
@@ -46,14 +46,14 @@
     "@mastra/core": "^1.32.1",
     "@mastra/deployer-cloudflare": "^1.1.32",
     "@tailwindcss/vite": "^4.2.4",
-    "@tiptap/core": "^3.22.5",
-    "@tiptap/extension-link": "^3.22.5",
-    "@tiptap/extension-placeholder": "^3.22.5",
-    "@tiptap/extension-underline": "^3.22.5",
-    "@tiptap/pm": "^3.22.5",
-    "@tiptap/starter-kit": "^3.22.5",
+    "@tiptap/core": "^3.23.4",
+    "@tiptap/extension-link": "^3.23.4",
+    "@tiptap/extension-placeholder": "^3.23.4",
+    "@tiptap/extension-underline": "^3.23.4",
+    "@tiptap/pm": "^3.23.4",
+    "@tiptap/starter-kit": "^3.23.4",
     "@types/leaflet": "^1.9.21",
-    "astro": "^6.3.2",
+    "astro": "^6.3.5",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.11",
     "better-auth-cloudflare": "^0.3.0",
@@ -67,7 +67,7 @@
     "node-fetch": "3",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.4",
+    "tailwindcss": "^4.3.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -97,4 +97,3 @@
   },
   "packageManager": "pnpm@9.15.0"
 }
-

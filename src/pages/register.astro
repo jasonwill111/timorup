@@ -12,7 +12,7 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
   <AuthCard
     title="Create an Account"
     description="Join TimorUp to promote your business"
-    footerText="Already have an account?"
+    footerText="Already have an account"
     footerLink={{ href: '/login', text: 'Sign in' }}
   >
     <form id="register-form" action="/api/auth/sign-up" class="space-y-4">
@@ -54,14 +54,14 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
         id="password"
         name="password"
         label="Password (min 8 characters)"
-        placeholder="•••••••�?
+        placeholder="********"
       />
 
       <PasswordInput
         id="confirmPassword"
         name="confirmPassword"
         label="Confirm Password"
-        placeholder="•••••••�?
+        placeholder="********"
       />
 
       <LoadingButton id="submit-btn" defaultText="Create Account" loadingText="Creating account..." />
@@ -109,8 +109,8 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
 
   function setLoading(loading: boolean) {
     if (submitBtn) submitBtn.disabled = loading;
-    btnText?.classList.toggle('hidden', loading);
-    btnLoading?.classList.toggle('hidden', !loading);
+    btnText.classList.toggle('hidden', loading);
+    btnLoading.classList.toggle('hidden', !loading);
   }
 
   function showError(msg: string) {
@@ -137,11 +137,11 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     }
   }
 
-  form?.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const password = (document.getElementById('password') as HTMLInputElement)?.value;
-    const confirm = (document.getElementById('confirmPassword') as HTMLInputElement)?.value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
+    const confirm = (document.getElementById('confirmPassword') as HTMLInputElement).value;
 
     if (password !== confirm) {
       showError('Passwords do not match');
@@ -153,7 +153,7 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
       return;
     }
 
-    message?.classList.add('hidden');
+    message.classList.add('hidden');
     setLoading(true);
 
     const formData = new FormData(form);
@@ -179,7 +179,7 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
           window.location.href = '/account';
         }, 1500);
       } else {
-        showError(res.error?.message || 'Registration failed');
+        showError(res.error.message || 'Registration failed');
       }
     } catch {
       setLoading(false);
@@ -187,4 +187,3 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     }
   });
 </script>
-

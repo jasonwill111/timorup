@@ -1,6 +1,6 @@
 ---
 increment: 0069-rename-to-timorlink
-title: "Rename TimorLink to TimorLink"
+title: "Rename TimorUp to TimorUp"
 type: refactor
 priority: P1
 status: active
@@ -10,11 +10,11 @@ test_mode: TDD
 coverage_target: 100
 ---
 
-# Feature: Rename TimorLink to TimorLink
+# Feature: Rename TimorUp to TimorUp
 
 ## Overview
 
-Rename all project references from TimorLink to TimorLink across:
+Rename all project references from TimorUp to TimorUp across:
 - Frontend (UI text, titles, meta tags)
 - Backend (variable names, constants)
 - Configuration (wrangler, package.json, CI/CD)
@@ -23,14 +23,14 @@ Rename all project references from TimorLink to TimorLink across:
 ## User Stories
 
 ### US-001: Rename Frontend Text (P1)
-**Project**: TimorLink
+**Project**: TimorUp
 
 **As a** developer
-**I want** to replace all visible "TimorLink" text with "TimorLink"
+**I want** to replace all visible "TimorUp" text with "TimorUp"
 **So that** the branding is consistent across the entire UI
 
 **Acceptance Criteria**:
-- [ ] **AC-US1-01**: Page titles updated to "TimorLink"
+- [ ] **AC-US1-01**: Page titles updated to "TimorUp"
 - [ ] **AC-US1-02**: Navigation text updated (header, footer, sidebar)
 - [ ] **AC-US1-03**: Meta tags (OG, Twitter) updated
 - [ ] **AC-US1-04**: Button/link text updated
@@ -38,21 +38,21 @@ Rename all project references from TimorLink to TimorLink across:
 ---
 
 ### US-002: Rename Backend Code References (P1)
-**Project**: TimorLink
+**Project**: TimorUp
 
 **As a** developer
 **I want** to rename code references (functions, constants, types)
 **So that** the codebase is consistent
 
 **Acceptance Criteria**:
-- [ ] **AC-US2-01**: Type names renamed (TimorLinkContext â†?TimorLinkContext)
+- [ ] **AC-US2-01**: Type names renamed (TimorUpContext â†?TimorUpContext)
 - [ ] **AC-US2-02**: Function names renamed
 - [ ] **AC-US2-03**: Schema/DB references renamed
 
 ---
 
 ### US-003: Rename Configuration Files (P1)
-**Project**: TimorLink
+**Project**: TimorUp
 
 **As a** developer
 **I want** to rename project configurations
@@ -66,7 +66,7 @@ Rename all project references from TimorLink to TimorLink across:
 ---
 
 ### US-004: Rename Static Assets (P2)
-**Project**: TimorLink
+**Project**: TimorUp
 
 **As a** developer
 **I want** to rename static asset references
@@ -79,7 +79,7 @@ Rename all project references from TimorLink to TimorLink across:
 ## Functional Requirements
 
 ### FR-001: Text Replacement
-Replace all occurrences of "TimorLink" with "TimorLink" in:
+Replace all occurrences of "TimorUp" with "TimorUp" in:
 - Astro components (titles, text)
 - TypeScript/TSX files (variables, types)
 - JSON configs (names, descriptions)
@@ -87,9 +87,9 @@ Replace all occurrences of "TimorLink" with "TimorLink" in:
 
 ### FR-002: Case Sensitivity
 Handle both:
-- "TimorLink" (PascalCase)
-- "TimorLink" (lowercase)
-- "TimorLink.com" (domain)
+- "TimorUp" (PascalCase)
+- "TimorUp" (lowercase)
+- "TimorUp.com" (domain)
 
 ### FR-003: Exclusions
 Do NOT change:
@@ -100,7 +100,7 @@ Do NOT change:
 
 ## Success Criteria
 
-1. All UI text shows "TimorLink" instead of "TimorLink"
+1. All UI text shows "TimorUp" instead of "TimorUp"
 2. All code references use consistent naming
 3. All configurations reference the new name
 4. Build succeeds without errors

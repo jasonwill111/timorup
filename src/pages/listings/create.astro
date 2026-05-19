@@ -37,7 +37,7 @@ try {
     if (session && session.expiresAt) {
       // expiresAt in D1 is Unix timestamp (seconds)
       const expiresAtMs = typeof session.expiresAt === 'number'
-        ? session.expiresAt * 1000
+         session.expiresAt * 1000
         : new Date(session.expiresAt).getTime();
 
       if (expiresAtMs > Date.now()) {
@@ -58,13 +58,13 @@ try {
             .limit(1)
             .get();
 
-          const existingNonProfit = existingBusiness ? null : await db.select()
+          const existingNonProfit = existingBusiness  null : await db.select()
             .from(nonProfits)
             .where(eq(nonProfits.ownerId, user.id))
             .limit(1)
             .get();
 
-          const existingPublicSector = existingBusiness || existingNonProfit ? null : await db.select()
+          const existingPublicSector = existingBusiness || existingNonProfit  null : await db.select()
             .from(publicSectors)
             .where(eq(publicSectors.ownerId, user.id))
             .limit(1)
@@ -77,7 +77,7 @@ try {
             existingListing = {
               title: existing.title,
               slug: existing.slug,
-              entityType: existingBusiness ? 'business' : existingNonProfit ? 'nonprofit' : 'public_sector'
+              entityType: existingBusiness  'business' : existingNonProfit  'nonprofit' : 'public_sector'
             };
           }
         }
@@ -90,7 +90,7 @@ try {
 
 // Redirect if not logged in
 if (!user) {
-  return Astro.redirect('/login?redirect=/listings/create');
+  return Astro.redirect('/loginredirect=/listings/create');
 }
 
 const url = new URL(Astro.request.url);
@@ -115,7 +115,7 @@ try {
 
 <Layout title="Create Listing - TimorUp">
   <div class="container py-8 max-w-4xl">
-    {hasExistingListing ? (
+    {hasExistingListing  (
       <div class="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
         <div class="w-16 h-16 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
           <svg class="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,41 +126,41 @@ try {
         <p class="text-amber-700 mb-4">Each account can only create one listing.</p>
 
         <div class="bg-white rounded-lg p-4 mb-6 text-left max-w-md mx-auto border border-amber-100">
-          <p class="font-medium">{existingListing?.title}</p>
-          <p class="text-sm text-muted-foreground capitalize">{existingListing?.entityType}</p>
+          <p class="font-medium">{existingListing.title}</p>
+          <p class="text-sm text-muted-foreground capitalize">{existingListing.entityType}</p>
         </div>
 
         <div class="flex gap-4 justify-center">
           <a href="/account" class="px-6 py-2 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors">
             Go to Dashboard
           </a>
-          <a href={`/business/${existingListing?.slug}`} class="px-6 py-2 border border-amber-300 text-amber-800 font-medium rounded-lg hover:bg-amber-100 transition-colors">
+          <a href={`/business/${existingListing.slug}`} class="px-6 py-2 border border-amber-300 text-amber-800 font-medium rounded-lg hover:bg-amber-100 transition-colors">
             View Listing
           </a>
         </div>
       </div>
     ) : null}
 
-    {!hasExistingListing && showTypeSelector ? (
+    {!hasExistingListing && showTypeSelector  (
       <div>
         <div class="mb-8">
           <h1 class="text-3xl font-bold">Create Your Listing</h1>
           <p class="text-muted-foreground mt-2">Fill in your details to get started</p>
         </div>
 
-        <h2 class="text-lg font-semibold mb-4">What type of listing?</h2>
+        <h2 class="text-lg font-semibold mb-4">What type of listing</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href="/listings/create?type=business" class="block">
+          <a href="/listings/createtype=business" class="block">
             <div class="border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all h-full">
-              <div class="text-4xl mb-3">🏪</div>
+              <div class="text-4xl mb-3">ðª</div>
               <h3 class="font-semibold text-lg mb-1">Business</h3>
               <p class="text-sm text-muted-foreground">Commercial businesses, retail, restaurants, hotels, services</p>
               <p class="text-xs text-amber-600 mt-2">Requires subscription</p>
             </div>
           </a>
-          <a href="/listings/create?type=non-profit" class="block">
+          <a href="/listings/createtype=non-profit" class="block">
             <div class="border rounded-xl p-6 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all h-full">
-              <div class="text-4xl mb-3">🏛�?/div>
+              <div class="text-4xl mb-3">ðï¸/div>
               <h3 class="font-semibold text-lg mb-1">Non-Profit</h3>
               <p class="text-sm text-muted-foreground">Government agencies, NGOs, nonprofits, foundations</p>
               <p class="text-xs text-green-600 mt-2">Free listing</p>
@@ -170,24 +170,24 @@ try {
       </div>
     ) : null}
 
-    {!hasExistingListing && showForm ? (
+    {!hasExistingListing && showForm  (
       <div id="create-form">
         <div class="flex items-center mb-6">
           <a href="/listings/create" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-            <span>�?/span> Back to type selection
+            <span>â/span> Back to type selection
           </a>
         </div>
 
-        {isBusiness ? (
+        {isBusiness  (
           <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
             <p class="text-amber-800 text-sm">
               <strong>Business listings require a subscription.</strong>
-              <a href="/pricing" class="underline ml-1">View pricing plans �?/a>
+              <a href="/pricing" class="underline ml-1">View pricing plans â/a>
             </p>
           </div>
         ) : null}
 
-        {isFreeType ? (
+        {isFreeType  (
           <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
             <p class="text-green-800 text-sm">
               <strong>Free listing!</strong> Government and nonprofit organizations get a free listing on TimorUp.
@@ -268,7 +268,7 @@ try {
                 />
               </div>
 
-              {isNonprofit ? (
+              {isNonprofit  (
                 <div>
                   <label for="organizationType" class="block text-sm font-medium mb-1">Organization Type *</label>
                   <select id="organizationType" name="organizationType" required class="w-full px-3 py-2 border rounded-lg bg-background">
@@ -357,7 +357,7 @@ try {
           <Card>
             <CardHeader>
               <CardTitle>Opening Hours</CardTitle>
-              <CardDescription>When are you open for business?</CardDescription>
+              <CardDescription>When are you open for business</CardDescription>
             </CardHeader>
             <CardContent class="space-y-3">
               {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
@@ -459,7 +459,7 @@ try {
 
           <div class="flex gap-4 pt-4">
             <Button type="button" id="save-draft-btn" variant="outline">Save as Draft</Button>
-            {isBusiness ? (
+            {isBusiness  (
               <Button type="button" id="subscribe-btn" class="bg-amber-600 hover:bg-amber-700">Subscribe & Publish</Button>
             ) : (
               <Button type="button" id="publish-btn" class="bg-green-600 hover:bg-green-700">Publish (Free)</Button>
@@ -481,7 +481,7 @@ try {
   const entityTypeInput = document.getElementById('entityType') as HTMLInputElement | null;
 
   // Auto-generate slug from title
-  titleInput?.addEventListener('input', () => {
+  titleInput.addEventListener('input', () => {
     if (slugInput && !slugInput.dataset.manual) {
       slugInput.value = titleInput.value
         .toLowerCase()
@@ -492,7 +492,7 @@ try {
     }
   });
 
-  slugInput?.addEventListener('input', () => {
+  slugInput.addEventListener('input', () => {
     if (slugInput) {
       slugInput.dataset.manual = 'true';
     }
@@ -510,9 +510,9 @@ try {
   });
 
   // Map picker click
-  document.getElementById('map-picker')?.addEventListener('click', () => {
-    const lat = prompt('Enter Latitude:', (document.getElementById('locationLat') as HTMLInputElement)?.value || '-8.5569');
-    const lng = prompt('Enter Longitude:', (document.getElementById('locationLng') as HTMLInputElement)?.value || '125.5603');
+  document.getElementById('map-picker').addEventListener('click', () => {
+    const lat = prompt('Enter Latitude:', (document.getElementById('locationLat') as HTMLInputElement).value || '-8.5569');
+    const lng = prompt('Enter Longitude:', (document.getElementById('locationLng') as HTMLInputElement).value || '125.5603');
     if (lat && lng) {
       (document.getElementById('locationLat') as HTMLInputElement).value = lat;
       (document.getElementById('locationLng') as HTMLInputElement).value = lng;
@@ -526,8 +526,8 @@ try {
     const requiredFields = ['title', 'slug', 'categoryId', 'aboutUs', 'contactName', 'contactNumber', 'email', 'address', 'locationLat', 'locationLng'];
     for (const field of requiredFields) {
       const el = document.getElementById(field) as HTMLInputElement;
-      if (!el?.value.trim()) {
-        el?.focus();
+      if (!el.value.trim()) {
+        el.focus();
         alert(`Please fill in the required field: ${field}`);
         return;
       }
@@ -536,27 +536,27 @@ try {
     // Build opening hours object
     const openingHours: Record<string, { open: string; close: string } | { open: string; close: string }> = {};
     ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
-      const closed = (document.querySelector(`.day-closed[data-day="${day}"]`) as HTMLInputElement)?.checked;
-      const openTime = (document.querySelector(`.day-open[data-day="${day}"]`) as HTMLInputElement)?.value || '09:00';
-      const closeTime = (document.querySelector(`.day-close[data-day="${day}"]`) as HTMLInputElement)?.value || '17:00';
-      openingHours[day] = closed ? { open: 'closed', close: 'closed' } : { open: openTime, close: closeTime };
+      const closed = (document.querySelector(`.day-closed[data-day="${day}"]`) as HTMLInputElement).checked;
+      const openTime = (document.querySelector(`.day-open[data-day="${day}"]`) as HTMLInputElement).value || '09:00';
+      const closeTime = (document.querySelector(`.day-close[data-day="${day}"]`) as HTMLInputElement).value || '17:00';
+      openingHours[day] = closed  { open: 'closed', close: 'closed' } : { open: openTime, close: closeTime };
     });
 
     // Parse tags
-    const tagsInput = (document.getElementById('tags') as HTMLInputElement)?.value || '';
+    const tagsInput = (document.getElementById('tags') as HTMLInputElement).value || '';
     const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t).slice(0, 10);
 
     // Build social links
     const socialLinks: Record<string, string | null> = {
-      facebook: (document.getElementById('facebook') as HTMLInputElement)?.value || null,
-      instagram: (document.getElementById('instagram') as HTMLInputElement)?.value || null,
-      tiktok: (document.getElementById('tiktok') as HTMLInputElement)?.value || null,
+      facebook: (document.getElementById('facebook') as HTMLInputElement).value || null,
+      instagram: (document.getElementById('instagram') as HTMLInputElement).value || null,
+      tiktok: (document.getElementById('tiktok') as HTMLInputElement).value || null,
     };
 
     // Handle images (file inputs)
-    const bannerFile = (document.getElementById('bannerImage') as HTMLInputElement)?.files?.[0];
-    const profileFile = (document.getElementById('profileImage') as HTMLInputElement)?.files?.[0];
-    const galleryFiles = (document.getElementById('galleryImages') as HTMLInputElement)?.files;
+    const bannerFile = (document.getElementById('bannerImage') as HTMLInputElement).files.[0];
+    const profileFile = (document.getElementById('profileImage') as HTMLInputElement).files.[0];
+    const galleryFiles = (document.getElementById('galleryImages') as HTMLInputElement).files;
 
     const data = {
       entityType: entityTypeInput.value,
@@ -595,15 +595,15 @@ try {
 
       const result = await actions.business.create(formData);
 
-      if (result.success && result.data?.slug) {
+      if (result.success && result.data.slug) {
         // Non-profits go live immediately, businesses need subscription
         if (result.data.entityType === 'nonprofit') {
           window.location.href = `/business/${result.data.slug}`;
         } else {
-          window.location.href = `/subscribe?business=${result.data.slug}`;
+          window.location.href = `/subscribebusiness=${result.data.slug}`;
         }
       } else {
-        alert(result.error?.message || 'Failed to create listing');
+        alert(result.error.message || 'Failed to create listing');
       }
     } catch (err) {
       console.error('Submit error:', err);
@@ -611,9 +611,9 @@ try {
     }
   }
 
-  saveDraftBtn?.addEventListener('click', () => submitForm(false));
-  publishBtn?.addEventListener('click', () => submitForm(true));
-  subscribeBtn?.addEventListener('click', () => {
+  saveDraftBtn.addEventListener('click', () => submitForm(false));
+  publishBtn.addEventListener('click', () => submitForm(true));
+  subscribeBtn.addEventListener('click', () => {
     window.location.href = '/pricing';
   });
 </script>

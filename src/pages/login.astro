@@ -33,7 +33,7 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
         id="password"
         name="password"
         label="Password"
-        placeholder="•••••••�?
+        placeholder="********"
       />
 
       <div class="flex items-center justify-between">
@@ -136,7 +136,6 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     const formData = new FormData(form);
 
     try {
-      // Use REST API for reliable cookie setting
       const response = await fetch('/api/auth/sign-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,4 +163,3 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     }
   });
 </script>
-
