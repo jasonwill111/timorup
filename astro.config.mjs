@@ -32,7 +32,10 @@ export default defineConfig({
     ],
     ssr: {
       external: ['cloudflare:workers'],
-      exclude: [/better-auth/, /@better-auth/],
+    },
+    optimizeDeps: {
+      exclude: [],
+      include: ['better-auth-cloudflare'],
     },
     resolve: {
       alias: {
