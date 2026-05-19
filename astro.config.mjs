@@ -36,11 +36,7 @@ export default defineConfig({
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,
-      },
-    },
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
+        'better-auth-cloudflare': new URL('./node_modules/.pnpm/better-auth-cloudflare@0.3.0_@better-auth+drizzle-adapter@1.6.11_@better-auth+core@1.6.11_@be_src5sknncbjqtpzeyo3bdvhxze/node_modules/better-auth-cloudflare/dist/index.mjs', import.meta.url).href,
       },
     },
     // Disable all caching in development for real-time updates
