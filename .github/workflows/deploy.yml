@@ -32,13 +32,9 @@ jobs:
           rm -rf node_modules .pnpm-store
           pnpm install
 
-      - name: Verify packages
+      - name: Prebundle dependencies
         run: |
-          echo "=== Check packages ==="
-          ls -la node_modules/ | grep better
-          echo "=== Check symlinks ==="
-          readlink -f node_modules/better-auth 2>/dev/null || echo "no symlink"
-          readlink -f node_modules/better-auth-cloudflare 2>/dev/null || echo "no symlink"
+          npx vite optimize --force
 
       - name: Build for Cloudflare Workers
         run: pnpm build
