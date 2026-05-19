@@ -1,0 +1,328 @@
+---
+export const prerender = false;
+import AdminLayout from '@layouts/AdminLayout.astro';
+import Button from '@components/ui/Button.astro';
+import { actions } from 'astro:actions';
+---
+
+<AdminLayout title="Ad Banners">
+  <div class="container py-4 px-2 md:py-6">
+    <!-- Page Header -->
+    <div class="mb-4 md:mb-6">
+      <h1 class="text-xl md:text-2xl font-bold">Ad Banners</h1>
+      <p class="text-sm text-muted-foreground mt-1">Manage homepage ad banners</p>
+    </div>
+    
+    <!-- Heroes List -->
+    <div class="bg-card border rounded-lg p-3 md:p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <h3 class="font-semibold text-sm md:text-base">All Heroes</h3>
+        <Button id="add-hero-btn" class="text-xs px-2 py-1 h-7 flex-shrink-0 whitespace-nowrap md:text-sm md:px-4 md:h-9">+ Add Hero</Button>
+      </div>
+      <div id="heroes-list" class="space-y-2">
+        <p class="text-center text-muted-foreground py-4 text-sm">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Hero Modal -->
+  <div id="hero-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-card border rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="p-4 border-b flex items-center justify-between sticky top-0 bg-card">
+        <h2 id="modal-title" class="text-lg font-bold">Add Hero</h2>
+        <button id="close-modal" class="p-1 hover:bg-muted rounded">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="hero-form" class="p-4 space-y-4">
+        <input type="hidden" id="hero-id" name="id" />
+        <div>
+          <label for="hero-title" class="block text-sm font-medium mb-1">Title *</label>
+          <input type="text" id="hero-title" name="title" required class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Hero title" />
+        </div>
+        <div>
+          <label for="hero-desc" class="block text-sm font-medium mb-1">Description</label>
+          <textarea id="hero-desc" name="description" rows="2" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="Hero description..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Image</label>
+          <div id="hero-image-upload" class="border-2 border-dashed border-muted-foreground/25 rounded-lg p-3 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
+            <p class="text-xs text-muted-foreground">Click or drag to upload</p>
+          </div>
+          <input type="file" id="hero-image-file" accept="image/*" class="hidden" />
+          <div id="hero-image-preview" class="mt-2 hidden">
+            <div class="relative inline-block">
+              <img id="hero-preview-img" class="w-full max-h-40 rounded-lg object-cover" />
+              <button type="button" id="remove-hero-image" class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs">×</button>
+            </div>
+          </div>
+          <input type="hidden" id="hero-image" name="imageId" value="" />
+        </div>
+        <div>
+          <label for="hero-ext-url" class="block text-sm font-medium mb-1">External URL</label>
+          <input type="text" id="hero-ext-url" name="externalUrl" class="w-full px-3 py-2 border rounded-md text-sm" placeholder="https://..." />
+        </div>
+        <div>
+          <label for="hero-business" class="block text-sm font-medium mb-1">Link to Business Page</label>
+          <select id="hero-business" name="linkedBusinessPageId" class="w-full px-3 py-2 border rounded-md text-sm bg-background">
+            <option value="">None</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="hero-active" name="isActive" checked class="w-4 h-4" />
+          <label for="hero-active" class="text-sm">Active</label>
+        </div>
+        <div class="flex gap-2 justify-end pt-2">
+          <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
+          <Button type="submit" class="text-xs py-1 h-8">Save</Button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { toast } from '../../stores/toast';
+  import { uploadFile } from '../../lib/client/upload-helper';
+
+  let isEditMode = false;
+  let heroImageId: string | null = null;
+
+  // Image upload handler
+  document.getElementById('hero-image-upload')?.addEventListener('click', () => {
+    document.getElementById('hero-image-file')?.click();
+  });
+  document.getElementById('hero-image-file')?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    // Compress and upload image
+    const result = await uploadFile(file, {
+      type: 'hero',
+      typeId: 'hero',
+      compress: true,
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+    });
+
+    if (result.success && result.data?.id) {
+      heroImageId = result.data.id;
+      (document.getElementById('hero-image') as HTMLInputElement).value = result.data.id;
+      (document.getElementById('hero-preview-img') as HTMLImageElement).src = result.data.url;
+      document.getElementById('hero-image-preview')?.classList.remove('hidden');
+      document.getElementById('hero-image-upload')?.classList.add('hidden');
+    } else {
+      toast.error(result.error?.message || 'Failed to upload image');
+    }
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('remove-hero-image')?.addEventListener('click', () => {
+    heroImageId = null;
+    (document.getElementById('hero-image') as HTMLInputElement).value = '';
+    document.getElementById('hero-image-preview')?.classList.add('hidden');
+    document.getElementById('hero-image-upload')?.classList.remove('hidden');
+  });
+  
+  // Load heroes
+  async function loadHeroes() {
+    try {
+      const res = await fetch("/api/admin/heroes", { credentials: "include" }); const result = await res.json();;
+
+      const container = document.getElementById('heroes-list');
+      if (!container) return;
+
+      if (!result.success || !result.data || result.data.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted-foreground py-8">No heroes yet. Click "+ Add Hero" to create one.</p>';
+        return;
+      }
+
+      const data = result.data;
+      container.innerHTML = data.map((hero: HeroData) => `
+        <div class="flex items-center gap-3 p-3 border rounded text-sm">
+          <div class="w-16 h-10 bg-muted rounded overflow-hidden flex-shrink-0">
+            ${hero.imageId ? `<img src="${hero.imageId}" alt="${hero.title}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='📷'"` : '<div class="w-full h-full flex items-center justify-center text-xs">📷</div>'}
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">${hero.title}</p>
+            <p class="text-xs text-muted-foreground truncate">${hero.description || 'No description'}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-xs rounded-full ${hero.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800'}">${hero.isActive ? 'Active' : 'Inactive'}</span>
+            <button class="text-blue-500 hover:text-blue-600 text-xs px-2 py-1" onclick="editHero('${hero.id}')">Edit</button>
+            <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1" onclick="deleteHero('${hero.id}')">Del</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading heroes:', err);
+      toast.error('Failed to load heroes');
+    }
+  }
+  
+  // Load businesses for dropdown
+  async function loadBusinesses() {
+    try {
+      const res = await fetch('/api/businesses?limit=100');
+      const data = await res.json();
+      
+      const select = document.getElementById('hero-business') as HTMLSelectElement;
+      if (!select || !data.success) return;
+      
+      data.data.forEach((biz: HeroData) => {
+        const option = document.createElement('option');
+        option.value = biz.id;
+        option.textContent = biz.title;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      console.error('Error loading businesses:', err);
+    }
+  }
+  
+  // Edit hero
+  window.editHero = async function(id: string) {
+    try {
+      const result = await actions.banners.list();
+
+      if (!result.success) {
+        toast.error('Failed to load hero data');
+        return;
+      }
+
+      const hero = result.data?.find((h: HeroData) => h.id === id);
+      if (!hero) {
+        toast.error('Hero not found');
+        return;
+      }
+      
+      isEditMode = true;
+      document.getElementById('modal-title')!.textContent = 'Edit Hero';
+      (document.getElementById('hero-id') as HTMLInputElement).value = hero.id;
+      (document.getElementById('hero-title') as HTMLInputElement).value = hero.title || '';
+      (document.getElementById('hero-desc') as HTMLTextAreaElement).value = hero.description || '';
+      (document.getElementById('hero-ext-url') as HTMLInputElement).value = hero.externalUrl || '';
+      (document.getElementById('hero-business') as HTMLSelectElement).value = hero.linkedBusinessPageId || '';
+      (document.getElementById('hero-active') as HTMLInputElement).checked = hero.isActive !== false;
+
+      // Load existing image
+      heroImageId = hero.imageId || null;
+      if (hero.imageId) {
+        (document.getElementById('hero-image') as HTMLInputElement).value = hero.imageId;
+        (document.getElementById('hero-preview-img') as HTMLImageElement).src = `/api/media/${hero.imageId}`;
+        document.getElementById('hero-image-preview')?.classList.remove('hidden');
+        document.getElementById('hero-image-upload')?.classList.add('hidden');
+      } else {
+        (document.getElementById('hero-image') as HTMLInputElement).value = '';
+        document.getElementById('hero-image-preview')?.classList.add('hidden');
+        document.getElementById('hero-image-upload')?.classList.remove('hidden');
+      }
+      
+      const modal = document.getElementById('hero-modal');
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    } catch (err) {
+      console.error('Error loading hero:', err);
+      toast.error('Error loading hero');
+    }
+  };
+  
+  // Delete hero
+  window.deleteHero = async function(id: string) {
+    if (!confirm('Delete this hero?')) return;
+
+    try {
+      const result = await actions.admin.heroes.delete({ id });
+
+      if (result.success) {
+        toast.success('Hero deleted');
+        loadHeroes();
+      } else {
+        toast.error(result.error?.message || 'Failed to delete hero');
+      }
+    } catch (err) {
+      console.error('Error deleting hero:', err);
+      toast.error('Error deleting hero');
+    }
+  };
+  
+  // Modal controls
+  const modal = document.getElementById('hero-modal');
+  const addBtn = document.getElementById('add-hero-btn');
+  const closeBtn = document.getElementById('close-modal');
+  const cancelBtn = document.getElementById('cancel-btn');
+  
+  addBtn?.addEventListener('click', () => {
+    isEditMode = false;
+    heroImageId = null;
+    document.getElementById('modal-title')!.textContent = 'Add Hero';
+    (document.getElementById('hero-form') as HTMLFormElement).reset();
+    (document.getElementById('hero-id') as HTMLInputElement).value = '';
+    (document.getElementById('hero-image') as HTMLInputElement).value = '';
+    document.getElementById('hero-image-preview')?.classList.add('hidden');
+    document.getElementById('hero-image-upload')?.classList.remove('hidden');
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+  });
+  
+  closeBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  cancelBtn?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+  });
+  
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  });
+  
+  // Form submission
+  document.getElementById('hero-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const heroData = {
+      title: String(formData.get('title') || ''),
+      description: String(formData.get('description') || ''),
+      imageId: String(formData.get('imageId') || ''),
+      ctaText: String(formData.get('ctaText') || ''),
+      ctaLink: String(formData.get('ctaLink') || ''),
+      isActive: (document.getElementById('hero-active') as HTMLInputElement).checked,
+    };
+
+    const heroId = formData.get('id');
+
+    try {
+      let result;
+      if (heroId) {
+        result = await actions.admin.heroes.update({ id: heroId as string, ...heroData });
+      } else {
+        result = await actions.admin.heroes.create(heroData);
+      }
+
+      if (result.success) {
+        toast.success(isEditMode ? 'Hero updated!' : 'Hero created!');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+        (e.target as HTMLFormElement).reset();
+        loadHeroes();
+      } else {
+        toast.error(result.error?.message || 'Failed to save hero');
+      }
+    } catch (err) {
+      console.error('Error saving hero:', err);
+      toast.error('Error saving hero');
+    }
+  });
+  
+  // Initialize
+  loadHeroes();
+  loadBusinesses();
+</script>

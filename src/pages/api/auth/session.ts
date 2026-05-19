@@ -1,54 +1,76 @@
 // Auth API - Session (Get current user)
+// Reads session directly from KV and queries DB for role
 export const prerender = false;
 
-import { getDb } from '@/lib/db';
-import { sessions, users } from '@/db/schema';
+import { initAuthInstance } from '@/lib/auth';
+import { drizzle } from 'drizzle-orm/d1';
+import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET({ request }: { request: Request }) {
-  const cookieHeader = request.headers.get('cookie');
-
   try {
-    const tokenMatch = cookieHeader?.match(/better-auth\.session_token=([^;]+)/);
+    const { env } = await import('cloudflare:workers');
 
-    if (tokenMatch?.[1]) {
-      const token = tokenMatch[1];
-      const db = await getDb();
-if (!db) throw new Error("Database not available");
+    // Get token from cookie
+    const cookieHeader = request.headers.get('cookie');
+    const match = cookieHeader?.match(/better-auth\.session_token=([^;]+)/);
 
-      const session = await db.select()
-        .from(sessions)
-        .where(eq(sessions.token, token))
-        .limit(1)
-        .get() ?? undefined;
+    if (!match) {
+      return new Response(JSON.stringify({ user: null, session: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
-      // expiresAt in D1 is Unix timestamp (seconds), need to convert to milliseconds
-      if (session && session.expiresAt) {
-        const expiresAtMs = typeof session.expiresAt === 'number'
-          ? session.expiresAt * 1000  // Convert seconds to milliseconds
-          : new Date(session.expiresAt).getTime();
+    const token = match[1];
 
-        if (expiresAtMs > Date.now()) {
-          // Session valid, get user
-          const user = await db.select()
-            .from(users)
-            .where(eq(users.id, session.userId))
-            .limit(1)
-            .get() ?? undefined;
+    // Read session directly from KV
+    if (env.SESSION) {
+      const stored = await env.SESSION.get(token);
 
-          if (user) {
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          const session = data.session;
+          const kvUser = data.user;
+
+          // Check if session is expired
+          if (session && new Date(session.expiresAt) > new Date()) {
+            // Initialize auth
+            initAuthInstance(env as Record<string, unknown>);
+
+            // Get role from database
+            let role = 'user';
+            if (env.DB) {
+              try {
+                const db = drizzle(env.DB as D1Database, {
+                  schema: { users }
+                });
+                const dbUser = await db.select({ role: users.role })
+                  .from(users)
+                  .where(eq(users.id, session.userId))
+                  .limit(1)
+                  .get();
+                if (dbUser) {
+                  role = dbUser.role || 'user';
+                }
+              } catch (e) {
+                console.error('[Session] DB error:', e);
+              }
+            }
+
             return new Response(JSON.stringify({
               user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                emailVerified: user.emailVerified ?? false,
-                image: user.image ?? null,
-                role: user.role ?? 'user',
+                id: session.userId,
+                email: kvUser?.email || '',
+                name: kvUser?.name || '',
+                emailVerified: kvUser?.emailVerified ?? false,
+                image: kvUser?.image ?? null,
+                role: role,
               },
               session: {
                 id: session.id,
-                expiresAt: new Date(expiresAtMs).toISOString(),
+                expiresAt: new Date(session.expiresAt).toISOString(),
                 token: session.token,
                 userId: session.userId,
               }
@@ -57,6 +79,8 @@ if (!db) throw new Error("Database not available");
               headers: { 'Content-Type': 'application/json' }
             });
           }
+        } catch (e) {
+          console.error('[Session] Parse error:', e);
         }
       }
     }

@@ -1,6 +1,6 @@
 // Auth API - Sign Up (REST endpoint)
 import type { APIRoute } from 'astro';
-import { initAuth } from '@/lib/auth';
+import { getAuth } from '@/lib/auth';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const auth = await initAuth();
+    const auth = getAuth();
     const authApi = auth.api;
 
     // Sign up via better-auth

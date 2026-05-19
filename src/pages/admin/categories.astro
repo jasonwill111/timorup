@@ -95,6 +95,9 @@ import Button from '@components/ui/Button.astro';
           <select id="cat-entity-type" required class="w-full px-3 py-2 border rounded-md text-sm">
             <option value="business">Business</option>
             <option value="nonprofit">Non-Profit</option>
+            <option value="public_sector">Public Sector</option>
+            <option value="listing">Listing</option>
+            <option value="product">Product</option>
           </select>
           <p class="text-xs text-muted-foreground mt-1">Category type determines which listings can use this category</p>
         </div>
@@ -137,6 +140,12 @@ import Button from '@components/ui/Button.astro';
           <input type="checkbox" id="cat-active" checked class="rounded" />
           <label for="cat-active" class="text-sm">Active</label>
         </div>
+        <!-- formFields - only for listing and product categories -->
+        <div id="formfields-section" class="hidden">
+          <label for="cat-formfields" class="block text-sm font-medium mb-1">Form Fields (JSON)</label>
+          <textarea id="cat-formfields" rows="4" class="w-full px-3 py-2 border rounded-md text-sm font-mono" placeholder='[{"name":"price","type":"number","label":"Price","required":true}]'></textarea>
+          <p class="text-xs text-muted-foreground mt-1">Define custom form fields for this category. Format: JSON array of field definitions.</p>
+        </div>
         <div class="flex gap-2 justify-end pt-2">
           <Button type="button" id="cancel-btn" variant="outline" class="text-xs py-1 h-8">Cancel</Button>
           <Button type="submit" id="submit-btn" class="text-xs py-1 h-8">Create</Button>
@@ -162,6 +171,7 @@ import Button from '@components/ui/Button.astro';
     sortOrder: number;
     description: string | null;
     isActive: boolean;
+    formFields?: string | null;
   }
 
   let categories: Category[] = [];
@@ -393,14 +403,32 @@ import Button from '@components/ui/Button.astro';
     (document.getElementById('cat-sort') as HTMLInputElement).value = '0';
     (document.getElementById('cat-active') as HTMLInputElement).checked = true;
     (document.getElementById('cat-image-id') as HTMLInputElement).value = '';
+    (document.getElementById('cat-formfields') as HTMLTextAreaElement).value = '';
     document.getElementById('cat-image-preview')?.classList.add('hidden');
     document.getElementById('cat-image-upload')?.classList.remove('hidden');
     updateParentDropdown();
+    updateFormFieldsVisibility();
     if (formTitle) formTitle.textContent = 'Create Category';
     if (submitBtn) submitBtn.textContent = 'Create';
     modal?.classList.remove('hidden');
     modal?.classList.add('flex');
   }
+
+  // Show/hide formFields based on entity type
+  function updateFormFieldsVisibility() {
+    const entityType = (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value;
+    const formFieldsSection = document.getElementById('formfields-section');
+    if (formFieldsSection) {
+      if (entityType === 'listing' || entityType === 'product') {
+        formFieldsSection.classList.remove('hidden');
+      } else {
+        formFieldsSection.classList.add('hidden');
+      }
+    }
+  }
+
+  // Listen for entity type changes
+  document.getElementById('cat-entity-type')?.addEventListener('change', updateFormFieldsVisibility);
 
   function closeModalFn() {
     modal?.classList.add('hidden');
@@ -445,6 +473,10 @@ import Button from '@components/ui/Button.astro';
       document.getElementById('cat-image-upload')?.classList.remove('hidden');
     }
 
+    // Load formFields
+    (document.getElementById('cat-formfields') as HTMLTextAreaElement).value = cat.formFields || '';
+    updateFormFieldsVisibility();
+
     if (formTitle) formTitle.textContent = 'Edit Category';
     if (submitBtn) submitBtn.textContent = 'Save Changes';
     modal?.classList.remove('hidden');
@@ -458,13 +490,17 @@ import Button from '@components/ui/Button.astro';
     const categoryData: Omit<Category, 'id'> = {
       name: (document.getElementById('cat-name') as HTMLInputElement)?.value,
       slug: (document.getElementById('cat-slug') as HTMLInputElement)?.value,
-      entityType: (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value as 'business' | 'nonprofit',
+      entityType: (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value as 'business' | 'nonprofit' | 'public_sector' | 'listing' | 'product',
       parentId: (document.getElementById('cat-parent') as HTMLSelectElement)?.value || null,
       icon: (document.getElementById('cat-icon') as HTMLInputElement)?.value || '',
       image: (document.getElementById('cat-image-id') as HTMLInputElement)?.value || '',
       sortOrder: parseInt((document.getElementById('cat-sort') as HTMLInputElement)?.value || '0'),
       description: (document.getElementById('cat-desc') as HTMLTextAreaElement)?.value || '',
       isActive: (document.getElementById('cat-active') as HTMLInputElement)?.checked ?? true,
+      formFields: (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value === 'listing' ||
+                  (document.getElementById('cat-entity-type') as HTMLSelectElement)?.value === 'product'
+        ? (document.getElementById('cat-formfields') as HTMLTextAreaElement)?.value || null
+        : null,
     };
 
     if (!categoryData.name || !categoryData.slug) {

@@ -4,48 +4,15 @@ export const prerender = false;
 
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import { getDb } from '@/lib/db';
-import { media, sessions, users } from '@/db/schema';
+import { media, users } from '@/db/schema';
 import { eq, like, sql, desc, isNull, and } from 'drizzle-orm';
 import { actions } from 'astro:actions';
+import { getAdminUser } from '@/lib/admin-auth';
 
-// Check admin auth using direct DB query
-const cookieHeader = Astro.request.headers.get('cookie') || '';
-const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
+// Check admin auth using KV session
+const adminUser = await getAdminUser(Astro.request);
 
-let isAdmin = false;
-if (tokenMatch) {
-  try {
-    const db = await getDb();
-    const token = tokenMatch[1];
-
-    const session = await db.select()
-      .from(sessions)
-      .where(eq(sessions.token, token))
-      .limit(1)
-      .get();
-
-    if (session && session.expiresAt) {
-      const expiresAtMs = typeof session.expiresAt === 'number'
-        ? session.expiresAt * 1000
-        : new Date(session.expiresAt).getTime();
-
-      if (expiresAtMs > Date.now()) {
-        const user = await db.select()
-          .from(users)
-          .where(eq(users.id, session.userId))
-          .limit(1)
-          .get();
-
-        if (user) {
-          const adminRoles = ['admin', 'super_admin'];
-          isAdmin = adminRoles.includes(user.role);
-        }
-      }
-    }
-  } catch { isAdmin = false; }
-}
-
-if (!isAdmin) {
+if (!adminUser) {
   return Astro.redirect('/admin/login');
 }
 

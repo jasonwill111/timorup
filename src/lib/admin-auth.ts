@@ -1,6 +1,8 @@
 // Admin API Auth Helper
-import { getDb } from '@/lib/db';
-import { users, sessions } from '@/db/schema';
+// Uses KV directly for session instead of better-auth's getSession
+import { initAuthInstance } from '@/lib/auth';
+import { drizzle } from 'drizzle-orm/d1';
+import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export interface AuthUser {
@@ -12,51 +14,58 @@ export interface AuthUser {
 
 export async function getAdminUser(request?: Request): Promise<AuthUser | null> {
   try {
-    // For Astro actions, request is passed via context
-    const cookieHeader = request?.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
-    if (!tokenMatch) return null;
+    if (!request) return null;
 
-    const token = tokenMatch?.[1];
-    if (!token) return null;
+    const { env } = await import('cloudflare:workers');
 
-    const db = await getDb();
-if (!db) throw new Error("Database not available");
+    // Get token from cookie
+    const cookieHeader = request.headers.get('cookie');
+    const match = cookieHeader?.match(/better-auth\.session_token=([^;]+)/);
 
-    const session = await db.select()
-      .from(sessions)
-      .where(eq(sessions.token, token))
-      .limit(1)
-      .get() ?? undefined;
+    if (!match) return null;
 
-    if (!session) return null;
+    const token = match[1];
 
-    const expiresAtMs = typeof session.expiresAt === 'number'
-      ? session.expiresAt * 1000
-      : new Date(session.expiresAt).getTime();
+    // Read session directly from KV
+    if (!env.SESSION) return null;
 
-    if (expiresAtMs <= Date.now()) return null;
+    const stored = await env.SESSION.get(token);
+    if (!stored) return null;
 
-    const user = await db.select()
+    const data = JSON.parse(stored);
+    const session = data.session;
+    const kvUser = data.user;
+
+    if (!session || new Date(session.expiresAt) <= new Date()) return null;
+
+    // Initialize auth instance
+    initAuthInstance(env as Record<string, unknown>);
+
+    // Get role from database
+    if (!env.DB) return null;
+
+    const db = drizzle(env.DB as D1Database, { schema: { users } });
+    const dbUser = await db.select({ id: users.id, email: users.email, name: users.name, role: users.role })
       .from(users)
       .where(eq(users.id, session.userId))
       .limit(1)
-      .get() ?? undefined;
+      .get();
 
-    if (!user) return null;
+    if (!dbUser) return null;
 
-    const role = (user.role || 'user') as AuthUser['role'];
+    const role = (dbUser.role || 'user') as AuthUser['role'];
     if (!['admin', 'super_admin', 'editor'].includes(role)) {
       return null;
     }
 
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
+      id: dbUser.id,
+      email: dbUser.email || '',
+      name: dbUser.name,
       role,
     };
-  } catch {
+  } catch (e) {
+    console.error('[AdminAuth] Error:', e);
     return null;
   }
 }

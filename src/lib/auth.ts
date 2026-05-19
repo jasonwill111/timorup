@@ -1,250 +1,232 @@
-// Better Auth Configuration - Environment Aware
+// Better Auth Configuration - Cloudflare Workers Compatible
+// Using better-auth-cloudflare for native CF Workers support
+
 import { betterAuth } from 'better-auth';
 import type { Auth } from 'better-auth';
-import { drizzleAdapter } from '@better-auth/drizzle-adapter';
+import { withCloudflare } from 'better-auth-cloudflare';
+import { drizzle } from 'drizzle-orm/d1';
 import { users, sessions, accounts, verifications } from '@/db/schema';
-import { createSessionKVStore } from './auth-kv-store';
 
-// Get OAuth credentials from environment
-const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
-const facebookClientId = process.env.FACEBOOK_CLIENT_ID || '';
-const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET || '';
-
-// Check if OAuth is configured
-const isGoogleConfigured = !!googleClientId && !!googleClientSecret;
-const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
-
-// Convert Date objects to Unix timestamps for D1
-function convertToTimestamp(value: unknown): number | unknown {
-  if (value instanceof Date) {
-    return Math.floor(value.getTime() / 1000);
-  }
-  if (Array.isArray(value)) {
-    return value.map(convertToTimestamp);
-  }
-  if (value && typeof value === 'object') {
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(value)) {
-      result[k] = convertToTimestamp(v);
-    }
-    return result;
-  }
-  return value;
+// Type for Cloudflare properties
+interface CfProperties {
+  colo?: string;
+  city?: string;
+  country?: string;
+  region?: string;
+  timezone?: string;
+  latitude?: string;
+  longitude?: string;
 }
 
-// Wrapper that only intercepts insert to convert Date to timestamps
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function wrapDbForD1(db: any): any {
-  return new Proxy(db, {
-    get(target, prop) {
-      if (prop === 'insert') {
-        return function(table: unknown) {
-          const query = target.insert(table);
-          return new Proxy(query, {
-            get(qTarget, qProp) {
-              if (qProp === 'values') {
-                return function(data: unknown) {
-                  return qTarget.values.call(qTarget, convertToTimestamp(data));
-                };
-              }
-              // Return method directly without binding - Cloudflare Workers requires native functions to keep their original `this`
-              const method = qTarget[qProp];
-              if (typeof method === 'function') {
-                return method;
-              }
-              return method;
-            }
-          });
-        };
-      }
-      const value = target[prop as keyof typeof target];
-      // Don't bind native functions - they must keep their original `this` in Cloudflare Workers
-      // Binding native functions like fetch, JSON.stringify, etc. causes "Illegal invocation" errors
-      if (typeof value === 'function') {
-        return value;
-      }
-      return value;
-    }
-  });
-}
-
-// Type for auth config
-export interface AuthConfig {
-  db: unknown;
-  env?: { SESSION?: KVNamespace };
-  baseURL?: string;
-}
+// Base URL fallback
+const DEFAULT_BASE_URL = 'https://timorlist.jasonwill.workers.dev';
 
 /**
- * Create Drizzle adapter for Better Auth
+ * Create Better Auth instance for Cloudflare Workers
+ * Uses withCloudflare for native CF Workers compatibility
  */
-export function createDrizzleAuthAdapter(db: unknown) {
-  const wrappedDb = wrapDbForD1(db);
-  return drizzleAdapter(wrappedDb, {
-    provider: 'sqlite',
+export function createAuthInstance(env: Record<string, unknown>, cf?: CfProperties) {
+  // Get D1 database binding
+  const d1Db = env.DB as D1Database;
+  if (!d1Db) {
+    throw new Error('[Auth] D1 database binding (DB) not found in env');
+  }
+
+  // Get environment variables from env (Cloudflare Workers bindings)
+  const googleClientId = (env.GOOGLE_CLIENT_ID as string) || '';
+  const googleClientSecret = (env.GOOGLE_CLIENT_SECRET as string) || '';
+  const facebookClientId = (env.FACEBOOK_CLIENT_ID as string) || '';
+  const facebookClientSecret = (env.FACEBOOK_CLIENT_SECRET as string) || '';
+
+  // Check if OAuth is configured
+  const isGoogleConfigured = !!googleClientId && !!googleClientSecret;
+  const isFacebookConfigured = !!facebookClientId && !!facebookClientSecret;
+
+  // Validate AUTH_SECRET (optional - better-auth handles missing secret)
+  const authSecret = (env.BETTER_AUTH_SECRET as string) || '';
+  if (authSecret && authSecret.length < 32) {
+    console.error('[Auth] BETTER_AUTH_SECRET must be at least 32 characters. Current length:', authSecret.length);
+  }
+
+  // Get base URL from env or use default
+  const baseURL = (env.APP_URL as string) || (env.BETTER_AUTH_URL as string) || DEFAULT_BASE_URL;
+
+  // Create Drizzle instance WITH schema - required for better-auth
+  const db = drizzle(d1Db, {
     schema: {
-      user: users,
-      session: sessions,
-      account: accounts,
-      verification: verifications,
-    },
+      users,
+      sessions,
+      accounts,
+      verifications
+    }
   });
-}
 
-/**
- * Auth Factory - creates Better Auth instances
- */
-export function createAuthFactory() {
-  return {
-    createAuth(config: AuthConfig): Auth {
-      const { db, env, baseURL } = config;
+  // Configure social providers if available
+  const socialProviders: Record<string, { clientId: string; clientSecret: string }> | undefined =
+    (isGoogleConfigured || isFacebookConfigured)
+      ? {
+          ...(isGoogleConfigured ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } } : {}),
+          ...(isFacebookConfigured ? { facebook: { clientId: facebookClientId, clientSecret: facebookClientSecret } } : {}),
+        }
+      : undefined;
 
-      // Wrap db to convert Date objects to timestamps for D1
-      const wrappedDb = wrapDbForD1(db);
-
-      // Create auth instance
-      return betterAuth({
-        baseURL: baseURL || process.env.BETTER_AUTH_URL || 'http://localhost:8787',
-
-        database: drizzleAdapter(wrappedDb, {
-          provider: 'sqlite',
+  // Use withCloudflare for native CF Workers compatibility
+  const authConfig = withCloudflare(
+    {
+      // Cloudflare specific options
+      d1: {
+        db,  // Drizzle instance with schema
+        options: {
           schema: {
             user: users,
             session: sessions,
             account: accounts,
             verification: verifications,
           },
-        }),
-
-        // Email and password authentication
-        emailAndPassword: {
-          enabled: true,
-          requireEmailVerification: false,
-        },
-
-        // Social providers - only enable if credentials are configured
-        ...(isGoogleConfigured || isFacebookConfigured ? {
-          socialProviders: {
-            google: isGoogleConfigured ? {
-              clientId: googleClientId,
-              clientSecret: googleClientSecret,
-            } : undefined,
-            facebook: isFacebookConfigured ? {
-              clientId: facebookClientId,
-              clientSecret: facebookClientSecret,
-            } : undefined,
-          },
-        } : {}),
-
-        // Session configuration - optimized for performance
-        session: {
-          expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
-          updateAge: 60 * 60 * 24, // 1 day
-          cookieCache: {
-            enabled: true,
-            maxAge: 60 * 5, // 5 minutes cache for session reads
-          },
-        },
-
-        // Cache configuration for better-auth 1.6+
-        cache: {
-          enabled: true,
-          maxAge: 60 * 10, // 10 minutes TTL for auth cache
-        },
-
-        // Trusted origins - validate APP_URL format, no localhost in production
-        trustedOrigins: (() => {
-          const origins: string[] = [];
-          const appUrl = process.env.APP_URL;
-          if (appUrl) {
-            try {
-              const url = new URL(appUrl);
-              // Only add if it's a valid HTTPS URL (not localhost)
-              if (url.protocol === 'https:' && !url.hostname.endsWith('.localhost') && url.hostname !== 'localhost') {
-                origins.push(appUrl);
-              }
-            } catch {
-              console.warn('[Auth] Invalid APP_URL format:', appUrl);
+          usePlural: false,
+        }
+      },
+      // KV for sessions - store sessions in KV instead of D1 (avoids RETURNING clause issue)
+      kv: env.SESSION,
+      // Disable geolocation and IP detection
+      geolocationTracking: false,
+      autoDetectIpAddress: false,
+    },
+    {
+      // Standard better-auth options
+      baseURL,
+      database: undefined,  // Set by withCloudflare
+      emailAndPassword: {
+        enabled: true,
+        requireEmailVerification: false,
+      },
+      ...(socialProviders ? { socialProviders } : {}),
+      session: {
+        expiresIn: 60 * 60 * 24 * 7, // 7 days
+        updateAge: 60 * 60 * 24, // 1 day
+        storeSessionInDatabase: false,  // Use KV for sessions
+      },
+      // Disable cache to ensure fresh reads
+      cache: undefined,
+      trustedOrigins: (() => {
+        const origins: string[] = [];
+        const appUrl = baseURL;
+        if (appUrl) {
+          try {
+            const url = new URL(appUrl);
+            if (url.protocol === 'https:' && !url.hostname.endsWith('.localhost') && url.hostname !== 'localhost') {
+              origins.push(appUrl);
             }
+          } catch {
+            console.warn('[Auth] Invalid APP_URL format:', appUrl);
           }
-          return origins;
-        })(),
+        }
+        return origins;
+      })(),
+      password: {
+        minLength: 8,
+        maxLength: 100,
+      },
+    }
+  );
 
-        // Password configuration
-        password: {
-          minLength: 8,
-          maxLength: 100,
-        },
-      });
+  return betterAuth(authConfig);
+}
+
+// Singleton auth instance cache - global to survive multiple requests
+let authInstance: Auth | null = null;
+let cachedEnvKeys: string = '';
+
+/**
+ * Initialize and cache auth instance
+ * Uses global singleton to avoid reinitializing on each request
+ */
+export function initAuthInstance(
+  env: Record<string, unknown>,
+  _cf?: CfProperties
+): Auth {
+  // Create a key from env binding names to detect env changes
+  const envKeys = Object.keys(env).sort().join(',');
+
+  // Return cached instance if env hasn't changed
+  if (authInstance && cachedEnvKeys === envKeys) {
+    return authInstance;
+  }
+
+  authInstance = createAuthInstance(env, _cf);
+  cachedEnvKeys = envKeys;
+  console.log('[Auth] Created new auth instance');
+
+  return authInstance;
+}
+
+/**
+ * Get auth instance (for use in API routes)
+ * Uses cloudflare:workers for env access
+ */
+export async function getAuth(): Promise<Auth> {
+  if (authInstance) {
+    return authInstance;
+  }
+
+  // Get env from cloudflare:workers
+  let env: Record<string, unknown> | undefined;
+
+  // Try cloudflare:workers dynamic import
+  try {
+    const { env: workersEnv } = await import('cloudflare:workers');
+    if (workersEnv && typeof workersEnv === 'object' && Object.keys(workersEnv).length > 0) {
+      env = workersEnv as Record<string, unknown>;
+    }
+  } catch {
+    // Not in CF environment
+  }
+
+  // Fallback to globalThis
+  if (!env && typeof globalThis !== 'undefined' && 'env' in globalThis) {
+    env = (globalThis as unknown as { env: Record<string, unknown> }).env;
+  }
+
+  if (!env || Object.keys(env).length === 0) {
+    throw new Error('[Auth] No env available');
+  }
+
+  return initAuthInstance(env);
+}
+
+/**
+ * Create auth handler for API routes
+ * Use in API endpoints like /api/auth/[...all].ts
+ */
+export function createAuthHandler() {
+  return {
+    handler: async (request: Request, env: Record<string, unknown>, cf?: CfProperties) => {
+      const auth = initAuthInstance(env, cf);
+      return auth.api.handler(request);
     }
   };
 }
 
-// Module-level singleton (lazy init to avoid startup issues)
-let _authInstance: Auth | undefined;
-let _initPromise: Promise<Auth> | undefined;
-
-/**
- * Get or create singleton auth instance
- */
-export async function getAuthInstance(env?: { SESSION?: KVNamespace }): Promise<Auth> {
-  if (!_authInstance) {
-    _initPromise ??= (async () => {
-      const { getDb } = await import('./db');
-      const db = await getDb();
-if (!db) throw new Error("Database not available");
-      if (!db) {
-        throw new Error('[getAuthInstance] Database not available');
-      }
-      const factory = createAuthFactory();
-      return factory.createAuth({ db, env });
-    })();
-    _authInstance = await _initPromise;
-  }
-  return _authInstance;
-}
-
-// Validate AUTH_SECRET at startup (must be >= 32 chars)
-const authSecret = process.env.BETTER_AUTH_SECRET;
-if (authSecret && authSecret.length < 32) {
-  console.error('[Auth] FATTER_AUTH_SECRET must be at least 32 characters. Current length:', authSecret.length);
-  throw new Error('BETTER_AUTH_SECRET must be at least 32 characters');
-}
-
-// Singleton auth instance cache
-let authInstance: Auth | null = null;
-
-/**
- * Get singleton auth instance (for Server Actions)
- */
-export async function initAuth(): Promise<Auth> {
-  if (authInstance) return authInstance;
-
-  // Lazy initialization with env check
+// Export OAuth status for UI (lazy-loaded)
+export function getOauthStatus(): { google: boolean; facebook: boolean } {
   if (typeof globalThis !== 'undefined' && 'env' in globalThis) {
-    try {
-      const cfEnv = (globalThis as unknown as { env: Record<string, unknown> }).env;
-      const db = await import('./db').then(m => m.getDb());
-      authInstance = createAuthFactory().createAuth({
-        db,
-        env: cfEnv as { SESSION?: KVNamespace; [key: string]: unknown },
-        baseURL: process.env.APP_URL || process.env.BETTER_AUTH_URL || 'http://localhost:8787',
-      });
-      return authInstance;
-    } catch (e) {
-      console.warn('[Auth] initAuth failed:', e);
+    const env = (globalThis as unknown as { env: Record<string, unknown> }).env;
+    if (env) {
+      const googleId = (env.GOOGLE_CLIENT_ID as string) || '';
+      const googleSecret = (env.GOOGLE_CLIENT_SECRET as string) || '';
+      const fbId = (env.FACEBOOK_CLIENT_ID as string) || '';
+      const fbSecret = (env.FACEBOOK_CLIENT_SECRET as string) || '';
+      return {
+        google: !!googleId && !!googleSecret,
+        facebook: !!fbId && !!fbSecret,
+      };
     }
   }
-
-  throw new Error('Auth not available');
+  return { google: false, facebook: false };
 }
-
-// Export OAuth status for UI
-export const oauthStatus = {
-  google: isGoogleConfigured,
-  facebook: isFacebookConfigured,
-};
 
 // Re-export types
 export type { Auth } from 'better-auth';
+
+// Re-export initAuth for server actions
+export { initAuthInstance as initAuth };
