@@ -38,9 +38,6 @@ export default defineConfig({
         '@': new URL('./src', import.meta.url).pathname,
       },
     },
-    optimizeDeps: {
-      enabled: false,
-    },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
       build: {

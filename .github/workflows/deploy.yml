@@ -24,13 +24,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install dependencies
         run: |
           rm -rf node_modules .pnpm-store
-          pnpm install --frozen-lockfile
+          pnpm install
 
       - name: Verify packages
         run: |
