@@ -30,13 +30,15 @@ jobs:
       - name: Install dependencies
         run: |
           rm -rf node_modules .pnpm-store
-          pnpm install
+          pnpm install --frozen-lockfile
 
-      - name: Debug node_modules
+      - name: Verify packages
         run: |
+          echo "=== Check packages ==="
           ls -la node_modules/ | grep better
-          ls -la node_modules/better-auth-cloudflare 2>/dev/null || echo "not in root"
-          ls -la node_modules/.pnpm/ | grep better | head -5
+          echo "=== Check symlinks ==="
+          readlink -f node_modules/better-auth 2>/dev/null || echo "no symlink"
+          readlink -f node_modules/better-auth-cloudflare 2>/dev/null || echo "no symlink"
 
       - name: Build for Cloudflare Workers
         run: pnpm build
