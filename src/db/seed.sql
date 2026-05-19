@@ -1,4 +1,4 @@
--- Seed data for timorlist (D1 compatible - snake_case columns)
+-- Seed data for timorup (D1 compatible - snake_case columns)
 
 -- Insert categories
 INSERT OR IGNORE INTO categories (id, name, slug, description, icon) VALUES

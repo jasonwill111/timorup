@@ -130,7 +130,7 @@ try {
 
 // Get first variant as default for display
 const getFirstVariant = (pkg: typeof PLAN_INFO[string]) => {
-  return pkg.variants[0] || { name: 'Default', price: 0, currency: 'USD', durationValue: 1, durationUnit: 'month', limits: {}, features: [] };
+  return pkg.variants.[0] || { name: 'Default', price: 0, currency: 'USD', durationValue: 1, durationUnit: 'month', limits: {}, features: [] };
 };
 
 const selectedPlan = PLAN_INFO[planParam] || PLAN_INFO['sp-business-free'] || {
@@ -151,19 +151,18 @@ try {
   const { getDb } = await import('@/lib/db');
   const db = await getDb();
   const { orders } = await import('@/db/schema');
-  const { eq } = await import('drizzle-orm');
+  const { eq, and } = await import('drizzle-orm');
 
-  // Check for existing unpaid order (simplified)
-  let existingOrder = null;
-  try {
-    const allOrders = await db.select({ id: orders.id, status: orders.status })
-      .from(orders)
-      .all();
-    const matching = allOrders.filter(o => o.userId === user.id && o.status === 'pending');
-    existingOrder = matching.length > 0 ? matching[0] : null;
-  } catch (e) {
-    console.error('Order query failed:', e);
-  }
+  // Check for existing unpaid order
+  const existingOrder = await db.select({ id: orders.id })
+    .from(orders)
+    .where(and(
+      eq(orders.userId, user.id),
+      eq(orders.servicePackageId, planParam),
+      eq(orders.status, 'pending')
+    ))
+    .limit(1)
+    .get();
 
   if (existingOrder) {
     orderId = existingOrder.id;
@@ -201,7 +200,7 @@ const adminInfo = {
   <div class="container py-8 md:py-12">
     <div class="max-w-2xl mx-auto">
 
-      {!userBusiness && (
+      {!userBusiness  (
         <!-- No business created -->
         <div class="text-center py-12">
           <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
@@ -216,7 +215,7 @@ const adminInfo = {
           </a>
         </div>
 
-      ) : !isConfirmed && (
+      ) : !isConfirmed  (
         <!-- Step 1: Review and confirm subscription -->
         <div>
           <div class="text-center mb-8">
@@ -259,7 +258,7 @@ const adminInfo = {
                 <span class="text-muted-foreground">Phone</span>
                 <span class="font-medium">
                   {userBusiness.contactNumber
-                     ? `${userBusiness.countryCode || '+670'} ${userBusiness.contactNumber}`
+                     `${userBusiness.countryCode || '+670'} ${userBusiness.contactNumber}`
                     : '-'}
                 </span>
               </div>
@@ -277,7 +276,7 @@ const adminInfo = {
             </CardHeader>
             <CardContent>
               <div class="flex justify-between items-center mb-4">
-                <span class="text-3xl font-bold text-primary">{firstVariant.price}</span>
+                <span class="text-3xl font-bold text-primary">${firstVariant.price}</span>
                 <span class="text-muted-foreground">/{firstVariant.durationValue} {firstVariant.durationUnit}</span>
               </div>
 
@@ -298,7 +297,7 @@ const adminInfo = {
             <CardFooter class="bg-muted/30">
               <div class="flex justify-between w-full text-sm">
                 <span class="text-muted-foreground">SKU Limit</span>
-                <span class="font-medium">{firstVariant.limits.skuLimit > 0 ? firstVariant.limits.skuLimit : 0} products</span>
+                <span class="font-medium">{firstVariant.limits.skuLimit  0} products</span>
               </div>
             </CardFooter>
           </Card>

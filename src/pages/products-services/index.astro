@@ -77,27 +77,27 @@ const productsWithBusiness = allProducts
       priceFields: p.priceFields,
       productType: p.productType,
       businessId: p.businessId,
-      businessTitle: business.title || 'Unknown',
-      businessSlug: business.slug || '',
-      businessType: business.entityType || 'business',
+      businessTitle: business?.title || 'Unknown',
+      businessSlug: business?.slug || '',
+      businessType: business?.entityType || 'business',
     };
   })
   .filter((p: any) => p.businessTitle !== 'Unknown');
 
 // Serialize for client - ensure all values are JSON-safe primitives
 const safeBusinesses = allBusinesses.map((b: any) => ({
-  id: typeof b.id === 'object'  String(Object.values(b)[0]) : String(b.id || ''),
-  title: typeof b.title === 'object'  String(b.title.toString() || '') : String(b.title || ''),
-  slug: typeof b.slug === 'object'  String(b.slug.toString() || '') : String(b.slug || ''),
+  id: typeof b.id === 'object' ? String(Object.values(b)[0]) : String(b.id || ''),
+  title: typeof b.title === 'object' ? String(b.title?.toString() || '') : String(b.title || ''),
+  slug: typeof b.slug === 'object' ? String(b.slug?.toString() || '') : String(b.slug || ''),
 }));
 
 const safeProducts = productsWithBusiness.map((p: any) => ({
-  id: typeof p.id === 'object'  String(p.id.toString() || '') : String(p.id || ''),
-  title: typeof p.title === 'object'  String(p.title.toString() || '') : String(p.title || ''),
-  price: p.price != null  (typeof p.price === 'object'  String(p.price.toString() || '') : String(p.price)) : null,
-  priceFields: p.priceFields != null  String(p.priceFields) : null,
-  productType: p.productType != null  String(p.productType) : null,
-  businessId: typeof p.businessId === 'object'  String(p.businessId.toString() || '') : String(p.businessId || ''),
+  id: typeof p.id === 'object' ? String(p.id?.toString() || '') : String(p.id || ''),
+  title: typeof p.title === 'object' ? String(p.title?.toString() || '') : String(p.title || ''),
+  price: p.price != null ? (typeof p.price === 'object' ? String(p.price?.toString() || '') : String(p.price)) : null,
+  priceFields: p.priceFields != null ? String(p.priceFields) : null,
+  productType: p.productType != null ? String(p.productType) : null,
+  businessId: typeof p.businessId === 'object' ? String(p.businessId?.toString() || '') : String(p.businessId || ''),
   businessTitle: String(p.businessTitle || ''),
   businessSlug: String(p.businessSlug || ''),
   businessType: String(p.businessType || 'business'),
@@ -126,7 +126,7 @@ const structuredData = {
         <h1 class="text-2xl sm:text-3xl font-bold">Products & Services</h1>
         <p class="text-xs sm:text-sm text-muted-foreground">Browse all products and services</p>
       </div>
-      <a href="/listings" class="text-xs sm:text-sm text-primary hover:underline">â†Directory</a>
+      <a href="/listings" class="text-xs sm:text-sm text-primary hover:underline">�?Directory</a>
     </div>
 
     <!-- Filters -->
@@ -149,8 +149,8 @@ const structuredData = {
       <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
         <option value="recent">Recent</option>
         <option value="name">Name A-Z</option>
-        <option value="price-low">Price â†/option>
-        <option value="price-high">Price â†/option>
+        <option value="price-low">Price �?/option>
+        <option value="price-high">Price �?/option>
       </select>
     </form>
 
@@ -179,13 +179,13 @@ const structuredData = {
       try {
         const fields = JSON.parse(product.priceFields);
         if (fields.length > 0 && fields[0].value) {
-          const unit = fields[0].unit  `/${fields[0].unit.replace('/', '')}` : '';
+          const unit = fields[0].unit ? `/${fields[0].unit.replace('/', '')}` : '';
           return `$${fields[0].value}${unit}`;
         }
       } catch {}
     }
     if (product.price) {
-      const unit = product.priceUnit  `/${product.priceUnit.replace('/', '')}` : '';
+      const unit = product.priceUnit ? `/${product.priceUnit.replace('/', '')}` : '';
       return `$${product.price}${unit}`;
     }
     return 'Ask for price';
@@ -193,7 +193,7 @@ const structuredData = {
 
   function getProductUrl(product) {
     return product.businessType === 'business'
-       `/business/${product.businessSlug}/product/${product.id}`
+      ? `/business/${product.businessSlug}/product/${product.id}`
       : `/${product.businessType}/${product.businessSlug}`;
   }
 
@@ -209,7 +209,7 @@ const structuredData = {
       <a href="${getProductUrl(product)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer">
         <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
           <span class="text-4xl font-bold text-amber-500/40">${product.title.charAt(0)}</span>
-          ${product.productType  `
+          ${product.productType ? `
             <span class="absolute top-1.5 left-1.5 sm:top-2 px-1.5 py-0.5 text-[10px] sm:text-[11px] bg-black/75 text-white rounded-full capitalize">
               ${product.productType}
             </span>

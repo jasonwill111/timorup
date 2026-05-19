@@ -7,7 +7,7 @@
 
 -- Jobs (listingType = 'job') - category: lc-004 (Jobs)
 INSERT OR IGNORE INTO listings (id, title, slug, owner_id, category_id, listing_type, status, description, price, condition, location, contact_name, contact_number, email, tags, likes, saves, views, created_at, expires_at) VALUES
-('job-001', 'Restaurant Manager Wanted', 'restaurant-manager-wanted', 'user-1', 'lc-004', 'job', 'live', 'Looking for an experienced restaurant manager to join our team. Must have 3+ years experience in hospitality management.', '$800-1200/month', NULL, 'Dili', 'Maria Santos', '+670 77001234', 'jobs@timorlist.tl', '["restaurant","manager","hospitality"]', 15, 8, 120, 1778077474, 1778335474),
+('job-001', 'Restaurant Manager Wanted', 'restaurant-manager-wanted', 'user-1', 'lc-004', 'job', 'live', 'Looking for an experienced restaurant manager to join our team. Must have 3+ years experience in hospitality management.', '$800-1200/month', NULL, 'Dili', 'Maria Santos', '+670 77001234', 'jobs@timorup.com', '["restaurant","manager","hospitality"]', 15, 8, 120, 1778077474, 1778335474),
 ('job-002', 'English Teacher Required', 'english-teacher-required', 'user-2', 'lc-004', 'job', 'live', 'International school seeks qualified English teacher. BA in Education required.', '$1500-2000/month', NULL, 'Dili', 'John Smith', '+670 77005678', 'jobs@school.tl', '["english","teacher","education"]', 23, 12, 200, 1778077475, 1778335475),
 ('job-003', 'Software Developer', 'software-developer-timor', 'user-3', 'lc-004', 'job', 'live', 'Tech company seeking full-stack developer. React/Node experience preferred.', '$1500-2500/month', NULL, 'Dili', 'Carlos Oliveira', '+670 77009999', 'careers@tech.tl', '["developer","software","tech"]', 45, 20, 350, 1778077476, 1778335476);
 

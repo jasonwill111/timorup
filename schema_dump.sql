@@ -218,8 +218,8 @@ INSERT INTO "users" ("id","email","email_verified","phone","name","image","role"
 INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('user-2','maria@example.com',0,NULL,'Maria Santos',NULL,'user',NULL,NULL);
 INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('user-3','carlos@example.com',0,NULL,'Carlos Oliveira',NULL,'user',NULL,NULL);
 INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('j2mQc2fKhIGpDrMhAjPeLg3lpGjo4U5M','test2@test.com',0,NULL,'Test',NULL,'user',1777891008,1777891008);
-INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('admin-main','admin@timorlist.com',0,NULL,'Admin',NULL,'super_admin',1778130000,1778130000);
-INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('user-main','user@timorlist.com',0,NULL,'User',NULL,'user',1778130000,1778130000);
+INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('admin-main','admin@timorup.com',0,NULL,'Admin',NULL,'super_admin',1778130000,1778130000);
+INSERT INTO "users" ("id","email","email_verified","phone","name","image","role","created_at","updated_at") VALUES('user-main','user@timorup.com',0,NULL,'User',NULL,'user',1778130000,1778130000);
 CREATE TABLE sessions (
   id TEXT PRIMARY KEY NOT NULL,
   user_id TEXT NOT NULL,

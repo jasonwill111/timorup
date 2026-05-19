@@ -48,7 +48,7 @@ const { id, lat, lng, address = 'Location', openFn = 'openMap' } = Astro.props;
   <div class="mt-2 flex items-center gap-2">
     <p class="text-xs text-muted-foreground select-all cursor-pointer flex-1 truncate" title="Click to copy">{address}</p>
     <button
-      onclick={`navigator.clipboard.writeText('${address}').then(() => { const btn = this; btn.textContent = '✓'; setTimeout(() => btn.textContent = 'Copy', 1500); })`}
+      onclick={`navigator.clipboard.writeText('${address}').then(() => { const btn = this; btn.textContent = '[OK]'; setTimeout(() => btn.textContent = 'Copy', 1500); })`}
       class="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted"
     >
       Copy

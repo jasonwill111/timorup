@@ -17,9 +17,7 @@ const offset = (page - 1) * LIMIT;
 
 // CDN Cache: 60s for filtered, 120s for main list
 const hasSearchParams = search || parentCat || childCat;
-Astro.response.headers.set('Cache-Control', hasSearchParams
-   'public, max-age=30, s-maxage=60, stale-while-revalidate=120'
-  : 'public, max-age=60, s-maxage=120, stale-while-revalidate=300'
+Astro.response.headers.set('Cache-Control', hasSearchParams ? 'public, max-age=30, s-maxage=60, stale-while-revalidate=120' : 'public, max-age=60, s-maxage=120, stale-while-revalidate=300'
 );
 
 // Get categories
@@ -126,14 +124,14 @@ const buildUrl = (params: Record<string, string>) => {
     </form>
 
     {/* Results */}
-    {entities.length > 0  (
+    {entities.length > 0 && (
       <>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {entities.map(e => (
             <a href={`/non-profit/${e.slug}`} data-animate-card class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/40 overflow-hidden cursor-pointer transition-all duration-200">
               {/* Image/Icon Area */}
               <div class="aspect-[4/3] bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 relative overflow-hidden">
-                {e.profileImageId  (
+                {e.profileImageId && (
                   <img src={`/api/media/${e.profileImageId}`} alt={e.title} class="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <div class="absolute inset-0 flex items-center justify-center">
@@ -182,7 +180,7 @@ const buildUrl = (params: Record<string, string>) => {
         {totalPages > 1 && (
           <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
             <a href={buildUrl({ page: String(page - 1) })}
-               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1  "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page > 1 ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
               â†Prev
             </a>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -195,7 +193,7 @@ const buildUrl = (params: Record<string, string>) => {
               );
             })}
             <a href={buildUrl({ page: String(page + 1) })}
-               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages  "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
+               class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", page < totalPages ? "hover:border-primary hover:text-primary cursor-pointer" : "opacity-50 pointer-events-none text-muted-foreground"]}>
               Next â†            </a>
           </nav>
         )}

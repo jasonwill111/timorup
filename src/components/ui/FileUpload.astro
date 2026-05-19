@@ -125,7 +125,7 @@ const {
     item.dataset.id = id;
     item.innerHTML = `
       <img src="${url}" alt="Preview" class="w-full h-full object-cover rounded" />
-      <button type="button" class="remove-btn absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs">×</button>
+      <button type="button" class="remove-btn absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs">[X]</button>
     `;
 
     item.querySelector('.remove-btn')?.addEventListener('click', () => {
