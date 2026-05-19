@@ -32,7 +32,6 @@ export default defineConfig({
     ],
     ssr: {
       external: ['cloudflare:workers'],
-      noExternal: [/@better-auth\/.*/, 'better-auth-cloudflare', 'better-auth'],
     },
     resolve: {
       alias: {
@@ -40,7 +39,7 @@ export default defineConfig({
       },
     },
     optimizeDeps: {
-      include: ['better-auth-cloudflare', 'better-auth', '@better-auth/drizzle-adapter'],
+      exclude: ['better-auth-cloudflare'],
     },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {
