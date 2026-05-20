@@ -28,7 +28,7 @@ export function getR2Bucket(): R2Bucket | undefined {
 export function getR2PublicUrl(): string {
   // R2_PUBLIC_URL is optional - cast through unknown for type safety
   const r2Url = (env as unknown as Record<string, string | undefined>)['R2_PUBLIC_URL'];
-  return r2Url || `https://TimorUp-media.r2.cloudflarestorage.com`;
+  return r2Url || `https://timorlist-media.r2.cloudflarestorage.com`;
 }
 
 // File size limits (in bytes)
@@ -219,7 +219,7 @@ export function getOptimizedImageUrl(
   if (originalUrl.includes(r2PublicUrl)) {
     key = originalUrl.replace(`${r2PublicUrl}/`, '');
   } else if (originalUrl.includes('r2.cloudflarestorage.com')) {
-    const match = originalUrl.match(/TimorUp-media\.r2\.cloudflarestorage\.com\/(.+)/);
+    const match = originalUrl.match(/timorlist-media\.r2\.cloudflarestorage\.com\/(.+)/);
     if (match) key = match[1];
   }
 
@@ -229,7 +229,7 @@ export function getOptimizedImageUrl(
   transforms.push(`quality=${quality}`);
   transforms.push(`format=${format}`);
 
-  return `${env.SITE_URL || 'https://TimorUp.com'}/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
+  return `${env.SITE_URL || 'https://timorlist.com'}/cdn-cgi/image/${transforms.join(',')}/${r2PublicUrl}/${key}`;
 }
 
 // Check if running in Cloudflare environment

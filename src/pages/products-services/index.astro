@@ -109,14 +109,14 @@ const productsJson = JSON.stringify(safeProducts);
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "Product",
-  "name": "TimorUp Products & Services",
+  "name": "TimorList Products & Services",
   "description": "Browse products and services from businesses in Timor-Leste",
-  "url": "https://TimorUp.com/products-services",
+  "url": "https://timorlist.com/products-services",
 };
 ---
 
 <Layout
-  title="Products & Services - TimorUp"
+  title="Products & Services - TimorList"
   description="Browse all products and services from businesses in Timor-Leste"
   structuredData={structuredData}
 >
@@ -126,7 +126,7 @@ const structuredData = {
         <h1 class="text-2xl sm:text-3xl font-bold">Products & Services</h1>
         <p class="text-xs sm:text-sm text-muted-foreground">Browse all products and services</p>
       </div>
-      <a href="/listings" class="text-xs sm:text-sm text-primary hover:underline">‚Ü?Directory</a>
+      <a href="/listings" class="text-xs sm:text-sm text-primary hover:underline">‚Üê Directory</a>
     </div>
 
     <!-- Filters -->
@@ -149,8 +149,8 @@ const structuredData = {
       <select id="sort-filter" name="sort" class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
         <option value="recent">Recent</option>
         <option value="name">Name A-Z</option>
-        <option value="price-low">Price ‚Ü?/option>
-        <option value="price-high">Price ‚Ü?/option>
+        <option value="price-low">Price ‚Üë</option>
+        <option value="price-high">Price ‚Üì</option>
       </select>
     </form>
 

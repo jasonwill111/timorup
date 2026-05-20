@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://timorup.com
+      url: https://timorlist.com
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
@@ -46,4 +46,4 @@ jobs:
       - name: Verify deployment
         run: |
           echo "Deployment complete"
-          curl -s -o /dev/null -w "%{http_code}" https://timorup.com || echo "Verification skipped"
+          curl -s -o /dev/null -w "%{http_code}" https://timorlist.com || echo "Verification skipped"

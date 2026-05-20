@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
-const BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@TimorUp.com';
+const BASE_URL = 'https://timorlist.jasonwill.workers.dev';
+const ADMIN_EMAIL = 'admin@timorlist.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 async function runTests() {
@@ -108,16 +108,16 @@ async function runTests() {
     console.log('   Direct API response:', apiText.substring(0, 300));
 
     // Summary
-    console.log('\n══════════════════════════════════════════════════════════════�?);
+    console.log('\n═══════════════════════════════════════════════════════════════');
     console.log('📊 ANALYSIS');
-    console.log('══════════════════════════════════════════════════════════════�?);
+    console.log('═══════════════════════════════════════════════════════════════');
 
     if (apiResponse?.success === false) {
-      console.log('�?API returned error');
+      console.log('❌ API returned error');
       console.log('   Code:', apiResponse?.error?.code);
       console.log('   Message:', apiResponse?.error?.message);
     } else if (apiResponse?.success === true) {
-      console.log('�?API returned success');
+      console.log('✅ API returned success');
       console.log('   User:', apiResponse?.user?.email);
     }
 

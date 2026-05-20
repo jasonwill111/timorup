@@ -6,8 +6,8 @@ import asyncio
 from browser_use import Agent
 from playwright.async_playwright import async_playwright
 
-BASE_URL = "https://timorup.jasonwill.workers.dev"
-ADMIN_EMAIL = "admin@timorup.com"
+BASE_URL = "https://timorlist.jasonwill.workers.dev"
+ADMIN_EMAIL = "admin@timorlist.com"
 ADMIN_PASSWORD = "admin12345"
 
 async def test_admin_pages():

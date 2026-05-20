@@ -1,7 +1,9 @@
 // Better Auth Configuration - Cloudflare Workers Compatible
+// Using better-auth-cloudflare for native CF Workers support
 
 import { betterAuth } from 'better-auth';
 import type { Auth } from 'better-auth';
+import { withCloudflare } from 'better-auth-cloudflare';
 import { drizzle } from 'drizzle-orm/d1';
 import { users, sessions, accounts, verifications } from '@/db/schema';
 
@@ -17,28 +19,7 @@ interface CfProperties {
 }
 
 // Base URL fallback
-const DEFAULT_BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
-
-/**
- * Cloudflare adapter configuration for better-auth
- */
-interface CloudflareAdapterConfig {
-  db: unknown;
-  schema?: Record<string, unknown>;
-  kv?: unknown;
-  r2?: unknown;
-}
-
-/**
- * withCloudflare - Creates Cloudflare-compatible better-auth config
- * This is a local implementation to avoid the better-auth-cloudflare package issues
- */
-function withCloudflare(cloudflareOptions: CloudflareAdapterConfig, authOptions: Record<string, unknown>) {
-  return {
-    ...authOptions,
-    database: cloudflareOptions.db,
-  };
-}
+const DEFAULT_BASE_URL = 'https://timorlist.jasonwill.workers.dev';
 
 /**
  * Create Better Auth instance for Cloudflare Workers
@@ -249,4 +230,3 @@ export type { Auth } from 'better-auth';
 
 // Re-export initAuth for server actions
 export { initAuthInstance as initAuth };
-

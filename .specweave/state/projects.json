@@ -1,18 +1,18 @@
 {
   "version": "1.0.0",
   "projects": {
-    "TimorUp": {
-      "id": "TimorUp",
-      "name": "TimorUp",
+    "TimorLink": {
+      "id": "TimorLink",
+      "name": "TimorLink",
       "techStack": [],
       "keywords": [],
       "created": "2026-04-23T00:00:00.000Z"
     }
   },
-  "defaultProject": "TimorUp",
+  "defaultProject": "TimorLink",
   "metadata": {
     "created": "2026-04-23T00:00:00.000Z",
-    "lastModified": "2026-05-19T00:00:00.000Z"
+    "lastModified": "2026-04-23T00:00:00.000Z"
   }
 }
 

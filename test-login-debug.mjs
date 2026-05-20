@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
-const BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@TimorUp.com';
+const BASE_URL = 'https://timorlist.jasonwill.workers.dev';
+const ADMIN_EMAIL = 'admin@timorlist.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 async function runTests() {
@@ -115,16 +115,16 @@ async function runTests() {
     console.log('   Admin Title:', adminTitle);
 
     // Summary
-    console.log('\n══════════════════════════════════════════════════════════════�?);
+    console.log('\n═══════════════════════════════════════════════════════════════');
     console.log('📊 LOGIN DEBUG SUMMARY');
-    console.log('══════════════════════════════════════════════════════════════�?);
+    console.log('═══════════════════════════════════════════════════════════════');
     console.log('Final URL:', url);
     console.log('Login successful:', !url.includes('/login'));
     console.log('Cookies set:', cookies.length);
 
     if (url.includes('/login') && cookies.length === 0) {
-      console.log('\n�?LOGIN FAILED - Possible causes:');
-      console.log('   1. User admin@TimorUp.com does not exist in database');
+      console.log('\n❌ LOGIN FAILED - Possible causes:');
+      console.log('   1. User admin@timorlist.com does not exist in database');
       console.log('   2. Password incorrect');
       console.log('   3. Auth API returning error (check console logs)');
       console.log('   4. Rate limiting blocking requests');

@@ -9,7 +9,7 @@ export default defineConfig({
     kvNamespaces: [],
     imageService: 'passthrough',
   }),
-  site: 'https://TimorUp.com',
+  site: 'https://timorlist.com',
 
   prefetch: {
     defaultStrategy: 'viewport',
@@ -19,7 +19,7 @@ export default defineConfig({
   // compressHTML: 'jsx', // ⚠️暂禁用，CI环境schema验证问题
 
   server: {
-    allowedHosts: ['TimorUp.com', 'www.TimorUp.com', 'localhost', '127.0.0.1'],
+    allowedHosts: ['timorlist.com', 'www.timorlist.com', 'localhost', '127.0.0.1'],
   },
 
   integrations: [
@@ -31,15 +31,16 @@ export default defineConfig({
       tailwindcss(),
     ],
     ssr: {
-      external: [
-        'cloudflare:workers',
-        /node:/,
-      ],
+      external: ['cloudflare:workers'],
+      noExternal: ['better-auth'],
     },
     resolve: {
       alias: {
         '@': new URL('./src', import.meta.url).pathname,
       },
+    },
+    optimizeDeps: {
+      exclude: ['@astrojs/cloudflare', 'better-auth', '@better-auth/drizzle-adapter', 'better-auth-cloudflare'],
     },
     // Disable all caching in development for real-time updates
     ...(process.env.NODE_ENV === 'development' ? {

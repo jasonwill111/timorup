@@ -1,43 +1,20 @@
 import { test, expect, Page } from '@playwright/test';
 
-// Use PRODUCTION environment for testing
-const BASE_URL = 'https://TimorUp.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@TimorUp.com';
+// Use LOCAL environment for testing (not production)
+const BASE_URL = 'http://localhost:8787';
+const ADMIN_EMAIL = 'admin@timorlist.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 // Helper to login
 async function adminLogin(page: Page) {
   await page.goto(`${BASE_URL}/admin/login`);
-  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle');
+  await page.fill('input[name="email"], input[type="email"], input#email', ADMIN_EMAIL);
+  await page.fill('input[name="password"], input#password', ADMIN_PASSWORD);
 
-  // Check if already logged in (redirected to home page or admin dashboard)
-  const currentUrl = page.url();
-  if (currentUrl.includes('/admin') && !currentUrl.includes('/login')) {
-    console.log('Already logged in, at:', currentUrl);
-    return;
-  }
-
-  // Check if redirected to home (user already has session)
-  if (!currentUrl.includes('/admin/login')) {
-    console.log('Redirected to:', currentUrl);
-    // Try going directly to admin
-    await page.goto(`${BASE_URL}/admin`);
-    return;
-  }
-
-  // Wait for the form to load
-  const emailInput = page.locator('#email');
-  const passwordInput = page.locator('#password');
-
-  await emailInput.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
-    console.log('Email input not found, page may be on login page');
-  });
-
-  await page.fill('#email', ADMIN_EMAIL);
-  await page.fill('#password', ADMIN_PASSWORD);
-
-  // Submit the form
-  await page.click('button[type="submit"]');
+  // Try clicking submit button
+  const submitBtn = page.locator('button[type="submit"], #submit-btn, button:has-text("Sign"), button:has-text("Log")');
+  await submitBtn.first().click();
   await page.waitForTimeout(2000);
 }
 
@@ -348,4 +325,3 @@ test.describe('Route Redirects (Old -> New)', () => {
     console.log('/admin/heroes status:', status);
   });
 });
-

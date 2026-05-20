@@ -19,7 +19,7 @@ Fix 588 TypeScript strict mode errors (TS18047, TS2339, TS2322, TS2769, TS2345) 
 ## User Stories
 
 ### US-001: Type Safety (P1)
-**Project**: TimorLink
+**Project**: timorlist
 
 **As a** developer
 **I want** all TypeScript errors resolved
@@ -74,10 +74,10 @@ export function assertNonNull<T>(val: T | null | undefined, msg = 'Value is null
 
 ## Success Criteria
 
-- `npx tsc --noEmit` â†?0 errors
-- `pnpm build` â†?success
-- `npx vitest run` â†?all pass
-- `npx playwright test` â†?all pass
+- `npx tsc --noEmit` â†’ 0 errors
+- `pnpm build` â†’ success
+- `npx vitest run` â†’ all pass
+- `npx playwright test` â†’ all pass
 
 ## Dependencies
 
@@ -88,4 +88,3 @@ export function assertNonNull<T>(val: T | null | undefined, msg = 'Value is null
 - Changing business logic
 - Modifying API contracts
 - Updating test expectations
-
