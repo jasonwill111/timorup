@@ -21,8 +21,11 @@ const UpdateProductSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
-  priceFields: z.record(z.string(), z.unknown()).optional().nullable(),
-  productType: z.enum(['product', 'service', 'virtual', 'ticket', 'rental', 'subscription']).optional(),
+  productType: z.enum([
+    'product', 'service', 'virtual', 'ticket', 'rental',
+    'food', 'accommodation', 'automotive', 'healthcare',
+    'education', 'beauty', 'event', 'subscription'
+  ]).optional(),
   specifications: z.record(z.string(), z.unknown()).optional().nullable(),
   images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional(),
@@ -76,8 +79,7 @@ if (!db) throw new Error("Database not available");
       if (input.title !== undefined) updateData.title = input.title;
       if (input.description !== undefined) updateData.description = input.description || null;
       if (input.categoryId !== undefined) updateData.categoryId = input.categoryId || null;
-      if (input.priceFields !== undefined) updateData.priceFields = input.priceFields ? JSON.stringify(input.priceFields) : null;
-      if (input.productType !== undefined) updateData.productType = VALID_PRODUCT_TYPES.includes(input.productType) ? input.productType : 'product';
+      if (input.productType !== undefined) updateData.productType = input.productType;
       if (input.specifications !== undefined) updateData.specifications = input.specifications ? JSON.stringify(input.specifications) : null;
       if (input.images !== undefined) updateData.images = input.images ? JSON.stringify(input.images) : null;
       if (input.featured !== undefined) updateData.featured = input.featured;
