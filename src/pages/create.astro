@@ -37,7 +37,7 @@ try {
     if (session && session.expiresAt) {
       // expiresAt in D1 is Unix timestamp (seconds)
       const expiresAtMs = typeof session.expiresAt === 'number'
-         session.expiresAt * 1000
+        ? session.expiresAt * 1000
         : new Date(session.expiresAt).getTime();
 
       if (expiresAtMs > Date.now()) {
@@ -58,13 +58,13 @@ try {
             .limit(1)
             .get();
 
-          const existingNonProfit = existingBusiness  null : await db.select()
+          const existingNonProfit = existingBusiness || await db.select()
             .from(nonProfits)
             .where(eq(nonProfits.ownerId, user.id))
             .limit(1)
             .get();
 
-          const existingPublicSector = existingBusiness || existingNonProfit  null : await db.select()
+          const existingPublicSector = existingBusiness || existingNonProfit || await db.select()
             .from(publicSectors)
             .where(eq(publicSectors.ownerId, user.id))
             .limit(1)
@@ -77,7 +77,7 @@ try {
             existingListing = {
               title: existing.title,
               slug: existing.slug,
-              entityType: existingBusiness  'business' : existingNonProfit  'nonprofit' : 'public_sector'
+              entityType: existingBusiness ? 'business' : existingNonProfit ? 'nonprofit' : 'public_sector'
             };
           }
         }
@@ -152,7 +152,7 @@ try {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a href="/listings/createtype=business" class="block">
             <div class="border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all h-full">
-              <div class="text-4xl mb-3">ðª</div>
+              <div class="text-4xl mb-3">🏢</div>
               <h3 class="font-semibold text-lg mb-1">Business</h3>
               <p class="text-sm text-muted-foreground">Commercial businesses, retail, restaurants, hotels, services</p>
               <p class="text-xs text-amber-600 mt-2">Requires subscription</p>
@@ -160,7 +160,7 @@ try {
           </a>
           <a href="/listings/createtype=non-profit" class="block">
             <div class="border rounded-xl p-6 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all h-full">
-              <div class="text-4xl mb-3">ðï¸/div>
+<div class="text-4xl mb-3">🏛️</div>
               <h3 class="font-semibold text-lg mb-1">Non-Profit</h3>
               <p class="text-sm text-muted-foreground">Government agencies, NGOs, nonprofits, foundations</p>
               <p class="text-xs text-green-600 mt-2">Free listing</p>
@@ -174,7 +174,7 @@ try {
       <div id="create-form">
         <div class="flex items-center mb-6">
           <a href="/listings/create" class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-            <span>←/span> Back to type selection
+            <span>&larr;</span> Back to type selection
           </a>
         </div>
 
@@ -182,7 +182,7 @@ try {
           <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
             <p class="text-amber-800 text-sm">
               <strong>Business listings require a subscription.</strong>
-              <a href="/pricing" class="underline ml-1">View pricing plans ←/a>
+              <a href="/pricing" class="underline ml-1">View pricing plans &rarr;</a>
             </p>
           </div>
         ) : null}
@@ -514,8 +514,8 @@ try {
     const lat = prompt('Enter Latitude:', (document.getElementById('locationLat') as HTMLInputElement).value || '-8.5569');
     const lng = prompt('Enter Longitude:', (document.getElementById('locationLng') as HTMLInputElement).value || '125.5603');
     if (lat && lng) {
-     ? (document.getElementById('locationLat') as HTMLInputElement).value = lat;
-     ? (document.getElementById('locationLng') as HTMLInputElement).value = lng;
+      (document.getElementById('locationLat') as HTMLInputElement).value = lat;
+      (document.getElementById('locationLng') as HTMLInputElement).value = lng;
     }
   });
 

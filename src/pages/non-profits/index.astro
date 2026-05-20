@@ -187,7 +187,7 @@ const buildUrl = (params: Record<string, string>) => {
               const p = i + 1;
               return (
                 <a href={buildUrl({ page: String(p) })}
-                   class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", p === page  "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary cursor-pointer"]}>
+                   class:list={["px-4 py-2 rounded-lg border text-sm font-medium transition-colors", p === page ? "bg-primary text-primary-foreground border-primary" : "hover:border-primary hover:text-primary cursor-pointer"]}>
                   {p}
                 </a>
               );

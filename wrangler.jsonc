@@ -1,7 +1,7 @@
 {
   "main": "@astrojs/cloudflare/entrypoints/server",
-  "name": "timorlist",
-  "minify": true,
+  "name": "timorup",
+  "minify": false,
   "compatibility_date": "2025-11-01",
   "compatibility_flags": [
     "nodejs_compat_v2",
