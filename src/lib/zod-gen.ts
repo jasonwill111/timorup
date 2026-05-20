@@ -120,12 +120,12 @@ export const schemas = {
   /**
    * Email string
    */
-  email: z.string().email(),
+  email: z.email(),
 
   /**
    * Optional email
    */
-  optionalEmail: z.string().email().optional().or(z.literal('')),
+  optionalEmail: z.email().optional().or(z.literal('')),
 
   /**
    * ISO date string

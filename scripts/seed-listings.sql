@@ -1,5 +1,5 @@
 -- Seed data for Listings (classified ads)
--- Run: npx wrangler d1 execute timorlist-db --local --file=scripts/seed-listings.sql
+-- Run: npx wrangler d1 execute timorup-db --local --file=scripts/seed-listings.sql
 
 -- ============================================================================
 -- LISTINGS - Classified Ads

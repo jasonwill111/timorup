@@ -1,5 +1,5 @@
 -- Seed data for Timor-Leste businesses and non-profits
--- Run: npx wrangler d1 execute timorlist-db --remote --file=scripts/seed-timor-data.sql
+-- Run: npx wrangler d1 execute timorup-db --remote --file=scripts/seed-timor-data.sql
 
 -- First, ensure the organization_type column exists
 ALTER TABLE business_pages ADD COLUMN organization_type text;

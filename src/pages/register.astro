@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Input from '../components/ui/Input.astro';
+import Button from '../components/ui/Button.astro';
 import AuthCard from '../components/forms/AuthCard.astro';
 import FormMessage from '../components/forms/FormMessage.astro';
-import LoadingButton from '../components/forms/LoadingButton.astro';
 import PasswordInput from '../components/forms/PasswordInput.astro';
 ---
 
@@ -14,27 +14,207 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     footerText="Already have an account"
     footerLink={{ href: '/login', text: 'Sign in' }}
   >
-    <form id="register-form" class="space-y-4">
+    <form id="register-form" class="space-y-4" novalidate>
       <FormMessage id="form-message" type="error" />
+
       <div>
         <label for="name" class="block text-sm font-medium mb-1">Full Name</label>
         <Input id="name" name="name" type="text" placeholder="John Doe" required />
       </div>
+
       <div>
         <label for="email" class="block text-sm font-medium mb-1">Email</label>
-        <Input id="email" name="email" type="email" placeholder="your@email.com" required />
+        <div class="relative">
+          <Input id="email" name="email" type="email" placeholder="your@email.com" required />
+          <span id="email-valid" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+        </div>
+        <p id="email-error" class="hidden text-sm text-red-500 mt-1">Please enter a valid email</p>
       </div>
-      <PasswordInput id="password" name="password" label="Password" placeholder="••••••••" />
-      <PasswordInput id="confirmPassword" name="confirmPassword" label="Confirm Password" placeholder="••••••••" />
-      <LoadingButton id="submit-btn" defaultText="Create Account" loadingText="Creating..." />
+
+      <div>
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <div class="relative">
+          <PasswordInput id="password" name="password" label="" placeholder="••••••••" />
+          <span id="password-valid" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+        </div>
+        <p id="password-error" class="hidden text-sm text-red-500 mt-1">Password must be at least 8 characters</p>
+      </div>
+
+      <div>
+        <label for="confirmPassword" class="block text-sm font-medium mb-1">Confirm Password</label>
+        <PasswordInput id="confirmPassword" name="confirmPassword" label="" placeholder="••••••••" />
+        <p id="confirm-error" class="hidden text-sm text-red-500 mt-1">Passwords do not match</p>
+      </div>
+
+      <Button id="submit-btn" type="submit" class="w-full" size="lg">
+        <span id="btn-text">Create Account</span>
+        <span id="btn-spinner" class="hidden animate-spin ml-1">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </span>
+      </Button>
     </form>
   </AuthCard>
 </Layout>
 
 <script>
-  const form = document.getElementById('register-form');
+  import { actions } from 'astro:actions';
+
+  const form = document.getElementById('register-form') as HTMLFormElement | null;
+  const emailInput = document.getElementById('email') as HTMLInputElement | null;
+  const passwordInput = document.getElementById('password') as HTMLInputElement | null;
+  const confirmInput = document.getElementById('confirmPassword') as HTMLInputElement | null;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+  const message = document.getElementById('form-message') as HTMLElement;
+  const emailError = document.getElementById('email-error');
+  const passwordError = document.getElementById('password-error');
+  const confirmError = document.getElementById('confirm-error');
+  const emailValid = document.getElementById('email-valid');
+  const passwordValid = document.getElementById('password-valid');
+
+  function isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function setEmailError(show: boolean, inputError: boolean = false) {
+    emailError?.classList.toggle('hidden', !show);
+    emailValid?.classList.toggle('hidden', !inputError);
+    if (emailInput) {
+      emailInput.classList.toggle('border-red-500', show);
+      emailInput.classList.toggle('focus-visible:ring-red-500', show);
+      emailInput.setAttribute('aria-invalid', show ? 'true' : 'false');
+    }
+  }
+
+  function setPasswordError(show: boolean, inputError: boolean = false) {
+    passwordError?.classList.toggle('hidden', !show);
+    passwordValid?.classList.toggle('hidden', !inputError);
+    if (passwordInput) {
+      const pwField = passwordInput.closest('.relative')?.querySelector('input');
+      pwField?.classList.toggle('border-red-500', show);
+    }
+  }
+
+  function setConfirmError(show: boolean) {
+    confirmError?.classList.toggle('hidden', !show);
+    if (confirmInput) {
+      const confirmField = confirmInput.closest('.relative')?.querySelector('input');
+      confirmField?.classList.toggle('border-red-500', show);
+    }
+  }
+
+  function setLoading(loading: boolean) {
+    if (submitBtn) {
+      submitBtn.disabled = loading;
+      btnText?.classList.toggle('hidden', loading);
+      btnSpinner?.classList.toggle('hidden', !loading);
+    }
+  }
+
+  emailInput?.addEventListener('blur', () => {
+    const email = emailInput.value.trim();
+    if (email && !isValidEmail(email)) {
+      setEmailError(true, false);
+    } else if (email && isValidEmail(email)) {
+      setEmailError(false, true);
+    }
+  });
+
+  emailInput?.addEventListener('input', () => {
+    if (emailInput.value && isValidEmail(emailInput.value.trim())) {
+      setEmailError(false, true);
+    }
+  });
+
+  passwordInput?.addEventListener('blur', () => {
+    const password = passwordInput.value;
+    if (password && password.length < 8) {
+      setPasswordError(true, false);
+    } else if (password && password.length >= 8) {
+      setPasswordError(false, true);
+    }
+  });
+
+  passwordInput?.addEventListener('input', () => {
+    if (passwordInput.value && passwordInput.value.length >= 8) {
+      setPasswordError(false, true);
+    }
+  });
+
+  confirmInput?.addEventListener('input', () => {
+    if (confirmInput.value && confirmInput.value === passwordInput?.value) {
+      setConfirmError(false);
+    }
+  });
+
+  function showError(msg: string) {
+    if (message) {
+      message.textContent = msg;
+      message.className = message.className
+        .replace(/bg-green-\d+/g, 'bg-red-50')
+        .replace(/text-green-\d+/g, 'text-red-700')
+        .replace(/dark:bg-green-\d+/g, 'dark:bg-red-900/20')
+        .replace(/dark:text-green-\d+/g, 'dark:text-red-400');
+      message.classList.remove('hidden');
+    }
+  }
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    alert('test');
+    message?.classList.add('hidden');
+
+    const email = emailInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
+    const confirmPassword = confirmInput?.value || '';
+    const name = (document.getElementById('name') as HTMLInputElement)?.value.trim() || '';
+
+    let hasError = false;
+
+    if (!email || !isValidEmail(email)) {
+      setEmailError(true, false);
+      hasError = true;
+    }
+
+    if (!password || password.length < 8) {
+      setPasswordError(true, false);
+      hasError = true;
+    }
+
+    if (password !== confirmPassword) {
+      setConfirmError(true);
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    setLoading(true);
+
+    const { data, error } = await actions.auth.signUp({
+      email: email,
+      password: password,
+      name: name,
+    });
+
+    setLoading(false);
+
+    if (error || !data?.success) {
+      const msg = error?.message || data?.error?.message || 'Registration failed';
+      showError(msg);
+      return;
+    }
+
+    window.location.assign('/login?registered=true');
   });
 </script>

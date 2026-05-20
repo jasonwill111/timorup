@@ -1,4 +1,4 @@
-# TimorLink User Guide
+# TimorUp User Guide
 
 ## Quick Start
 
@@ -19,7 +19,7 @@
 
 ### Product/Service Types
 
-TimorLink supports multiple industry types with specialized fields:
+TimorUp supports multiple industry types with specialized fields:
 
 | Type | Use For |
 |------|---------|
@@ -52,7 +52,7 @@ See `.specweave/docs/internal/modules/api-products.md` for details.
 
 ## Deployment
 
-- **Production**: https://TimorLink.jasonwill.workers.dev
+- **Production**: https://TimorUp.jasonwill.workers.dev
 - **Database**: Cloudflare D1
 - **Storage**: Cloudflare R2
 

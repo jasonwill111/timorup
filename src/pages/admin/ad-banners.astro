@@ -128,7 +128,7 @@ import { actions } from 'astro:actions';
   // Load heroes
   async function loadHeroes() {
     try {
-      const res = await fetch("/api/admin/heroes", { credentials: "include" }); const result = await res.json();;
+      const result = await actions.admin.heroes.list();
 
       const container = document.getElementById('heroes-list');
       if (!container) return;

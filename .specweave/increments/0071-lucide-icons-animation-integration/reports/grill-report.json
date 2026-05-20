@@ -1,0 +1,109 @@
+{
+  "shipReadiness": "NOT READY",
+  "blockingIssues": [
+    {
+      "id": "G-001",
+      "severity": "CRITICAL",
+      "category": "spec-compliance",
+      "title": "ToastContainer still uses inline SVGs instead of LucideIcon",
+      "description": "ToastContainer.astro defines typeIcons in frontmatter using LucideIcon but the actual renderToasts() function in the script block uses raw inline SVGs (lines 35-38). The spec requires AC-US1-03: all toasts must use Lucide icons (CheckCircle, XCircle, Info, AlertTriangle).",
+      "location": "src/components/ui/ToastContainer.astro:35-38",
+      "evidence": "typeIcons: Record<ToastType, string> = { success: `<svg...>`, error: `<svg...>`, info: `<svg...>`, warning: `<svg...>` }",
+      "fix": "Replace inline SVGs with LucideIcon component rendering in the toast template"
+    },
+    {
+      "id": "G-002",
+      "severity": "HIGH",
+      "category": "spec-compliance",
+      "title": "26+ files still use inline SVGs instead of LucideIcon component",
+      "description": "Per AC-US1-05 and AC-US1-06, the goal is to replace ALL inline SVGs with consistent Lucide icons. Major violators include AdminLayout.astro (18+ inline SVGs), businesses/index.astro (5+ inline SVGs), about.astro (4 inline SVGs).",
+      "location": "src/layouts/AdminLayout.astro, src/pages/businesses/index.astro, src/pages/about.astro, and 25+ more files",
+      "fix": "Systematically replace inline SVGs with LucideIcon component across all files"
+    },
+    {
+      "id": "G-003",
+      "severity": "HIGH",
+      "category": "animation-motion-safety",
+      "title": "MotionAnimations.astro missing explicit prefers-reduced-motion check",
+      "description": "Motion.js library respects prefers-reduced-motion by default, BUT globals.css line 139-147 sets animation-duration: 0.01ms which conflicts with Motion animations. The code doesn't have explicit guards before starting animations.",
+      "location": "src/components/ui/MotionAnimations.astro, src/styles/globals.css:139-147",
+      "fix": "Add explicit prefers-reduced-motion check before calling animate() in DOMContentLoaded handlers"
+    }
+  ],
+  "warnings": [
+    {
+      "id": "W-001",
+      "severity": "MEDIUM",
+      "category": "accessibility",
+      "title": "LucideIcon strokeWidth prop not propagated to icons",
+      "description": "LucideIcon.astro accepts strokeWidth prop but doesn't pass it to the Icon component. All icons use default stroke-width.",
+      "location": "src/components/ui/LucideIcon.astro:20",
+      "fix": "Pass strokeWidth prop to Icon component: <Icon size={size} class={className} strokeWidth={strokeWidth} />"
+    },
+    {
+      "id": "W-002",
+      "severity": "MEDIUM",
+      "category": "accessibility",
+      "title": "Footer social links touch target too small",
+      "description": "Footer.astro social links use LucideIcon with size={16} (w-4 h-4 = 16px). WCAG requires minimum 44x44px touch targets. The parent <a> needs min-height: 44px or explicit touch sizing.",
+      "location": "src/components/Footer.astro:21-31",
+      "fix": "Add min-h-[44px] min-w-[44px] or increase link padding to meet touch target requirements"
+    },
+    {
+      "id": "W-003",
+      "severity": "MEDIUM",
+      "category": "performance",
+      "title": "LucideIcon imports all icons via '* as LucideIcons'",
+      "description": "LucideIcon.astro uses 'import * as LucideIcons from @lucide/astro' which imports ALL Lucide icons. This increases bundle size. Consider importing only needed icons.",
+      "location": "src/components/ui/LucideIcon.astro:2",
+      "fix": "Use named imports: import { Sun, Moon, ChevronDown, etc. } from '@lucide/astro'"
+    },
+    {
+      "id": "W-004",
+      "severity": "LOW",
+      "category": "code-quality",
+      "title": "motion-utils.ts duplicates MotionAnimations.astro functions",
+      "description": "Both src/lib/motion-utils.ts and src/components/ui/MotionAnimations.astro contain animation utility functions. This duplication may cause maintenance issues.",
+      "location": "src/lib/motion-utils.ts, src/components/ui/MotionAnimations.astro",
+      "fix": "Consolidate to single source of truth, import from one location"
+    },
+    {
+      "id": "W-005",
+      "severity": "LOW",
+      "category": "animation",
+      "title": "Text reveal animation may cause layout shift",
+      "description": "textReveal() in MotionAnimations.astro manipulates innerHTML and creates <span> wrappers for each word. This happens synchronously during DOMContentLoaded which may cause FOUC or layout shift on slower devices.",
+      "location": "src/components/ui/MotionAnimations.astro:23-43",
+      "fix": "Consider applying opacity: 0 initially via CSS, only animate in after fonts load"
+    }
+  ],
+  "checks": {
+    "icons-render-light-dark": {
+      "status": "PARTIAL",
+      "notes": "LucideIcon uses currentColor stroke, which adapts to text color in both themes. However, ToastContainer still uses hardcoded inline SVGs that may not respect theme."
+    },
+    "animations-respect-reduced-motion": {
+      "status": "FAIL",
+      "notes": "No explicit JavaScript check for prefers-reduced-motion before calling animate(). CSS global rule may conflict with Motion.js."
+    },
+    "no-visual-jank": {
+      "status": "PASS",
+      "notes": "CSS transitions use transform/opacity which are GPU-accelerated. will-change applied to animated elements."
+    },
+    "touch-targets-44px": {
+      "status": "PARTIAL",
+      "notes": "Most interactive elements meet 44px requirement (Button h-11, mobile menu items min-h-[44px], ThemeToggle h-10 w-10 = 40px). Footer social links at 16px fail."
+    },
+    "focus-states-visible": {
+      "status": "PASS",
+      "notes": "All buttons/links have focus-visible:ring-2 focus-visible:ring-ring classes. Proper focus indicators throughout."
+    }
+  },
+  "recommendations": [
+    "Priority 1: Fix ToastContainer to use LucideIcon (spec blocker)",
+    "Priority 2: Add prefers-reduced-motion guard in animation initialization",
+    "Priority 3: Increase Footer social link touch targets to 44px",
+    "Priority 4: Replace remaining inline SVGs with LucideIcon across Admin pages and list pages",
+    "Priority 5: Optimize LucideIcon bundle with named imports instead of wildcard"
+  ]
+}

@@ -235,9 +235,17 @@ import Button from '@components/ui/Button.astro';
   // Load categories
   async function loadCategories() {
     try {
-      const res = await fetch(`/api/admin/categories?table=${currentTable}`, { credentials: "include" }); const result = await res.json();;
-      if (res.ok && result.success && result.data) {
-        categories = result.data;
+      const result = await actions.admin.categories.getAll();
+      if (result.success && result.data) {
+        // Filter by current table/entity type on client side
+        const entityTypeMap: Record<string, string> = {
+          business: 'business',
+          non_profit: 'nonprofit',
+          public_sector: 'public_sector',
+          listing: 'listing',
+        };
+        const targetType = entityTypeMap[currentTable] || currentTable;
+        categories = result.data.filter((c: Category) => c.entityType === targetType);
         parentCategories = categories.filter((c: Category) => !c.parentId);
         renderCategories();
         updateStats();

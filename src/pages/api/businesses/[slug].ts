@@ -219,7 +219,6 @@ if (!db) throw new Error("Database not available");
       title?: string;
       slug?: string;
       categoryId?: string;
-      industry?: string;
       contactName?: string;
       contactNumber?: string;
       countryCode?: string;
@@ -237,7 +236,7 @@ if (!db) throw new Error("Database not available");
       socialLinks?: string;
     };
     const {
-      title, slug: newSlug, categoryId, industry, contactName, contactNumber,
+      title, slug: newSlug, categoryId, contactName, contactNumber,
       countryCode, email, address, aboutUs, tags, openingHours,
       latitude, longitude, yearOfEstablishment, registrationUrl,
       bannerImageId, profileImageId, socialLinks
@@ -247,7 +246,6 @@ if (!db) throw new Error("Database not available");
     if (title !== undefined) updateValues.title = title;
     if (newSlug !== undefined) updateValues.slug = newSlug;
     if (categoryId !== undefined) updateValues.categoryId = categoryId || null;
-    if (industry !== undefined) updateValues.industry = industry || null;
     if (contactName !== undefined) updateValues.contactName = contactName || null;
     if (contactNumber !== undefined) updateValues.contactNumber = contactNumber || null;
     if (countryCode !== undefined) updateValues.countryCode = countryCode || '+670';

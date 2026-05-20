@@ -56,27 +56,3 @@ const totalPages = Math.ceil(total / PAGE_SIZE);
           {business.address && (
             <p class="text-xs text-muted-foreground truncate">{business.address.split(',')[0]}</p>
           )}
-          {business.industry && (
-            <span class="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary capitalize">{business.industry}</span>
-          )}
-        </div>
-      </a>
-    ))}
-  </div>
-) : (
-  <div class="text-center py-12 text-muted-foreground">
-    No businesses found
-  </div>
-)}
-
-{totalPages > 1 && (
-  <div class="flex justify-center gap-2 mt-8">
-    {page > 1 && (
-      <a href={`/businesses?page=${page - 1}`} class="px-4 py-2 border rounded">Previous</a>
-    )}
-    <span class="px-4 py-2">Page {page} of {totalPages}</span>
-    {page < totalPages && (
-      <a href={`/businesses?page=${page + 1}`} class="px-4 py-2 border rounded">Next</a>
-    )}
-  </div>
-)}

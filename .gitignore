@@ -92,9 +92,9 @@ _bmad-output/
 
 # Project screenshots (local only)
 admin-*.png
-timorbiz-*.png
-timorbiz-dark-mode.png
-timorbiz-screenshot.png
+timorup-*.png
+timorup-dark-mode.png
+timorup-screenshot.png
 
 # Local database
 local.db

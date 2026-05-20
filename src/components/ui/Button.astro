@@ -5,6 +5,7 @@ interface Props {
   class?: string;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  loading?: boolean;
   'data-slot'?: string;
 }
 
@@ -14,9 +15,12 @@ const {
   class: className = '',
   type = 'button',
   disabled = false,
+  loading = false,
   'data-slot': slot = 'button',
   ...props
 } = Astro.props;
+
+const isDisabled = disabled || loading;
 
 const variants = {
   default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
@@ -39,7 +43,7 @@ const sizes = {
 
 <button
   type={type}
-  disabled={disabled}
+  disabled={isDisabled}
   data-slot={slot}
   class:list={[
     'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -50,4 +54,12 @@ const sizes = {
   {...props}
 >
   <slot />
+  {loading && (
+    <span class="animate-spin ml-1">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+    </span>
+  )}
 </button>

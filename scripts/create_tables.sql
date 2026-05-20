@@ -1,5 +1,5 @@
 -- Create tables directly on remote D1
--- Run: wrangler d1 execute timorlist-db --remote --command="..."
+-- Run: wrangler d1 execute timorup-db --remote --command="..."
 
 -- 1. Create businesses table
 CREATE TABLE IF NOT EXISTS businesses (

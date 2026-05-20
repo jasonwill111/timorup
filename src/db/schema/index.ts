@@ -228,7 +228,7 @@ export const businesses = sqliteTable("businesses", {
   aboutUs: text("about_us"),
   latestUpdates: text("latest_updates"),
   tags: text(),
-  industry: text(),
+
   // 统计
   likes: integer().default(0),
   saves: integer().default(0),

@@ -2,6 +2,6 @@
   "dialect": "sqlite",
   "schema": "./src/db/schema/index.ts",
   "dbCredentials": {
-    "url": "./.wrangler/state/v3/d1/miniflare-D1DatabaseObject/b35dc1252703368fd322588b14dfdbedf063db1b9844683bfee80e94dd327afa.sqlite"
+    "url": "file:./.wrangler/state/v3/d1/*.sqlite"
   }
 }

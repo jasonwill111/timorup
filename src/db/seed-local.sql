@@ -1,4 +1,4 @@
--- Seed data for timorbiz (SQLite compatible)
+-- Seed data for timorup (SQLite compatible)
 -- Based on original tmbiz project data
 
 -- Insert categories (from original tmbiz)

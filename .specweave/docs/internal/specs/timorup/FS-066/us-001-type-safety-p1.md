@@ -6,7 +6,7 @@ status: completed
 priority: P1
 created: 2026-05-18T00:00:00.000Z
 tldr: "**As a** developer."
-project: TimorLink
+project: timorup
 ---
 
 # US-001: Type Safety (P1)
@@ -39,4 +39,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

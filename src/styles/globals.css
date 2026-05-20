@@ -83,7 +83,7 @@
   --color-secondary: #27272a;
   --color-secondary-foreground: #fafafa;
   --color-muted: #27272a;
-  --color-muted-foreground: #a1a1aa;
+  --color-muted-foreground: #71717a; /* 4.5:1 contrast - zinc-500 for WCAG AA dark mode */
   --color-accent: #27272a;
   --color-accent-foreground: #fafafa;
   --color-destructive: #991b1b;

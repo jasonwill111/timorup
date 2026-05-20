@@ -22,7 +22,7 @@ Fix Admin UI issues discovered during schema audit:
 ## User Stories
 
 ### US-001: Add formFields to Categories Management (P1)
-**Project**: timorlist
+**Project**: timorup
 
 **As a** admin
 **I want** to edit category-specific form field configurations
@@ -37,7 +37,7 @@ Fix Admin UI issues discovered during schema audit:
 ---
 
 ### US-002: Clean Up Deprecated Fields in Products (P2)
-**Project**: timorlist
+**Project**: timorup
 
 **As a** admin
 **I want** to see only current field names in the products form
@@ -51,7 +51,7 @@ Fix Admin UI issues discovered during schema audit:
 ---
 
 ### US-003: Deploy and Test Renamed Routes (P1)
-**Project**: timorlist
+**Project**: timorup
 
 **As a** admin
 **I want** to access renamed pages via new URLs
@@ -66,7 +66,7 @@ Fix Admin UI issues discovered during schema audit:
 ---
 
 ### US-004: Update All References to Old Routes (P2)
-**Project**: timorlist
+**Project**: timorup
 
 **As a** system
 **I want** to update all code references to old route paths

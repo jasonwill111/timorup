@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm';
 export const login = defineAction({
   accept: 'form',
   input: z.object({
-    email: z.string().email('Valid email required'),
+    email: z.email({ error: 'Valid email required' }),
     password: z.string().min(1, 'Password required'),
   }),
   handler: async (input) => {

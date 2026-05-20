@@ -1,5 +1,5 @@
 -- Migration: business_pages → businesses/non_profits/public_sectors
--- Run: npx wrangler d1 execute timorlist-db --local --file=scripts/migrate-to-new-tables.sql
+-- Run: npx wrangler d1 execute timorup-db --local --file=scripts/migrate-to-new-tables.sql
 
 -- ============================================================================
 -- Step 1: Migrate businesses (entityType = 'business')

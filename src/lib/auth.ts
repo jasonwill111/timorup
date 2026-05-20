@@ -19,7 +19,7 @@ interface CfProperties {
 }
 
 // Base URL fallback
-const DEFAULT_BASE_URL = 'https://timorlist.jasonwill.workers.dev';
+const DEFAULT_BASE_URL = 'https://timorup.jasonwill.workers.dev';
 
 /**
  * Create Better Auth instance for Cloudflare Workers

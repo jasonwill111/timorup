@@ -20,7 +20,7 @@ export interface BaseListing {
 
 export interface BusinessListing extends BaseListing {
   categoryName: string;
-  industryName?: string;
+
 }
 
 export interface NonProfitListing extends BaseListing {

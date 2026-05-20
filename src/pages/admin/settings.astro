@@ -40,28 +40,16 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
+  import { actions } from 'astro:actions';
   import { toast } from '../../stores/toast';
-
-  // Auth fetch helper
-  async function authFetch(url, options = {}) {
-    return fetch(url, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-    });
-  }
 
   // Load settings
   async function loadSettings() {
     try {
-      const res = await authFetch('/api/admin/settings');
-      const data = await res.json();
+      const result = await actions.admin.settings.getAll();
 
-      if (data.success) {
-        const settings = data.data;
+      if (result.success && result.data) {
+        const settings = result.data;
         (document.getElementById('site-name') as HTMLInputElement).value = settings.site_name?.value || '';
         (document.getElementById('contact-email') as HTMLInputElement).value = settings.contact_email?.value || '';
         (document.getElementById('contact-phone') as HTMLInputElement).value = settings.contact_phone?.value || '';
@@ -85,12 +73,7 @@ import Button from '@components/ui/Button.astro';
     };
 
     try {
-      const res = await authFetch('/api/admin/settings/save', {
-        method: 'POST',
-        body: JSON.stringify({ settings }),
-      });
-
-      const result = await res.json();
+      const result = await actions.admin.settings.saveAll({ settings });
 
       if (result.success) {
         toast.success('Settings saved successfully!');

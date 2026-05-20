@@ -1,0 +1,9 @@
+-- Business Subscriptions - SKU limit only
+INSERT OR REPLACE INTO service_packages (id, name, slug, type, category, description, variants, is_active, sort_order) VALUES
+('sp-business-starter', 'Starter Business Plan', 'starter-monthly', 'subscription', 'business', 'For small businesses starting out', '[{"name":"Starter Monthly","price":29,"currency":"USD","durationValue":1,"durationUnit":"month","limits":{"skuLimit":10},"features":["Up to 10 products/services"]},{"name":"Starter Annual","price":290,"currency":"USD","durationValue":12,"durationUnit":"months","limits":{"skuLimit":10},"features":["Up to 10 products/services","Save 20%"]}]', 1, 11);
+
+INSERT OR REPLACE INTO service_packages (id, name, slug, type, category, description, variants, is_active, sort_order) VALUES
+('sp-business-professional', 'Professional Business Plan', 'professional-monthly', 'subscription', 'business', 'For growing businesses with advanced features', '[{"name":"Professional Monthly","price":59,"currency":"USD","durationValue":1,"durationUnit":"month","limits":{"skuLimit":30},"features":["Up to 30 products/services"]},{"name":"Professional Annual","price":590,"currency":"USD","durationValue":12,"durationUnit":"months","limits":{"skuLimit":30},"features":["Up to 30 products/services","Save 17%"]}]', 1, 20);
+
+INSERT OR REPLACE INTO service_packages (id, name, slug, type, category, description, variants, is_active, sort_order) VALUES
+('sp-business-enterprise', 'Enterprise Business Plan', 'enterprise-monthly', 'subscription', 'business', 'For established businesses with full features', '[{"name":"Enterprise Monthly","price":89,"currency":"USD","durationValue":1,"durationUnit":"month","limits":{"skuLimit":60},"features":["Up to 60 products/services"]},{"name":"Enterprise Annual","price":890,"currency":"USD","durationValue":12,"durationUnit":"months","limits":{"skuLimit":60},"features":["Up to 60 products/services","Save 17%"]}]', 1, 30);

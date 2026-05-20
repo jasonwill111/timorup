@@ -28,7 +28,6 @@ export const badges = {
   business: createBadgeHtml('blue', 'Business'),
   nonprofit: createBadgeHtml('purple', 'Non-Profit'),
   sub: createBadgeHtml('green', 'Sub'),
-  industry: createBadgeHtml('blue', 'Industry'),
   live: createBadgeHtml('green', 'Live'),
   draft: createBadgeHtml('orange', 'Draft'),
   expired: createBadgeHtml('destructive', 'Expired'),

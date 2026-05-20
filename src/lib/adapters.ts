@@ -3,7 +3,6 @@
  * Enables test mocking and alternate DB implementations
  */
 import type { Auth, BetterAuthOptions, Session } from 'better-auth';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 
 // Drizzle table type for schema inference
 export type AnyDrizzleTable = ReturnType<typeof import('drizzle-orm/sqlite-core').sqliteTable>;

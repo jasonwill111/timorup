@@ -25,7 +25,7 @@ export const businesses = sqliteTable('businesses', {
   aboutUs: text('about_us'),
   latestUpdates: text('latest_updates'),
   tags: text('tags'),
-  industry: text('industry'),
+
   likes: integer('likes').default(0),
   saves: integer('saves').default(0),
   ratingAverage: real('rating_average').default(0),

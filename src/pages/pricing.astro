@@ -1,32 +1,14 @@
 ---
 // Pricing page - SSR to access database for pricing cards
+// Service packages are managed in admin/service-packages
+// All changes sync automatically to this page
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import PricingCards from '@/components/islands/PricingCards.astro';
 ---
 
 <Layout title="Pricing - TimorUp">
-  <div class="container py-12">
-    <!-- Dynamic Pricing Cards (Server Island) -->
+  <div class="container py-16">
     <PricingCards />
-
-    <!-- Static Feature comparison -->
-    <div class="mt-16 text-center">
-      <div class="bg-muted/30 rounded-lg p-6 max-w-2xl mx-auto">
-        <h3 class="font-semibold mb-4">All Business Plans Include:</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-          <div>Business page</div>
-          <div>Photo gallery</div>
-          <div>Map location</div>
-          <div>Reviews</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="text-center mt-8">
-      <p class="text-muted-foreground">
-        Questions? <a href="mailto:hello@TimorUp.com" class="text-primary hover:underline">Contact us</a>
-      </p>
-    </div>
   </div>
 </Layout>

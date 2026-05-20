@@ -1,10 +1,9 @@
 ---
-
 import Layout from '../layouts/Layout.astro';
 import Input from '../components/ui/Input.astro';
+import Button from '../components/ui/Button.astro';
 import AuthCard from '../components/forms/AuthCard.astro';
 import FormMessage from '../components/forms/FormMessage.astro';
-import LoadingButton from '../components/forms/LoadingButton.astro';
 import PasswordInput from '../components/forms/PasswordInput.astro';
 ---
 
@@ -15,26 +14,45 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     footerText="Don't have an account?"
     footerLink={{ href: '/register', text: 'Sign up' }}
   >
-    <form id="login-form" class="space-y-4">
+    <form id="login-form" class="space-y-4" novalidate>
       <FormMessage id="form-message" type="error" />
 
       <div>
         <label for="email" class="block text-sm font-medium mb-1">Email</label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="********"
-          required
-        />
+        <div class="relative">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="your@email.com"
+            required
+          />
+          <span id="email-valid" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+        </div>
+        <p id="email-error" class="hidden text-sm text-red-500 mt-1">Please enter a valid email</p>
       </div>
 
-      <PasswordInput
-        id="password"
-        name="password"
-        label="Password"
-        placeholder="••••••••"
-      />
+      <div>
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <div class="relative">
+          <PasswordInput
+            id="password"
+            name="password"
+            label=""
+            placeholder="••••••••"
+          />
+          <span id="password-valid" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+        </div>
+        <p id="password-error" class="hidden text-sm text-red-500 mt-1">Password must be at least 8 characters</p>
+      </div>
 
       <div class="flex items-center justify-between">
         <div class="flex items-center">
@@ -53,7 +71,15 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
         </a>
       </div>
 
-      <LoadingButton id="submit-btn" defaultText="Sign In" loadingText="Signing in..." />
+      <Button id="submit-btn" type="submit" class="w-full" size="lg">
+        <span id="btn-text">Sign In</span>
+        <span id="btn-spinner" class="hidden animate-spin ml-1">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </span>
+      </Button>
 
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center">
@@ -92,17 +118,82 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
 <script>
   import { actions } from 'astro:actions';
 
-  const form = document.getElementById('login-form');
+  const form = document.getElementById('login-form') as HTMLFormElement | null;
+  const emailInput = document.getElementById('email') as HTMLInputElement | null;
+  const passwordInput = document.getElementById('password') as HTMLInputElement | null;
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
-  const btnText = document.getElementById('submit-btn-text');
-  const btnLoading = document.getElementById('submit-btn-loading');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
   const message = document.getElementById('form-message') as HTMLElement;
+  const emailError = document.getElementById('email-error');
+  const passwordError = document.getElementById('password-error');
+  const emailValid = document.getElementById('email-valid');
+  const passwordValid = document.getElementById('password-valid');
+
+  function isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function setEmailError(show: boolean, inputError: boolean = false) {
+    emailError?.classList.toggle('hidden', !show);
+    emailValid?.classList.toggle('hidden', !inputError);
+    if (emailInput) {
+      emailInput.classList.toggle('border-red-500', show);
+      emailInput.classList.toggle('focus-visible:ring-red-500', show);
+      emailInput.setAttribute('aria-invalid', show ? 'true' : 'false');
+    }
+  }
+
+  function setPasswordError(show: boolean, inputError: boolean = false) {
+    passwordError?.classList.toggle('hidden', !show);
+    passwordValid?.classList.toggle('hidden', !inputError);
+    if (passwordInput) {
+      const pwField = passwordInput.closest('.relative')?.querySelector('input');
+      pwField?.classList.toggle('border-red-500', show);
+    }
+  }
 
   function setLoading(loading: boolean) {
-    if (submitBtn) submitBtn.disabled = loading;
-    btnText?.classList.toggle('hidden', loading);
-    btnLoading?.classList.toggle('hidden', !loading);
+    if (submitBtn) {
+      submitBtn.disabled = loading;
+      btnText?.classList.toggle('hidden', loading);
+      btnSpinner?.classList.toggle('hidden', !loading);
+    }
   }
+
+  emailInput?.addEventListener('blur', () => {
+    const email = emailInput.value.trim();
+    if (email && !isValidEmail(email)) {
+      setEmailError(true, false);
+    } else if (email && isValidEmail(email)) {
+      setEmailError(false, true);
+    } else {
+      setEmailError(false, false);
+    }
+  });
+
+  emailInput?.addEventListener('input', () => {
+    if (emailInput.value && isValidEmail(emailInput.value.trim())) {
+      setEmailError(false, true);
+    }
+  });
+
+  passwordInput?.addEventListener('blur', () => {
+    const password = passwordInput.value;
+    if (password && password.length < 8) {
+      setPasswordError(true, false);
+    } else if (password && password.length >= 8) {
+      setPasswordError(false, true);
+    } else {
+      setPasswordError(false, false);
+    }
+  });
+
+  passwordInput?.addEventListener('input', () => {
+    if (passwordInput.value && passwordInput.value.length >= 8) {
+      setPasswordError(false, true);
+    }
+  });
 
   function showError(msg: string) {
     if (message) {
@@ -116,52 +207,45 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
     }
   }
 
-  function showSuccess(msg: string) {
-    if (message) {
-      message.textContent = msg;
-      message.className = message.className
-        .replace(/bg-red-\d+/g, 'bg-green-50')
-        .replace(/text-red-\d+/g, 'text-green-700')
-        .replace(/dark:bg-red-\d+/g, 'dark:bg-green-900/20')
-        .replace(/dark:text-red-\d+/g, 'dark:text-green-400');
-      message.classList.remove('hidden');
-    }
-  }
-
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     message?.classList.add('hidden');
+
+    const email = emailInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
+
+    let hasError = false;
+
+    if (!email || !isValidEmail(email)) {
+      setEmailError(true, false);
+      hasError = true;
+    }
+
+    if (!password || password.length < 8) {
+      setPasswordError(true, false);
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     setLoading(true);
 
     const formData = new FormData(form);
+    const { data, error } = await actions.auth.signIn({
+      email: email,
+      password: password,
+      rememberMe: formData.get('rememberMe') === 'on',
+    });
 
-    try {
-      // Use REST API for reliable cookie setting
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.get('email'),
-          password: formData.get('password')
-        }),
-        credentials: 'include'
-      });
+    setLoading(false);
 
-      const res = await response.json();
-      setLoading(false);
-
-      if (res.success) {
-        showSuccess('Login successful! Redirecting...');
-        window.location.assign('/account');
-        return;
-      } else {
-        showError(res.error?.message || 'Invalid email or password');
-      }
-    } catch (err) {
-      console.error('[LOGIN] Error:', err);
-      setLoading(false);
-      showError('Network error. Please try again.');
+    if (error || !data?.success) {
+      const msg = error?.message || data?.error?.message || 'Invalid email or password';
+      showError(msg);
+      return;
     }
+
+    window.location.assign('/account');
   });
 </script>
 

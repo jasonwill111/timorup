@@ -1,6 +1,6 @@
 -- Migration: business_pages → businesses/non_profits/public_sectors
 -- Run after pushing schema to D1
--- npx wrangler d1 execute timorlist-db --remote --file=scripts/migrate-entity-tables.sql
+-- npx wrangler d1 execute timorup-db --remote --file=scripts/migrate-entity-tables.sql
 
 -- ============================================================================
 -- MIGRATION LOGIC

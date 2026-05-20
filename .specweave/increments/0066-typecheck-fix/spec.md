@@ -19,7 +19,7 @@ Fix 588 TypeScript strict mode errors (TS18047, TS2339, TS2322, TS2769, TS2345) 
 ## User Stories
 
 ### US-001: Type Safety (P1)
-**Project**: timorlist
+**Project**: timorup
 
 **As a** developer
 **I want** all TypeScript errors resolved

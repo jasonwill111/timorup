@@ -4,7 +4,7 @@ Feature specifications for **TimorLink**.
 
 ## Core Architecture
 
-- [Entity Tables Migration](entity-tables-migration.md) â€?4 separate entity tables, independent APIs, UI/UX updates (2026-05-11)
+- [Entity Tables Migration](entity-tables-migration.md) ï¿½?4 separate entity tables, independent APIs, UI/UX updates (2026-05-11)
 
 ## Features
 
@@ -48,6 +48,11 @@ sw:sync-docs 0001
 - [FS-058: Code Quality Cleanup P0](FS-058/FEATURE.md)
 - [FS-059: Performance Optimization - 0059](FS-059/FEATURE.md)
 - [FS-066: TypeScript Type Errors Fix](FS-066/FEATURE.md)
+- [FS-069: Feature: Refactor Product Config Module](FS-069/FEATURE.md)
+- [FS-070: Feature: Migrate REST APIs to Server Actions](FS-070/FEATURE.md)
+- [FS-071: Lucide Icons & Motion Animation Integration](FS-071/FEATURE.md)
+- [FS-072: Feature: Form Validation & State Enhancement](FS-072/FEATURE.md)
+- [FS-073: Feature: Loading States & Color Contrast Fix](FS-073/FEATURE.md)
 
 ---
 

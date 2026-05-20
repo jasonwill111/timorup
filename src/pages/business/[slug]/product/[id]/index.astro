@@ -60,10 +60,13 @@ const pageDesc = product.description?.substring(0, 160) || `${product.title} - $
 const specifications = product.specifications ? JSON.parse(product.specifications) : null;
 const priceFields = product.priceFields ? JSON.parse(product.priceFields) : null;
 
-// Get first price for display under title (e.g., "$4.50 / bottle")
-const firstPrice = priceFields && priceFields.length > 0 && priceFields[0].value
-  ? `$${priceFields[0].value} / ${priceFields[0].unit || 'unit'}`
-  : null;
+// Get price from specifications.pricing
+const pricing = specifications?.pricing;
+const firstPrice = pricing?.basePrice
+  ? `$${parseFloat(pricing.basePrice).toFixed(2)}${pricing.unit ? ' / ' + pricing.unit : ''}`
+  : (priceFields && priceFields.length > 0 && priceFields[0].value
+    ? `$${priceFields[0].value} / ${priceFields[0].unit || 'unit'}`
+    : null);
 
 // Service type display names
 const productTypeLabels: Record<string, string> = {

@@ -1,0 +1,19 @@
+{
+  "id": "0069-refactor-product-config",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-20T04:32:27.158Z",
+  "lastActivity": "2026-05-20T04:40:20.735Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-20T04:40:20.711Z",
+  "approvedAt": "2026-05-20T04:40:20.735Z"
+}

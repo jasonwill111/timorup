@@ -1,4 +1,4 @@
--- Create all tables for timorbiz
+-- Create all tables for timorup
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (

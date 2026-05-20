@@ -7,12 +7,6 @@ import { eq } from 'drizzle-orm';
 import { canCreateSku, canEditBusiness } from '@/lib/subscription';
 import { getAdminUser } from '@/lib/admin-auth';
 
-const VALID_SERVICE_TYPES = [
-  'product', 'service', 'rental', 'food',
-  'accommodation', 'automotive', 'healthcare',
-  'education', 'beauty', 'event'
-];
-
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
@@ -21,11 +15,14 @@ function getErrorMessage(error: unknown): string {
 const CreateProductSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional().nullable(),
-  businessId: z.string().min(1),           // FK to businesses.id (NOT businessPageId)
-  categoryId: z.string().optional().nullable(),  // FK to product_categories.id
-  priceFields: z.record(z.string(), z.unknown()).optional().nullable(),  // JSON with category-specific price fields
-  productType: z.enum(['product', 'service', 'virtual', 'ticket', 'rental', 'subscription']).default('product'),
-  specifications: z.record(z.string(), z.unknown()).optional().nullable(),  // JSON with category-specific specs
+  businessId: z.string().min(1),
+  categoryId: z.string().min(1),  // FK to product_categories.id
+  productType: z.enum([
+    'product', 'service', 'virtual', 'ticket', 'rental',
+    'food', 'accommodation', 'automotive', 'healthcare',
+    'education', 'beauty', 'event', 'subscription'
+  ]).default('product'),
+  specifications: z.record(z.string(), z.unknown()).optional().nullable(),  // { pricing: { basePrice, currency, unit, unitOptions, ... } }
   images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional().default(false),
 });
@@ -39,16 +36,15 @@ export const createProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+    if (!db) throw new Error("Database not available");
+
     try {
       // Check business exists
-      const business = await db.select({
-        id: businesses.id,
-      })
-      .from(businesses)
-      .where(eq(businesses.id, input.businessId))
-      .limit(1)
-      .get() ?? undefined;
+      const business = await db.select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.id, input.businessId))
+        .limit(1)
+        .get() ?? undefined;
 
       if (!business) {
         return { success: false, error: { message: 'Business not found' } };
@@ -63,6 +59,7 @@ if (!db) throw new Error("Database not available");
       const id = `prod-${Date.now()}`;
       const finalProductType = input.productType || 'product';
 
+      // Stringify specifications
       const safeStringify = (val: unknown): string | null => {
         if (!val) return null;
         if (typeof val === 'string') {
@@ -77,20 +74,24 @@ if (!db) throw new Error("Database not available");
         title: input.title,
         description: input.description ?? null,
         businessId: input.businessId,
-        businessPageId: input.businessId, // Alias for compatibility
-        categoryId: input.categoryId || `cat-${Date.now()}`,
-        priceFields: safeStringify(input.priceFields),
+        businessPageId: input.businessId,
+        categoryId: input.categoryId,
         productType: finalProductType,
-        serviceType: finalProductType,
+        serviceType: finalProductType,  // Keep for compatibility
         specifications: safeStringify(input.specifications),
-        images: input.images ? JSON.stringify(input.images) : null,
+        images: input.images ? JSON.stringify(input.images) : '[]',
         featured: input.featured ? 1 : 0,
         active: 1,
       }).run();
 
       return {
         success: true,
-        data: { id, title: input.title, priceFields: input.priceFields, productType: finalProductType, specifications: input.specifications, featured: input.featured, description: input.description },
+        data: {
+          id,
+          title: input.title,
+          productType: finalProductType,
+          specifications: input.specifications,
+        },
       };
     } catch (error) {
       console.error('[Products:create] Database insert failed:', getErrorMessage(error));

@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from './ui/ThemeToggle.astro';
+import LucideIcon from './ui/LucideIcon.astro';
 
 interface Props {
   currentPath?: string;
@@ -28,9 +29,7 @@ const urlParams = new URL(Astro.request.url).searchParams;
         <div class="relative group">
           <button class="text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center text-muted-foreground hover:text-primary">
             Business
-            <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <LucideIcon name="ChevronDown" size={12} class="ml-0.5" />
           </button>
           <!-- Hover bridge: invisible area to prevent dropdown from disappearing when mouse moves down -->
           <div class="absolute left-0 right-0 h-2 -mb-1 -mt-0.5 cursor-default"></div>
@@ -52,9 +51,7 @@ const urlParams = new URL(Astro.request.url).searchParams;
         <div class="relative group">
           <button class="text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1.5 py-1 flex items-center text-muted-foreground hover:text-primary">
             Govs & NGOs
-            <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <LucideIcon name="ChevronDown" size={12} class="ml-0.5" />
           </button>
           <!-- Hover bridge: invisible area to prevent dropdown from disappearing when mouse moves down -->
           <div class="absolute left-0 right-0 h-2 -mb-1 -mt-0.5 cursor-default"></div>
@@ -177,12 +174,39 @@ const urlParams = new URL(Astro.request.url).searchParams;
 
 <script>
   import { actions } from 'astro:actions';
+  import { dropdownIn, dropdownOut, slideInLeft } from '@/lib/motion-utils';
 
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
+  let isMenuOpen = false;
 
   mobileMenuBtn?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
+    if (!mobileMenu) return;
+    isMenuOpen = !isMenuOpen;
+    if (isMenuOpen) {
+      mobileMenu.classList.remove('hidden');
+      const mobileNav = mobileMenu.querySelector('nav');
+      if (mobileNav) {
+        slideInLeft(mobileNav);
+      }
+    } else {
+      mobileMenu.classList.add('hidden');
+    }
+  });
+
+  // Dropdown menu animations
+  const dropdownGroups = document.querySelectorAll('.group');
+  dropdownGroups.forEach(group => {
+    const dropdown = group.querySelector('div:last-child');
+    if (dropdown) {
+      group.addEventListener('mouseenter', () => {
+        dropdown.classList.remove('hidden');
+        dropdownIn(dropdown);
+      });
+      group.addEventListener('mouseleave', () => {
+        dropdownOut(dropdown, () => dropdown.classList.add('hidden'));
+      });
+    }
   });
 
   document.getElementById('mobile-logout')?.addEventListener('click', async () => {

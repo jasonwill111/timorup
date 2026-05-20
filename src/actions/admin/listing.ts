@@ -12,11 +12,11 @@ const updateSchema = z.object({
   title: z.string().min(1).optional(),
   slug: z.string().optional(),
   categoryId: z.string().optional().nullable(),
-  industry: z.string().optional().nullable(),
+  
   contactName: z.string().optional().nullable(),
   countryCode: z.string().optional(),
   contactNumber: z.string().optional().nullable(),
-  email: z.string().email().optional().nullable().or(z.literal('')),
+  email: z.email().optional().or(z.literal('')),
   registrationUrl: z.string().optional().nullable().or(z.literal('')),
   address: z.string().optional().nullable(),
   aboutUs: z.string().optional().nullable(),

@@ -5,7 +5,8 @@ import Button from '@components/ui/Button.astro';
 import { getDb } from '@/lib/db';
 const db = await getDb();
 import { businesses } from '@/db/schema';
-import { SKU_SERVICE_TYPES, SPECIFICATION_FIELDS } from '@/lib/constants';
+import { SKU_SERVICE_TYPES } from '@/lib/constants';
+import { productConfig } from '@/lib/product-config';
 
 // Get all businesses for dropdown
 const allBusinesses = await db.select({
@@ -189,7 +190,8 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 </AdminLayout>
 
 <script>
-  import { getPriceUnitsForServiceType, SPECIFICATION_FIELDS } from '../../lib/constants';
+  import { getPriceUnitsForServiceType } from '../../lib/constants';
+  import { productConfig } from '../../lib/product-config';
   import { actions } from 'astro:actions';
 
   // Lazy-loaded TiPTap modules
@@ -501,7 +503,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
     const fieldsContainer = document.getElementById('specifications-fields');
     if (!container || !fieldsContainer) return;
 
-    const fields = SPECIFICATION_FIELDS[productType] || [];
+    const fields = productConfig.getSpecificationFields(productType) || [];
 
     if (fields.length === 0) {
       container.classList.add('hidden');
@@ -811,7 +813,7 @@ const businessOptionsJson = JSON.stringify(businessOptions);
 
     // Collect specification fields
     const productType = formData.get('productType');
-    const specFields = SPECIFICATION_FIELDS[productType] || [];
+    const specFields = productConfig.getSpecificationFields(productType) || [];
     const specifications = {};
     specFields.forEach(field => {
       const key = `spec_${field.key}`;

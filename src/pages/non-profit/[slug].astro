@@ -33,21 +33,25 @@ if (!org) {
   return Astro.redirect('/non-profits');
 }
 
-const category = org.categoryId
-  ? await db.select().from(nonProfitCategories).where(eq(nonProfitCategories.id, org.categoryId)).get()
-  : null;
+let category = null;
+let parentCategory = null;
+if (org.categoryId) {
+  category = await db.select().from(nonProfitCategories).where(eq(nonProfitCategories.id, org.categoryId)).get();
+  if (category?.parentId) {
+    parentCategory = await db.select().from(nonProfitCategories).where(eq(nonProfitCategories.id, category.parentId)).get();
+  }
+}
 
 const tags = org.tags ? JSON.parse(org.tags) : [];
 const openingHours = org.openingHours ? JSON.parse(org.openingHours) : null;
 const socialLinks = org.socialLinks ? JSON.parse(org.socialLinks) : {};
 
-// Load photo gallery from media table (entityType: 'non-profits')
+// Load photo gallery from media table (type: 'non-profits')
 let galleryImages: { id: string; url: string }[] = [];
 const galleryMedia = await db.select({ id: media.id })
   .from(media)
-  .where(eq(media.entityId, org.id))
-  .where(eq(media.entityType, 'non-profits'))
-  .where(eq(media.purpose, 'gallery'))
+  .where(eq(media.typeId, org.id))
+  .where(eq(media.type, 'non-profits'))
   .orderBy(media.sortOrder)
   .all();
 galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
@@ -56,21 +60,18 @@ galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }))
 const updatesData = await db.select()
   .from(latestUpdates)
   .where(eq(latestUpdates.typeId, org.id))
-  .where(eq(latestUpdates.type, 'non_profit'))
+  .where(eq(latestUpdates.type, 'non_profits'))
   .orderBy(desc(latestUpdates.createdAt))
   .limit(4)
   .all();
 
 const updates = updatesData.map(u => ({
   ...u,
-  images: u.imageIds ? JSON.parse(u.imageIds) : [],
+  images: u.images ? JSON.parse(u.images) : [],
 }));
 
 const pageTitle = `${org.title} - TimorUp`;
 const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - Non-Profit in Timor-Leste`;
-
-// JSON-Ld type
-const jsonLdType = org.organizationType === 'government' ? 'GovernmentOrganization' : 'NGO';
 ---
 
 <Layout title={pageTitle} description={pageDesc} canonical={canonicalUrl}>
@@ -130,7 +131,9 @@ const jsonLdType = org.organizationType === 'government' ? 'GovernmentOrganizati
             <div class="flex-1 min-w-0">
               <h1 class="text-xl md:text-2xl font-bold">{org.title}</h1>
               {category && (
-                <p class="text-xs text-muted-foreground mt-0.5">{category.name}</p>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                  {parentCategory ? `${parentCategory.name} > ` : ''}{category.name}
+                </p>
               )}
               <div class="mt-1 space-y-1">
                 {org.contactNumber && (

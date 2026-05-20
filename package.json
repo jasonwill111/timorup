@@ -72,7 +72,6 @@
   },
   "devDependencies": {
     "@astrojs/compiler-rs": "^0.1.10",
-    "@astrojs/node": "^10.0.6",
     "@cloudflare/workers-types": "^4.20260518.1",
     "@noble/hashes": "^2.2.0",
     "@playwright/test": "^1.60.0",
@@ -89,6 +88,7 @@
     "miniflare": "^4.20260426.0",
     "playwright": "^1.60.0",
     "typescript": "^6.0.3",
+    "unenv": "^1.10.0",
     "vitest": "^4.1.5",
     "wrangler": "^4.90.1"
   },

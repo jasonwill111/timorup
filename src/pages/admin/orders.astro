@@ -135,9 +135,17 @@ import { actions } from 'astro:actions';
   // Load orders
   async function loadOrders() {
     try {
-      const result = currentFilter === 'all'
-        ? fetch("/api/admin/subscriptions", { credentials: "include" }).then(r => r.json())
-        : await actions.admin.subscriptions.list({ status: currentFilter });
+      // Map filter to status for action
+      const statusMap: Record<string, string> = {
+        'unpaid': 'pending',
+        'paid': 'paid',
+        'all': undefined,
+      };
+      const status = statusMap[currentFilter] || undefined;
+
+      const result = await actions.admin.subscriptions.list(
+        status ? { status } : undefined
+      );
 
       const container = document.getElementById('orders-list');
       const countEl = document.getElementById('orders-count');

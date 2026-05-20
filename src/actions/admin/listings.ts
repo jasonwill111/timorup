@@ -21,7 +21,7 @@ const createSchema = z.object({
   contactName: z.string().optional().nullable(),
   contactNumber: z.string().optional().nullable(),
   countryCode: z.string().default('+670'),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.email().optional().or(z.literal('')),
   tags: z.string().optional().nullable(), // JSON string
   imageIds: z.string().optional().nullable(), // JSON string
   status: z.enum(['draft', 'published']).default('draft'),

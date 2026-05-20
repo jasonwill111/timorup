@@ -1,0 +1,20 @@
+---
+import * as LucideIcons from '@lucide/astro';
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+  strokeWidth?: number;
+}
+
+const {
+  name,
+  size = 24,
+  class: className = '',
+  strokeWidth = 2,
+} = Astro.props;
+
+const Icon = LucideIcons[name as keyof typeof LucideIcons] || LucideIcons['HelpCircle'];
+---
+<Icon size={size} class={className} strokeWidth={strokeWidth} />

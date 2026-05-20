@@ -6,7 +6,7 @@ status: completed
 priority: P1
 created: 2026-05-19
 tldr: "**As a** admin."
-project: TimorLink
+project: timorup
 ---
 
 # US-002: Clean Up Deprecated Fields in Products (P2)
@@ -37,4 +37,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

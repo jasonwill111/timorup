@@ -2,23 +2,12 @@
 // Server Island: Fetches dynamic content on the homepage
 // This runs on the server and caches results
 import { getDb } from '@/lib/db';
-import { businesses, products, listings } from '@/db/schema';
-import { eq, desc, inArray, or } from 'drizzle-orm';
+import { businesses, listings, nonProfits, publicSectors } from '@/db/schema';
+import { eq, desc, or } from 'drizzle-orm';
 import BusinessCard from '@/components/business/BusinessCard.astro';
-import ProductCard from '@/components/business/ProductCard.astro';
 import ListingCard from '@/components/business/ListingCard.astro';
 
 // Define types for better TypeScript safety
-
-type ProductListing = {
-  id: string;
-  title: string;
-  priceFields: { label: string; value: string; unit: string }[];
-  productType: string;
-  businessTitle: string;
-  businessSlug: string;
-  thumbnail: string | null;
-};
 
 type BusinessListing = {
   id: string;
@@ -59,7 +48,8 @@ if (!db) {
 
 let featuredBusinesses: BusinessListing[] = [];
 let featuredListings: ListingItem[] = [];
-let featuredProducts: ProductListing[] = [];
+let featuredPublicSectors: BusinessListing[] = [];
+let featuredNonProfits: BusinessListing[] = [];
 
 try {
   if (!db) throw new Error('Database not initialized');
@@ -125,51 +115,85 @@ try {
     };
   });
 
-  // Featured Products & Services (limit 6)
-  const productsResult = await db.select({
-    id: products.id,
-    title: products.title,
-    priceFields: products.priceFields,
-    productType: products.productType,
-    businessId: products.businessId,
-    images: products.images,
-    featured: products.featured,
+  // Featured Public Sectors (limit 12)
+  const publicSectorsResult = await db.select({
+    id: publicSectors.id,
+    title: publicSectors.title,
+    slug: publicSectors.slug,
+    tags: publicSectors.tags,
+    likes: publicSectors.likes,
+    status: publicSectors.status,
+    categoryId: publicSectors.categoryId,
+    profileImageId: publicSectors.profileImageId,
   })
-  .from(products)
-  .innerJoin(businesses, eq(products.businessId, businesses.id))
-  .where(eq(businesses.status, 'live'))
-  .orderBy(desc(products.featured), desc(products.createdAt))
+  .from(publicSectors)
+  .where(
+    or(
+      eq(publicSectors.status, 'live'),
+      eq(publicSectors.status, 'published')
+    )
+  )
+  .orderBy(desc(publicSectors.likes))
   .limit(12);
 
-  const businessIds = [...new Set(productsResult.map(p => p.businessId))];
-  const businessesForProducts = businessIds.length > 0
-    ? await db.select({
-        id: businesses.id,
-        title: businesses.title,
-        slug: businesses.slug,
-      })
-      .from(businesses)
-      .where(inArray(businesses.id, businessIds))
-    : [];
-
-  const businessMap: Record<string, { title: string; slug: string }> = {};
-  businessesForProducts.forEach(b => {
-    businessMap[b.id] = { title: b.title, slug: b.slug };
+  featuredPublicSectors = publicSectorsResult.map(b => {
+    const tags = b.tags ? JSON.parse(b.tags) : [];
+    return {
+      id: b.id,
+      title: b.title,
+      slug: b.slug,
+      category: 'Public Sector',
+      rating: 0,
+      reviews: 0,
+      likes: b.likes || 0,
+      location: 'Dili',
+      tag: tags[0] || '',
+      tags,
+      profileImageId: b.profileImageId,
+      entityType: 'public-sector',
+      entityTypeDisplay: 'Public Sector',
+      isNew: false,
+    };
   });
 
-  featuredProducts = productsResult.map(p => {
-    const business = businessMap[p.businessId] || {};
-    const priceFields = p.priceFields ? JSON.parse(p.priceFields as string) : [];
-    const images = p.images ? JSON.parse(p.images as string) : [];
+  // Featured Non-Profits (limit 12)
+  const nonProfitsResult = await db.select({
+    id: nonProfits.id,
+    title: nonProfits.title,
+    slug: nonProfits.slug,
+    tags: nonProfits.tags,
+    likes: nonProfits.likes,
+    status: nonProfits.status,
+    categoryId: nonProfits.categoryId,
+    profileImageId: nonProfits.profileImageId,
+  })
+  .from(nonProfits)
+  .where(
+    or(
+      eq(nonProfits.status, 'live'),
+      eq(nonProfits.status, 'published')
+    )
+  )
+  .orderBy(desc(nonProfits.likes))
+  .limit(12);
+
+  featuredNonProfits = nonProfitsResult.map(b => {
+    const tags = b.tags ? JSON.parse(b.tags) : [];
     return {
-      id: p.id,
-      title: p.title,
-      priceFields,
-      images,
-      productType: p.productType || 'product',
-      businessTitle: business.title || '',
-      businessSlug: business.slug || '',
-      thumbnail: images.length > 0 ? images[0] : null,
+      id: b.id,
+      title: b.title,
+      slug: b.slug,
+      category: 'Non-Profit',
+      rating: 0,
+      reviews: 0,
+      likes: b.likes || 0,
+      location: 'Dili',
+      tag: tags[0] || '',
+      tags,
+      profileImageId: b.profileImageId,
+      entityType: 'non-profit',
+      entityTypeDisplay: 'Non-Profit',
+      isNew: false,
     };
   });
 
@@ -177,7 +201,7 @@ try {
   console.error('Failed to fetch database data:', e);
 }
 
-const hasContent = featuredBusinesses.length > 0 || featuredListings.length > 0 || featuredProducts.length > 0;
+const hasContent = featuredBusinesses.length > 0 || featuredListings.length > 0 || featuredPublicSectors.length > 0 || featuredNonProfits.length > 0;
 ---
 
 {hasContent ? (
@@ -189,30 +213,38 @@ const hasContent = featuredBusinesses.length > 0 || featuredListings.length > 0 
         data-tab="businesses"
         data-active="true"
       >
-        Featured Businesses
+        Businesses
       </button>
       <button
         class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[active=true]:border-primary transition-colors"
         data-tab="listings"
         data-active="false"
       >
-        Classified Ads
+        Listings
       </button>
       <button
         class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[active=true]:border-primary transition-colors"
-        data-tab="products"
+        data-tab="public-sectors"
         data-active="false"
       >
-        Products & Services
+        Public Sectors
+      </button>
+      <button
+        class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[active=true]:text-foreground data-[active=true]:border-primary transition-colors"
+        data-tab="non-profits"
+        data-active="false"
+      >
+        Non-Profits
       </button>
     </div>
 
     <!-- Mobile: Select dropdown instead of tabs -->
     <div class="md:hidden">
       <select id="content-select" class="w-full p-3 rounded-lg border bg-card text-sm font-medium">
-        <option value="businesses">Featured Businesses</option>
-        <option value="listings">Classified Ads</option>
-        <option value="products">Products & Services</option>
+        <option value="businesses">Businesses</option>
+        <option value="listings">Listings</option>
+        <option value="public-sectors">Public Sectors</option>
+        <option value="non-profits">Non-Profits</option>
       </select>
     </div>
 
@@ -286,34 +318,72 @@ const hasContent = featuredBusinesses.length > 0 || featuredListings.length > 0 
         )}
       </div>
 
-      <!-- Featured Products Panel -->
-      <div class="tab-panel hidden" data-panel="products">
-        {featuredProducts.length > 0 ? (
+      <!-- Featured Public Sectors Panel -->
+      <div class="tab-panel hidden" data-panel="public-sectors">
+        {featuredPublicSectors.length > 0 ? (
           <>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-              {featuredProducts.map((product: ProductListing) => (
-                <ProductCard
-                  title={product.title}
-                  businessTitle={product.businessTitle}
-                  businessSlug={product.businessSlug}
-                  priceFields={product.priceFields}
-                  productType={product.productType}
-                  slug={product.id}
-                  thumbnail={product.thumbnail}
+              {featuredPublicSectors.map((sector: BusinessListing) => (
+                <BusinessCard
+                  title={sector.title}
+                  slug={sector.slug}
+                  category={sector.category}
+                  thumbnail={null}
+                  rating={sector.rating}
+                  likes={sector.likes}
+                  reviews={sector.reviews}
+                  location={sector.location}
+                  tag={sector.tag}
+                  type={sector.entityType}
                 />
               ))}
             </div>
             <div class="mt-6 text-center">
-              <a href="/products-services" class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors">
-                View All Products
+              <a href="/public-sectors" class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                View All Public Sectors
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
               </a>
             </div>
           </>
         ) : (
           <div class="text-center py-12 bg-muted/30 rounded-xl">
-            <p class="text-muted-foreground mb-4">No products available yet.</p>
-            <a href="/businesses/create" class="text-primary hover:underline">Add your products!</a>
+            <p class="text-muted-foreground mb-4">No public sectors available yet.</p>
+            <a href="/public-sectors" class="text-primary hover:underline">Explore public sectors!</a>
+          </div>
+        )}
+      </div>
+
+      <!-- Featured Non-Profits Panel -->
+      <div class="tab-panel hidden" data-panel="non-profits">
+        {featuredNonProfits.length > 0 ? (
+          <>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+              {featuredNonProfits.map((nonprofit: BusinessListing) => (
+                <BusinessCard
+                  title={nonprofit.title}
+                  slug={nonprofit.slug}
+                  category={nonprofit.category}
+                  thumbnail={null}
+                  rating={nonprofit.rating}
+                  likes={nonprofit.likes}
+                  reviews={nonprofit.reviews}
+                  location={nonprofit.location}
+                  tag={nonprofit.tag}
+                  type={nonprofit.entityType}
+                />
+              ))}
+            </div>
+            <div class="mt-6 text-center">
+              <a href="/non-profits" class="inline-flex items-center gap-2 px-6 py-2.5 bg-rose-500 text-white rounded-lg font-medium hover:bg-rose-600 transition-colors">
+                View All Non-Profits
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </>
+        ) : (
+          <div class="text-center py-12 bg-muted/30 rounded-xl">
+            <p class="text-muted-foreground mb-4">No non-profits available yet.</p>
+            <a href="/non-profits" class="text-primary hover:underline">Explore non-profits!</a>
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-// AI Agents - Mastra Agents with MiniMax M2.7
+// AI Agents - Mastra Agents with MiniMax M2.7 and Structured Output
 import { Agent } from "@mastra/core/agent";
 import { getMinimaxApiKey } from '@/lib/env';
 import {
@@ -6,6 +6,10 @@ import {
   SKU_INSTRUCTIONS,
   BLOG_INSTRUCTIONS,
   LANDING_INSTRUCTIONS,
+  ListingDataSchema,
+  SkuDataSchema,
+  BlogDataSchema,
+  LandingDataSchema,
 } from '@/lib/ai/validation';
 
 // NOTE: In Cloudflare Workers, process.env is NOT available by default.
@@ -30,6 +34,7 @@ export const listingCreator = new Agent({
   name: "Listing Creator",
   instructions: LISTING_INSTRUCTIONS,
   model: minimaxModel,
+  output: ListingDataSchema,
 });
 
 // ============================================
@@ -40,6 +45,7 @@ export const skuCreator = new Agent({
   name: "SKU Creator",
   instructions: SKU_INSTRUCTIONS,
   model: minimaxModel,
+  output: SkuDataSchema,
 });
 
 // ============================================
@@ -50,6 +56,7 @@ export const blogCreator = new Agent({
   name: "Blog Creator",
   instructions: BLOG_INSTRUCTIONS,
   model: minimaxModel,
+  output: BlogDataSchema,
 });
 
 // ============================================
@@ -60,6 +67,7 @@ export const landingPageCreator = new Agent({
   name: "Landing Page Creator",
   instructions: LANDING_INSTRUCTIONS,
   model: minimaxModel,
+  output: LandingDataSchema,
 });
 
 export const agents = {

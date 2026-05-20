@@ -27,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Drizzle relations (one/many) configured
   - Mastra AI with unified provider config + Workers AI fallback
   - Server Actions with defineAction + Zod validation
-  - Type refactor: 84 any usages â†?proper types
+  - Type refactor: 84 any usages ï¿½?proper types
 - TypeScript strict mode: strict, noUncheckedIndexedAccess, noImplicitReturns
 - Motion animations integrated in Layout.astro
 - XSS prevention with escapeHtml() (10 usages)
@@ -40,5 +40,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - All 30 increments completed and archived
 - Feature catalog with 36 features (6 active, 30 archived)
 
-[1.0.0]: https://github.com/jasonwill111/TimorLink/compare/v0.0.0...v1.0.0
+[1.0.0]: https://github.com/jasonwill111/timorup/compare/v0.0.0...v1.0.0
 

@@ -1,0 +1,19 @@
+{
+  "id": "0070-migrate-to-server-actions",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-20T04:53:52.353Z",
+  "lastActivity": "2026-05-20T07:13:21.628Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-20T07:13:21.575Z",
+  "approvedAt": "2026-05-20T07:13:21.628Z"
+}

@@ -2,9 +2,10 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "name": "timorup",
   "minify": false,
-  "compatibility_date": "2025-11-01",
+  "compatibility_date": "2026-05-06",
   "compatibility_flags": [
     "nodejs_compat_v2",
+    "nodejs_compat_populate_process_env",
     "global_fetch_strictly_public"
   ],
 
@@ -13,7 +14,7 @@
     "directory": "./dist/client"
   },
 
-  // D1 - local dev with local D1
+  // D1 - local dev with local D1, remote with timorlist-db
   "d1_databases": [
     {
       "binding": "DB",
@@ -34,8 +35,8 @@
   "r2_buckets": [
     {
       "binding": "MEDIA_BUCKET",
-      "bucket_name": "timorlist-media",
-      "preview_bucket_name": "timorlist-media"
+      "bucket_name": "timorup-media",
+      "preview_bucket_name": "timorup-media"
     }
   ]
 }

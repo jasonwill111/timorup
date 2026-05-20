@@ -27,7 +27,7 @@ export const create = defineAction({
     locationLat: z.number().optional(),
     locationLng: z.number().optional(),
     registrationUrl: z.string().url().optional().or(z.string().optional()),
-    industry: z.string().optional(),
+    
     yearOfEstablishment: z.number().optional(),
     socialLinks: z.string().optional(), // JSON string
     countryCode: z.string().optional(),
@@ -122,7 +122,6 @@ if (!db) throw new Error("Database not available");
         slug: businessSlug,
         ownerId: userId,
         categoryId: input.categoryId,
-        industry: input.industry || null,
         contactName: input.contactName,
         contactNumber: input.contactNumber,
         countryCode: input.countryCode || '+670',

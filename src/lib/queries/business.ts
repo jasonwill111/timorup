@@ -24,7 +24,7 @@ export interface BusinessWithCategory {
   openingHours: string | null;
   aboutUs: string | null;
   tags: string | null;
-  industry: string | null;
+
   likes: number | null;
   ratingAverage: number | null;
   ratingCount: number | null;
@@ -79,7 +79,6 @@ if (!db) throw new Error("Database not available");
         openingHours: businesses.openingHours,
         aboutUs: businesses.aboutUs,
         tags: businesses.tags,
-        industry: businesses.industry,
         likes: businesses.likes,
         ratingAverage: businesses.ratingAverage,
         ratingCount: businesses.ratingCount,
@@ -159,7 +158,6 @@ if (!db) throw new Error("Database not available");
         openingHours: businesses.openingHours,
         aboutUs: businesses.aboutUs,
         tags: businesses.tags,
-        industry: businesses.industry,
         likes: businesses.likes,
         ratingAverage: businesses.ratingAverage,
         ratingCount: businesses.ratingCount,
@@ -269,7 +267,6 @@ if (!db) throw new Error("Database not available");
         openingHours: businesses.openingHours,
         aboutUs: businesses.aboutUs,
         tags: businesses.tags,
-        industry: businesses.industry,
         likes: businesses.likes,
         ratingAverage: businesses.ratingAverage,
         ratingCount: businesses.ratingCount,
@@ -335,7 +332,6 @@ if (!db) throw new Error("Database not available");
         openingHours: businesses.openingHours,
         aboutUs: businesses.aboutUs,
         tags: businesses.tags,
-        industry: businesses.industry,
         likes: businesses.likes,
         ratingAverage: businesses.ratingAverage,
         ratingCount: businesses.ratingCount,
@@ -384,7 +380,6 @@ if (!db) throw new Error("Database not available");
         openingHours: businesses.openingHours,
         aboutUs: businesses.aboutUs,
         tags: businesses.tags,
-        industry: businesses.industry,
         likes: businesses.likes,
         ratingAverage: businesses.ratingAverage,
         ratingCount: businesses.ratingCount,

@@ -11,7 +11,7 @@ import { getErrorMessage } from '@/lib/utils';
 export const signIn = defineAction({
   accept: 'form',
   input: z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.email({ error: 'Invalid email address' }),
     password: z.string().min(1, 'Password is required'),
     rememberMe: z.boolean().optional().default(false),
   }),

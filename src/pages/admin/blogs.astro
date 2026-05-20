@@ -418,7 +418,7 @@ const userId = Astro.locals.user?.id || 'system';
   // ── Fetch posts ─────────────────────────────────────────────────────────────
   async function fetchPosts() {
     try {
-      const res = await fetch("/api/admin/blogs", { credentials: "include" }); const result = await res.json();;
+      const result = await actions.admin.blogs.list();
       posts = result.success ? result.data : [];
       renderList();
     } catch {

@@ -3,6 +3,7 @@
 export const prerender = false;
 
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { actions } from 'astro:actions';
 import { getDb } from '@/lib/db';
 import { listingCategories } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -203,16 +204,22 @@ const conditions = [
 
     // Get status from button
     const submitter = (e as SubmitEvent).submitter as HTMLButtonElement;
-    data.status = submitter?.value || 'draft';
+    const status = submitter?.value || 'draft';
 
     try {
-      const res = await fetch('/api/admin/listing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+      const result = await actions.admin.listings.create({
+        title: data.get('title') as string,
+        listingType: data.get('listingType') as 'job' | 'product' | 'service' | 'vehicle' | 'property' | 'wanted',
+        categoryId: data.get('categoryId') as string || undefined,
+        description: data.get('description') as string,
+        price: data.get('price') as string || undefined,
+        condition: data.get('condition') as 'new' | 'like-new' | 'good' | 'fair' | 'poor' || undefined,
+        location: data.get('location') as string || undefined,
+        contactName: data.get('contactName') as string || undefined,
+        contactNumber: data.get('contactNumber') as string || undefined,
+        email: data.get('email') as string || undefined,
+        status: status as 'draft' | 'published',
       });
-
-      const result = await res.json();
 
       if (result.success) {
         window.location.href = '/admin/listings';

@@ -5,7 +5,7 @@ type: feature
 status: ready_for_review
 priority: P1
 created: 2026-05-19
-lastUpdated: 2026-05-19
+lastUpdated: 2026-05-20
 tldr: "Fix Admin UI issues discovered during schema audit:."
 complexity: high
 stakeholder_relevant: true

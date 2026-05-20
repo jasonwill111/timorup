@@ -1,4 +1,4 @@
-# TimorLink - Business Directory Platform
+# TimorUp - Business Directory Platform
 
 Timor-Leste's business directory platform built with Astro + Cloudflare Workers.
 
@@ -50,8 +50,8 @@ src/
 
 ## Documentation
 
-- [SpecWeave Increments](.specweave/docs/internal/specs/TimorLink/)
-- [Feature Catalog](.specweave/docs/internal/specs/TimorLink/)
+- [SpecWeave Increments](.specweave/docs/internal/specs/timorup/)
+- [Feature Catalog](.specweave/docs/internal/specs/timorup/)
 
 ## License
 

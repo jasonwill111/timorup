@@ -1,0 +1,19 @@
+{
+  "id": "0072-form-validation-state",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-20T06:56:52.191Z",
+  "lastActivity": "2026-05-20T08:13:30.651Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-20T08:13:30.587Z",
+  "approvedAt": "2026-05-20T08:13:30.651Z"
+}

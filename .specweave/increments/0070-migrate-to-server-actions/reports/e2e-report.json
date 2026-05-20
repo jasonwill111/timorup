@@ -1,0 +1,23 @@
+{
+  "incrementId": "0070",
+  "timestamp": "2026-05-20T13:50:00.000Z",
+  "mode": "run",
+  "playwrightConfig": "D:/Dev Projects/timorup/playwright.config.ts",
+  "summary": {
+    "total": 176,
+    "passed": 137,
+    "failed": 21,
+    "skipped": 0
+  },
+  "results": [
+    { "acId": "AC-US1-01", "testFile": "e2e/us-0070-001.spec.ts", "status": "fail", "duration": 1800, "error": "login.astro uses actions.auth.signIn() instead of fetch" },
+    { "acId": "AC-US1-02", "testFile": "e2e/us-0070-001.spec.ts", "status": "fail", "duration": 1500, "error": "signup.astro uses actions.auth.signUp() instead of fetch" },
+    { "acId": "AC-US1-03", "testFile": "e2e/us-0070-001.spec.ts", "status": "fail", "duration": 1500, "error": "admin/login.astro uses actions.auth.signIn() instead of fetch" },
+    { "acId": "AC-US1-04", "testFile": "e2e/us-0070-001.spec.ts", "status": "pass", "duration": 1500, "error": null },
+    { "acId": "AC-US2-01", "testFile": "e2e/us-0070-002.spec.ts", "status": "fail", "duration": 5400, "error": "admin/blogs.astro uses actions.admin.blogs.* instead of fetch" },
+    { "acId": "AC-US2-02", "testFile": "e2e/us-0070-002.spec.ts", "status": "fail", "duration": 4800, "error": "admin/categories.astro uses actions.admin.categories.* instead of fetch" },
+    { "acId": "AC-US2-03", "testFile": "e2e/us-0070-002.spec.ts", "status": "fail", "duration": 5200, "error": "admin/heroes.astro (ad-banners) uses actions.admin.heroes.* instead of fetch" },
+    { "acId": "AC-US2-04", "testFile": "e2e/us-0070-002.spec.ts", "status": "fail", "duration": 4800, "error": "admin/orders.astro uses actions.admin.subscriptions.* instead of fetch" },
+    { "acId": "AC-US2-05", "testFile": "e2e/us-0070-002.spec.ts", "status": "fail", "duration": 4000, "error": "admin/users.astro uses actions.admin.users.* instead of fetch" }
+  ]
+}

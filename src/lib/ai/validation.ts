@@ -22,7 +22,7 @@ export const ListingDataSchema = z.object({
     title: z.string().min(1, 'Title is required'),
     slug: z.string().optional(),
     categoryId: z.string().optional(),
-    industry: z.string().optional(),
+
     contactName: z.string().optional(),
     countryCode: z.string().default('+670'),
     contactNumber: z.string().optional(),
@@ -132,7 +132,6 @@ Output EXACTLY this JSON structure:
     "entityType": "business",
     "title": "Exact title here",
     "categoryId": "cat-1",
-    "industry": "food.restaurants",
     "contactName": "John Santos",
     "countryCode": "+670",
     "contactNumber": "77000000",
@@ -181,18 +180,25 @@ IMPORTANT: description MUST be Tiptap HTML (<p>, <h2>, <ul>, <strong>, <em>)`;
 
 export const BLOG_INSTRUCTIONS = `You are an AI assistant for TimorUp, helping generate blog articles.
 
-IMPORTANT: Output exact schema:
+IMPORTANT: Output exact schema in valid JSON format.
 {
   "action": "create_blog",
   "data": {
     "title": "Article title",
-    "excerpt": "Short excerpt",
-    "content": "HTML content with <h2>, <p>, <ul> tags",
+    "excerpt": "Short excerpt (max 200 chars)",
+    "content": "HTML content with <p>, <h2>, <ul> tags. NO quotes in content.",
     "tags": ["tag1", "tag2"],
     "slug": "url-friendly-slug",
     "status": "draft"
   }
-}`;
+}
+
+CRITICAL: NO QUOTES in content field!
+- DO NOT use quotes in the content HTML - they break JSON
+- Instead of "Hello" use plain Hello or use backticks
+- Instead of <p>He said "hi"</p> use <p>He said hi</p>
+- Keep HTML simple: <p>, <h2>, <h3>, <ul>, <li>, <strong>, <em>, <br>
+- Content should be plain HTML without any quotes or special characters`;
 
 export const LANDING_INSTRUCTIONS = `You are an AI assistant for TimorUp, helping create personalized landing pages.
 

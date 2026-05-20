@@ -6,13 +6,53 @@ import Layout from '@layouts/Layout.astro';
 import Button from '@components/ui/Button.astro';
 import Input from '@components/ui/Input.astro';
 import Label from '@components/ui/Label.astro';
-import Card from '@components/ui/Card.astro'
+import Card from '@components/ui/Card.astro';
+import { getDb } from '@/lib/db';
+import { productCategories } from '@/db/schema';
 
-import CardHeader from '@/components/ui/CardHeader.astro'
-import CardTitle from '@/components/ui/CardTitle.astro'
-import CardDescription from '@/components/ui/CardDescription.astro'
-import CardContent from '@/components/ui/CardContent.astro'
-import { actions } from 'astro:actions'
+const db = await getDb();
+const allCategories = db ? await db.select().from(productCategories).all() : [];
+
+// Product types
+const PRODUCT_TYPES = [
+  { value: 'product', label: 'Product (Physical/Digital)' },
+  { value: 'service', label: 'Service' },
+  { value: 'rental', label: 'Rental' },
+  { value: 'food', label: 'Food & Dining' },
+  { value: 'accommodation', label: 'Accommodation' },
+  { value: 'automotive', label: 'Automotive/Vehicle' },
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'education', label: 'Education' },
+  { value: 'beauty', label: 'Beauty & Wellness' },
+  { value: 'event', label: 'Event' },
+];
+
+// Common unit options for pricing
+const UNIT_OPTIONS = [
+  { value: '', label: 'No unit' },
+  { value: 'piece', label: 'per piece' },
+  { value: 'unit', label: 'per unit' },
+  { value: 'hour', label: 'per hour' },
+  { value: 'day', label: 'per day' },
+  { value: 'night', label: 'per night' },
+  { value: 'week', label: 'per week' },
+  { value: 'month', label: 'per month' },
+  { value: 'bottle', label: 'per bottle' },
+  { value: 'box', label: 'per box' },
+  { value: 'pack', label: 'per pack' },
+  { value: 'set', label: 'per set' },
+  { value: 'kg', label: 'per kg' },
+  { value: 'g', label: 'per gram' },
+  { value: 'litre', label: 'per litre' },
+  { value: 'ml', label: 'per ml' },
+  { value: 'meal', label: 'per meal' },
+  { value: 'person', label: 'per person' },
+  { value: 'session', label: 'per session' },
+  { value: 'visit', label: 'per visit' },
+  { value: 'course', label: 'per course' },
+  { value: 'lesson', label: 'per lesson' },
+  { value: 'treatment', label: 'per treatment' },
+];
 ---
 
 <Layout title="Add Product - TimorUp">
@@ -81,28 +121,72 @@ import { actions } from 'astro:actions'
         </CardHeader>
         <CardContent>
           <form id="product-form" class="space-y-6">
+            <!-- Product Category -->
+            <div>
+              <Label for="categoryId">Category *</Label>
+              <select id="categoryId" name="categoryId" required class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                <option value="">Select a category</option>
+                {allCategories.map(cat => (
+                  <option value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+              <p class="text-xs text-muted-foreground mt-1">Choose the product category</p>
+            </div>
+
             <!-- Product Name -->
             <div>
               <Label for="title">Product Name *</Label>
-              <Input 
-                id="title" 
-                name="title" 
-                placeholder="e.g., Professional Photography Service" 
-                required 
+              <Input
+                id="title"
+                name="title"
+                placeholder="e.g., Professional Photography Service"
+                required
               />
             </div>
 
-            <!-- Price -->
+            <!-- Product Type -->
             <div>
-              <Label for="price">Price *</Label>
-              <Input 
-                id="price" 
-                name="price" 
-                type="text"
-                placeholder="e.g., $150" 
-                required 
-              />
-              <p class="text-xs text-muted-foreground mt-1">Enter price in USD or local currency</p>
+              <Label for="productType">Product Type *</Label>
+              <select id="productType" name="productType" required class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                {PRODUCT_TYPES.map(type => (
+                  <option value={type.value}>{type.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <!-- Price Section -->
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-2">
+                <Label for="basePrice">Price *</Label>
+                <Input
+                  id="basePrice"
+                  name="basePrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <div>
+                <Label for="currency">Currency</Label>
+                <select id="currency" name="currency" class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="USD">USD ($)</option>
+                  <option value="IDR">IDR (Rp)</option>
+                  <option value="TLS">TLS ($)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Unit -->
+            <div>
+              <Label for="unit">Price Unit</Label>
+              <select id="unit" name="unit" class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                {UNIT_OPTIONS.map(opt => (
+                  <option value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <p class="text-xs text-muted-foreground mt-1">How the price is displayed (e.g., "$150 per hour")</p>
             </div>
 
             <!-- Description -->
@@ -323,29 +407,53 @@ import { actions } from 'astro:actions'
   // Handle form submission
   document.getElementById('product-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    const categoryId = (document.getElementById('categoryId') as HTMLSelectElement).value;
     const title = (document.getElementById('title') as HTMLInputElement).value;
-    const price = (document.getElementById('price') as HTMLInputElement).value;
+    const productType = (document.getElementById('productType') as HTMLSelectElement).value;
+    const basePrice = (document.getElementById('basePrice') as HTMLInputElement).value;
+    const currency = (document.getElementById('currency') as HTMLSelectElement).value;
+    const unit = (document.getElementById('unit') as HTMLSelectElement).value;
     const description = (document.getElementById('description') as HTMLInputElement).value;
     const mediaIdsInput = document.getElementById('media-ids') as HTMLInputElement;
-    
-    if (!title || !price) {
+    const images = mediaIdsInput?.value ? mediaIdsInput.value.split(',').filter(Boolean) : [];
+
+    if (!title || !categoryId || !basePrice) {
       showError('Please fill in all required fields');
       return;
     }
+
+    // Build specifications JSON
+    const specifications = {
+      pricing: {
+        basePrice: parseFloat(basePrice) || 0,
+        currency: currency || 'USD',
+        unit: unit || '',
+        unitOptions: [
+          '', 'piece', 'unit', 'hour', 'day', 'night', 'week', 'month',
+          'bottle', 'box', 'pack', 'set', 'kg', 'g', 'litre', 'ml',
+          'meal', 'person', 'session', 'visit', 'course', 'lesson', 'treatment'
+        ],
+        minOrder: 1,
+        discount: 0,
+        deposit: 0
+      }
+    };
 
     try {
       const result = await actions.products.createProduct({
         businessId: currentBusiness.id,
         title,
         description,
+        categoryId,
+        productType: productType as 'product' | 'service' | 'rental' | 'food' | 'accommodation' | 'automotive' | 'healthcare' | 'education' | 'beauty' | 'event' | 'virtual' | 'ticket' | 'subscription',
+        specifications,
+        images,
       });
 
       if (result.success) {
-        // Redirect to products page
         window.location.href = `/business/${slug}/products`;
       } else {
-        // Check for specific error codes
         if (result.error?.code === 'SKU_LIMIT_REACHED' || result.error?.code === 'SKU_NOT_ALLOWED') {
           loading?.classList.add('hidden');
           content?.classList.add('hidden');

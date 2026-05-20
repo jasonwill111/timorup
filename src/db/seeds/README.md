@@ -7,15 +7,15 @@ SQL scripts to seed local D1 database with realistic data.
 ```bash
 # Run all seed scripts in order
 for f in src/db/seeds/*.sql; do
-  npx wrangler d1 execute TimorLink-db --local --file="$f"
+  npx wrangler d1 execute timorup-db --local --file="$f"
 done
 
 # Or run individually
-npx wrangler d1 execute TimorLink-db --local --file=src/db/seeds/01_update_businesses.sql
-npx wrangler d1 execute TimorLink-db --local --file=src/db/seeds/02_update_products.sql
-npx wrangler d1 execute TimorLink-db --local --file=src/db/seeds/03_update_listings.sql
-npx wrangler d1 execute TimorLink-db --local --file=src/db/seeds/04_update_nonprofits.sql
-npx wrangler d1 execute TimorLink-db --local --file=src/db/seeds/05_update_public_sectors.sql
+npx wrangler d1 execute timorup-db --local --file=src/db/seeds/01_update_businesses.sql
+npx wrangler d1 execute timorup-db --local --file=src/db/seeds/02_update_products.sql
+npx wrangler d1 execute timorup-db --local --file=src/db/seeds/03_update_listings.sql
+npx wrangler d1 execute timorup-db --local --file=src/db/seeds/04_update_nonprofits.sql
+npx wrangler d1 execute timorup-db --local --file=src/db/seeds/05_update_public_sectors.sql
 ```
 
 ## Scripts
@@ -42,6 +42,6 @@ npx wrangler d1 execute TimorLink-db --local --file=src/db/seeds/05_update_publi
 
 ```bash
 # Seed all service packages (local + remote)
-npx wrangler d1 execute TimorLink-db --local --file="migrations/0045_seed_all_service_packages.sql"
-npx wrangler d1 execute TimorLink-db --remote --file="migrations/0045_seed_all_service_packages.sql"
+npx wrangler d1 execute timorup-db --local --file="migrations/0045_seed_all_service_packages.sql"
+npx wrangler d1 execute timorup-db --remote --file="migrations/0045_seed_all_service_packages.sql"
 ```

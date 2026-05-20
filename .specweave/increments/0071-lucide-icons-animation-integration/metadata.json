@@ -1,0 +1,19 @@
+{
+  "id": "0071-lucide-icons-animation-integration",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-20T06:56:50.321Z",
+  "lastActivity": "2026-05-20T07:53:05.952Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-20T07:47:31.229Z",
+  "approvedAt": "2026-05-20T07:53:05.953Z"
+}

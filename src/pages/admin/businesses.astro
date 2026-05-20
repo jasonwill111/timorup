@@ -92,39 +92,28 @@ import Button from '@components/ui/Button.astro';
 </AdminLayout>
 
 <script>
-  // Auth fetch helper
-  async function authFetch(url, options = {}) {
-    return fetch(url, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-    });
-  }
+  import { actions } from 'astro:actions';
 
-  let businessList: BusinessData = [];
+  let businessList: any[] = [];
   let aboutContent = '';
   let updatesContent = '';
 
   // Load businesses
   async function loadBusinesses() {
     try {
-      const res = await authFetch('/api/admin/businesses');
-      const data = await res.json();
+      const result = await actions.admin.businesses.list();
 
       const container = document.getElementById('businesses-list');
       const countEl = document.getElementById('businesses-count');
       if (!container) return;
 
-      if (!data.success || data.data.length === 0) {
+      if (!result.success || !result.data || result.data.length === 0) {
         container.innerHTML = '<p class="text-center text-muted-foreground py-8">No businesses yet</p>';
         if (countEl) countEl.textContent = '0 businesses';
         return;
       }
 
-      businessList = data.data;
+      businessList = result.data;
       renderBusinesses();
     } catch (err) {
       console.error('Error loading businesses:', err);
@@ -155,7 +144,7 @@ import Button from '@components/ui/Button.astro';
       return;
     }
 
-    container.innerHTML = filtered.map((biz: BusinessData) => `
+    container.innerHTML = filtered.map((biz) => `
       <div class="flex items-center justify-between p-2 md:p-3 border rounded text-sm hover:bg-muted/30">
         <div class="min-w-0 flex-1">
           <p class="font-medium truncate">${escapeHtml(biz.title)}</p>
@@ -164,7 +153,7 @@ import Button from '@components/ui/Button.astro';
         <div class="flex items-center gap-2 ml-2">
           <button class="text-xs px-2 py-1 border rounded hover:bg-muted edit-btn" data-id="${biz.id}">Edit</button>
           <span class="px-2 py-0.5 text-xs rounded-full ${biz.status === 'live' || biz.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'}">${biz.status}</span>
-          <select class="text-xs border rounded px-1 py-0.5 bg-background" onchange="updateBusinessStatus('${biz.id}', this.value)">
+          <select class="text-xs border rounded px-1 py-0.5 bg-background status-select" data-id="${biz.id}">
             <option value="draft" ${biz.status === 'draft' ? 'selected' : ''}>Draft</option>
             <option value="live" ${biz.status === 'live' ? 'selected' : ''}>Live</option>
             <option value="paid" ${biz.status === 'paid' ? 'selected' : ''}>Paid</option>
@@ -178,7 +167,30 @@ import Button from '@components/ui/Button.astro';
   function escapeHtml(str: string) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g, '&#39;');
   }
-  
+
+  // Status update handler
+  document.getElementById('businesses-list')?.addEventListener('change', async (e) => {
+    const target = e.target as HTMLSelectElement;
+    if (!target.classList.contains('status-select')) return;
+
+    const id = target.dataset.id;
+    const status = target.value;
+    if (!id) return;
+
+    try {
+      const result = await actions.admin.businesses.updateStatus({ id, status });
+      if (!result.success) {
+        alert('Failed to update status');
+        loadBusinesses();
+      } else {
+        alert('Status updated');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      alert('Error updating status');
+    }
+  });
+
   // Auto-generate slug from title
   document.getElementById('biz-title')?.addEventListener('input', (e) => {
     const title = (e.target as HTMLInputElement).value;
@@ -187,17 +199,17 @@ import Button from '@components/ui/Button.astro';
       slugInput.value = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     }
   });
-  
+
   document.getElementById('biz-slug')?.addEventListener('input', (e) => {
     (e.target as HTMLInputElement).dataset.userModified = 'true';
   });
-  
+
   // Modal controls
   const modal = document.getElementById('business-modal');
   const addBtn = document.getElementById('add-business-btn');
   const closeBtn = document.getElementById('close-modal');
   const cancelBtn = document.getElementById('cancel-btn');
-  
+
   // Render editors with simple textareas
   function renderEditors(initialAbout = '', initialUpdates = '') {
     aboutContent = initialAbout;
@@ -220,24 +232,24 @@ import Button from '@components/ui/Button.astro';
     modal?.classList.add('flex');
     renderEditors('', '');
   });
-  
+
   closeBtn?.addEventListener('click', () => {
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
   });
-  
+
   cancelBtn?.addEventListener('click', () => {
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
   });
-  
+
   modal?.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
   });
-  
+
   // Form submission
   let editingId: string | null = null;
 
@@ -245,26 +257,33 @@ import Button from '@components/ui/Button.astro';
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
 
-    const businessData = {
-      title: String(formData.get('title') || ''),
-      slug: String(formData.get('slug') || ''),
-      email: String(formData.get('email') || ''),
-      contactNumber: String(formData.get('phone') || ''),
-      aboutUs: aboutContent,
-      latestUpdates: updatesContent,
-      status: 'draft',
-    };
+    const isEdit = editingId !== null;
 
     try {
-      const isEdit = editingId !== null;
-      const res = await authFetch('/api/admin/businesses' + (isEdit ? '/' + editingId : ''), {
-        method: isEdit ? 'PUT' : 'POST',
-        body: JSON.stringify(businessData),
-      });
+      let result;
 
-      const data = await res.json();
+      if (isEdit) {
+        // Update existing business using listing action
+        result = await actions.admin.listing.update({
+          id: editingId,
+          title: String(formData.get('title') || ''),
+          email: String(formData.get('email') || '') || undefined,
+          contactNumber: String(formData.get('phone') || '') || undefined,
+          aboutUs: aboutContent || undefined,
+        });
+      } else {
+        // Create new business
+        result = await actions.admin.businesses.create({
+          title: String(formData.get('title') || ''),
+          slug: String(formData.get('slug') || ''),
+          email: String(formData.get('email') || '') || undefined,
+          contactNumber: String(formData.get('phone') || '') || undefined,
+          aboutUs: aboutContent || undefined,
+          latestUpdates: updatesContent || undefined,
+        });
+      }
 
-      if (data.success) {
+      if (result.success) {
         alert(isEdit ? 'Business updated successfully!' : 'Business created successfully!');
         modal?.classList.add('hidden');
         modal?.classList.remove('flex');
@@ -272,36 +291,14 @@ import Button from '@components/ui/Button.astro';
         editingId = null;
         loadBusinesses();
       } else {
-        alert(data.error?.message || 'Failed to save business');
+        alert(result.error?.message || 'Failed to save business');
       }
     } catch (err) {
       console.error('Error saving business:', err);
       alert('Error saving business');
     }
   });
-  
-  // Global function for status update
-  (window as BusinessData).updateBusinessStatus = async function(id: string, status: string) {
-    try {
-      const res = await fetch(`/api/admin/businesses/${id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      const data = await res.json();
-      
-      if (!data.success) {
-        alert('Failed to update status');
-        loadBusinesses();
-      } else {
-        alert('Status updated');
-      }
-    } catch (err) {
-      console.error('Error updating status:', err);
-      alert('Error updating status');
-    }
-  };
-  
+
   // Event listeners for search and filter
   document.getElementById('search-input')?.addEventListener('input', renderBusinesses);
   document.getElementById('status-filter')?.addEventListener('change', renderBusinesses);
@@ -317,22 +314,36 @@ import Button from '@components/ui/Button.astro';
     const entity = businessList.find(b => b.id === id);
     if (!entity) return;
 
-    // Populate form
-    (document.getElementById('biz-title') as HTMLInputElement).value = entity.title || '';
-    (document.getElementById('biz-slug') as HTMLInputElement).value = entity.slug || '';
-    (document.getElementById('biz-email') as HTMLInputElement).value = entity.email || '';
-    (document.getElementById('biz-phone') as HTMLInputElement).value = entity.contactNumber || '';
+    // Get full details
+    try {
+      const result = await actions.admin.listing.get({ id });
+      if (!result.success || !result.data) {
+        alert('Failed to load business details');
+        return;
+      }
 
-    // Set modal title and show
-    const modalTitle = document.getElementById('modal-title');
-    if (modalTitle) modalTitle.textContent = 'Edit Business';
-    editingId = id;
-    aboutContent = entity.aboutUs || '';
-    updatesContent = entity.latestUpdates || '';
-    renderEditors(aboutContent, updatesContent);
+      const business = result.data;
 
-    modal?.classList.remove('hidden');
-    modal?.classList.add('flex');
+      // Populate form
+      (document.getElementById('biz-title') as HTMLInputElement).value = business.title || '';
+      (document.getElementById('biz-slug') as HTMLInputElement).value = business.slug || '';
+      (document.getElementById('biz-email') as HTMLInputElement).value = business.email || '';
+      (document.getElementById('biz-phone') as HTMLInputElement).value = business.contactNumber || '';
+
+      // Set modal title and show
+      const modalTitle = document.getElementById('modal-title');
+      if (modalTitle) modalTitle.textContent = 'Edit Business';
+      editingId = id;
+      aboutContent = business.aboutUs || '';
+      updatesContent = business.latestUpdates || '';
+      renderEditors(aboutContent, updatesContent);
+
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    } catch (err) {
+      console.error('Error loading business details:', err);
+      alert('Error loading business details');
+    }
   });
 
   // Initialize

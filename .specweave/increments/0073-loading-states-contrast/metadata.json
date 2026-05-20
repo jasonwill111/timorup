@@ -1,0 +1,19 @@
+{
+  "id": "0073-loading-states-contrast",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-20T06:56:54.098Z",
+  "lastActivity": "2026-05-20T09:05:53.086Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-20T09:05:52.976Z",
+  "approvedAt": "2026-05-20T09:05:53.086Z"
+}

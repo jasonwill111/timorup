@@ -316,10 +316,24 @@ import CardContent from '../../../components/ui/CardContent.astro'
       const firstImage = product.images && product.images.length > 0
         ? `/api/media/${product.images[0].mediaId}`
         : null;
-      
+
+      // Parse price from specifications
+      let priceDisplay = '';
+      try {
+        const specs = product.specifications ? JSON.parse(product.specifications) : null;
+        if (specs?.pricing) {
+          const p = specs.pricing;
+          const formatted = p.basePrice ? `$${parseFloat(p.basePrice).toFixed(2)}` : '';
+          const unit = p.unit ? ` / ${p.unit}` : '';
+          priceDisplay = formatted + unit;
+        }
+      } catch (e) {
+        priceDisplay = '';
+      }
+
       const card = document.createElement('div');
       card.className = 'border rounded-lg overflow-hidden hover:shadow-md transition-shadow';
-      
+
       card.innerHTML = `
         <div class="aspect-square bg-muted relative">
           ${firstImage
@@ -347,7 +361,7 @@ import CardContent from '../../../components/ui/CardContent.astro'
         </div>
         <div class="p-3">
           <h3 class="font-medium truncate">${escapeHtml(product.title)}</h3>
-          <p class="text-sm text-muted-foreground">${escapeHtml(product.price)}</p>
+          <p class="text-sm text-muted-foreground">${priceDisplay || 'No price set'}</p>
         </div>
       `;
       

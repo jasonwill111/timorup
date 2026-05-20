@@ -109,14 +109,14 @@ const productsJson = JSON.stringify(safeProducts);
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "Product",
-  "name": "TimorList Products & Services",
+  "name": "TimorUp Products & Services",
   "description": "Browse products and services from businesses in Timor-Leste",
-  "url": "https://timorlist.com/products-services",
+  "url": "https://timorup.com/products-services",
 };
 ---
 
 <Layout
-  title="Products & Services - TimorList"
+  title="Products & Services - TimorUp"
   description="Browse all products and services from businesses in Timor-Leste"
   structuredData={structuredData}
 >
@@ -161,7 +161,19 @@ const structuredData = {
 
     <!-- Products Grid -->
     <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-      <!-- Rendered by JS -->
+      <!-- Skeleton Loader -->
+      <div id="skeleton-grid" class="contents">
+        {Array.from({ length: 12 }).map(() => (
+          <div class="bg-card rounded-lg border shadow-sm overflow-hidden">
+            <div class="aspect-square bg-muted animate-pulse"></div>
+            <div class="p-3 space-y-2">
+              <div class="h-4 bg-muted rounded animate-pulse w-3/4"></div>
+              <div class="h-3 bg-muted rounded animate-pulse w-1/2"></div>
+              <div class="h-5 bg-muted rounded animate-pulse w-20 mt-2"></div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </Layout>
@@ -198,6 +210,8 @@ const structuredData = {
   }
 
   function renderProducts(filteredProducts) {
+    const skeletonGrid = document.getElementById('skeleton-grid');
+    if (skeletonGrid) skeletonGrid.classList.add('hidden');
     resultsContainer.textContent = `Showing ${filteredProducts.length} products`;
 
     if (filteredProducts.length === 0) {
@@ -206,7 +220,7 @@ const structuredData = {
     }
 
     grid.innerHTML = filteredProducts.slice(0, 24).map(product => `
-      <a href="${getProductUrl(product)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden group cursor-pointer">
+      <a href="${getProductUrl(product)}" class="block bg-card rounded-lg border shadow-sm hover:shadow-lg hover:border-primary/60 transition-all duration-200 overflow-hidden group cursor-pointer">
         <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 relative flex items-center justify-center">
           <span class="text-4xl font-bold text-amber-500/40">${product.title.charAt(0)}</span>
           ${product.productType ? `
@@ -259,4 +273,20 @@ const structuredData = {
 
   // Init
   applyFilters();
+</script>
+
+<script>
+  import { sectionReveal, addHoverLift, addCardGlow, animateFilters, animatePagination } from '@/lib/motion-utils';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Scroll reveal on product cards
+    sectionReveal('#products-grid a');
+
+    // Filter animation
+    animateFilters('#business-filter, #sort-filter');
+
+    // Card hover effects
+    addHoverLift('#products-grid a');
+    addCardGlow('#products-grid a');
+  });
 </script>

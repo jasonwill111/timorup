@@ -2,13 +2,13 @@
 // Create Listing - /listings/create
 export const prerender = false;
 
-import Layout from '../../layouts/Layout.astro';
-import Button from '../../components/ui/Button.astro';
-import Card from '../../components/ui/Card.astro';
-import CardHeader from '../../components/ui/CardHeader.astro';
-import CardTitle from '../../components/ui/CardTitle.astro';
-import CardDescription from '../../components/ui/CardDescription.astro';
-import CardContent from '../../components/ui/CardContent.astro';
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/ui/Button.astro';
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardDescription from '../components/ui/CardDescription.astro';
+import CardContent from '../components/ui/CardContent.astro';
 import { actions } from 'astro:actions';
 
 // Check auth via session cookie
@@ -58,13 +58,13 @@ try {
             .limit(1)
             .get();
 
-          const existingNonProfit = existingBusiness || await db.select()
+          const existingNonProfit = existingBusiness ? null : await db.select()
             .from(nonProfits)
             .where(eq(nonProfits.ownerId, user.id))
             .limit(1)
             .get();
 
-          const existingPublicSector = existingBusiness || existingNonProfit || await db.select()
+          const existingPublicSector = (existingBusiness || existingNonProfit) ? null : await db.select()
             .from(publicSectors)
             .where(eq(publicSectors.ownerId, user.id))
             .limit(1)
@@ -150,17 +150,17 @@ try {
 
         <h2 class="text-lg font-semibold mb-4">What type of listing</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href="/listings/createtype=business" class="block">
+          <a href="/listings/create?type=business" class="block">
             <div class="border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all h-full">
-              <div class="text-4xl mb-3">🏢</div>
+              <div class="text-4xl mb-3">Business</div>
               <h3 class="font-semibold text-lg mb-1">Business</h3>
               <p class="text-sm text-muted-foreground">Commercial businesses, retail, restaurants, hotels, services</p>
               <p class="text-xs text-amber-600 mt-2">Requires subscription</p>
             </div>
           </a>
-          <a href="/listings/createtype=non-profit" class="block">
+          <a href="/listings/create?type=non-profit" class="block">
             <div class="border rounded-xl p-6 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all h-full">
-<div class="text-4xl mb-3">🏛️</div>
+              <div class="text-4xl mb-3">Non-Profit</div>
               <h3 class="font-semibold text-lg mb-1">Non-Profit</h3>
               <p class="text-sm text-muted-foreground">Government agencies, NGOs, nonprofits, foundations</p>
               <p class="text-xs text-green-600 mt-2">Free listing</p>
@@ -539,7 +539,7 @@ try {
       const closed = (document.querySelector(`.day-closed[data-day="${day}"]`) as HTMLInputElement).checked;
       const openTime = (document.querySelector(`.day-open[data-day="${day}"]`) as HTMLInputElement).value || '09:00';
       const closeTime = (document.querySelector(`.day-close[data-day="${day}"]`) as HTMLInputElement).value || '17:00';
-      openingHours[day] = closed  { open: 'closed', close: 'closed' } : { open: openTime, close: closeTime };
+      openingHours[day] = closed ? { open: 'closed', close: 'closed' } : { open: openTime, close: closeTime };
     });
 
     // Parse tags
@@ -554,8 +554,8 @@ try {
     };
 
     // Handle images (file inputs)
-    const bannerFile = (document.getElementById('bannerImage') as HTMLInputElement).files.[0];
-    const profileFile = (document.getElementById('profileImage') as HTMLInputElement).files.[0];
+    const bannerFile = (document.getElementById('bannerImage') as HTMLInputElement).files[0];
+    const profileFile = (document.getElementById('profileImage') as HTMLInputElement).files[0];
     const galleryFiles = (document.getElementById('galleryImages') as HTMLInputElement).files;
 
     const data = {

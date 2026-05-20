@@ -96,25 +96,15 @@ import { actions } from 'astro:actions';
   import { actions } from 'astro:actions';
   import { toast } from '../../stores/toast';
 
-  let allUsers: UserData = [];
+  let allUsers: any[] = [];
   let currentUserRole = 'user';
-
-  // Auth fetch helper
-  async function authFetch(url, options = {}) {
-    return fetch(url, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-        ...options.headers,
-      },
-    });
-  }
 
   // Check current user role
   async function checkUserRole() {
     try {
-      const res = await authFetch('/api/auth/session');
+      const result = await actions.admin.users.getById({ id: 'session-check' }).catch(() => null);
+      // Use direct fetch for session check as getById requires actual user ID
+      const res = await fetch('/api/auth/session');
       const data = await res.json();
       currentUserRole = data.user?.role || 'user';
 
@@ -136,15 +126,14 @@ import { actions } from 'astro:actions';
   // Load users
   async function loadUsers() {
     try {
-      const res = await authFetch('/api/admin/users');
-      const data = await res.json();
+      const result = await actions.admin.users.list();
 
-      if (!data.success) {
-        toast.error(data.error?.message || 'Failed to load users');
+      if (!result.success) {
+        toast.error(result.error?.message || 'Failed to load users');
         return;
       }
 
-      allUsers = data.data || [];
+      allUsers = result.data || [];
       renderUsers();
     } catch (err) {
       console.error('Error loading users:', err);
@@ -176,7 +165,7 @@ import { actions } from 'astro:actions';
       return;
     }
 
-    container.innerHTML = filtered.map((user: UserData) => `
+    container.innerHTML = filtered.map((user) => `
       <div class="flex items-center justify-between p-3 border rounded text-sm hover:bg-muted/30" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name)}" data-user-email="${escapeHtml(user.email || '')}" data-user-phone="${escapeHtml(user.phone || '')}" data-user-role="${user.role}">
         <div class="min-w-0 flex-1">
           <p class="font-medium truncate">${escapeHtml(user.name)}</p>
@@ -191,7 +180,7 @@ import { actions } from 'astro:actions';
       </div>
     `).join('');
   }
-  
+
   function getRoleClass(role: string) {
     switch(role) {
       case 'super_admin': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
@@ -240,45 +229,42 @@ import { actions } from 'astro:actions';
     if (!confirm('Delete this user and all their data? This action cannot be undone.')) return;
 
     try {
-      const result = await actions.admin.setUserRole({ userId: id, role: 'user' }).catch(() => null);
-      // Use direct API for delete since no delete action exists
-      const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const result = await actions.admin.users.delete({ id });
 
-      if (data.success) {
+      if (result.success) {
         toast.success('User deleted');
         loadUsers();
       } else {
-        toast.error(data.error?.message || 'Failed to delete user');
+        toast.error(result.error?.message || 'Failed to delete user');
       }
     } catch (err) {
       console.error('Error deleting user:', err);
       toast.error('Error deleting user');
     }
-  };
-  
+  }
+
   // Modal controls
   const modal = document.getElementById('edit-modal');
   const closeBtn = document.getElementById('close-modal');
   const cancelBtn = document.getElementById('cancel-btn');
-  
+
   closeBtn?.addEventListener('click', () => {
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
   });
-  
+
   cancelBtn?.addEventListener('click', () => {
     modal?.classList.add('hidden');
     modal?.classList.remove('flex');
   });
-  
+
   modal?.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
   });
-  
+
   // Form submission
   document.getElementById('user-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -289,26 +275,30 @@ import { actions } from 'astro:actions';
       name: String(formData.get('name') || ''),
       email: String(formData.get('email') || ''),
       phone: String(formData.get('phone') || ''),
-      role: String(formData.get('role') || 'user'),
     };
     const originalRole = (document.getElementById('users-list')?.querySelector(`[data-user-id="${userId}"]`) as HTMLElement)?.dataset.userRole || 'user';
+    const newRole = String(formData.get('role') || 'user');
 
     try {
       // Update basic info
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
+      const result = await actions.admin.users.update({
+        id: userId,
+        name: userData.name,
+        email: userData.email || undefined,
+        phone: userData.phone || undefined,
       });
 
-      const data = await res.json();
+      if (!result.success) {
+        toast.error(result.error?.message || 'Failed to update user');
+        return;
+      }
 
       // If role changed and user is super_admin, use actions to update role
-      if (data.success && userData.role !== originalRole && currentUserRole === 'super_admin') {
+      if (newRole !== originalRole && currentUserRole === 'super_admin') {
         try {
           const roleResult = await actions.admin.setUserRole({
             userId,
-            role: userData.role as 'user' | 'editor' | 'admin' | 'super_admin',
+            role: newRole as 'user' | 'editor' | 'admin' | 'super_admin',
           });
           if (!roleResult.success) {
             toast.error(roleResult.error?.message || 'Failed to update role');
@@ -321,20 +311,16 @@ import { actions } from 'astro:actions';
         }
       }
 
-      if (data.success) {
-        toast.success('User updated');
-        modal?.classList.add('hidden');
-        modal?.classList.remove('flex');
-        loadUsers();
-      } else {
-        toast.error(data.error?.message || 'Failed to update user');
-      }
+      toast.success('User updated');
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+      loadUsers();
     } catch (err) {
       console.error('Error updating user:', err);
       toast.error('Error updating user');
     }
   });
-  
+
   // Event listeners for search and filter
   document.getElementById('search-input')?.addEventListener('input', renderUsers);
   document.getElementById('role-filter')?.addEventListener('change', renderUsers);

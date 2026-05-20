@@ -70,18 +70,18 @@ if (business.status === 'draft') {
 // Check pending_payment status - show message to owner
 const isPending = business.status === 'pending_payment';
 
-// Check grace period using subscription fields
-const subscriptionStatus = business.subscriptionStatus || 'none';
+// Check grace period using plan fields
+const planStatus = business.planStatus || 'none';
 const gracePeriodEndDate = business.gracePeriodEndDate
   ? new Date(business.gracePeriodEndDate * 1000)
   : null;
 
 const now = new Date();
 const isInGracePeriod = gracePeriodEndDate
-  ? subscriptionStatus === 'expired' && now < gracePeriodEndDate
+  ? planStatus === 'expired' && now < gracePeriodEndDate
   : false;
 
-const isExpiredBeyondGrace = subscriptionStatus === 'expired' && (!gracePeriodEndDate || now >= gracePeriodEndDate);
+const isExpiredBeyondGrace = planStatus === 'expired' && (!gracePeriodEndDate || now >= gracePeriodEndDate);
 
 const daysRemaining = gracePeriodEndDate
   ? Math.max(0, Math.ceil((gracePeriodEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
@@ -115,6 +115,7 @@ interface UpdateRecord {
   createdAt: number;
 }
 let category = null;
+let parentCategory = null;
 let businessReviews: ReviewRecord[] = [];
 let galleryImages: { id: string; url: string }[] = [];
 let updates: UpdateRecord[] = [];
@@ -123,6 +124,10 @@ try {
   category = business.categoryId
     ? await db.select().from(businessCategories).where(eq(businessCategories.id, business.categoryId)).get()
     : null;
+  // Get parent category if exists
+  if (category?.parentId) {
+    parentCategory = await db.select().from(businessCategories).where(eq(businessCategories.id, category.parentId)).get();
+  }
 } catch (e) {
   console.error('Category query failed:', e);
 }
@@ -140,9 +145,8 @@ try {
 try {
   const galleryMedia = await db.select({ id: media.id })
     .from(media)
-    .where(eq(media.entityId, business.id))
-    .where(eq(media.entityType, 'businesses'))
-    .where(eq(media.purpose, 'gallery'))
+    .where(eq(media.typeId, business.id))
+    .where(eq(media.type, 'businesses'))
     .orderBy(media.sortOrder)
     .all();
   galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
@@ -154,13 +158,13 @@ try {
   const latestUpdatesData = await db.select()
     .from(latestUpdates)
     .where(eq(latestUpdates.typeId, business.id))
-    .where(eq(latestUpdates.type, 'business'))
+    .where(eq(latestUpdates.type, 'businesses'))
     .orderBy(desc(latestUpdates.createdAt))
     .limit(4)
     .all();
   updates = latestUpdatesData.map(u => ({
     ...u,
-    images: safeJsonParse(u.imageIds, []),
+    images: safeJsonParse(u.images, []),
   }));
 } catch (e) {
   console.error('Updates query failed:', e);
@@ -308,7 +312,9 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
             <div class="flex-1 min-w-0">
               <h1 class="text-xl md:text-2xl font-bold">{business.title}</h1>
               {category && (
-                <p class="text-xs text-muted-foreground mt-0.5">{category.name}</p>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                  {parentCategory ? `${parentCategory.name} > ` : ''}{category.name}
+                </p>
               )}
               <div class="mt-1 space-y-1">
                 {business.contactNumber && (

@@ -1,0 +1,236 @@
+---
+// Listings page - displays classified ads from listings table
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getDb } from '@/lib/db';
+import { listings } from '@/db/schema';
+import { desc, eq } from 'drizzle-orm';
+
+const db = await getDb();
+const searchParams = Astro.url.searchParams;
+const search = searchParams.get('q') || '';
+const type = searchParams.get('type') || '';
+const page = parseInt(searchParams.get('page') || '1', 10);
+const LIMIT = 12;
+const offset = (page - 1) * LIMIT;
+
+const hasSearchParams = search || type;
+Astro.response.headers.set('Cache-Control', hasSearchParams ? 'public, max-age=30, s-maxage=60, stale-while-revalidate=120' : 'public, max-age=60, s-maxage=120, stale-while-revalidate=300');
+
+interface ListingRecord {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  price: string | null;
+  listingType: string | null;
+  location: string | null;
+  imageIds: string[];
+  likes: number;
+  views: number;
+  status: string;
+  createdAt: number;
+}
+
+let allListings: ListingRecord[] = [];
+try {
+  const searchLower = search.toLowerCase();
+  allListings = await db.select()
+    .from(listings)
+    .orderBy(desc(listings.createdAt))
+    .all();
+
+  allListings = allListings.filter((l: ListingRecord) => {
+    const statusOk = l.status === 'active' || l.status === 'published';
+    const searchMatch = !search ||
+      l.title.toLowerCase().includes(searchLower) ||
+      (l.description && l.description.toLowerCase().includes(searchLower));
+    const typeMatch = !type || l.listingType === type;
+    return statusOk && searchMatch && typeMatch;
+  });
+} catch (e) { console.error('Query error:', e); allListings = []; }
+
+const total = allListings.length;
+const totalPages = Math.ceil(total / LIMIT);
+const entities = allListings.slice(offset, offset + LIMIT);
+
+const buildUrl = (params: Record<string, string>) => {
+  const p = new URLSearchParams();
+  if (search) p.set('q', search);
+  if (type) p.set('type', type);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) p.set(k, v);
+  });
+  return `/listings${p.toString()}`;
+};
+
+const typeColors: Record<string, { bg: string; text: string }> = {
+  product: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
+  vehicle: { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-700 dark:text-red-300' },
+  property: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
+  job: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
+  service: { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
+  wanted: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300' },
+};
+---
+
+<Layout title="Classified Ads - TimorUp">
+  <div class="container py-4 sm:py-8" data-page-content>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold">Classified Ads</h1>
+      <span class="text-sm text-muted-foreground">{total} total</span>
+    </div>
+
+    <form method="GET" action="/listings" class="bg-card rounded-2xl border border-border/50 p-4 mb-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input name="q" type="search" placeholder="Search listings..." value={search}
+            class="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+        </div>
+        <div class="flex gap-2">
+          <select name="type" onchange="this.form.submit()"
+            class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+            <option value="">All Types</option>
+            <option value="product" selected={type==='product'}>Product</option>
+            <option value="vehicle" selected={type==='vehicle'}>Vehicle</option>
+            <option value="property" selected={type==='property'}>Property</option>
+            <option value="job" selected={type==='job'}>Job</option>
+            <option value="service" selected={type==='service'}>Service</option>
+            <option value="wanted" selected={type==='wanted'}>Wanted</option>
+          </select>
+        </div>
+      </div>
+    </form>
+
+    {entities.length > 0 ? (
+      <div id="entities-grid" class="hidden">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {entities.map(l => {
+          const imageIds = l.imageIds && typeof l.imageIds === 'string' ? JSON.parse(l.imageIds) : [];
+          const colors = typeColors[l.listingType || 'product'] || typeColors.product;
+          return (
+          <a href={`/listing/${l.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/60 overflow-hidden cursor-pointer transition-all duration-200">
+            <div class="aspect-[4/3] bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 relative overflow-hidden">
+              {imageIds.length > 0 ? (
+                <img src={`/api/media/${imageIds[0]}`} alt={l.title} class="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <svg class="w-16 h-16 text-emerald-400/60 dark:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+                  </svg>
+                </div>
+              )}
+              {l.listingType ? (
+                <span class={`absolute top-3 left-3 text-xs px-3 py-1.5 rounded-full font-semibold shadow-md ${colors.bg} ${colors.text}`}>
+                  {l.listingType.charAt(0).toUpperCase() + l.listingType.slice(1)}
+                </span>
+              ) : null}
+            </div>
+            <div class="p-4 space-y-3">
+              <h3 class="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">{l.title}</h3>
+              {l.price ? (
+                <p class={`text-lg font-bold ${l.listingType === 'job' ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>{l.price}</p>
+              ) : null}
+              {l.location ? (
+                <p class="text-sm text-muted-foreground flex items-start gap-2">
+                  <svg class="w-4 h-4 mt-0.5 shrink-0 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span class="truncate">{l.location}</span>
+                </p>
+              ) : null}
+              <div class="flex items-center gap-4 pt-2 border-t border-border/50">
+                {l.likes > 0 ? (
+                  <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    {l.likes}
+                  </span>
+                ) : null}
+                <span class="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  {l.views > 999 ? `${(l.views/1000).toFixed(1)}k` : l.views}
+                </span>
+              </div>
+            </div>
+          </a>
+          );
+        })}
+      </div>
+      </div>
+      <!-- Skeleton Loader -->
+      <div id="skeleton-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 12 }).map(() => (
+          <div class="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+            <div class="aspect-[4/3] bg-muted animate-pulse"></div>
+            <div class="p-4 space-y-3">
+              <div class="h-4 bg-muted rounded animate-pulse w-3/4"></div>
+              <div class="h-5 bg-muted rounded animate-pulse w-1/3"></div>
+              <div class="flex items-center justify-between pt-2 border-t border-border/50">
+                <div class="h-3 bg-muted rounded animate-pulse w-16"></div>
+                <div class="h-3 bg-muted rounded animate-pulse w-12"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16">
+        <svg class="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+        </svg>
+        <h3 class="text-lg font-medium mb-2">No listings found</h3>
+        <p class="text-muted-foreground">Try adjusting your search or filters</p>
+      </div>
+    )}
+
+    {totalPages > 1 ? (
+      <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
+        <a href={buildUrl({ page: String(page - 1) })}
+           class={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${page > 1 ? 'hover:border-primary hover:text-primary cursor-pointer' : 'opacity-50 pointer-events-none text-muted-foreground'}`}>
+          &larr; Prev
+        </a>
+        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+          const p = i + 1;
+          return (
+            <a href={buildUrl({ page: String(p) })}
+               class={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${p === page ? 'bg-primary text-primary-foreground border-primary' : 'hover:border-primary hover:text-primary cursor-pointer'}`}>
+              {p}
+            </a>
+          );
+        })}
+        <a href={buildUrl({ page: String(page + 1) })}
+           class={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${page < totalPages ? 'hover:border-primary hover:text-primary cursor-pointer' : 'opacity-50 pointer-events-none text-muted-foreground'}`}>
+          Next &rarr;
+        </a>
+      </nav>
+    ) : null}
+  </div>
+</Layout>
+
+<script>
+  import { sectionReveal, animateFilters, animatePagination, addHoverLift, addCardGlow, pageTransitionIn } from '@/lib/motion-utils';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Page transition
+    pageTransitionIn('[data-page-content]');
+
+    // Show real content, hide skeleton
+    const entitiesGrid = document.getElementById('entities-grid');
+    const skeletonGrid = document.getElementById('skeleton-grid');
+    if (entitiesGrid && skeletonGrid) {
+      entitiesGrid.classList.remove('hidden');
+      skeletonGrid.classList.add('hidden');
+    }
+
+    // Filter animation
+    animateFilters('select[name="type"]');
+
+    // Pagination animation
+    animatePagination('nav[aria-label="Pagination"]');
+
+    // Card animations
+    sectionReveal('.grid a');
+    addHoverLift('.grid a');
+    addCardGlow('.grid a');
+  });
+</script>

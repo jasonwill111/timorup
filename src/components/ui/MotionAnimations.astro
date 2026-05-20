@@ -3,6 +3,9 @@
 ---
 
 <script>
+// Check for reduced motion preference
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 import { animate, stagger, inView } from 'motion';
 
 // ===== EXISTING FUNCTIONS =====
@@ -516,6 +519,16 @@ export function lazyImageFade(imgEl: HTMLImageElement) {
 // ===== AUTO INITIALIZATION =====
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Skip all animations if user prefers reduced motion
+  if (prefersReducedMotion) {
+    // Make all elements immediately visible without animation
+    document.querySelectorAll('.word-reveal').forEach(el => {
+      (el as HTMLElement).style.opacity = '1';
+      (el as HTMLElement).style.transform = 'none';
+    });
+    return;
+  }
+
   // Hero section text reveal
   const heroTitle = document.querySelector('h1');
   if (heroTitle) {

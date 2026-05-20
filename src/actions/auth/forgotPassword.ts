@@ -25,7 +25,7 @@ function checkRateLimit(identifier: string): boolean {
 export const forgotPassword = defineAction({
   accept: 'form',
   input: z.object({
-    email: z.string().email('Valid email required'),
+    email: z.email({ error: 'Valid email required' }),
   }),
   handler: async (input) => {
     if (!checkRateLimit(`forgot:${input.email}`)) {

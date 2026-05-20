@@ -33,11 +33,11 @@ export const update = defineAction({
     slug: z.string().min(1, 'Slug is required'),
     title: z.string().optional(),
     categoryId: z.string().optional(),
-    industry: z.string().optional(),
+    
     contactName: z.string().optional(),
     contactNumber: z.string().optional(),
     countryCode: z.string().optional(),
-    email: z.email({ error: 'Valid email required' }).optional().or(z.string().optional()),
+    email: z.email().optional().or(z.literal('')),
     address: z.string().optional(),
     aboutUs: z.string().optional(),
     tags: z.array(z.string()).optional(),
@@ -91,7 +91,6 @@ if (!db) throw new Error("Database not available");
       if (input.title !== undefined) updateValues.title = input.title;
       if (input.newSlug !== undefined) updateValues.slug = input.newSlug;
       if (input.categoryId !== undefined) updateValues.categoryId = input.categoryId || null;
-      if (input.industry !== undefined) updateValues.industry = input.industry || null;
       if (input.contactName !== undefined) updateValues.contactName = input.contactName || null;
       if (input.contactNumber !== undefined) updateValues.contactNumber = input.contactNumber || null;
       if (input.countryCode !== undefined) updateValues.countryCode = input.countryCode || '+670';

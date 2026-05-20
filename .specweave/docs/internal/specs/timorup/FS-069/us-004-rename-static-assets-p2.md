@@ -2,7 +2,7 @@
 id: US-004
 feature: FS-069
 title: "Rename Static Assets (P2)"
-status: not_started
+status: completed
 priority: P1
 created: 2026-05-19
 tldr: "**As a** developer."
@@ -28,11 +28,9 @@ project: TimorUp
 
 ## Implementation
 
-**Increment**: [0069-rename-to-timorlink](../../../../../increments/0069-rename-to-timorlink/spec.md)
-
-**Tasks**: See increment tasks.md for implementation details.
-
+✅ **Completed** - All static asset references renamed to TimorUp
 
 ## Tasks
 
-_No tasks defined for this user story_
+- [x] T-001: Update favicon alt text ✅
+- [x] T-002: Update OG image references ✅

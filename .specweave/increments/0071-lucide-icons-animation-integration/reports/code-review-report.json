@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "critical": 1,
+    "high": 3,
+    "medium": 4,
+    "low": 2
+  },
+  "findings": [
+    {
+      "severity": "critical",
+      "file": "src/components/ui/ToastContainer.astro",
+      "line": 24-39",
+      "category": "Specification Compliance",
+      "title": "ToastContainer uses inline SVGs instead of LucideIcon",
+      "description": "The ToastContainer script block still uses hardcoded inline SVG strings for toast icons (CheckCircle, XCircle, Info, AlertTriangle) instead of the LucideIcon component. This violates AC-US1-03.",
+      "evidence": "Lines 34-38 contain SVG strings: `success: '<svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">...'`. There are also duplicate typeStyles/typeIcons definitions - frontmatter has one set (lines 5-17) that's completely unused.",
+      "impact": "Users see inconsistent icon rendering. The unified LucideIcon component is not being used as specified.",
+      "recommendation": "1. Remove duplicate frontmatter definitions (lines 5-17). 2. Replace inline SVG strings with LucideIcon calls. Since toasts are rendered dynamically in JavaScript, consider either: (a) Create a helper function that returns SVG strings for server-side rendering, or (b) Use data attributes to trigger client-side icon replacement after render."
+    },
+    {
+      "severity": "high",
+      "file": "src/components/ui/MotionAnimations.astro",
+      "line": "518-643",
+      "category": "Accessibility",
+      "title": "Missing prefers-reduced-motion media query support",
+      "description": "The spec (FR-003) explicitly requires respecting the prefers-reduced-motion media query, but the MotionAnimations.astro auto-initialization does not check for this preference. All animations run unconditionally.",
+      "evidence": "The DOMContentLoaded handler at line 518 runs all animations without checking `window.matchMedia('(prefers-reduced-motion: reduce)')`.",
+      "impact": "Users with vestibular disorders or motion sensitivity may experience discomfort. This is a WCAG 2.1 Level AA requirement.",
+      "recommendation": "Add a reduced motion check at the start of DOMContentLoaded: `const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;` Then conditionally skip animations or use instant transitions when true. Also wrap any CSS animations with `@media (prefers-reduced-motion: no-preference)`."
+    },
+    {
+      "severity": "high",
+      "file": "src/components/ui/ThemeToggle.astro",
+      "line": "16-26",
+      "category": "Accessibility",
+      "title": "Missing ARIA attributes for toggle state",
+      "description": "The theme toggle button lacks ARIA attributes to communicate its state to screen readers. It should indicate whether dark mode is currently active.",
+      "evidence": "Button has only `aria-label=\"Toggle theme\"` but no `aria-pressed` or `aria-checked` attribute to indicate current theme state.",
+      "impact": "Screen reader users cannot determine the current theme state from the toggle.",
+      "recommendation": "Add `aria-pressed={isDark}` dynamically, or use `role=\"switch\"` with `aria-checked={isDark}`. Update the JS to toggle this attribute along with the visual state."
+    },
+    {
+      "severity": "high",
+      "file": "src/components/Header.astro",
+      "line": "29-40, 51-62",
+      "category": "Accessibility",
+      "title": "Dropdown buttons missing ARIA attributes",
+      "description": "The dropdown trigger buttons ('Business' and 'Govs & NGOs') lack ARIA attributes to indicate they control expandable content.",
+      "evidence": "Lines 29-32: `<button>Business <ChevronDown/></button>` - no aria-expanded, aria-haspopup, or aria-controls.",
+      "impact": "Screen readers don't know these buttons control dropdown menus.",
+      "recommendation": "Add: `aria-expanded=\"false\"` (toggle via JS), `aria-haspopup=\"menu\"`, and `aria-controls=\"dropdown-business\"` (with matching IDs on dropdown divs). Update aria-expanded on hover."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/ui/LucideIcon.astro",
+      "line": "18",
+      "category": "Maintainability",
+      "title": "Silent fallback to HelpCircle may hide errors",
+      "description": "The component falls back to HelpCircle for invalid icon names. While this prevents crashes, it may silently mask typos during development.",
+      "evidence": "Line 18: `LucideIcons[name as keyof typeof LucideIcons] || LucideIcons['HelpCircle']`",
+      "impact": "A typo like 'Buildng2' instead of 'Building2' would render HelpCircle with no visible error in development.",
+      "recommendation": "Consider: (1) Add console.warn for invalid names in development mode, (2) Use TypeScript to validate props at compile time if @lucide/astro supports it, or (3) Document this behavior in a comment."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/ui/ToastContainer.astro",
+      "line": "45-56",
+      "category": "Security",
+      "title": "Correct XSS protection but consider safer pattern",
+      "description": "The escapeHtml function correctly prevents XSS, but the innerHTML pattern could be simplified by using textContent for the message.",
+      "evidence": "Lines 41-43 define escapeHtml, line 53 uses it: `${escapeHtml(t.message)}`.",
+      "impact": "Current implementation is safe but slightly harder to audit. Using textContent would be simpler.",
+      "recommendation": "Consider using `span.textContent = t.message` instead of innerHTML interpolation, which removes the need for manual escaping entirely."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/Header.astro",
+      "line": "175-276",
+      "category": "Performance",
+      "title": "Duplicate escapeHtml function definition",
+      "description": "Both Header.astro and ToastContainer.astro define the same escapeHtml function. This is duplicated code that should be extracted.",
+      "evidence": "Header.astro line 273-275, ToastContainer.astro line 41-43.",
+      "impact": "Maintenance overhead if the function needs to change. Minor bundle size impact.",
+      "recommendation": "Extract escapeHtml to a shared utility file like `src/lib/sanitize.ts` or `src/lib/dom-utils.ts` and import it in both components."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/ui/MotionAnimations.astro",
+      "line": "646-711",
+      "category": "Code Quality",
+      "title": "CSS keyframes not wrapped in prefers-reduced-motion",
+      "description": "The MotionAnimations CSS includes keyframes (shimmer, ripple, float, pageIn) that will still animate when prefers-reduced-motion is set.",
+      "evidence": "Lines 646-711 define CSS animations that run regardless of user preferences.",
+      "impact": "CSS-based animations don't respect accessibility preferences.",
+      "recommendation": "Wrap animation definitions in `@media (prefers-reduced-motion: no-preference) { /* animations */ }` to disable them when users prefer reduced motion."
+    },
+    {
+      "severity": "low",
+      "file": "src/components/Header.astro",
+      "line": "11-12",
+      "category": "Code Quality",
+      "title": "Server-side check for auth state before client hydration",
+      "description": "Line 11 checks sessionStorage/localStorage on the server, which will always be false during SSR since these APIs don't exist server-side.",
+      "evidence": "Line 11: `const isLoggedIn = typeof window !== 'undefined' && (sessionStorage.getItem('userId') || localStorage.getItem('userId'));`",
+      "impact": "Minor - the check works but is redundant. The `typeof window !== 'undefined'` guard is always false during SSR, so isLoggedIn will always be false on the server. The client-side updateAuthState() handles the real check.",
+      "recommendation": "Simplify to `const isLoggedIn = false;` for SSR, or remove the variable entirely since updateAuthState() re-renders auth UI client-side anyway."
+    },
+    {
+      "severity": "low",
+      "file": "src/pages/index.astro",
+      "line": "125-148",
+      "category": "Maintainability",
+      "title": "Animation initialization duplicated across files",
+      "description": "The index.astro script has its own hero animation setup (lines 129-133) that duplicates functionality already in MotionAnimations.astro auto-init (lines 519-522).",
+      "evidence": "index.astro calls `textReveal(heroTitle, 0.5)` in its own DOMContentLoaded, while MotionAnimations.astro auto-init calls `textReveal(heroTitle, 0.3)` on all h1 elements.",
+      "impact": "Text will be processed twice (double word splitting) on the homepage h1. This could cause visual glitches.",
+      "recommendation": "Remove the duplicate textReveal call from index.astro (lines 130-133) and let MotionAnimations.astro handle it, adjusting the delay in the auto-init if needed."
+    }
+  ]
+}

@@ -87,34 +87,8 @@ export const servicePackages = [
 
   // ========================
   // BUSINESS SUBSCRIPTIONS
+  // Only SKU limit differs between plans
   // ========================
-  {
-    id: 'sp-business-free',
-    type: 'subscription',
-    category: 'business',
-    name: 'Free Business Plan',
-    slug: 'free',
-    description: 'Get started with basic business listing',
-    variants: JSON.stringify([
-      {
-        name: 'Free',
-        price: 0,
-        currency: 'USD',
-        durationValue: 3,
-        durationUnit: 'days',
-        limits: {
-          skuLimit: 0,
-          maxImages: 4,
-          maxVideos: 1,
-          maxBusinessImages: 4,
-          maxBusinessVideos: 1
-        },
-        features: ['Basic listing for 3 days', 'Up to 4 images', '1 video', 'Category selection']
-      }
-    ]),
-    isActive: 1,
-    sortOrder: 10
-  },
   {
     id: 'sp-business-starter',
     type: 'subscription',
@@ -125,33 +99,21 @@ export const servicePackages = [
     variants: JSON.stringify([
       {
         name: 'Starter Monthly',
-        price: 19,
+        price: 29,
         currency: 'USD',
         durationValue: 1,
         durationUnit: 'month',
-        limits: {
-          skuLimit: 10,
-          maxImages: 5,
-          maxVideos: 1,
-          maxBusinessImages: 12,
-          maxBusinessVideos: 1
-        },
-        features: ['Up to 10 products/services', 'Up to 5 images per product', '12 business images', 'Featured in category (7 days/month)', 'Basic analytics']
+        limits: { skuLimit: 10 },
+        features: ['Up to 10 products/services']
       },
       {
         name: 'Starter Annual',
-        price: 180,
+        price: 290,
         currency: 'USD',
         durationValue: 12,
         durationUnit: 'months',
-        limits: {
-          skuLimit: 10,
-          maxImages: 5,
-          maxVideos: 1,
-          maxBusinessImages: 12,
-          maxBusinessVideos: 1
-        },
-        features: ['Up to 10 products/services', 'Up to 5 images per product', '12 business images', 'Featured in category (7 days/month)', 'Basic analytics', 'Save 20%']
+        limits: { skuLimit: 10 },
+        features: ['Up to 10 products/services', 'Save 20%']
       }
     ]),
     isActive: 1,
@@ -171,14 +133,8 @@ export const servicePackages = [
         currency: 'USD',
         durationValue: 1,
         durationUnit: 'month',
-        limits: {
-          skuLimit: 30,
-          maxImages: 8,
-          maxVideos: 1,
-          maxBusinessImages: 24,
-          maxBusinessVideos: 2
-        },
-        features: ['Up to 30 products/services', 'Up to 8 images per product', '24 business images', 'Featured in category (15 days/month)', 'Homepage featured (7 days/month)', 'Advanced analytics', 'Priority support', 'Verified badge']
+        limits: { skuLimit: 30 },
+        features: ['Up to 30 products/services']
       },
       {
         name: 'Professional Annual',
@@ -186,14 +142,8 @@ export const servicePackages = [
         currency: 'USD',
         durationValue: 12,
         durationUnit: 'months',
-        limits: {
-          skuLimit: 30,
-          maxImages: 8,
-          maxVideos: 1,
-          maxBusinessImages: 24,
-          maxBusinessVideos: 2
-        },
-        features: ['Up to 30 products/services', 'Up to 8 images per product', '24 business images', 'Featured in category (15 days/month)', 'Homepage featured (7 days/month)', 'Advanced analytics', 'Priority support', 'Verified badge', 'Save 25%']
+        limits: { skuLimit: 30 },
+        features: ['Up to 30 products/services', 'Save 25%']
       }
     ]),
     isActive: 1,
@@ -213,14 +163,8 @@ export const servicePackages = [
         currency: 'USD',
         durationValue: 1,
         durationUnit: 'month',
-        limits: {
-          skuLimit: 60,
-          maxImages: 10,
-          maxVideos: 2,
-          maxBusinessImages: 32,
-          maxBusinessVideos: 3
-        },
-        features: ['Up to 60 products/services', 'Up to 10 images per product', '2 videos per product', '32 business images', '3 business videos', 'Featured in category (30 days/month)', 'Homepage featured (14 days/month)', 'Premium analytics', '24/7 priority support', 'Verified badge', 'Custom branding']
+        limits: { skuLimit: 60 },
+        features: ['Up to 60 products/services']
       },
       {
         name: 'Enterprise Annual',
@@ -228,14 +172,8 @@ export const servicePackages = [
         currency: 'USD',
         durationValue: 12,
         durationUnit: 'months',
-        limits: {
-          skuLimit: 60,
-          maxImages: 10,
-          maxVideos: 2,
-          maxBusinessImages: 32,
-          maxBusinessVideos: 3
-        },
-        features: ['Up to 60 products/services', 'Up to 10 images per product', '2 videos per product', '32 business images', '3 business videos', 'Featured in category (30 days/month)', 'Homepage featured (14 days/month)', 'Premium analytics', '24/7 priority support', 'Verified badge', 'Custom branding', 'Save 20%']
+        limits: { skuLimit: 60 },
+        features: ['Up to 60 products/services', 'Save 20%']
       }
     ]),
     isActive: 1,

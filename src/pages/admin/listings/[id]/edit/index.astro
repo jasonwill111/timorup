@@ -78,25 +78,6 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
                 ))}
               </select>
             </div>
-
-            <div id="industry-field">
-              <label class="block text-sm font-medium mb-1">Industry</label>
-              <select name="industry" class="w-full h-10 px-3 rounded-md border border-input bg-background">
-                <option value="">Select industry</option>
-                {Object.entries(INDUSTRIES).map(([key, group]) => (
-                  <optgroup label={group.label}>
-                    {group.items.map(item => {
-                      const value = `${key}.${item.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-                      return (
-                        <option value={value} selected={listing.industry === value}>
-                          {item}
-                        </option>
-                      );
-                    })}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
           </div>
         </div>
       </div>
@@ -197,7 +178,6 @@ const tags = listing.tags ? JSON.parse(listing.tags) : [];
     const data = {
       title: formData.get('title'),
       categoryId: formData.get('categoryId'),
-      industry: formData.get('industry') || null,
       contactName: formData.get('contactName') || null,
       countryCode: formData.get('countryCode') || '+670',
       contactNumber: formData.get('contactNumber') || null,

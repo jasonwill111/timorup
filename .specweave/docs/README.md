@@ -1,6 +1,6 @@
-# TimorLink - Living Documentation
+# TimorUp - Living Documentation
 
-This directory contains the living documentation for **TimorLink**.
+This directory contains the living documentation for **TimorUp**.
 
 ## Structure
 

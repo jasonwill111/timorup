@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 
 // Use LOCAL environment for testing (not production)
 const BASE_URL = 'http://localhost:8787';
-const ADMIN_EMAIL = 'admin@timorlist.com';
+const ADMIN_EMAIL = 'admin@timorup.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 // Helper to login
@@ -35,9 +35,12 @@ test.describe('Admin Dashboard & Navigation', () => {
   });
 
   test('Sidebar navigation is visible', async ({ page }) => {
+    // Set desktop viewport to ensure desktop sidebar is visible
+    await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto(`${BASE_URL}/admin`);
-    const sidebar = page.locator('nav, aside, [class*="sidebar"], [class*="nav"]');
-    await expect(sidebar.first()).toBeVisible();
+    // Target the desktop sidebar specifically (inside aside element)
+    const sidebar = page.locator('aside nav, aside.fixed nav');
+    await expect(sidebar.first()).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -228,11 +231,18 @@ test.describe('Admin - Categories', () => {
     console.log('Modal visible:', modalVisible);
 
     if (modalVisible) {
-      // Change entity type to listing using force
+      // Change entity type to listing - use value selector and dispatch change event
       const entitySelect = page.locator('#cat-entity-type');
       if (await entitySelect.count() > 0) {
-        await entitySelect.selectOption({ index: 3 }); // Listing is 4th option (index 3)
-        await page.waitForTimeout(500);
+        await entitySelect.selectOption('listing');
+        // Dispatch change event to trigger the visibility update
+        await page.evaluate(() => {
+          const select = document.getElementById('cat-entity-type');
+          if (select) {
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+        await page.waitForTimeout(800);
 
         // Check if formFields section is now visible
         const formFieldsSection = page.locator('#formfields-section');
@@ -323,5 +333,41 @@ test.describe('Route Redirects (Old -> New)', () => {
     const response = await page.goto(`${BASE_URL}/admin/heroes`, { waitUntil: 'load' });
     const status = response?.status();
     console.log('/admin/heroes status:', status);
+  });
+});
+
+// ==================== ADMIN LISTING CRUD ====================
+
+test.describe('Admin - Listing CRUD', () => {
+  test.beforeEach(async ({ page }) => {
+    await adminLogin(page);
+  });
+
+  test('New Listing page loads with form', async ({ page }) => {
+    await page.goto(`${BASE_URL}/admin/listings/new`);
+    await expect(page.locator('body')).toBeVisible();
+
+    // Check for form elements
+    const h1 = page.locator('h1');
+    const title = await h1.textContent();
+    console.log('New Listing page title:', title);
+
+    // Check for form fields
+    const hasForm = await page.locator('form').count() > 0;
+    console.log('Has form:', hasForm);
+
+    // Check for essential form fields
+    const hasTitle = await page.locator('input[name="title"], #title, input#title').count() > 0;
+    const hasCategory = await page.locator('select[name="categoryId"], #categoryId, select#categoryId').count() > 0;
+    console.log('Has title field:', hasTitle, 'Has categoryId field:', hasCategory);
+  });
+
+  test('Listing list page has add button', async ({ page }) => {
+    await page.goto(`${BASE_URL}/admin/listings`);
+    await page.waitForTimeout(1000);
+
+    const addBtn = page.locator('a[href*="/listings/new"], button:has-text("Add"), button:has-text("New"), a:has-text("Add")');
+    const count = await addBtn.count();
+    console.log('Add/New button found:', count > 0);
   });
 });

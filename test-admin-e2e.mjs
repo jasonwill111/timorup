@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
-const BASE_URL = 'https://timorlist.jasonwill.workers.dev';
-const ADMIN_EMAIL = 'admin@timorlist.com';
+const BASE_URL = 'https://timorup.jasonwill.workers.dev';
+const ADMIN_EMAIL = 'admin@timorup.com';
 const ADMIN_PASSWORD = 'admin12345';
 
 async function loginAsAdmin(browser) {
@@ -25,7 +25,7 @@ async function loginAsAdmin(browser) {
       return false;
     }
 
-    (emailInput).value = 'admin@timorlist.com';
+    (emailInput).value = 'admin@timorup.com';
     (passwordInput).value = 'admin12345';
 
     // Trigger input events for Astro

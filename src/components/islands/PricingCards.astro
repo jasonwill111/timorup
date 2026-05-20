@@ -1,5 +1,6 @@
 ---
-// Pricing Cards Server Island - reads from service_packages table
+// Pricing Page - Reads from service_packages table (admin managed)
+// Schema: type (subscription|listing_renewal|featured|addon) + category (business|listing|other)
 import { getDb } from '@/lib/db';
 import { servicePackages } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
@@ -11,6 +12,7 @@ const db = await getDb();
 if (!db) {
   console.error('[PricingCards] Database not available - returning empty state');
 }
+
 const allPackages = db
   ? await db.select()
       .from(servicePackages)
@@ -28,40 +30,66 @@ const businessPlans = allPackages
   }));
 
 const listingPlans = allPackages
-  .filter(p => p.type === 'listing_renewal')
+  .filter(p => p.type === 'listing_renewal' && p.category === 'listing')
+  .map(p => ({
+    ...p,
+    variants: JSON.parse(p.variants),
+  }));
+
+const featuredPlans = allPackages
+  .filter(p => p.type === 'featured')
+  .map(p => ({
+    ...p,
+    variants: JSON.parse(p.variants),
+  }));
+
+const addonPlans = allPackages
+  .filter(p => p.type === 'addon')
   .map(p => ({
     ...p,
     variants: JSON.parse(p.variants),
   }));
 ---
 
-{/* Business Plans */}
-<section class="mb-16">
+<!-- ============================================
+     SECTION 1: BUSINESS PAGE PLANS
+     Type: subscription | Category: business
+     订阅制：月付/年付，无限期使用
+     ============================================ -->
+<section class="mb-20">
   <div class="text-center mb-12">
-    <h2 class="text-3xl font-bold mb-4">Business Page Plans</h2>
+    <span class="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+      For Businesses
+    </span>
+    <h2 class="text-3xl md:text-4xl font-bold mb-4">Business Page Plans</h2>
     <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-      Get a professional business page with your products, photos, and contact info.
+      Create a professional business page with your products, photos, and contact info.
+      Choose a plan that fits your business needs.
     </p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
     {businessPlans.map((pkg, index) => {
       const monthly = pkg.variants.find((v: any) => v.durationUnit === 'month');
       const annual = pkg.variants.find((v: any) => v.durationUnit === 'months');
       const isPopular = index === 1;
 
       return (
-        <div class={`bg-card border rounded-2xl p-8 relative ${isPopular ? 'border-2 border-primary' : ''}`}>
+        <div class={`bg-card border rounded-2xl p-8 relative transition-shadow hover:shadow-lg ${isPopular ? 'border-2 border-primary ring-2 ring-primary/20' : ''}`}>
           {isPopular && (
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white px-3 py-1 text-sm font-medium rounded-full">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1.5 text-sm font-semibold rounded-full shadow-lg">
               Most Popular
             </div>
           )}
-          <div class="text-center mb-6">
+
+          <div class="text-center mb-6 pt-2">
             <h3 class="text-2xl font-bold mb-2">{pkg.name}</h3>
             <p class="text-sm text-muted-foreground mb-4">{pkg.description}</p>
+
             {monthly && (
-              <div class="text-4xl font-bold">${monthly.price}<span class="text-lg text-muted-foreground">/mo</span></div>
+              <div class="text-5xl font-bold tracking-tight">
+                ${monthly.price}<span class="text-lg text-muted-foreground font-normal">/mo</span>
+              </div>
             )}
             {annual && monthly && (
               <p class="text-sm font-medium text-green-600 dark:text-green-400 mt-2">
@@ -70,15 +98,18 @@ const listingPlans = allPackages
             )}
           </div>
 
-          {monthly?.limits?.skuLimit && (
-            <div class="bg-muted/50 rounded-lg p-3 mb-6 text-center">
-              <span>Up to <strong class="font-bold text-primary">{monthly.limits.skuLimit}</strong> products</span>
+          {monthly && (
+            <div class="bg-muted/50 rounded-xl p-4 mb-6 text-center">
+              <span class="text-sm">
+                Up to <strong class="font-bold text-primary text-lg">{monthly.limits.skuLimit}</strong> products/services
+              </span>
+              <p class="text-xs text-muted-foreground mt-1">Images & videos: same for all plans</p>
             </div>
           )}
 
-          <ul class="text-left space-y-3 text-sm mb-8">
+          <ul class="text-sm space-y-3 mb-8">
             {monthly?.features?.map((feature: string) => (
-              <li class="flex items-start gap-2">
+              <li class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
@@ -87,8 +118,8 @@ const listingPlans = allPackages
             ))}
           </ul>
 
-          <a href={`/listings/create?plan=${pkg.slug}`} class="block">
-            <Button class={`w-full ${isPopular ? '' : 'bg-primary hover:bg-primary/90'}`}>
+          <a href={`/create?type=business&plan=${pkg.slug}`} class="block">
+            <Button class={`w-full ${isPopular ? 'bg-primary hover:bg-primary/90' : ''}`}>
               Get Started
             </Button>
           </a>
@@ -98,35 +129,193 @@ const listingPlans = allPackages
   </div>
 </section>
 
-{/* Listing Plans */}
-{listingPlans.length > 0 && (
-  <section class="max-w-4xl mx-auto">
+<!-- ============================================
+     SECTION 2: CLASSIFIED ADS
+     Type: listing_renewal | Category: listing
+     按天计费：首次创建3天免费，之后续费
+     ============================================ -->
+<section class="mb-20">
+  <div class="text-center mb-12">
+    <span class="inline-block px-4 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-sm font-medium mb-4">
+      For Individuals
+    </span>
+    <h2 class="text-3xl md:text-4xl font-bold mb-4">Classified Ads</h2>
+    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+      Jobs, vehicles, property, services, products — post a listing and reach thousands of buyers in Timor-Leste.
+    </p>
+  </div>
+
+  <!-- Free Trial Banner -->
+  <div class="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-emerald-500/10 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-8 mb-10 max-w-4xl mx-auto">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+          3
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-emerald-700 dark:text-emerald-400">Days Free Trial</h3>
+          <p class="text-sm text-muted-foreground">Create your first listing absolutely free. No credit card required.</p>
+        </div>
+      </div>
+      <a href="/create?type=listing" class="flex-shrink-0">
+        <Button class="bg-emerald-500 hover:bg-emerald-600 text-white">
+          Post Free Listing
+        </Button>
+      </a>
+    </div>
+  </div>
+
+  <!-- Renewal Options -->
+  <div class="max-w-4xl mx-auto">
+    <h3 class="text-lg font-semibold text-center mb-6 text-muted-foreground">After 3 days, renew your listing:</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {listingPlans.map(lp => {
+        const variant = lp.variants[0];
+        return (
+          <div class="bg-card border rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
+            <div class="text-3xl font-bold mb-1">
+              ${variant.price}
+            </div>
+            <p class="text-sm text-muted-foreground mb-3">
+              for {variant.durationValue} {variant.durationUnit}
+            </p>
+            <p class="text-xs text-muted-foreground mb-4">{lp.name}</p>
+            <div class="space-y-1 text-xs text-left">
+              {variant.features?.slice(0, 3).map((f: string) => (
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 3: PROMOTIONS & ADD-ONS
+     Type: featured | addon
+     增值服务：置顶、首页推荐、插件
+     ============================================ -->
+{(featuredPlans.length > 0 || addonPlans.length > 0) && (
+  <section class="mb-16">
     <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold mb-4">Classified Ads</h2>
-      <p class="text-lg text-muted-foreground">
-        Jobs, vehicles, property, services - post a listing and reach thousands of buyers.
+      <span class="inline-block px-4 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full text-sm font-medium mb-4">
+        Boost Your Visibility
+      </span>
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Promotions & Add-ons</h2>
+      <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+        Add extra visibility and features to your listing or business page.
       </p>
     </div>
 
-    <div class="bg-card border rounded-2xl p-8 mb-8">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {listingPlans.map(lp => {
-          const variant = lp.variants[0];
-          return (
-            <div class="bg-muted/30 rounded-xl p-6 text-center">
-              <div class="text-2xl font-bold mb-2">{variant.durationValue} {variant.durationUnit}</div>
-              <p class="text-sm text-muted-foreground mb-3">{lp.name}</p>
-              <div class="text-lg font-bold">${variant.price}</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+      {/* Featured Listings */}
+      {featuredPlans.filter(p => p.category === 'listing').map(pkg => {
+        const variant = pkg.variants[0];
+        return (
+          <div class="bg-card border rounded-xl p-6">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+              </svg>
             </div>
-          );
-        })}
-      </div>
+            <h3 class="font-semibold mb-2">{pkg.name}</h3>
+            <p class="text-2xl font-bold mb-1">${variant.price}</p>
+            <p class="text-sm text-muted-foreground mb-4">for {variant.durationValue} {variant.durationUnit}</p>
+            <ul class="text-xs space-y-1 text-muted-foreground">
+              {variant.features?.map((f: string) => (
+                <li class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
 
-      <div class="text-center mt-6">
-        <a href="/listings/create?type=listing" class="inline-block">
-          <Button>Post a Listing</Button>
-        </a>
-      </div>
+      {/* Homepage Featured */}
+      {featuredPlans.filter(p => p.category === 'business').map(pkg => {
+        const variant = pkg.variants[0];
+        return (
+          <div class="bg-card border-2 border-amber-300 dark:border-amber-700 rounded-xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-bl-lg font-medium">
+              Popular
+            </div>
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold mb-2">{pkg.name}</h3>
+            <p class="text-2xl font-bold mb-1">${variant.price}</p>
+            <p class="text-sm text-muted-foreground mb-4">for {variant.durationValue} {variant.durationUnit}</p>
+            <ul class="text-xs space-y-1 text-muted-foreground">
+              {variant.features?.map((f: string) => (
+                <li class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+
+      {/* Add-ons */}
+      {addonPlans.map(pkg => {
+        const variant = pkg.variants[0];
+        return (
+          <div class="bg-card border rounded-xl p-6">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold mb-2">{pkg.name}</h3>
+            <p class="text-2xl font-bold mb-1">${variant.price}</p>
+            <p class="text-sm text-muted-foreground mb-4">for 1 month</p>
+            <ul class="text-xs space-y-1 text-muted-foreground">
+              {variant.features?.map((f: string) => (
+                <li class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   </section>
 )}
+
+<!-- ============================================
+     FAQ / Help Section
+     ============================================ -->
+<section class="mt-16 pt-12 border-t">
+  <div class="max-w-2xl mx-auto text-center">
+    <h3 class="text-lg font-semibold mb-4">Questions?</h3>
+    <p class="text-muted-foreground mb-6">
+      Need help choosing the right plan? Contact us for a consultation.
+    </p>
+    <a href="mailto:hello@timorup.com" class="inline-flex items-center gap-2 text-primary hover:underline">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      hello@timorup.com
+    </a>
+  </div>
+</section>
