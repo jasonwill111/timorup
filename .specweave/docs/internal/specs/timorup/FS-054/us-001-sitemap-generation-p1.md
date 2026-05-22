@@ -21,7 +21,8 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US1-01**: `/sitemap.xml` returns valid XML with all public pages âœ?- [x] **AC-US1-02**: Sitemap includes static pages (homepage, about, contact, pricing, faq, blog) âœ?- [x] **AC-US1-03**: Sitemap includes business/non-profit/public-sector detail pages âœ?- [x] **AC-US1-04**: Sitemap includes lastmod timestamp for each entry âœ?- [x] **AC-US1-05**: Sitemap includes changefreq and priority based on page type âœ?
+- [x] **AC-US1-01**: `/sitemap.xml` returns valid XML with all public pages ï¿½?- [x] **AC-US1-02**: Sitemap includes static pages (homepage, about, contact, pricing, faq, blog) ï¿½?- [x] **AC-US1-03**: Sitemap includes business/non-profit/public-sector detail pages ï¿½?- [x] **AC-US1-04**: Sitemap includes lastmod timestamp for each entry ï¿½?- [x] **AC-US1-05**: Sitemap includes changefreq and priority based on page type ï¿½?
+
 ---
 
 ## Implementation
@@ -34,4 +35,3 @@ project: TimorLink
 ## Tasks
 
 - [x] **T-009**: Create e2e/seo.spec.ts with all SEO tests
-

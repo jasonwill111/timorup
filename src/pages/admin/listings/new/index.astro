@@ -20,15 +20,6 @@ const allCategories = await db
 const parentCategories = allCategories.filter(c => !c.parentId);
 const getChildren = (parentId: string) => allCategories.filter(c => c.parentId === parentId);
 
-const listingTypes = [
-  { value: 'product', label: 'Product', icon: '📦' },
-  { value: 'vehicle', label: 'Vehicle', icon: '🚗' },
-  { value: 'property', label: 'Property', icon: '🏠' },
-  { value: 'job', label: 'Job', icon: '💼' },
-  { value: 'service', label: 'Service', icon: '🔧' },
-  { value: 'wanted', label: 'Wanted', icon: '🔍' },
-];
-
 const conditions = [
   { value: 'new', label: 'New' },
   { value: 'like-new', label: 'Like New' },
@@ -48,22 +39,6 @@ const conditions = [
     </div>
 
     <form id="listing-form" class="space-y-6">
-      <!-- Listing Type -->
-      <div class="bg-card rounded-lg border p-6">
-        <h2 class="text-lg font-semibold mb-4">Listing Type</h2>
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
-          {listingTypes.map(type => (
-            <label class="type-option cursor-pointer text-center">
-              <input type="radio" name="listingType" value={type.value} class="sr-only peer" required />
-              <div class="p-3 rounded-lg border-2 border-muted peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-muted-foreground/30">
-                <div class="text-2xl mb-1">{type.icon}</div>
-                <div class="text-xs">{type.label}</div>
-              </div>
-            </label>
-          ))}
-        </div>
-      </div>
-
       <!-- Basic Info -->
       <div class="bg-card rounded-lg border p-6">
         <h2 class="text-lg font-semibold mb-4">Basic Information</h2>
@@ -93,14 +68,31 @@ const conditions = [
             </select>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">Price</label>
-            <input
-              type="text"
-              name="price"
-              class="w-full h-10 px-3 rounded-md border border-input bg-background"
-              placeholder="$100 or Negotiable"
-            />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Price Amount</label>
+              <input
+                type="number"
+                name="priceAmount"
+                step="0.01"
+                min="0"
+                class="w-full h-10 px-3 rounded-md border border-input bg-background"
+                placeholder="350"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Price Unit</label>
+              <select name="priceUnit" class="w-full h-10 px-3 rounded-md border border-input bg-background">
+                <option value="">No price (Jobs, Events, etc.)</option>
+                <option value="free">Free</option>
+                <option value="negotiable">Negotiable</option>
+                <option value="/mo">/month</option>
+                <option value="/wk">/week</option>
+                <option value="/day">/day</option>
+                <option value="/hr">/hour</option>
+                <option value="/次">/session</option>
+              </select>
+            </div>
           </div>
 
           <div>
@@ -206,29 +198,34 @@ const conditions = [
     const submitter = (e as SubmitEvent).submitter as HTMLButtonElement;
     const status = submitter?.value || 'draft';
 
-    try {
-      const result = await actions.admin.listings.create({
-        title: data.get('title') as string,
-        listingType: data.get('listingType') as 'job' | 'product' | 'service' | 'vehicle' | 'property' | 'wanted',
-        categoryId: data.get('categoryId') as string || undefined,
-        description: data.get('description') as string,
-        price: data.get('price') as string || undefined,
-        condition: data.get('condition') as 'new' | 'like-new' | 'good' | 'fair' | 'poor' || undefined,
-        location: data.get('location') as string || undefined,
-        contactName: data.get('contactName') as string || undefined,
-        contactNumber: data.get('contactNumber') as string || undefined,
-        email: data.get('email') as string || undefined,
-        status: status as 'draft' | 'published',
-      });
+    // Parse price fields
+        const priceAmountStr = data.get('priceAmount') as string;
+        const priceAmount = priceAmountStr ? parseFloat(priceAmountStr) : undefined;
+        const priceUnit = data.get('priceUnit') as string || undefined;
 
-      if (result.success) {
-        window.location.href = '/admin/listings';
-      } else {
-        alert('Failed: ' + (result.error?.message || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error('Error:', err);
-      alert('Failed to create listing');
-    }
+        try {
+          const result = await actions.admin.listings.create({
+            title: data.get('title') as string,
+            categoryId: data.get('categoryId') as string || undefined,
+            description: data.get('description') as string,
+            priceAmount: priceAmount,
+            priceUnit: priceUnit,
+            condition: data.get('condition') as 'new' | 'like-new' | 'good' | 'fair' | 'poor' || undefined,
+            location: data.get('location') as string || undefined,
+            contactName: data.get('contactName') as string || undefined,
+            contactNumber: data.get('contactNumber') as string || undefined,
+            email: data.get('email') as string || undefined,
+            status: status as 'draft' | 'published',
+          });
+
+          if (result.success) {
+            window.location.href = '/admin/listings';
+          } else {
+            alert('Failed: ' + (result.error?.message || 'Unknown error'));
+          }
+        } catch (err) {
+          console.error('Error:', err);
+          alert('Failed to create listing');
+        }
   });
 </script>

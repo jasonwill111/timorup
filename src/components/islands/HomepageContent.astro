@@ -32,8 +32,9 @@ type ListingItem = {
   id: string;
   title: string;
   slug: string;
-  price: string;
-  listingType: string;
+  priceAmount: number | null;
+  priceUnit: string | null;
+  categoryId: string | null;
   location: string;
   imageIds: string[];
   likes: number;
@@ -107,8 +108,9 @@ try {
       id: l.id,
       title: l.title,
       slug: l.slug,
-      price: l.price || '',
-      listingType: l.listingType || 'product',
+      priceAmount: l.priceAmount || null,
+        priceUnit: l.priceUnit || null,
+      categoryId: l.categoryId || null,
       location: l.location || '',
       imageIds,
       likes: l.likes || 0,
@@ -294,8 +296,9 @@ const hasContent = featuredBusinesses.length > 0 || featuredListings.length > 0 
                 <ListingCard
                   title={listing.title}
                   slug={listing.slug}
-                  price={listing.price}
-                  listingType={listing.listingType}
+                  priceAmount={listing.priceAmount}
+                  priceUnit={listing.priceUnit}
+                  categoryId={listing.categoryId}
                   location={listing.location}
                   thumbnail={null}
                   imageIds={listing.imageIds}

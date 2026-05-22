@@ -262,7 +262,7 @@ if (!db) throw new Error("Database not available");
     if (bannerImageId !== undefined) updateValues.bannerImageId = bannerImageId || null;
     if (profileImageId !== undefined) updateValues.profileImageId = profileImageId || null;
     if (socialLinks !== undefined) updateValues.socialLinks = socialLinks ? JSON.stringify(socialLinks) : null;
-    // Note: latestUpdates and photoGallery now use separate tables (latestUpdates, media)
+    // Note: latestUpdate and photo_gallery now use separate tables (latestUpdate, media)
 
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = Math.floor(Date.now() / 1000);

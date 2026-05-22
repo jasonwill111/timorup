@@ -10,10 +10,10 @@ import { getAdminUser } from '@/lib/admin-auth';
 const createSchema = z.object({
   title: z.string().min(1),
   slug: z.string().optional(),
-  listingType: z.enum(['job', 'product', 'service', 'vehicle', 'property', 'wanted']),
   categoryId: z.string().optional().nullable(),
   description: z.string().min(1),
-  price: z.string().optional().nullable(),
+  priceAmount: z.number().optional().nullable(),
+  priceUnit: z.string().optional().nullable(),
   condition: z.enum(['new', 'like-new', 'good', 'fair', 'poor']).optional().nullable(),
   location: z.string().optional().nullable(),
   locationLat: z.number().optional().nullable(),
@@ -28,12 +28,11 @@ const createSchema = z.object({
   ownerId: z.string().optional(),
 });
 
-const updateSchema = createSchema.partial().extend({
+const updateSchema = createSchema.extend({
   id: z.string(),
 });
 
 const listSchema = z.object({
-  listingType: z.enum(['job', 'product', 'service', 'vehicle', 'property', 'wanted']).optional(),
   status: z.enum(['draft', 'published']).optional(),
   search: z.string().optional(),
 });
@@ -59,9 +58,6 @@ if (!db) throw new Error("Database not available");
       let query = db.select().from(listingsTable);
       const conditions = [];
 
-      if (input?.listingType) {
-        conditions.push(eq(listingsTable.listingType, input.listingType));
-      }
       if (input?.status) {
         conditions.push(eq(listingsTable.status, input.status));
       }
@@ -98,10 +94,10 @@ if (!db) throw new Error("Database not available");
         title: input.title,
         slug,
         ownerId: input.ownerId || user.id,
-        listingType: input.listingType,
         categoryId: input.categoryId || null,
         description: input.description,
-        price: input.price || null,
+        priceAmount: input.priceAmount || null,
+        priceUnit: input.priceUnit || null,
         condition: input.condition || null,
         location: input.location || null,
         locationLat: input.locationLat || null,
@@ -143,10 +139,10 @@ if (!db) throw new Error("Database not available");
 
       if (data.title !== undefined) updateData.title = data.title;
       if (data.slug !== undefined) updateData.slug = data.slug;
-      if (data.listingType !== undefined) updateData.listingType = data.listingType;
       if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
       if (data.description !== undefined) updateData.description = data.description;
-      if (data.price !== undefined) updateData.price = data.price;
+      if (data.priceAmount !== undefined) updateData.priceAmount = data.priceAmount;
+      if (data.priceUnit !== undefined) updateData.priceUnit = data.priceUnit;
       if (data.condition !== undefined) updateData.condition = data.condition;
       if (data.location !== undefined) updateData.location = data.location;
       if (data.locationLat !== undefined) updateData.locationLat = data.locationLat;

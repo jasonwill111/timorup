@@ -21,7 +21,8 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US3-01**: Custom `src/pages/500.astro` error page exists âœ?- [x] **AC-US3-02**: Business update cache purge actually implemented âœ?- [x] **AC-US3-03**: Auth initialization race condition eliminated âœ?
+- [x] **AC-US3-01**: Custom `src/pages/500.astro` error page exists ï¿½?- [x] **AC-US3-02**: Business update cache purge actually implemented ï¿½?- [x] **AC-US3-03**: Auth initialization race condition eliminated ï¿½?
+
 ---
 
 ## Implementation
@@ -34,4 +35,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

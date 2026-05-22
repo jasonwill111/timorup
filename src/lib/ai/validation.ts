@@ -42,7 +42,7 @@ export const ListingDataSchema = z.object({
       instagram: z.string().optional(),
       tiktok: z.string().optional(),
     }).optional(),
-    photoGallery: z.array(z.string()).optional(),
+    photo_gallery: z.array(z.string()).optional(),
     planType: z.string().optional(),
   }),
 });

@@ -24,7 +24,7 @@ interface ListingRecord {
   slug: string;
   description: string | null;
   price: string | null;
-  listingType: string | null;
+  categoryId: string | null;
   location: string | null;
   imageIds: string[];
   likes: number;
@@ -46,8 +46,7 @@ try {
     const searchMatch = !search ||
       l.title.toLowerCase().includes(searchLower) ||
       (l.description && l.description.toLowerCase().includes(searchLower));
-    const typeMatch = !type || l.listingType === type;
-    return statusOk && searchMatch && typeMatch;
+    return statusOk && searchMatch;
   });
 } catch (e) { console.error('Query error:', e); allListings = []; }
 
@@ -66,12 +65,8 @@ const buildUrl = (params: Record<string, string>) => {
 };
 
 const typeColors: Record<string, { bg: string; text: string }> = {
-  product: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
-  vehicle: { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-700 dark:text-red-300' },
-  property: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
-  job: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
-  service: { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
-  wanted: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300' },
+  // Colors will be derived from category in the future
+  default: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
 };
 ---
 
@@ -109,7 +104,7 @@ const typeColors: Record<string, { bg: string; text: string }> = {
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {entities.map(l => {
           const imageIds = l.imageIds && typeof l.imageIds === 'string' ? JSON.parse(l.imageIds) : [];
-          const colors = typeColors[l.listingType || 'product'] || typeColors.product;
+          const colors = typeColors.default;
           return (
           <a href={`/listing/${l.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/60 overflow-hidden cursor-pointer transition-all duration-200">
             <div class="aspect-[4/3] bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 relative overflow-hidden">
@@ -122,16 +117,11 @@ const typeColors: Record<string, { bg: string; text: string }> = {
                   </svg>
                 </div>
               )}
-              {l.listingType ? (
-                <span class={`absolute top-3 left-3 text-xs px-3 py-1.5 rounded-full font-semibold shadow-md ${colors.bg} ${colors.text}`}>
-                  {l.listingType.charAt(0).toUpperCase() + l.listingType.slice(1)}
-                </span>
-              ) : null}
             </div>
             <div class="p-4 space-y-3">
               <h3 class="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">{l.title}</h3>
               {l.price ? (
-                <p class={`text-lg font-bold ${l.listingType === 'job' ? 'text-blue-600 dark:text-blue-400' : 'text-primary'}`}>{l.price}</p>
+                <p class="text-lg font-bold text-primary">{l.price}</p>
               ) : null}
               {l.location ? (
                 <p class="text-sm text-muted-foreground flex items-start gap-2">

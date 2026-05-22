@@ -4,7 +4,7 @@ feature: FS-073
 title: "Skeleton Loading States"
 status: completed
 priority: P1
-created: 2026-05-20
+created: 2026-05-22
 tldr: "**As a** site visitor."
 project: timorup
 ---

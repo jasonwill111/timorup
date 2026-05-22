@@ -1,240 +1,91 @@
 /**
  * Non-Profit Categories Seed Data
- * TimorUp - NGOs, Charities, Community Organizations
+ * TimorUp (2026-05-21)
+ *
+ * 12 parent categories with subcategories
+ * Simplified structure - Others category as fallback
  */
 
 export const nonProfitCategories = [
-  // TOP-LEVEL CATEGORIES
-  {
-    id: 'npc-1',
-    name: 'Humanitarian Aid',
-    slug: 'humanitarian-aid',
-    description: 'Emergency relief and humanitarian organizations',
-    icon: '❤️',
-    parentId: null,
-    sortOrder: 1,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'focusArea', type: 'select', label: 'Focus Area', required: true, options: ['Emergency Response', 'Food Security', 'Shelter', 'Health', 'Education', 'Water & Sanitation', 'Protection', 'Multiple'] },
-      { name: 'targetGroup', type: 'text', label: 'Primary Beneficiaries' },
-      { name: 'responseCapacity', type: 'select', label: 'Response Capacity', options: ['Local', 'Regional', 'National', 'International'] },
-      { name: 'registrationStatus', type: 'text', label: 'Registration Status' }
-    ])
-  },
-  {
-    id: 'npc-2',
-    name: 'Education',
-    slug: 'education-ngo',
-    description: 'Educational organizations and programs',
-    icon: '📚',
-    parentId: null,
-    sortOrder: 2,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'educationType', type: 'select', label: 'Type', required: true, options: ['Formal Education', 'Non-Formal Education', 'Vocational Training', 'Teacher Training', 'Scholarship Programs', 'Literacy Programs', 'Early Childhood', 'Multiple'] },
-      { name: 'ageGroups', type: 'text', label: 'Age Groups Served' },
-      { name: 'schoolLevel', type: 'text', label: 'School Level' },
-      { name: 'freeOrSubsidized', type: 'boolean', label: 'Free or Subsidized' }
-    ])
-  },
-  {
-    id: 'npc-3',
-    name: 'Healthcare',
-    slug: 'healthcare-ngo',
-    description: 'Health and medical organizations',
-    icon: '🏥',
-    parentId: null,
-    sortOrder: 3,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'healthType', type: 'select', label: 'Type', required: true, options: ['Hospital', 'Clinic', 'Mobile Clinic', 'Community Health', 'Mental Health', 'Maternal Health', 'HIV/AIDS', 'Malaria', 'Tuberculosis', 'Vaccination', 'Nutrition', 'Multiple'] },
-      { name: 'serviceArea', type: 'text', label: 'Service Area' },
-      { name: 'freeService', type: 'boolean', label: 'Free Services' },
-      { name: 'mobileUnit', type: 'boolean', label: 'Mobile Health Unit' }
-    ])
-  },
-  {
-    id: 'npc-4',
-    name: 'Environment',
-    slug: 'environment',
-    description: 'Environmental protection and conservation',
-    icon: '🌍',
-    parentId: null,
-    sortOrder: 4,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'environmentType', type: 'select', label: 'Focus', required: true, options: ['Conservation', 'Reforestation', 'Marine Protection', 'Wildlife', 'Climate Change', 'Waste Management', 'Water Conservation', 'Sustainable Energy', 'Environmental Education', 'Multiple'] },
-      { name: 'projectAreas', type: 'text', label: 'Project Areas' },
-      { name: 'communityInvolvement', type: 'boolean', label: 'Community Involvement' }
-    ])
-  },
-  {
-    id: 'npc-5',
-    name: 'Women & Children',
-    slug: 'women-children',
-    description: 'Organizations supporting women and children',
-    icon: '👶',
-    parentId: null,
-    sortOrder: 5,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Gender Equality', 'Violence Prevention', 'Women\'s Rights', 'Child Protection', 'Orphan Support', 'Youth Development', 'Early Childhood Development', 'Multiple'] },
-      { name: 'ageGroups', type: 'text', label: 'Age Groups' },
-      { name: 'shelterServices', type: 'boolean', label: 'Shelter Services' }
-    ])
-  },
-  {
-    id: 'npc-6',
-    name: 'Youth Development',
-    slug: 'youth-development',
-    description: 'Youth empowerment and development programs',
-    icon: '🌟',
-    parentId: null,
-    sortOrder: 6,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'programType', type: 'select', label: 'Program Type', required: true, options: ['Skills Training', 'Sports', 'Arts & Culture', 'Leadership', 'Entrepreneurship', 'Volunteer Programs', 'Mentorship', 'Civic Engagement', 'Multiple'] },
-      { name: 'ageRange', type: 'text', label: 'Age Range' },
-      { name: 'dropoutPrevention', type: 'boolean', label: 'Dropout Prevention' }
-    ])
-  },
-  {
-    id: 'npc-7',
-    name: 'Agriculture & Food Security',
-    slug: 'agriculture-food',
-    description: 'Food security and agricultural development',
-    icon: '🌾',
-    parentId: null,
-    sortOrder: 7,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'agriType', type: 'select', label: 'Type', required: true, options: ['Food Security', 'Sustainable Agriculture', 'Livestock', 'Fishing', 'Nutrition', 'Food Distribution', 'Agricultural Training', 'Seed Distribution', 'Multiple'] },
-      { name: 'farmersReached', type: 'number', label: 'Farmers Reached' },
-      { name: 'organicPractices', type: 'boolean', label: 'Organic/Sustainable Practices' }
-    ])
-  },
-  {
-    id: 'npc-8',
-    name: 'Governance & Advocacy',
-    slug: 'governance-advocacy',
-    description: 'Civic engagement and policy advocacy',
-    icon: '⚖️',
-    parentId: null,
-    sortOrder: 8,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Human Rights', 'Democracy', 'Transparency', 'Anti-Corruption', 'Civic Education', 'Justice', 'Good Governance', 'Research & Advocacy', 'Multiple'] },
-      { name: 'policyAreas', type: 'text', label: 'Policy Areas' },
-      { name: 'internationalAffiliates', type: 'text', label: 'International Affiliates' }
-    ])
-  },
-  {
-    id: 'npc-9',
-    name: 'Disability Inclusion',
-    slug: 'disability-inclusion',
-    description: 'Organizations supporting people with disabilities',
-    icon: '�?,
-    parentId: null,
-    sortOrder: 9,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Physical Disability', 'Visual Impairment', 'Hearing Impairment', 'Intellectual Disability', 'Multiple Disabilities', 'Inclusion Advocacy', 'Assistive Technology', 'Rehabilitation', 'Multiple'] },
-      { name: 'servicesOffered', type: 'text', label: 'Services Offered' },
-      { name: 'barrierFreeAccess', type: 'boolean', label: 'Barrier-Free Access' }
-    ])
-  },
-  {
-    id: 'npc-10',
-    name: 'Emergency & Disaster',
-    slug: 'emergency-disaster',
-    description: 'Disaster preparedness and response',
-    icon: '🚨',
-    parentId: null,
-    sortOrder: 10,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'preparednessType', type: 'select', label: 'Type', required: true, options: ['Disaster Response', 'Disaster Preparedness', 'Search & Rescue', 'First Aid', 'Emergency Shelter', 'Early Warning Systems', 'Climate Adaptation', 'Multiple'] },
-      { name: 'responseTime', type: 'text', label: 'Response Time Capacity' },
-      { name: 'equipmentAvailable', type: 'text', label: 'Equipment Available' }
-    ])
-  },
-  {
-    id: 'npc-11',
-    name: 'Community Development',
-    slug: 'community-development',
-    description: 'Local community development organizations',
-    icon: '🏘�?,
-    parentId: null,
-    sortOrder: 11,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'focusArea', type: 'select', label: 'Focus', required: true, options: ['Infrastructure', 'Water & Sanitation', 'Energy Access', 'Income Generation', 'Local Governance', 'Social Cohesion', 'Cultural Preservation', 'Multiple'] },
-      { name: 'villagesCovered', type: 'number', label: 'Villages Covered' },
-      { name: 'communityLed', type: 'boolean', label: 'Community-Led Development' }
-    ])
-  },
-  {
-    id: 'npc-12',
-    name: 'Arts & Culture',
-    slug: 'arts-culture',
-    description: 'Arts, culture, and heritage organizations',
-    icon: '🎨',
-    parentId: null,
-    sortOrder: 12,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'cultureType', type: 'select', label: 'Type', required: true, options: ['Traditional Arts', 'Performing Arts', 'Visual Arts', 'Music', 'Film & Media', 'Heritage Preservation', 'Cultural Education', 'Crafts & Textiles', 'Multiple'] },
-      { name: 'culturalFocus', type: 'text', label: 'Cultural Focus' },
-      { name: 'workshopsOffered', type: 'boolean', label: 'Workshops Offered' }
-    ])
-  },
+  // 1. Humanitarian Aid
+  { id: "humanitarian-aid", name: "Humanitarian Aid", slug: "humanitarian-aid", description: "Emergency relief and humanitarian organizations", icon: "Heart", parentId: null, sortOrder: 1, isActive: 1 },
+  { id: "emergency-relief", name: "Emergency Relief", slug: "emergency-relief", description: "Emergency response and relief", icon: "Siren", parentId: "humanitarian-aid", sortOrder: 1 },
+  { id: "food-aid", name: "Food Aid", slug: "food-aid", description: "Food distribution programs", icon: "Utensils", parentId: "humanitarian-aid", sortOrder: 2 },
+  { id: "shelter", name: "Shelter", slug: "shelter", description: "Emergency shelter and housing", icon: "Home", parentId: "humanitarian-aid", sortOrder: 3 },
+  { id: "medical-aid", name: "Medical Aid", slug: "medical-aid", description: "Medical humanitarian aid", icon: "Stethoscope", parentId: "humanitarian-aid", sortOrder: 4 },
 
-  // SUB-CATEGORIES
-  {
-    id: 'npc-1-1',
-    name: 'Food Security',
-    slug: 'food-security',
-    description: 'Food distribution and nutrition programs',
-    icon: '🍚',
-    parentId: 'npc-1',
-    sortOrder: 11,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'beneficiaries', type: 'number', label: 'Monthly Beneficiaries' },
-      { name: 'foodType', type: 'text', label: 'Type of Food Aid' },
-      { name: 'distributionPoints', type: 'number', label: 'Distribution Points' }
-    ])
-  },
-  {
-    id: 'npc-5-1',
-    name: 'Gender-Based Violence',
-    slug: 'gbv-services',
-    description: 'Services for survivors of gender-based violence',
-    icon: '🆘',
-    parentId: 'npc-5',
-    sortOrder: 51,
-    isActive: 1,
-    formFields: JSON.stringify([
-      { name: 'servicesType', type: 'select', label: 'Services', required: true, options: ['Shelter', 'Hotline', 'Counseling', 'Legal Aid', 'Medical Support', 'Rehabilitation', 'Awareness Programs', 'Multiple'] },
-      { name: 'confidentialService', type: 'boolean', label: 'Confidential Service' },
-      { name: '24hrService', type: 'boolean', label: '24/7 Hotline' }
-    ])
-  }
+  // 2. Education
+  { id: "education", name: "Education", slug: "education", description: "Educational organizations and programs", icon: "GraduationCap", parentId: null, sortOrder: 2, isActive: 1 },
+  { id: "schools", name: "Schools", slug: "schools", description: "Formal education institutions", icon: "Building2", parentId: "education", sortOrder: 1 },
+  { id: "training", name: "Training", slug: "training", description: "Vocational and skills training", icon: "Award", parentId: "education", sortOrder: 2 },
+  { id: "literacy", name: "Literacy Programs", slug: "literacy-programs", description: "Literacy education", icon: "BookOpen", parentId: "education", sortOrder: 3 },
+  { id: "scholarships", name: "Scholarships", slug: "scholarships", description: "Scholarship programs", icon: "Gift", parentId: "education", sortOrder: 4 },
+
+  // 3. Healthcare
+  { id: "healthcare", name: "Healthcare", slug: "healthcare", description: "Health and medical organizations", icon: "Heart", parentId: null, sortOrder: 3, isActive: 1 },
+  { id: "clinics", name: "Clinics", slug: "clinics", description: "Medical clinics", icon: "Stethoscope", parentId: "healthcare", sortOrder: 1 },
+  { id: "health-outreach", name: "Health Outreach", slug: "health-outreach", description: "Mobile health services", icon: "MapPin", parentId: "healthcare", sortOrder: 2 },
+  { id: "mental-health", name: "Mental Health", slug: "mental-health", description: "Mental health services", icon: "Brain", parentId: "healthcare", sortOrder: 3 },
+  { id: "maternal-health", name: "Maternal Health", slug: "maternal-health", description: "Maternal and child health", icon: "Baby", parentId: "healthcare", sortOrder: 4 },
+
+  // 4. Environment
+  { id: "environment", name: "Environment", slug: "environment", description: "Environmental protection and conservation", icon: "Leaf", parentId: null, sortOrder: 4, isActive: 1 },
+  { id: "conservation", name: "Conservation", slug: "conservation", description: "Nature conservation", icon: "TreePine", parentId: "environment", sortOrder: 1 },
+  { id: "reforestation", name: "Reforestation", slug: "reforestation", description: "Tree planting programs", icon: "Sprout", parentId: "environment", sortOrder: 2 },
+  { id: "wildlife", name: "Wildlife Protection", slug: "wildlife-protection", description: "Wildlife conservation", icon: "PawPrint", parentId: "environment", sortOrder: 3 },
+  { id: "clean-energy", name: "Clean Energy", slug: "clean-energy", description: "Renewable energy initiatives", icon: "Sun", parentId: "environment", sortOrder: 4 },
+
+  // 5. Women & Children
+  { id: "women-children", name: "Women & Children", slug: "women-children", description: "Organizations supporting women and children", icon: "Users", parentId: null, sortOrder: 5, isActive: 1 },
+  { id: "womens-rights", name: "Women's Rights", slug: "womens-rights", description: "Gender equality advocacy", icon: "Scale", parentId: "women-children", sortOrder: 1 },
+  { id: "child-protection", name: "Child Protection", slug: "child-protection", description: "Child welfare services", icon: "Shield", parentId: "women-children", sortOrder: 2 },
+  { id: "youth-programs", name: "Youth Programs", slug: "youth-programs", description: "Youth development", icon: "Rocket", parentId: "women-children", sortOrder: 3 },
+
+  // 6. Agriculture & Food
+  { id: "agriculture-food", name: "Agriculture & Food", slug: "agriculture-food", description: "Food security and agricultural development", icon: "Wheat", parentId: null, sortOrder: 6, isActive: 1 },
+  { id: "urban-farming", name: "Urban Farming", slug: "urban-farming", description: "Urban agriculture", icon: "Sprout", parentId: "agriculture-food", sortOrder: 1 },
+  { id: "food-banks", name: "Food Banks", slug: "food-banks", description: "Food distribution", icon: "Package", parentId: "agriculture-food", sortOrder: 2 },
+  { id: "community-gardens", name: "Community Gardens", slug: "community-gardens", description: "Community agriculture", icon: "Flower2", parentId: "agriculture-food", sortOrder: 3 },
+
+  // 7. Governance & Advocacy
+  { id: "governance-advocacy", name: "Governance & Advocacy", slug: "governance-advocacy", description: "Civic engagement and policy advocacy", icon: "Scale", parentId: null, sortOrder: 7, isActive: 1 },
+  { id: "human-rights", name: "Human Rights", slug: "human-rights", description: "Human rights advocacy", icon: "Globe", parentId: "governance-advocacy", sortOrder: 1 },
+  { id: "legal-aid", name: "Legal Aid", slug: "legal-aid", description: "Free legal services", icon: "Scale", parentId: "governance-advocacy", sortOrder: 2 },
+  { id: "policy-advocacy", name: "Policy Advocacy", slug: "policy-advocacy", description: "Policy research and advocacy", icon: "FileText", parentId: "governance-advocacy", sortOrder: 3 },
+
+  // 8. Community Development
+  { id: "community-development", name: "Community Development", slug: "community-development", description: "Local community development", icon: "Building", parentId: null, sortOrder: 8, isActive: 1 },
+  { id: "infrastructure", name: "Infrastructure", slug: "infrastructure", description: "Community infrastructure", icon: "HardHat", parentId: "community-development", sortOrder: 1 },
+  { id: "water-sanitation", name: "Water & Sanitation", slug: "water-sanitation", description: "WASH programs", icon: "Droplets", parentId: "community-development", sortOrder: 2 },
+  { id: "social-programs", name: "Social Programs", slug: "social-programs", description: "Social welfare programs", icon: "Heart", parentId: "community-development", sortOrder: 3 },
+
+  // 9. Emergency & Disaster
+  { id: "emergency-disaster", name: "Emergency & Disaster", slug: "emergency-disaster", description: "Disaster preparedness and response", icon: "Siren", parentId: null, sortOrder: 9, isActive: 1 },
+  { id: "disaster-response", name: "Disaster Response", slug: "disaster-response", description: "Post-disaster response", icon: "AlertTriangle", parentId: "emergency-disaster", sortOrder: 1 },
+  { id: "search-rescue", name: "Search & Rescue", slug: "search-rescue", description: "Search and rescue operations", icon: "Compass", parentId: "emergency-disaster", sortOrder: 2 },
+  { id: "relief", name: "Relief", slug: "relief", description: "Relief supplies and logistics", icon: "Package", parentId: "emergency-disaster", sortOrder: 3 },
+
+  // 10. Arts, Culture & Sports
+  { id: "arts-culture-sports", name: "Arts, Culture & Sports", slug: "arts-culture-sports", description: "Arts, culture, and sports organizations", icon: "Palette", parentId: null, sortOrder: 10, isActive: 1 },
+  { id: "cultural-orgs", name: "Cultural Organizations", slug: "cultural-organizations", description: "Cultural preservation", icon: "Landmark", parentId: "arts-culture-sports", sortOrder: 1 },
+  { id: "sports-clubs", name: "Sports Clubs", slug: "sports-clubs", description: "Sports organizations", icon: "Trophy", parentId: "arts-culture-sports", sortOrder: 2 },
+  { id: "community-events", name: "Community Events", slug: "community-events", description: "Community gatherings", icon: "Calendar", parentId: "arts-culture-sports", sortOrder: 3 },
+
+  // 11. Disability & Senior Care
+  { id: "disability-senior", name: "Disability & Senior Care", slug: "disability-senior-care", description: "Support for disabled and elderly", icon: "Accessibility", parentId: null, sortOrder: 11, isActive: 1 },
+  { id: "disability-support", name: "Disability Support", slug: "disability-support", description: "Disability services", icon: "Accessibility", parentId: "disability-senior", sortOrder: 1 },
+  { id: "senior-services", name: "Senior Services", slug: "senior-services", description: "Elderly care", icon: "Heart", parentId: "disability-senior", sortOrder: 2 },
+
+  // 12. Housing & Shelter
+  { id: "housing-shelter", name: "Housing & Shelter", slug: "housing-shelter", description: "Housing assistance organizations", icon: "Home", parentId: null, sortOrder: 12, isActive: 1 },
+  { id: "homeless-shelters", name: "Homeless Shelters", slug: "homeless-shelters", description: "Shelter for homeless", icon: "Bed", parentId: "housing-shelter", sortOrder: 1 },
+  { id: "housing-assistance", name: "Housing Assistance", slug: "housing-assistance", description: "Housing support programs", icon: "Key", parentId: "housing-shelter", sortOrder: 2 },
+
+  // 13. Others
+  { id: "others", name: "Others", slug: "others", description: "Other non-profit organizations", icon: "MoreHorizontal", parentId: null, sortOrder: 13, isActive: 1 },
+  { id: "refugee-support", name: "Refugee Support", slug: "refugee-support", description: "Refugee assistance", icon: "Users", parentId: "others", sortOrder: 1 },
+  { id: "veterans", name: "Veterans Services", slug: "veterans-services", description: "Veteran organizations", icon: "Award", parentId: "others", sortOrder: 2 },
+  { id: "other-services", name: "Other Services", slug: "other-services", description: "Other charitable services", icon: "Circle", parentId: "others", sortOrder: 3 },
 ];
-
-export const insertNonProfitCategoriesSQL = nonProfitCategories.map(cat => `
-  INSERT INTO non_profit_categories (id, name, slug, description, icon, parent_id, sort_order, is_active, form_fields)
-  VALUES (
-    '${cat.id}',
-    '${cat.name.replace(/'/g, "''")}',
-    '${cat.slug}',
-    '${cat.description?.replace(/'/g, "''") || ''}',
-    '${cat.icon}',
-    ${cat.parentId ? `'${cat.parentId}'` : 'NULL'},
-    ${cat.sortOrder},
-    ${cat.isActive ? 1 : 0},
-    '${cat.formFields.replace(/'/g, "''")}'
-  );
-`).join('\n');
 
 export default nonProfitCategories;

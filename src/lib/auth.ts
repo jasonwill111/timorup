@@ -5,7 +5,7 @@ import { betterAuth } from 'better-auth';
 import type { Auth } from 'better-auth';
 import { withCloudflare } from 'better-auth-cloudflare';
 import { drizzle } from 'drizzle-orm/d1';
-import { users, sessions, accounts, verifications } from '@/db/schema';
+import { users, accounts, verifications } from '@/db/schema';
 
 // Type for Cloudflare properties
 interface CfProperties {
@@ -51,11 +51,10 @@ export function createAuthInstance(env: Record<string, unknown>, cf?: CfProperti
   // Get base URL from env or use default
   const baseURL = (env.APP_URL as string) || (env.BETTER_AUTH_URL as string) || DEFAULT_BASE_URL;
 
-  // Create Drizzle instance WITH schema - required for better-auth
+  // Create Drizzle instance WITHOUT sessions table - better-auth uses KV only
   const db = drizzle(d1Db, {
     schema: {
       users,
-      sessions,
       accounts,
       verifications
     }
@@ -79,14 +78,13 @@ export function createAuthInstance(env: Record<string, unknown>, cf?: CfProperti
         options: {
           schema: {
             user: users,
-            session: sessions,
             account: accounts,
             verification: verifications,
           },
           usePlural: false,
         }
       },
-      // KV for sessions - store sessions in KV instead of D1 (avoids RETURNING clause issue)
+      // KV for sessions - store sessions in KV instead of D1
       kv: env.SESSION,
       // Disable geolocation and IP detection
       geolocationTracking: false,

@@ -212,7 +212,7 @@ import Button from '@components/ui/Button.astro';
     const updatesContainer = document.getElementById('updates-editor-container')!;
 
     aboutContainer.innerHTML = `<textarea name="aboutUs" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Write about your business...">${escapeHtml(initialAbout)}</textarea>`;
-    updatesContainer.innerHTML = `<textarea name="latestUpdates" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Latest news and updates...">${escapeHtml(initialUpdates)}</textarea>`;
+    updatesContainer.innerHTML = `<textarea name="latestUpdate" rows="4" class="w-full px-3 py-2 border rounded-md text-sm resize-y" placeholder="Latest news and updates...">${escapeHtml(initialUpdates)}</textarea>`;
   }
 
   addBtn?.addEventListener('click', () => {
@@ -253,7 +253,7 @@ import Button from '@components/ui/Button.astro';
       email: String(formData.get('email') || ''),
       contactNumber: String(formData.get('phone') || ''),
       aboutUs: aboutContent,
-      latestUpdates: updatesContent,
+      latestUpdate: updatesContent,
       status: 'draft',
     };
 
@@ -330,7 +330,7 @@ import Button from '@components/ui/Button.astro';
     if (modalTitle) modalTitle.textContent = 'Edit Public Sector';
     editingId = id;
     aboutContent = entity.aboutUs || '';
-    updatesContent = entity.latestUpdates || '';
+    updatesContent = entity.latestUpdate || '';
     renderEditors(aboutContent, updatesContent);
 
     modal?.classList.remove('hidden');

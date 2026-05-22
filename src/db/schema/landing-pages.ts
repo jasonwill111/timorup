@@ -1,26 +1,35 @@
-// Landing Pages schema - for AI-generated promotional pages
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+/**
+ * Landing Pages table (AI-generated promotional pages)
+ * TimorUp
+ *
+ * pageType: promotion | event | seasonal | custom
+ * content: JSON - 完整的页面内容（AI 生成什么结构，存什么结构）
+ */
+import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core"
 
-export const landingPages = sqliteTable('landing_pages', {
-  id: text('id').primaryKey(),
-  pageType: text('page_type').default('promotion'), // 'promotion' | 'product-showcase' | 'event' | 'seasonal'
-  title: text('title').notNull(),
-  slug: text('slug').notNull().unique(),
-  heroImageId: text('hero_image_id'),              // Media ID for hero image
-  hero: text('hero').notNull(),                    // JSON: { title, subtitle, ctaText, ctaSecondary }
-  description: text('description'),                 // Tiptap HTML content
-  features: text('features'),                      // JSON array: [{ title, description, icon }]
-  cta: text('cta'),                                // JSON: { title, description (Tiptap HTML), buttonText }
-  status: text('status').default('draft'),        // 'draft' | 'published'
-  views: integer('views').default(0),
-  conversions: integer('conversions').default(0),
-  createdBy: text('created_by').notNull(),        // FK to users.id
-  publishedAt: integer('published_at', { mode: 'timestamp' }),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-}, (t) => ({
-  slugIdx: index('landing_pages_slug_idx').on(t.slug),
-  statusIdx: index('landing_pages_status_idx').on(t.status),
-  createdByIdx: index('landing_pages_created_by_idx').on(t.createdBy),
-}));
+export const landingPages = sqliteTable("landing_pages", {
+  id: text().primaryKey().notNull(),
+  pageType: text("page_type").default("promotion"),
+  title: text().notNull(),
+  slug: text().notNull().unique(),
+  status: text().default("draft"),
+
+  // AI 生成的内容 - 灵活的 JSON 结构
+  content: text().notNull(),              // JSON: 完整的页面内容
+
+  // 元数据
+  views: integer().default(0),
+  conversions: integer().default(0),
+  createdBy: text("created_by").notNull(),
+  publishedAt: integer("published_at"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+},
+(table) => [
+  uniqueIndex("landing_pages_slug_idx").on(table.slug),
+  index("landing_pages_status_idx").on(table.status),
+  index("landing_pages_created_by_idx").on(table.createdBy),
+]);
+
+export type LandingPage = typeof landingPages.$inferSelect;
+export type NewLandingPage = typeof landingPages.$inferInsert;

@@ -56,11 +56,9 @@ import { actions } from 'astro:actions';
             <tr>
               <th class="text-left p-3 font-medium">Package</th>
               <th class="text-left p-3 font-medium hidden md:table-cell">Type</th>
-              <th class="text-left p-3 font-medium">Price</th>
-              <th class="text-left p-3 font-medium hidden lg:table-cell">SKU Limit</th>
-              <th class="text-left p-3 font-medium hidden lg:table-cell">Images</th>
-              <th class="text-left p-3 font-medium hidden lg:table-cell">Variants</th>
+              <th class="text-left p-3 font-medium">Price (Mo / Yr)</th>
               <th class="text-center p-3 font-medium">Status</th>
+              <th class="text-right p-3 font-medium">Variants</th>
               <th class="text-right p-3 font-medium">Actions</th>
             </tr>
           </thead>
@@ -97,50 +95,61 @@ import { actions } from 'astro:actions';
           <div id="package-type-field">
             <label class="block text-sm font-medium mb-1">Type</label>
             <select id="package-type" name="packageType" class="w-full h-9 px-3 rounded-md border bg-background text-sm">
-              <option value="subscription">Subscription</option>
+              <option value="business_page">Business Page</option>
               <option value="listing_renewal">Listing Renewal</option>
               <option value="featured">Featured</option>
-              <option value="addon">Addon</option>
+              <option value="ad_banner">Ad Banner</option>
             </select>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Price (USD)</label>
-            <input type="number" id="plan-amount" name="amount" required min="0" step="0.01" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+            <label class="block text-sm font-medium mb-1">Price Monthly (USD)</label>
+            <input type="number" id="plan-amount-monthly" name="amountMonthly" required min="0" step="0.01" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
           </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Price Yearly (USD)</label>
+            <input type="number" id="plan-amount-yearly" name="amountYearly" required min="0" step="0.01" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-1">SKU Limit</label>
             <input type="number" id="plan-skuLimit" name="skuLimit" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
           </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Max Images per SKU</label>
-            <input type="number" id="plan-maxImages" name="maxImages" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Max Videos per SKU</label>
-            <input type="number" id="plan-maxVideos" name="maxVideos" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+            <label class="block text-sm font-medium mb-1">Sort Order</label>
+            <input type="number" id="plan-sortOrder" name="sortOrder" min="0" value="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Max Business Images</label>
-            <input type="number" id="plan-maxBusinessImages" name="maxBusinessImages" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+            <label class="block text-sm font-medium mb-1">Max Images/SKU</label>
+            <input type="number" id="plan-maxImages" name="maxImages" value="6" readonly class="w-full h-9 px-3 rounded-md border bg-muted text-sm" />
+            <p class="text-xs text-muted-foreground mt-1">Fixed: 6</p>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Max Business Videos</label>
-            <input type="number" id="plan-maxBusinessVideos" name="maxBusinessVideos" required min="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+            <label class="block text-sm font-medium mb-1">Max Images/Business</label>
+            <input type="number" id="plan-maxBusinessImages" name="maxBusinessImages" value="12" readonly class="w-full h-9 px-3 rounded-md border bg-muted text-sm" />
+            <p class="text-xs text-muted-foreground mt-1">Fixed: 12</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Max Videos</label>
+            <input type="number" id="plan-maxVideos" name="maxVideos" value="1" readonly class="w-full h-9 px-3 rounded-md border bg-muted text-sm" />
+            <p class="text-xs text-muted-foreground mt-1">Fixed: 1</p>
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Sort Order</label>
-          <input type="number" id="plan-sortOrder" name="sortOrder" min="0" value="0" class="w-full h-9 px-3 rounded-md border bg-background text-sm" />
+        <div class="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
+          <p><strong>Note:</strong> Media limits are fixed across all plans:</p>
+          <ul class="list-disc list-inside mt-1 space-y-0.5">
+            <li>Product/SKU: 6 images, 1 video</li>
+            <li>Business Page Gallery: 12 images, 1 video</li>
+            <li>LatestUpdate: 4 images, 1 video</li>
+          </ul>
         </div>
 
         <div>
@@ -187,16 +196,18 @@ import { actions } from 'astro:actions';
   interface Plan {
     id: string;
     name: string;
-    period: string;
-    amount: number;
-    skuLimit: number;
-    maxImages: number;
-    maxVideos: number;
-    maxBusinessImages: number;
-    maxBusinessVideos: number;
-    features: string[];
+    slug: string;
+    type: string;
     description: string;
-    active: boolean;
+    variants: Array<{
+      name: string;
+      price: number;
+      currency: string;
+      durationValue: number;
+      durationUnit: string;
+      features: string[];
+    }>;
+    isActive: boolean;
     sortOrder: number;
   }
 
@@ -260,19 +271,18 @@ import { actions } from 'astro:actions';
     if (!tbody) return;
 
     if (plans.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-muted-foreground">No packages found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center p-8 text-muted-foreground">No packages found</td></tr>';
       return;
     }
 
     const canEdit = currentUserRole === 'super_admin';
 
     tbody.innerHTML = plans.map(pkg => {
-      const firstVariant = pkg.variants?.[0] || {};
-      const durationUnit = firstVariant.durationUnit || 'month';
-      const price = firstVariant.price || 0;
-      const skuLimit = firstVariant.limits?.skuLimit ?? '-';
-      const maxImages = firstVariant.limits?.maxImages ?? '-';
-      const maxVideos = firstVariant.limits?.maxVideos ?? '-';
+      // Find monthly and yearly variants
+      const monthlyVariant = pkg.variants?.find(v => v.durationUnit === 'month');
+      const yearlyVariant = pkg.variants?.find(v => v.durationUnit === 'months');
+      const monthlyPrice = monthlyVariant?.price || 0;
+      const yearlyPrice = yearlyVariant?.price || 0;
       const variantCount = pkg.variants?.length || 0;
 
       return `
@@ -286,17 +296,20 @@ import { actions } from 'astro:actions';
             ${pkg.type}
           </span>
         </td>
-        <td class="p-3 font-semibold">$${price}</td>
-        <td class="p-3 hidden lg:table-cell">${skuLimit}</td>
-        <td class="p-3 hidden lg:table-cell">${maxImages}</td>
-        <td class="p-3 hidden lg:table-cell">${variantCount} variant${variantCount !== 1 ? 's' : ''}</td>
+        <td class="p-3">
+          <div class="text-sm">Mo: $${monthlyPrice}</div>
+          <div class="text-xs text-muted-foreground">Yr: $${yearlyPrice}</div>
+        </td>
         <td class="p-3 text-center">
           <span class="px-2 py-1 text-xs rounded-full ${pkg.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}">
             ${pkg.isActive ? 'Active' : 'Inactive'}
           </span>
         </td>
         <td class="p-3 text-right">
-          ${canEdit ? `<button onclick="window.editPlan('${pkg.id}')" class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>` : '<span class="text-xs text-muted-foreground">View only</span>'}
+          ${variantCount} variant${variantCount !== 1 ? 's' : ''}
+        </td>
+        <td class="p-3 text-right">
+          ${canEdit ? `<button onclick="window.editPlan('${pkg.id}')" class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>` : '<span class="text-xs text-muted-foreground">View</span>'}
         </td>
       </tr>
     `}).join('');
@@ -323,7 +336,9 @@ import { actions } from 'astro:actions';
     const pkg = plans.find(p => p.id === planId);
     if (!pkg) return;
 
-    const firstVariant = pkg.variants?.[0] || {};
+    // Find monthly and yearly variants
+    const monthlyVariant = pkg.variants?.find(v => v.durationUnit === 'month');
+    const yearlyVariant = pkg.variants?.find(v => v.durationUnit === 'months');
 
     const modal = document.getElementById('plan-modal');
     const title = document.getElementById('modal-title');
@@ -341,15 +356,12 @@ import { actions } from 'astro:actions';
     if (form) {
       (document.getElementById('plan-id') as HTMLInputElement).value = pkg.id;
       (document.getElementById('plan-name') as HTMLInputElement).value = pkg.name;
-      (document.getElementById('plan-amount') as HTMLInputElement).value = String(firstVariant.price || 0);
-      (document.getElementById('plan-skuLimit') as HTMLInputElement).value = String(firstVariant.limits?.skuLimit || 0);
-      (document.getElementById('plan-maxImages') as HTMLInputElement).value = String(firstVariant.limits?.maxImages || 0);
-      (document.getElementById('plan-maxVideos') as HTMLInputElement).value = String(firstVariant.limits?.maxVideos || 0);
-      (document.getElementById('plan-maxBusinessImages') as HTMLInputElement).value = String(firstVariant.limits?.maxBusinessImages || 0);
-      (document.getElementById('plan-maxBusinessVideos') as HTMLInputElement).value = String(firstVariant.limits?.maxBusinessVideos || 0);
+      (document.getElementById('package-type') as HTMLSelectElement).value = pkg.type || 'business_page';
+      (document.getElementById('plan-amount-monthly') as HTMLInputElement).value = String(monthlyVariant?.price || 0);
+      (document.getElementById('plan-amount-yearly') as HTMLInputElement).value = String(yearlyVariant?.price || 0);
       (document.getElementById('plan-sortOrder') as HTMLInputElement).value = String(pkg.sortOrder || 0);
       (document.getElementById('plan-description') as HTMLTextAreaElement).value = pkg.description || '';
-      (document.getElementById('plan-features') as HTMLTextAreaElement).value = (firstVariant.features || []).join('\n');
+      (document.getElementById('plan-features') as HTMLTextAreaElement).value = (monthlyVariant?.features || []).join('\n');
       (document.getElementById('plan-active') as HTMLInputElement).checked = Boolean(pkg.isActive);
     }
 
@@ -363,25 +375,19 @@ import { actions } from 'astro:actions';
     const modal = document.getElementById('plan-modal');
     const title = document.getElementById('modal-title');
     const modeInput = document.getElementById('plan-mode') as HTMLInputElement;
-    const periodField = document.getElementById('period-field');
     const deleteBtn = document.getElementById('delete-plan-btn');
     const form = document.getElementById('plan-form') as HTMLFormElement;
 
     if (modeInput) modeInput.value = 'create';
     if (title) title.textContent = 'Create Plan';
-    if (periodField) periodField.classList.remove('hidden');
     if (deleteBtn) deleteBtn.classList.add('hidden');
 
     if (form) {
       (document.getElementById('plan-id') as HTMLInputElement).value = '';
       (document.getElementById('plan-name') as HTMLInputElement).value = '';
-      (document.getElementById('plan-period') as HTMLSelectElement).value = 'monthly';
-      (document.getElementById('plan-amount') as HTMLInputElement).value = '';
-      (document.getElementById('plan-skuLimit') as HTMLInputElement).value = '10';
-      (document.getElementById('plan-maxImages') as HTMLInputElement).value = '5';
-      (document.getElementById('plan-maxVideos') as HTMLInputElement).value = '1';
-      (document.getElementById('plan-maxBusinessImages') as HTMLInputElement).value = '16';
-      (document.getElementById('plan-maxBusinessVideos') as HTMLInputElement).value = '2';
+      (document.getElementById('package-type') as HTMLSelectElement).value = 'business_page';
+      (document.getElementById('plan-amount-monthly') as HTMLInputElement).value = '';
+      (document.getElementById('plan-amount-yearly') as HTMLInputElement).value = '';
       (document.getElementById('plan-sortOrder') as HTMLInputElement).value = '0';
       (document.getElementById('plan-description') as HTMLTextAreaElement).value = '';
       (document.getElementById('plan-features') as HTMLTextAreaElement).value = '';
@@ -443,49 +449,51 @@ import { actions } from 'astro:actions';
     const id = formData.get('id') as string;
     const featuresText = formData.get('features') as string;
     const features = featuresText.split('\n').filter(f => f.trim());
+    const packageType = (formData.get('packageType') as string) || 'business_page';
 
-    // Build variant from form data
-    const variant = {
-      name: formData.get('name') as string,
-      price: parseFloat(formData.get('amount') as string) || 0,
-      currency: 'USD',
-      durationValue: 1,
-      durationUnit: 'month',
-      limits: {
-        skuLimit: parseInt(formData.get('skuLimit') as string) || 0,
-        maxImages: parseInt(formData.get('maxImages') as string) || 0,
-        maxVideos: parseInt(formData.get('maxVideos') as string) || 0,
-        maxBusinessImages: parseInt(formData.get('maxBusinessImages') as string) || 0,
-        maxBusinessVideos: parseInt(formData.get('maxBusinessVideos') as string) || 0,
+    // Build two variants: Monthly and Yearly
+    const monthlyPrice = parseFloat(formData.get('amountMonthly') as string) || 0;
+    const yearlyPrice = parseFloat(formData.get('amountYearly') as string) || 0;
+
+    const variants = [
+      {
+        name: "Monthly",
+        price: monthlyPrice,
+        currency: 'USD',
+        durationValue: 1,
+        durationUnit: 'month',
+        features: features,
       },
-      features: features,
-    };
+      {
+        name: "Yearly",
+        price: yearlyPrice,
+        currency: 'USD',
+        durationValue: 12,
+        durationUnit: 'months',
+        features: yearlyPrice > 0 && yearlyPrice < monthlyPrice * 10
+          ? [...features, 'Save ' + Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100) + '%']
+          : features,
+      },
+    ].filter(v => v.price > 0);
 
     try {
       let result;
       if (mode === 'edit' && id) {
-        // For edit, we need to get the existing package to preserve all variants
-        const existingPkg = plans.find(p => p.id === id);
-        const variants = existingPkg?.variants || [variant];
-        // Update first variant with new values
-        variants[0] = variant;
-
         result = await actions.admin.servicePackagesAdmin.update({
           id,
           name: formData.get('name') as string,
+          type: packageType as 'business_page' | 'listing_renewal' | 'featured' | 'ad_banner',
           description: formData.get('description') as string,
           variants: variants,
           isActive: formData.get('active') === 'on',
           sortOrder: parseInt(formData.get('sortOrder') as string) || 0,
         });
       } else {
-        // Create new package
-        const packageType = (formData.get('packageType') as string) || 'subscription';
         result = await actions.admin.servicePackagesAdmin.create({
           name: formData.get('name') as string,
-          type: packageType as 'subscription' | 'listing_renewal' | 'featured' | 'addon',
+          type: packageType as 'business_page' | 'listing_renewal' | 'featured' | 'ad_banner',
           description: formData.get('description') as string || '',
-          variants: [variant],
+          variants: variants,
           isActive: formData.get('active') === 'on',
           sortOrder: parseInt(formData.get('sortOrder') as string) || 0,
         });

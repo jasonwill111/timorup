@@ -23,14 +23,14 @@ const allPackages = db
 
 // Parse and categorize
 const businessPlans = allPackages
-  .filter(p => p.type === 'subscription' && p.category === 'business')
+  .filter(p => p.type === 'business_page')
   .map(p => ({
     ...p,
     variants: JSON.parse(p.variants),
   }));
 
 const listingPlans = allPackages
-  .filter(p => p.type === 'listing_renewal' && p.category === 'listing')
+  .filter(p => p.type === 'listing_renewal')
   .map(p => ({
     ...p,
     variants: JSON.parse(p.variants),
@@ -101,7 +101,10 @@ const addonPlans = allPackages
           {monthly && (
             <div class="bg-muted/50 rounded-xl p-4 mb-6 text-center">
               <span class="text-sm">
-                Up to <strong class="font-bold text-primary text-lg">{monthly.limits.skuLimit}</strong> products/services
+                {/* Extract SKU limit from features array, default to plan name */}
+                Up to <strong class="font-bold text-primary text-lg">
+                  {monthly.features?.find(f => f.includes('Up to'))?.match(/Up to (\d+)/)?.[1] || '10'}
+                </strong> products/services
               </span>
               <p class="text-xs text-muted-foreground mt-1">Images & videos: same for all plans</p>
             </div>

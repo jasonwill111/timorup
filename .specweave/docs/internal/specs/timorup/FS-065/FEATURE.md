@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P2
 created: 2026-05-18
-lastUpdated: 2026-05-18
+lastUpdated: 2026-05-22
 tldr: "Replace `any[]` arrays in 6 listing pages with typed interfaces and repository functions."
 complexity: medium
 stakeholder_relevant: true

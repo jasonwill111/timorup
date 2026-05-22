@@ -15,7 +15,7 @@ import ShareDialog from '@/components/ui/ShareDialog.astro';
 import { getDb } from '@/lib/db';
 import { createBreadcrumbSchema } from '@/lib/seo';
 const db = await getDb();
-import { businesses, businessCategories, reviews, media, latestUpdates } from '@/db/schema';
+import { businesses, businessCategories, reviews, media, latestUpdate } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const { slug } = Astro.params;
@@ -155,14 +155,14 @@ try {
 }
 
 try {
-  const latestUpdatesData = await db.select()
-    .from(latestUpdates)
-    .where(eq(latestUpdates.typeId, business.id))
-    .where(eq(latestUpdates.type, 'businesses'))
-    .orderBy(desc(latestUpdates.createdAt))
+  const latestUpdateData = await db.select()
+    .from(latestUpdate)
+    .where(eq(latestUpdate.typeId, business.id))
+    .where(eq(latestUpdate.type, 'businesses'))
+    .orderBy(desc(latestUpdate.createdAt))
     .limit(4)
     .all();
-  updates = latestUpdatesData.map(u => ({
+  updates = latestUpdateData.map(u => ({
     ...u,
     images: safeJsonParse(u.images, []),
   }));

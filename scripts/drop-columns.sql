@@ -1,0 +1,11 @@
+ALTER TABLE `businesses` DROP COLUMN IF EXISTS `latest_updates`;
+ALTER TABLE `non_profits` DROP COLUMN IF EXISTS `latest_updates`;
+ALTER TABLE `non_profits` DROP COLUMN IF EXISTS `photo_gallery`;
+ALTER TABLE `non_profits` DROP COLUMN IF EXISTS `latest_update`;
+ALTER TABLE `non_profits` DROP COLUMN IF EXISTS `latest_update_images`;
+ALTER TABLE `non_profits` DROP COLUMN IF EXISTS `latest_update_date`;
+ALTER TABLE `public_sectors` DROP COLUMN IF EXISTS `latest_updates`;
+ALTER TABLE `public_sectors` DROP COLUMN IF EXISTS `photo_gallery`;
+ALTER TABLE `public_sectors` DROP COLUMN IF EXISTS `latest_update`;
+ALTER TABLE `public_sectors` DROP COLUMN IF EXISTS `latest_update_images`;
+ALTER TABLE `public_sectors` DROP COLUMN IF EXISTS `latest_update_date`;

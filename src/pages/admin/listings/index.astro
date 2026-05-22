@@ -114,7 +114,7 @@ import Button from '../../../components/ui/Button.astro';
     id: string;
     title: string;
     slug: string;
-    listingType: string;
+    categoryId: string | null;
     status: string;
     price: string | null;
     createdAt: number;
@@ -129,27 +129,9 @@ import Button from '../../../components/ui/Button.astro';
   const tbody = document.getElementById('listings-body') as HTMLTableSectionElement;
   const noResults = document.getElementById('no-results') as HTMLDivElement;
 
-  const typeColors: Record<string, string> = {
-    product: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    vehicle: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    property: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    job: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    service: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-    wanted: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  };
-
   const statusColors: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
     published: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  };
-
-  const typeLabels: Record<string, string> = {
-    product: 'Product',
-    vehicle: 'Vehicle',
-    property: 'Property',
-    job: 'Job',
-    service: 'Service',
-    wanted: 'Wanted',
   };
 
   async function loadListings() {
@@ -191,7 +173,6 @@ import Button from '../../../components/ui/Button.astro';
 
     const filtered = listings.filter(l => {
       if (search && !l.title.toLowerCase().includes(search)) return false;
-      if (type && l.listingType !== type) return false;
       if (status && l.status !== status) return false;
       return true;
     });
@@ -213,8 +194,8 @@ import Button from '../../../components/ui/Button.astro';
           </div>
         </td>
         <td class="px-4 py-3">
-          <span class="px-2 py-0.5 text-xs rounded-full ${typeColors[listing.listingType] || typeColors.product}">
-            ${typeLabels[listing.listingType] || listing.listingType}
+          <span class="px-2 py-0.5 text-xs rounded-full bg-muted">
+            {listing.categoryId || '-'}
           </span>
         </td>
         <td class="px-4 py-3">

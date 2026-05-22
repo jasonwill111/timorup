@@ -11,7 +11,7 @@ import { Eye, Heart, Bookmark, Globe, MapPin, Tag, Clock } from '@lucide/astro';
 import ShareDialog from '@/components/ui/ShareDialog.astro';
 import { getDb } from '@/lib/db';
 import { createBreadcrumbSchema } from '@/lib/seo';
-import { nonProfits, nonProfitCategories, media, latestUpdates } from '@/db/schema';
+import { nonProfits, nonProfitCategories, media, latestUpdate } from '@/db/schema';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 const db = await getDb();
@@ -56,12 +56,12 @@ const galleryMedia = await db.select({ id: media.id })
   .all();
 galleryImages = galleryMedia.map(m => ({ id: m.id, url: `/api/media/${m.id}` }));
 
-// Load updates from latestUpdates table
+// Load updates from latestUpdate table
 const updatesData = await db.select()
-  .from(latestUpdates)
-  .where(eq(latestUpdates.typeId, org.id))
-  .where(eq(latestUpdates.type, 'non_profits'))
-  .orderBy(desc(latestUpdates.createdAt))
+  .from(latestUpdate)
+  .where(eq(latestUpdate.typeId, org.id))
+  .where(eq(latestUpdate.type, 'non_profits'))
+  .orderBy(desc(latestUpdate.createdAt))
   .limit(4)
   .all();
 
