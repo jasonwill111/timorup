@@ -4,7 +4,7 @@ feature: FS-073
 title: "Card Hover Enhancement"
 status: completed
 priority: P1
-created: 2026-05-22
+created: 2026-05-20
 tldr: "**As a** site visitor."
 project: timorup
 ---

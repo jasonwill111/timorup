@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-05-18
-lastUpdated: 2026-05-22
+lastUpdated: 2026-05-18
 tldr: "Replace stateful singleton rate limiter with injectable adapter pattern."
 complexity: medium
 stakeholder_relevant: true

@@ -3,8 +3,8 @@ import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { initAuth } from '@/lib/auth';
 import { getDb } from '@/lib/db';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, sessions } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 import { checkRateLimitKV } from '@/lib/rate-limit';
 import { getErrorMessage } from '@/lib/utils';
 
@@ -69,8 +69,23 @@ if (!db) throw new Error("Database not available");
 
       if (existingUser && newUser.id !== existingUser.id) {
         // better-auth created a NEW user instead of finding existing one
-        // Fix: delete the new user, use existing user
+        // Fix: delete the new user, use existing user's session
         await db.delete(users).where(eq(users.id, newUser.id)).run();
+
+        // Get the session that better-auth just created
+        const session = await db.select()
+          .from(sessions)
+          .where(and(eq(sessions.token, token!), eq(sessions.userId, newUser.id)))
+          .limit(1)
+          .get() ?? undefined;
+
+        if (session) {
+          await db.update(sessions)
+            .set({ userId: existingUser.id })
+            .where(eq(sessions.id, session.id))
+            .run();
+        }
+
         userId = existingUser.id;
         userRole = existingUser.role || 'user';
       } else if (existingUser) {

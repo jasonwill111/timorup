@@ -1,20 +1,18 @@
 {
   "version": "1.0.0",
   "projects": {
-    "TimorUp": {
+    "timorup": {
       "id": "timorup",
       "name": "TimorUp",
-      "displayName": "TimorUp",
-      "aliases": ["timorup", "TimorUp", "TIMORUP"],
-      "techStack": ["Astro", "Cloudflare", "Drizzle", "TypeScript"],
-      "keywords": ["timor-leste", "business-directory", "marketplace"],
+      "techStack": [],
+      "keywords": [],
       "created": "2026-04-23T00:00:00.000Z"
     }
   },
-  "defaultProject": "TimorUp",
+  "defaultProject": "timorup",
   "metadata": {
     "created": "2026-04-23T00:00:00.000Z",
-    "lastModified": "2026-05-20T15:40:00.000Z"
+    "lastModified": "2026-05-20T00:00:00.000Z"
   }
 }
 

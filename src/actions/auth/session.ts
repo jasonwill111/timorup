@@ -1,6 +1,5 @@
-import { initAuthInstance } from '@/lib/auth';
-import { drizzle } from 'drizzle-orm/d1';
-import { users } from '@/db/schema';
+import { getDb } from '@/lib/db';
+import { sessions, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
@@ -19,66 +18,53 @@ export const getSession = defineAction({
       }
 
       const token = tokenMatch[1];
+      const db = await getDb();
+if (!db) throw new Error("Database not available");
 
-      // Get env from context - this works in Astro SSR
-      const { env } = await import('cloudflare:workers');
+      const session = await db.select()
+        .from(sessions)
+        .where(eq(sessions.token, token))
+        .limit(1)
+        .get();
 
-      // Initialize auth with env
-      initAuthInstance(env as Record<string, unknown>);
-
-      // Read session from KV
-      if (!env.SESSION) {
-        console.error('[Session Action] SESSION KV not available');
+      if (!session || !session.expiresAt) {
         return { user: null, session: null };
       }
 
-      const stored = await env.SESSION.get(token);
+      // expiresAt in D1 is Unix timestamp (seconds), need to convert to milliseconds
+      const expiresAtMs = typeof session.expiresAt === 'number'
+        ? session.expiresAt * 1000
+        : new Date(session.expiresAt).getTime();
 
-      if (!stored) {
+      if (expiresAtMs <= Date.now()) {
         return { user: null, session: null };
       }
 
-      const data = JSON.parse(stored);
-      const kvSession = data.session;
-      const kvUser = data.user;
+      // Session valid, get user
+      const user = await db.select()
+        .from(users)
+        .where(eq(users.id, session.userId))
+        .limit(1)
+        .get();
 
-      // Check if session is expired
-      if (!kvSession || new Date(kvSession.expiresAt) <= new Date()) {
+      if (!user) {
         return { user: null, session: null };
-      }
-
-      // Get role from database
-      let role = 'user';
-      if (env.DB) {
-        try {
-          const db = drizzle(env.DB as D1Database, { schema: { users } });
-          const dbUser = await db.select({ role: users.role })
-            .from(users)
-            .where(eq(users.id, kvSession.userId))
-            .limit(1)
-            .get();
-          if (dbUser) {
-            role = dbUser.role || 'user';
-          }
-        } catch (e) {
-          console.error('[Session] DB error:', e);
-        }
       }
 
       return {
         user: {
-          id: kvSession.userId,
-          email: kvUser?.email || '',
-          name: kvUser?.name || '',
-          emailVerified: kvUser?.emailVerified ?? false,
-          image: kvUser?.image ?? null,
-          role: role,
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          emailVerified: user.emailVerified ?? false,
+          image: user.image ?? null,
+          role: user.role ?? 'user',
         },
         session: {
-          id: kvSession.id,
-          expiresAt: kvSession.expiresAt,
-          token: kvSession.token,
-          userId: kvSession.userId,
+          id: session.id,
+          expiresAt: new Date(expiresAtMs).toISOString(),
+          token: session.token,
+          userId: session.userId,
         }
       };
     } catch (error) {

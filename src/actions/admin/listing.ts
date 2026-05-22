@@ -34,7 +34,7 @@ const updateSchema = z.object({
     instagram: z.string().optional(),
     tiktok: z.string().optional(),
   }).optional().nullable(),
-  photo_gallery: z.array(z.string()).optional().nullable(),
+  photoGallery: z.array(z.string()).optional().nullable(),
   latestUpdate: z.string().optional().nullable(),
   latestUpdateImages: z.array(z.string()).optional().nullable(),
   latestUpdateDate: z.number().optional().nullable(),

@@ -21,9 +21,8 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US1-01**: All user-controlled data in `innerHTML` uses `escapeHtml()` or `escapeHtmlServer()` ï¿½?(Verified: already safe)
-- [x] **AC-US1-02**: All `JSON.parse()` calls wrapped in try/catch with error handling ï¿½?- [x] **AC-US1-03**: `wrangler.jsonc` compatibility_date updated to 2025-11-01 or later ï¿½?
-
+- [x] **AC-US1-01**: All user-controlled data in `innerHTML` uses `escapeHtml()` or `escapeHtmlServer()` âœ?(Verified: already safe)
+- [x] **AC-US1-02**: All `JSON.parse()` calls wrapped in try/catch with error handling âœ?- [x] **AC-US1-03**: `wrangler.jsonc` compatibility_date updated to 2025-11-01 or later âœ?
 ---
 
 ## Implementation
@@ -36,3 +35,4 @@ project: TimorLink
 ## Tasks
 
 - [x] **T-005**: Wrap JSON.parse in update.ts + Cache Purge [P]
+

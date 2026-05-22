@@ -2,7 +2,7 @@
 id: US-001
 feature: FS-057
 title: "Server Islands 启用"
-status: completed
+status: in_progress
 priority: P1
 created: 2026-05-15
 tldr: "**As a** developer."
@@ -21,7 +21,7 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US1-01**: HomepageContent 组件使用 `server:defer` 指令 �?- [x] **AC-US1-02**: 首页 HTML 在构建时预渲染，静态部分可�?CDN 缓存 �?- [x] **AC-US1-03**: island 加载时显�?skeleton/fallback UI �?- [ ] **AC-US1-04**: 性能测试：TTFB < 200ms（在 5Mbps 网络下）�?(requires deploy)
+- [x] **AC-US1-01**: HomepageContent 组件使用 `server:defer` 指令 �?- [x] **AC-US1-02**: 首页 HTML 在构建时预渲染，静态部分可�?CDN 缓存 �?- [x] **AC-US1-03**: island 加载时显�?skeleton/fallback UI �?- [ ] **AC-US1-04**: 性能测试：TTFB < 200ms（在 5Mbps 网络下）�?(requires deploy)
 
 ---
 
@@ -36,3 +36,4 @@ project: TimorLink
 
 - [x] **T-002**: Add Fallback UI to HomepageContent
 - [x] **T-006**: Performance Testing
+

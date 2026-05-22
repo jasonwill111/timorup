@@ -4,8 +4,8 @@ title: "Feature: Migrate REST APIs to Server Actions"
 type: feature
 status: completed
 priority: P1
-created: 2026-05-22
-lastUpdated: 2026-05-22
+created: 2026-05-20
+lastUpdated: 2026-05-20
 tldr: "Migrate all mutable REST API endpoints (auth, admin CRUD) to Server Actions, keep public reads as REST for SSR caching."
 complexity: high
 stakeholder_relevant: true
@@ -29,7 +29,7 @@ Migrate all mutable REST API endpoints (auth, admin CRUD) to Server Actions, kee
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0070-migrate-to-server-actions](../../../../../increments/0070-migrate-to-server-actions/spec.md) | ✅ completed | 2026-05-22 |
+| [0070-migrate-to-server-actions](../../../../../increments/0070-migrate-to-server-actions/spec.md) | ✅ completed | 2026-05-20 |
 
 ## User Stories
 

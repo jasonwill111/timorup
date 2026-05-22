@@ -21,8 +21,7 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US5-01**: Session cookie `sameSite` set to `'strict'` (not `'lax'`) ï¿½?
-
+- [x] **AC-US5-01**: Session cookie `sameSite` set to `'strict'` (not `'lax'`) âœ?
 ---
 
 ## Implementation
@@ -35,3 +34,4 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
+

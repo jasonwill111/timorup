@@ -1,123 +1,375 @@
 /**
- * Business Categories Seed Data
- * TimorUp (2026-05-21)
+ * Business Industry Categories Seed Data
+ * TimorUp - Business Directory Categories
  *
- * 15 parent categories, each with 2-6 subcategories
- * Total: ~56 categories
- *
- * Structure: 2-level hierarchy
- * - parentId: null = top-level parent
- * - parentId: 'xxx' = child of parent
+ * Each category has:
+ * - name: Display name
+ * - slug: URL-friendly identifier
+ * - description: Category description
+ * - icon: Emoji icon
+ * - parentId: Parent category (null for top-level)
+ * - formFields: JSON schema for category-specific fields
+ * - sortOrder: Display order
+ * - isActive: Active status
  */
 
 export const businessCategories = [
-  // 1. Food & Dining
-  { id: "food-dining", name: "Food & Dining", slug: "food-dining", description: "Restaurants, cafés, and food services", icon: "UtensilsCrossed", parentId: null, sortOrder: 1, isActive: 1 },
-  { id: "restaurants", name: "Restaurants", slug: "restaurants", description: "Full-service restaurants", icon: "Utensils", parentId: "food-dining", sortOrder: 1 },
-  { id: "cafes", name: "Cafés", slug: "cafes", description: "Coffee shops and cafés", icon: "Coffee", parentId: "food-dining", sortOrder: 2 },
-  { id: "fast-food", name: "Fast Food", slug: "fast-food", description: "Fast food chains and outlets", icon: "Burger", parentId: "food-dining", sortOrder: 3 },
-  { id: "food-stalls", name: "Food Stalls", slug: "food-stalls", description: "Street food and local markets", icon: "Store", parentId: "food-dining", sortOrder: 4 },
-  { id: "timorese-cuisine", name: "Timorese Cuisine", slug: "timorese-cuisine", description: "Traditional Timor-Leste cuisine", icon: "ChefHat", parentId: "food-dining", sortOrder: 5 },
+  // ========================
+  // TOP-LEVEL INDUSTRIES
+  // ========================
 
-  // 2. Accommodation
-  { id: "accommodation", name: "Accommodation", slug: "accommodation", description: "Hotels, guesthouses, and lodging", icon: "Bed", parentId: null, sortOrder: 2, isActive: 1 },
-  { id: "hotels", name: "Hotels", slug: "hotels", description: "Hotels and resorts", icon: "Building", parentId: "accommodation", sortOrder: 1 },
-  { id: "guesthouses", name: "Guesthouses", slug: "guesthouses", description: "Guesthouses and B&Bs", icon: "Home", parentId: "accommodation", sortOrder: 2 },
-  { id: "hostels", name: "Hostels", slug: "hostels", description: "Budget hostels", icon: "Backpack", parentId: "accommodation", sortOrder: 3 },
-  { id: "homestays", name: "Homestays", slug: "homestays", description: "Home-stay accommodations", icon: "Heart", parentId: "accommodation", sortOrder: 4 },
+  {
+    id: 'bc-1',
+    name: 'Restaurants & Cafés',
+    slug: 'restaurants-cafes',
+    description: 'Food service establishments',
+    icon: '🍽�?,
+    parentId: null,
+    sortOrder: 1,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'cuisineType', type: 'select', label: 'Cuisine Type', required: true, options: ['Timorese', 'Portuguese', 'Indonesian', 'Chinese', 'Indian', 'Italian', 'Fast Food', 'Seafood', 'Western', 'Fusion', 'Other'] },
+      { name: 'priceRange', type: 'select', label: 'Price Range', options: ['$', '$$', '$$$', '$$$$'] },
+      { name: 'openingHours', type: 'text', label: 'Opening Hours' },
+      { name: 'outdoorSeating', type: 'boolean', label: 'Outdoor Seating' },
+      { name: 'liveMusic', type: 'boolean', label: 'Live Music' },
+      { name: 'wifiAvailable', type: 'boolean', label: 'WiFi Available' }
+    ])
+  },
+  {
+    id: 'bc-2',
+    name: 'Accommodation',
+    slug: 'accommodation',
+    description: 'Hotels, guesthouses, and lodging',
+    icon: '🏨',
+    parentId: null,
+    sortOrder: 2,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'accommodationType', type: 'select', label: 'Type', required: true, options: ['Hotel', 'Guesthouse', 'Homestay', 'Hostel', 'Resort', 'Villa', 'Lodge', 'Apartment'] },
+      { name: 'starRating', type: 'select', label: 'Star Rating', options: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars', 'Unrated'] },
+      { name: 'roomCount', type: 'number', label: 'Number of Rooms' },
+      { name: 'checkInTime', type: 'text', label: 'Check-in Time' },
+      { name: 'checkOutTime', type: 'text', label: 'Check-out Time' },
+      { name: 'breakfastIncluded', type: 'boolean', label: 'Breakfast Included' },
+      { name: 'poolAvailable', type: 'boolean', label: 'Pool Available' },
+      { name: 'wifiAvailable', type: 'boolean', label: 'WiFi Available' },
+      { name: 'airConditioning', type: 'boolean', label: 'Air Conditioning' }
+    ])
+  },
+  {
+    id: 'bc-3',
+    name: 'Retail & Shops',
+    slug: 'retail-shops',
+    description: 'Retail stores and shops',
+    icon: '🏪',
+    parentId: null,
+    sortOrder: 3,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'retailType', type: 'select', label: 'Store Type', required: true, options: ['Grocery', 'Clothing', 'Electronics', 'Furniture', 'Hardware', 'Pharmacy', 'Books', 'Sports', 'Beauty', 'Jewelry', 'Souvenirs', 'Other'] },
+      { name: 'parkingAvailable', type: 'boolean', label: 'Parking Available' },
+      { name: 'openingHours', type: 'text', label: 'Opening Hours' }
+    ])
+  },
+  {
+    id: 'bc-4',
+    name: 'Transportation',
+    slug: 'transportation',
+    description: 'Transport services and vehicle rental',
+    icon: '🚗',
+    parentId: null,
+    sortOrder: 4,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'transportType', type: 'select', label: 'Service Type', required: true, options: ['Taxi', 'Rent-a-Car', 'Motorcycle Rental', 'Bus', 'Boat/Ferry', 'Airport Transfer', 'Trucking', 'Logistics', 'Driving School'] },
+      { name: 'fleetSize', type: 'number', label: 'Fleet Size' },
+      { name: 'operatingHours', type: 'text', label: 'Operating Hours' },
+      { name: 'homePickup', type: 'boolean', label: 'Home Pickup Available' }
+    ])
+  },
+  {
+    id: 'bc-5',
+    name: 'Professional Services',
+    slug: 'professional-services',
+    description: 'Legal, accounting, consulting',
+    icon: '💼',
+    parentId: null,
+    sortOrder: 5,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'serviceType', type: 'select', label: 'Service Type', required: true, options: ['Legal', 'Accounting', 'Consulting', 'IT Services', 'Marketing', 'Architecture', 'Engineering', 'Insurance', 'Real Estate', 'Other'] },
+      { name: 'languages', type: 'text', label: 'Languages Spoken' },
+      { name: 'experience', type: 'text', label: 'Years of Experience' },
+      { name: 'certifications', type: 'text', label: 'Certifications' }
+    ])
+  },
+  {
+    id: 'bc-6',
+    name: 'Health & Wellness',
+    slug: 'health-wellness',
+    description: 'Healthcare and wellness services',
+    icon: '🏥',
+    parentId: null,
+    sortOrder: 6,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'healthType', type: 'select', label: 'Service Type', required: true, options: ['Hospital', 'Clinic', 'Pharmacy', 'Dental', 'Optical', 'Laboratory', 'Physiotherapy', 'Mental Health', 'Traditional Medicine', 'Gym/Fitness', 'Spa', 'Beauty Salon', 'Barbershop'] },
+      { name: 'emergencyService', type: 'boolean', label: '24/7 Emergency' },
+      { name: 'insuranceAccepted', type: 'boolean', label: 'Insurance Accepted' },
+      { name: 'parkingAvailable', type: 'boolean', label: 'Parking Available' }
+    ])
+  },
+  {
+    id: 'bc-7',
+    name: 'Education & Training',
+    slug: 'education-training',
+    description: 'Schools, courses, and training',
+    icon: '🎓',
+    parentId: null,
+    sortOrder: 7,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'educationType', type: 'select', label: 'Institution Type', required: true, options: ['University', 'School', 'Vocational Training', 'Language School', 'Driving School', 'Music School', 'Art School', 'Tutoring Center', 'Online Platform', 'Other'] },
+      { name: 'accreditation', type: 'text', label: 'Accreditation' },
+      { name: 'ageGroups', type: 'text', label: 'Age Groups Served' },
+      { name: 'classSize', type: 'text', label: 'Average Class Size' }
+    ])
+  },
+  {
+    id: 'bc-8',
+    name: 'Construction & Trades',
+    slug: 'construction-trades',
+    description: 'Building and home services',
+    icon: '🏗�?,
+    parentId: null,
+    sortOrder: 8,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'tradeType', type: 'select', label: 'Service Type', required: true, options: ['General Contractor', 'Electrical', 'Plumbing', 'Painting', 'Carpentry', 'Roofing', 'Landscaping', 'Cleaning', 'Pest Control', 'AC Repair', 'Security Systems', 'Masonry', 'Other'] },
+      { name: 'licensed', type: 'boolean', label: 'Licensed & Insured' },
+      { name: 'serviceArea', type: 'text', label: 'Service Area' },
+      { name: 'freeQuote', type: 'boolean', label: 'Free Estimates' }
+    ])
+  },
+  {
+    id: 'bc-9',
+    name: 'Entertainment & Events',
+    slug: 'entertainment-events',
+    description: 'Entertainment and event services',
+    icon: '🎭',
+    parentId: null,
+    sortOrder: 9,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'entertainmentType', type: 'select', label: 'Service Type', required: true, options: ['Cinema', 'Theater', 'Nightclub', 'Bar', 'Karaoke', 'Bowling', 'Arcade', 'Events Venue', 'Photography', 'Videography', 'DJ Services', 'Event Planning', 'Catering', 'Other'] },
+      { name: 'capacity', type: 'number', label: 'Capacity (people)' },
+      { name: 'openingHours', type: 'text', label: 'Opening Hours' },
+      { name: 'ageRestriction', type: 'text', label: 'Age Restriction' }
+    ])
+  },
+  {
+    id: 'bc-10',
+    name: 'Agriculture & Farming',
+    slug: 'agriculture-farming',
+    description: 'Agricultural products and services',
+    icon: '🌾',
+    parentId: null,
+    sortOrder: 10,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'agriType', type: 'select', label: 'Type', required: true, options: ['Farm', 'Nursery', 'AgriSupplier', 'Livestock', 'Fishery', 'Coffee Farm', 'Organic Farm', 'AgriProcessing', 'Other'] },
+      { name: 'organicCertified', type: 'boolean', label: 'Organic Certified' },
+      { name: 'productTypes', type: 'text', label: 'Products Grown/Sold' },
+      { name: 'farmVisits', type: 'boolean', label: 'Farm Visits Available' }
+    ])
+  },
+  {
+    id: 'bc-11',
+    name: 'Computers & Electronics',
+    slug: 'computers-electronics',
+    description: 'Tech shops and services',
+    icon: '💻',
+    parentId: null,
+    sortOrder: 11,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'techType', type: 'select', label: 'Service Type', required: true, options: ['Computer Shop', 'Phone Shop', 'Repair Service', 'Software Development', 'Web Design', 'IT Support', 'Network Installation', 'CCTV Installation', 'Gaming', 'Other'] },
+      { name: 'warrantyOffered', type: 'boolean', label: 'Warranty Offered' },
+      { name: 'partsAvailable', type: 'boolean', label: 'Parts Available' }
+    ])
+  },
+  {
+    id: 'bc-12',
+    name: 'Fashion & Beauty',
+    slug: 'fashion-beauty',
+    description: 'Clothing, accessories, and beauty services',
+    icon: '👗',
+    parentId: null,
+    sortOrder: 12,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'fashionType', type: 'select', label: 'Business Type', required: true, options: ['Clothing Store', 'Shoes', 'Accessories', 'Tailoring', 'Laundry/Dry Clean', 'Hair Salon', 'Nail Salon', 'Barbershop', 'Spa', 'Makeup Artist', 'Fashion Designer', 'Other'] },
+      { name: 'customOrders', type: 'boolean', label: 'Custom Orders' },
+      { name: 'appointmentOnly', type: 'boolean', label: 'Appointment Only' }
+    ])
+  },
 
-  // 3. Retail & Shops
-  { id: "retail-shops", name: "Retail & Shops", slug: "retail-shops", description: "Retail stores and shops", icon: "ShoppingBag", parentId: null, sortOrder: 3, isActive: 1 },
-  { id: "supermarkets", name: "Supermarkets", slug: "supermarkets", description: "Large grocery stores", icon: "ShoppingCart", parentId: "retail-shops", sortOrder: 1 },
-  { id: "markets", name: "Markets", slug: "markets", description: "Traditional markets", icon: "Store", parentId: "retail-shops", sortOrder: 2 },
-  { id: "convenience", name: "Convenience Stores", slug: "convenience-stores", description: "Convenience and minimarts", icon: "CreditCard", parentId: "retail-shops", sortOrder: 3 },
-  { id: "specialty-shops", name: "Specialty Shops", slug: "specialty-shops", description: "Specialized retail", icon: "Sparkles", parentId: "retail-shops", sortOrder: 4 },
+  // ========================
+  // SUB-CATEGORIES (Restaurants & Cafés)
+  // ========================
+  {
+    id: 'bc-1-1',
+    name: 'Timorese Cuisine',
+    slug: 'timorese-restaurants',
+    description: 'Traditional Timor-Leste cuisine',
+    icon: '🍲',
+    parentId: 'bc-1',
+    sortOrder: 11,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'traditionalDishes', type: 'text', label: 'Traditional Dishes' },
+      { name: 'regionalSpecialty', type: 'text', label: 'Regional Specialty' }
+    ])
+  },
+  {
+    id: 'bc-1-2',
+    name: 'Coffee Shops',
+    slug: 'coffee-shops',
+    description: 'Coffee shops and cafés',
+    icon: '�?,
+    parentId: 'bc-1',
+    sortOrder: 12,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'coffeeOrigin', type: 'text', label: 'Coffee Origin' },
+      { name: 'beansAvailable', type: 'select', label: 'Beans Available', options: ['Local Timor', 'Imported', 'Both'] }
+    ])
+  },
+  {
+    id: 'bc-1-3',
+    name: 'Fast Food',
+    slug: 'fast-food',
+    description: 'Fast food chains and outlets',
+    icon: '🍟',
+    parentId: 'bc-1',
+    sortOrder: 13,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'chainName', type: 'text', label: 'Chain Name' },
+      { name: 'deliveryAvailable', type: 'boolean', label: 'Delivery Available' }
+    ])
+  },
 
-  // 4. Transportation
-  { id: "transportation", name: "Transportation", slug: "transportation", description: "Transport and travel services", icon: "Car", parentId: null, sortOrder: 4, isActive: 1 },
-  { id: "taxis", name: "Taxis", slug: "taxis", description: "Taxi services", icon: "Taxi", parentId: "transportation", sortOrder: 1 },
-  { id: "car-rentals", name: "Car Rentals", slug: "car-rentals", description: "Vehicle rental services", icon: "Key", parentId: "transportation", sortOrder: 2 },
-  { id: "tours", name: "Tours & Travel", slug: "tours-travel", description: "Tour operators and travel agencies", icon: "Map", parentId: "transportation", sortOrder: 3 },
-  { id: "bus-services", name: "Bus Services", slug: "bus-services", description: "Public and private bus services", icon: "Bus", parentId: "transportation", sortOrder: 4 },
+  // SUB-CATEGORIES (Accommodation)
+  {
+    id: 'bc-2-1',
+    name: 'Hotels',
+    slug: 'hotels',
+    description: 'Hotels and resorts',
+    icon: '🏨',
+    parentId: 'bc-2',
+    sortOrder: 21,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'starRating', type: 'select', label: 'Star Rating', options: ['2 Stars', '3 Stars', '4 Stars', '5 Stars'] },
+      { name: 'roomCount', type: 'number', label: 'Number of Rooms' },
+      { name: 'meetingRooms', type: 'boolean', label: 'Meeting Rooms' }
+    ])
+  },
+  {
+    id: 'bc-2-2',
+    name: 'Guesthouses',
+    slug: 'guesthouses',
+    description: 'Guesthouses and homestays',
+    icon: '🏠',
+    parentId: 'bc-2',
+    sortOrder: 22,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'roomCount', type: 'number', label: 'Number of Rooms' },
+      { name: 'mealsAvailable', type: 'boolean', label: 'Meals Available' },
+      { name: 'kitchenAccess', type: 'boolean', label: 'Guest Kitchen Access' }
+    ])
+  },
 
-  // 5. Professional Services
-  { id: "professional-services", name: "Professional Services", slug: "professional-services", description: "Professional and business services", icon: "Briefcase", parentId: null, sortOrder: 5, isActive: 1 },
-  { id: "banks", name: "Banks & Finance", slug: "banks-finance", description: "Banks and financial institutions", icon: "Landmark", parentId: "professional-services", sortOrder: 1 },
-  { id: "legal-services", name: "Legal Services", slug: "legal-services", description: "Lawyers and legal firms", icon: "Scale", parentId: "professional-services", sortOrder: 2 },
-  { id: "accounting", name: "Accounting", slug: "accounting", description: "Accounting and bookkeeping", icon: "Calculator", parentId: "professional-services", sortOrder: 3 },
-  { id: "insurance", name: "Insurance", slug: "insurance", description: "Insurance providers", icon: "Shield", parentId: "professional-services", sortOrder: 4 },
-  { id: "consulting", name: "Consulting", slug: "consulting", description: "Business consulting", icon: "MessageSquare", parentId: "professional-services", sortOrder: 5 },
+  // SUB-CATEGORIES (Health & Wellness)
+  {
+    id: 'bc-6-1',
+    name: 'Clinics',
+    slug: 'clinics',
+    description: 'Medical and dental clinics',
+    icon: '🩺',
+    parentId: 'bc-6',
+    sortOrder: 61,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'specialty', type: 'text', label: 'Medical Specialty' },
+      { name: 'operatingHours', type: 'text', label: 'Operating Hours' },
+      { name: 'appointmentRequired', type: 'boolean', label: 'Appointment Required' }
+    ])
+  },
+  {
+    id: 'bc-6-2',
+    name: 'Pharmacies',
+    slug: 'pharmacies',
+    description: 'Pharmacies and medicine shops',
+    icon: '💊',
+    parentId: 'bc-6',
+    sortOrder: 62,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'nightService', type: 'boolean', label: '24/7 Service' },
+      { name: 'prescriptionRequired', type: 'boolean', label: 'Prescription Required for Some Items' }
+    ])
+  },
 
-  // 6. Health & Wellness
-  { id: "health-wellness", name: "Health & Wellness", slug: "health-wellness", description: "Healthcare and wellness services", icon: "Heart", parentId: null, sortOrder: 6, isActive: 1 },
-  { id: "clinics", name: "Clinics", slug: "clinics", description: "Medical clinics", icon: "Stethoscope", parentId: "health-wellness", sortOrder: 1 },
-  { id: "pharmacies", name: "Pharmacies", slug: "pharmacies", description: "Pharmacies and drugstores", icon: "Pill", parentId: "health-wellness", sortOrder: 2 },
-  { id: "gyms", name: "Gyms & Fitness", slug: "gyms-fitness", description: "Fitness centers", icon: "Dumbbell", parentId: "health-wellness", sortOrder: 3 },
-  { id: "spas", name: "Spas & Massage", slug: "spas-massage", description: "Spa and massage services", icon: "Sparkles", parentId: "health-wellness", sortOrder: 4 },
-  { id: "optical", name: "Optical & Eyewear", slug: "optical-eyewear", description: "Opticians and eyewear", icon: "Glasses", parentId: "health-wellness", sortOrder: 5 },
-  { id: "dental", name: "Dental Services", slug: "dental-services", description: "Dental clinics", icon: "Smile", parentId: "health-wellness", sortOrder: 6 },
-
-  // 7. Education
-  { id: "education", name: "Education", slug: "education", description: "Schools and educational services", icon: "GraduationCap", parentId: null, sortOrder: 7, isActive: 1 },
-  { id: "schools", name: "Schools", slug: "schools", description: "Primary and secondary schools", icon: "Building2", parentId: "education", sortOrder: 1 },
-  { id: "language-centers", name: "Language Centers", slug: "language-centers", description: "Language learning centers", icon: "Languages", parentId: "education", sortOrder: 2 },
-  { id: "training", name: "Training Centers", slug: "training-centers", description: "Vocational training", icon: "Award", parentId: "education", sortOrder: 3 },
-  { id: "tutoring", name: "Tutoring", slug: "tutoring", description: "Private tutoring services", icon: "BookOpen", parentId: "education", sortOrder: 4 },
-
-  // 8. Construction & Trades
-  { id: "construction-trades", name: "Construction & Trades", slug: "construction-trades", description: "Construction and home services", icon: "HardHat", parentId: null, sortOrder: 8, isActive: 1 },
-  { id: "contractors", name: "Contractors", slug: "contractors", description: "Building contractors", icon: "Hammer", parentId: "construction-trades", sortOrder: 1 },
-  { id: "electricians", name: "Electricians", slug: "electricians", description: "Electrical services", icon: "Zap", parentId: "construction-trades", sortOrder: 2 },
-  { id: "plumbers", name: "Plumbers", slug: "plumbers", description: "Plumbing services", icon: "Wrench", parentId: "construction-trades", sortOrder: 3 },
-  { id: "painters", name: "Painters", slug: "painters", description: "Painting services", icon: "Paintbrush", parentId: "construction-trades", sortOrder: 4 },
-  { id: "furniture", name: "Furniture Makers", slug: "furniture-makers", description: "Custom furniture", icon: "Armchair", parentId: "construction-trades", sortOrder: 5 },
-
-  // 9. Entertainment
-  { id: "entertainment", name: "Entertainment", slug: "entertainment", description: "Entertainment and leisure", icon: "Ticket", parentId: null, sortOrder: 9, isActive: 1 },
-  { id: "bars-clubs", name: "Bars & Clubs", slug: "bars-clubs", description: "Bars and nightclubs", icon: "Wine", parentId: "entertainment", sortOrder: 1 },
-  { id: "cinemas", name: "Cinemas", slug: "cinemas", description: "Movie theaters", icon: "Film", parentId: "entertainment", sortOrder: 2 },
-  { id: "sports", name: "Sports & Recreation", slug: "sports-recreation", description: "Sports venues and activities", icon: "Trophy", parentId: "entertainment", sortOrder: 3 },
-  { id: "events", name: "Event Venues", slug: "event-venues", description: "Event halls and venues", icon: "Calendar", parentId: "entertainment", sortOrder: 4 },
-
-  // 10. Agriculture
-  { id: "agriculture", name: "Agriculture", slug: "agriculture", description: "Farming and agricultural services", icon: "Wheat", parentId: null, sortOrder: 10, isActive: 1 },
-  { id: "farms", name: "Farms", slug: "farms", description: "Farms and plantations", icon: "Sprout", parentId: "agriculture", sortOrder: 1 },
-  { id: "agri-markets", name: "Agricultural Markets", slug: "agri-markets", description: "Farm produce markets", icon: "Apple", parentId: "agriculture", sortOrder: 2 },
-  { id: "agri-supplies", name: "Agri Supplies", slug: "agri-supplies", description: "Seeds, fertilizers, tools", icon: "Package", parentId: "agriculture", sortOrder: 3 },
-  { id: "livestock", name: "Livestock", slug: "livestock", description: "Livestock sales", icon: "Rabbit", parentId: "agriculture", sortOrder: 4 },
-
-  // 11. Technology & IT
-  { id: "technology-it", name: "Technology & IT", slug: "technology-it", description: "Technology and IT services", icon: "Laptop", parentId: null, sortOrder: 11, isActive: 1 },
-  { id: "phone-shops", name: "Phone Shops", slug: "phone-shops", description: "Mobile phone retailers", icon: "Smartphone", parentId: "technology-it", sortOrder: 1 },
-  { id: "internet-cafes", name: "Internet Cafés", slug: "internet-cafes", description: "Internet and gaming cafés", icon: "Monitor", parentId: "technology-it", sortOrder: 2 },
-  { id: "repair", name: "Repair Services", slug: "repair-services", description: "Electronics repair", icon: "Wrench", parentId: "technology-it", sortOrder: 3 },
-  { id: "software", name: "Software & IT", slug: "software-it", description: "Software and IT services", icon: "Code", parentId: "technology-it", sortOrder: 4 },
-
-  // 12. Beauty & Personal Care
-  { id: "beauty-personal-care", name: "Beauty & Personal Care", slug: "beauty-personal-care", description: "Salons and personal care", icon: "Scissors", parentId: null, sortOrder: 12, isActive: 1 },
-  { id: "salons", name: "Hair Salons", slug: "hair-salons", description: "Hair salons and barbershops", icon: "Scissors", parentId: "beauty-personal-care", sortOrder: 1 },
-  { id: "beauty-parlors", name: "Beauty Parlors", slug: "beauty-parlors", description: "Beauty and nail services", icon: "Sparkles", parentId: "beauty-personal-care", sortOrder: 2 },
-  { id: "laundries", name: "Laundries", slug: "laundries", description: "Laundry and dry cleaning", icon: "Shirt", parentId: "beauty-personal-care", sortOrder: 3 },
-
-  // 13. Automotive
-  { id: "automotive", name: "Automotive", slug: "automotive", description: "Vehicle sales and services", icon: "Car", parentId: null, sortOrder: 13, isActive: 1 },
-  { id: "gas-stations", name: "Gas Stations", slug: "gas-stations", description: "Petrol stations", icon: "Fuel", parentId: "automotive", sortOrder: 1 },
-  { id: "repair-shops", name: "Repair Shops", slug: "repair-shops", description: "Vehicle repair", icon: "Wrench", parentId: "automotive", sortOrder: 2 },
-  { id: "auto-parts", name: "Auto Parts", slug: "auto-parts", description: "Car parts and accessories", icon: "Cog", parentId: "automotive", sortOrder: 3 },
-  { id: "car-dealers", name: "Car Dealers", slug: "car-dealers", description: "Vehicle sales", icon: "Car", parentId: "automotive", sortOrder: 4 },
-
-  // 14. Crafts & Souvenirs
-  { id: "crafts-souvenirs", name: "Crafts & Souvenirs", slug: "crafts-souvenirs", description: "Local crafts and souvenirs", icon: "Gift", parentId: null, sortOrder: 14, isActive: 1 },
-  { id: "local-crafts", name: "Local Crafts", slug: "local-crafts", description: "Traditional Timorese crafts", icon: "Palette", parentId: "crafts-souvenirs", sortOrder: 1 },
-  { id: "gift-shops", name: "Gift Shops", slug: "gift-shops", description: "Gift and souvenir shops", icon: "Gift", parentId: "crafts-souvenirs", sortOrder: 2 },
-  { id: "jewelry", name: "Jewelry", slug: "jewelry", description: "Jewelry shops", icon: "Gem", parentId: "crafts-souvenirs", sortOrder: 3 },
-
-  // 15. Financial & Communication
-  { id: "financial-communication", name: "Financial & Communication", slug: "financial-communication", description: "Finance and communications", icon: "Phone", parentId: null, sortOrder: 15, isActive: 1 },
-  { id: "money-transfer", name: "Money Transfer", slug: "money-transfer", description: "Remittance services", icon: "Send", parentId: "financial-communication", sortOrder: 1 },
-  { id: "telecom", name: "Telecom Services", slug: "telecom-services", description: "Phone and internet providers", icon: "Signal", parentId: "financial-communication", sortOrder: 2 },
-  { id: "print-copy", name: "Printing & Copy", slug: "printing-copy", description: "Printing and copying services", icon: "Printer", parentId: "financial-communication", sortOrder: 3 },
-  { id: "photos", name: "Photography", slug: "photography", description: "Photo studios", icon: "Camera", parentId: "financial-communication", sortOrder: 4 },
+  // SUB-CATEGORIES (Education & Training)
+  {
+    id: 'bc-7-1',
+    name: 'Language Schools',
+    slug: 'language-schools',
+    description: 'Language learning centers',
+    icon: '🗣�?,
+    parentId: 'bc-7',
+    sortOrder: 71,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'languagesTaught', type: 'text', label: 'Languages Taught' },
+      { name: 'classSizes', type: 'text', label: 'Class Sizes' },
+      { name: 'certificationOffered', type: 'boolean', label: 'Certification Offered' }
+    ])
+  },
+  {
+    id: 'bc-7-2',
+    name: 'Vocational Training',
+    slug: 'vocational-training',
+    description: 'Vocational and technical schools',
+    icon: '🔧',
+    parentId: 'bc-7',
+    sortOrder: 72,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'coursesOffered', type: 'text', label: 'Courses Offered' },
+      { name: 'internshipAvailable', type: 'boolean', label: 'Internship Available' },
+      { name: 'jobPlacement', type: 'boolean', label: 'Job Placement Assistance' }
+    ])
+  }
 ];
+
+export const insertBusinessCategoriesSQL = businessCategories.map(cat => `
+  INSERT INTO business_categories (id, name, slug, description, icon, parent_id, sort_order, is_active, form_fields)
+  VALUES (
+    '${cat.id}',
+    '${cat.name.replace(/'/g, "''")}',
+    '${cat.slug}',
+    '${cat.description?.replace(/'/g, "''") || ''}',
+    '${cat.icon}',
+    ${cat.parentId ? `'${cat.parentId}'` : 'NULL'},
+    ${cat.sortOrder},
+    ${cat.isActive ? 1 : 0},
+    '${cat.formFields.replace(/'/g, "''")}'
+  );
+`).join('\n');
 
 export default businessCategories;

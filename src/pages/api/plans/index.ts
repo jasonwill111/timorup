@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { getDb } from '@/lib/db';
-import { servicePackages } from '@/db/schema';
+import { plans } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
 
 const CACHE_TTL = 300; // 5 minutes
@@ -48,7 +48,7 @@ if (!db) throw new Error("Database not available");
   try {
     // Get active plans sorted by sortOrder
     const allPlans = await db.select()
-      .from(servicePackages)
+      .from(plans)
       .where(eq(plans.isActive, true))
       .orderBy(asc(plans.sortOrder))
       .all();

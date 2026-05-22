@@ -67,7 +67,7 @@ if (!db) throw new Error("Database not available");
       email: z.email().optional().nullable(),
       contactNumber: z.string().optional().nullable(),
       aboutUs: z.string().optional().nullable(),
-      latestUpdate: z.string().optional().nullable(),
+      latestUpdates: z.string().optional().nullable(),
     }),
     handler: async (input) => {
       const user = await getAdminUser();
@@ -85,7 +85,7 @@ if (!db) throw new Error("Database not available");
         email: input.email || null,
         contactNumber: input.contactNumber || null,
         aboutUs: input.aboutUs || null,
-        latestUpdate: input.latestUpdate || null,
+        latestUpdates: input.latestUpdates || null,
         status: 'draft' as const,
         createdAt: now,
         updatedAt: now,

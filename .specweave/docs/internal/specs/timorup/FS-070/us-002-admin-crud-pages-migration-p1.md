@@ -4,7 +4,7 @@ feature: FS-070
 title: "Admin CRUD Pages Migration (P1)"
 status: completed
 priority: P1
-created: 2026-05-22
+created: 2026-05-20
 tldr: "**As a** developer."
 project: timorup
 ---

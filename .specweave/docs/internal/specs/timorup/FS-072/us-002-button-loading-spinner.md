@@ -4,7 +4,7 @@ feature: FS-072
 title: "Button Loading Spinner"
 status: completed
 priority: P1
-created: 2026-05-22
+created: 2026-05-20
 tldr: "**As a** user **I want** to see a loading indicator when a form is submitting **So that** I know my action is being processed."
 project: timorup
 ---

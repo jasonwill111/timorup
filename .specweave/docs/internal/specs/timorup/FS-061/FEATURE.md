@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-05-18
-lastUpdated: 2026-05-22
+lastUpdated: 2026-05-18
 tldr: "Consolidate fragmented R2 utilities across `media/index.ts`, `media/r2.ts`, `media.ts`, and `actions/media/upload.ts` into a single source of truth with consistent interface."
 complexity: high
 stakeholder_relevant: true

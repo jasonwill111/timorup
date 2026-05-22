@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-05-20T00:00:00.000Z
-lastUpdated: 2026-05-22
+lastUpdated: 2026-05-20
 tldr: "统一项目中所有图标为 Lucide，并增强 MotionAnimations 组件的集成使用。消除内联 SVG 混用，统一图标管理，同时提升 UI 动效体验。."
 complexity: medium
 stakeholder_relevant: true

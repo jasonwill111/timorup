@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getDb } from '@/lib/db';
-import { businesses, latestUpdate } from '@/db/schema';
+import { businesses, latestUpdates } from '@/db/schema';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 
@@ -55,10 +55,10 @@ if (!db) throw new Error("Database not available");
       const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
       const todayPosts = await db.select()
-        .from(latestUpdate)
+        .from(latestUpdates)
         .where(and(
-          eq(latestUpdate.typeId, business.id),
-          eq(latestUpdate.type, 'businesses')
+          eq(latestUpdates.typeId, business.id),
+          eq(latestUpdates.type, 'businesses')
         ))
         .all();
 
@@ -73,7 +73,7 @@ if (!db) throw new Error("Database not available");
 
       const id = `upd-${Math.floor(Date.now() / 1000)}-${Math.random().toString(36).substr(2, 9)}`;
 
-      await db.insert(latestUpdate).values({
+      await db.insert(latestUpdates).values({
         id,
         type: 'businesses',
         typeId: business.id,
@@ -108,12 +108,12 @@ if (!db) throw new Error("Database not available");
       }
 
       const updates = await db.select()
-        .from(latestUpdate)
+        .from(latestUpdates)
         .where(and(
-          eq(latestUpdate.typeId, business.id),
-          eq(latestUpdate.type, 'businesses')
+          eq(latestUpdates.typeId, business.id),
+          eq(latestUpdates.type, 'businesses')
         ))
-        .orderBy(desc(latestUpdate.createdAt))
+        .orderBy(desc(latestUpdates.createdAt))
         .limit(4)
         .all();
 
@@ -162,7 +162,7 @@ if (!db) throw new Error("Database not available");
         return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } };
       }
 
-      await db.delete(latestUpdate).where(eq(latestUpdate.id, input.id)).run();
+      await db.delete(latestUpdates).where(eq(latestUpdates.id, input.id)).run();
       return { success: true };
     } catch (error) {
       return { success: false, error: { message: getErrorMessage(error) } };

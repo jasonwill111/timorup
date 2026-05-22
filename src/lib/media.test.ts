@@ -83,6 +83,11 @@ describe('Database Schema', () => {
   });
 
   // Test auth schema exports
+  it('should export sessions from auth', async () => {
+    const schema = await import('../db/schema/index');
+    expect(schema.sessions).toBeDefined();
+  });
+
   it('should export accounts from auth', async () => {
     const schema = await import('../db/schema/index');
     expect(schema.accounts).toBeDefined();

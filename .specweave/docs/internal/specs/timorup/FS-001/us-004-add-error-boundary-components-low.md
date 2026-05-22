@@ -2,11 +2,11 @@
 id: US-004
 feature: FS-001
 title: "Add Error Boundary Components (LOW)"
-status: completed
+status: not_started
 priority: P1
-created: 2026-05-22
+created: 2026-05-13
 tldr: "**As a** frontend engineer."
-project: timorlink
+project: TimorLink
 ---
 
 # US-004: Add Error Boundary Components (LOW)
@@ -21,9 +21,9 @@ project: timorlink
 
 ## Acceptance Criteria
 
-- [x] **AC-US4-01**: Create `src/components/islands/ErrorBoundary.astro` component
-- [x] **AC-US4-02**: Wrap `HomepageContent.astro` with ErrorBoundary
-- [x] **AC-US4-03**: Wrap `BusinessList.astro` with ErrorBoundary
+- [ ] **AC-US4-01**: Create `src/components/islands/ErrorBoundary.astro` component
+- [ ] **AC-US4-02**: Wrap `HomepageContent.astro` with ErrorBoundary
+- [ ] **AC-US4-03**: Wrap `BusinessList.astro` with ErrorBoundary
 
 ---
 
@@ -37,3 +37,4 @@ project: timorlink
 ## Tasks
 
 _No tasks defined for this user story_
+

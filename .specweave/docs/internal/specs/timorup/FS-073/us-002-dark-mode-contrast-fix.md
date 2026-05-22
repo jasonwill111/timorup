@@ -4,7 +4,7 @@ feature: FS-073
 title: "Dark Mode Contrast Fix"
 status: completed
 priority: P1
-created: 2026-05-22
+created: 2026-05-20
 tldr: "**As a** user in dark mode."
 project: timorup
 ---

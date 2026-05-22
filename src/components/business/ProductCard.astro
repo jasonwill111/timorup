@@ -3,8 +3,7 @@ interface Props {
   title: string;
   businessTitle?: string;
   businessSlug?: string;
-  priceAmount?: number | null;
-  priceUnit?: string | null;
+  priceFields?: Array<{label: string; value: string; unit: string}>;
   thumbnail?: string | null;
   slug?: string;
   productType?: string;
@@ -15,25 +14,17 @@ const {
   title,
   businessTitle = '',
   businessSlug = '',
-  priceAmount = null,
-  priceUnit = null,
+  priceFields = [],
   thumbnail = null,
   slug = '',
   productType = 'product',
   class: className = '',
 } = Astro.props;
 
-// Format price display (same as ListingCard)
-function formatPrice(amount: number | null, unit: string | null): string {
-  if (amount === null && unit === null) return "Price on request";
-  if (unit === 'free') return "Free";
-  if (unit === 'negotiable') return "Negotiable";
-  if (amount === null) return "Price on request";
-  const formatted = amount % 1 === 0 ? amount.toString() : amount.toFixed(2);
-  return unit ? `$${formatted}${unit}` : `$${formatted}`;
-}
-
-const displayPrice = formatPrice(priceAmount, priceUnit);
+// Display price format: "$4.50 / bottle"
+const displayPrice = priceFields.length > 0 && priceFields[0].value
+  ? `$${priceFields[0].value} / ${priceFields[0].unit || 'unit'}`
+  : 'Price on request';
 
 const href = businessSlug ? `/business/${businessSlug}${slug ? `/product/${slug}` : ''}` : '#';
 

@@ -1,100 +1,179 @@
 /**
  * Service Packages Seed Data
- * TimorUp (2026-05-21)
+ * TimorUp - Plans/Packages for Businesses
  *
- * Schema: type = 'business_page' | 'listing_renewal' | 'featured' | 'ad_banner'
- * Variants: [{ name, price, currency, durationValue, durationUnit, features }]
- *
- * SKU Limit (business_page): 描述在 features 里，如 "Up to 10 products"
- * Listing renewal: 无 SKU 限制
- *
- * FIXED Limits (per entity type - NOT in variants):
- *   - Product/SKU: 6 images, 1 video
- *   - Business Page Gallery: 12 images, 1 video
- *   - LatestUpdate: 4 images, 1 video
- *   - Listing: 6 images, 1 video
+ * Schema (2026-05-14):
+ * - type: 'subscription' | 'listing_renewal' | 'featured' | 'addon'
+ * - category: 'business' | 'listing' | 'other'
+ * - variants: JSON array with [{ name, price, currency, durationValue, durationUnit, limits, features }]
  */
 
 export const servicePackages = [
   // ========================
-  // BUSINESS PAGE PLANS
+  // LISTING RENEWALS
   // ========================
   {
-    id: 'sp-basic',
-    type: 'business_page',
-    name: 'Basic Business Plan',
-    slug: 'basic-monthly',
+    id: 'sp-7days',
+    type: 'listing_renewal',
+    category: 'listing',
+    name: '7-Day Listing Renewal',
+    slug: '7-day-listing',
+    description: 'Extend your listing visibility for 7 days',
+    variants: JSON.stringify([
+      {
+        name: '7 Days',
+        price: 5,
+        currency: 'USD',
+        durationValue: 7,
+        durationUnit: 'days',
+        limits: {
+          maxImages: 4,
+          maxVideos: 1
+        },
+        features: ['7-day listing visibility', 'Up to 4 images', '1 video']
+      }
+    ]),
+    isActive: 1,
+    sortOrder: 1
+  },
+  {
+    id: 'sp-30days',
+    type: 'listing_renewal',
+    category: 'listing',
+    name: '30-Day Listing Renewal',
+    slug: '30-day-listing',
+    description: 'Monthly listing with better visibility',
+    variants: JSON.stringify([
+      {
+        name: '30 Days',
+        price: 15,
+        currency: 'USD',
+        durationValue: 30,
+        durationUnit: 'days',
+        limits: {
+          maxImages: 6,
+          maxVideos: 1
+        },
+        features: ['30-day listing visibility', 'Up to 6 images', '1 video', 'Basic stats']
+      }
+    ]),
+    isActive: 1,
+    sortOrder: 2
+  },
+  {
+    id: 'sp-365days',
+    type: 'listing_renewal',
+    category: 'listing',
+    name: '365-Day Listing Renewal',
+    slug: '365-day-listing',
+    description: 'Full year listing with maximum exposure',
+    variants: JSON.stringify([
+      {
+        name: '365 Days',
+        price: 100,
+        currency: 'USD',
+        durationValue: 365,
+        durationUnit: 'days',
+        limits: {
+          maxImages: 8,
+          maxVideos: 1
+        },
+        features: ['365-day listing visibility', 'Up to 8 images', '1 video', 'Full stats', 'Priority support']
+      }
+    ]),
+    isActive: 1,
+    sortOrder: 3
+  },
+
+  // ========================
+  // BUSINESS SUBSCRIPTIONS
+  // Only SKU limit differs between plans
+  // ========================
+  {
+    id: 'sp-business-starter',
+    type: 'subscription',
+    category: 'business',
+    name: 'Starter Business Plan',
+    slug: 'starter-monthly',
     description: 'For small businesses starting out',
     variants: JSON.stringify([
       {
-        name: 'Monthly',
+        name: 'Starter Monthly',
         price: 29,
         currency: 'USD',
         durationValue: 1,
         durationUnit: 'month',
-        features: ['Up to 10 products/services', '12 business images', '1 video']
+        limits: { skuLimit: 10 },
+        features: ['Up to 10 products/services']
       },
       {
-        name: 'Yearly',
+        name: 'Starter Annual',
         price: 290,
         currency: 'USD',
         durationValue: 12,
         durationUnit: 'months',
-        features: ['Up to 10 products/services', '12 business images', '1 video', 'Save $58']
+        limits: { skuLimit: 10 },
+        features: ['Up to 10 products/services', 'Save 20%']
       }
     ]),
     isActive: 1,
-    sortOrder: 10
+    sortOrder: 11
   },
   {
-    id: 'sp-pro',
-    type: 'business_page',
-    name: 'Pro Business Plan',
-    slug: 'pro-monthly',
-    description: 'For growing businesses',
+    id: 'sp-business-professional',
+    type: 'subscription',
+    category: 'business',
+    name: 'Professional Business Plan',
+    slug: 'professional-monthly',
+    description: 'For growing businesses with advanced features',
     variants: JSON.stringify([
       {
-        name: 'Monthly',
-        price: 59,
+        name: 'Professional Monthly',
+        price: 49,
         currency: 'USD',
         durationValue: 1,
         durationUnit: 'month',
-        features: ['Up to 30 products/services', '12 business images', '1 video']
+        limits: { skuLimit: 30 },
+        features: ['Up to 30 products/services']
       },
       {
-        name: 'Yearly',
-        price: 590,
+        name: 'Professional Annual',
+        price: 440,
         currency: 'USD',
         durationValue: 12,
         durationUnit: 'months',
-        features: ['Up to 30 products/services', '12 business images', '1 video', 'Save $118']
+        limits: { skuLimit: 30 },
+        features: ['Up to 30 products/services', 'Save 25%']
       }
     ]),
     isActive: 1,
     sortOrder: 20
   },
   {
-    id: 'sp-max',
-    type: 'business_page',
-    name: 'Max Business Plan',
-    slug: 'max-monthly',
+    id: 'sp-business-enterprise',
+    type: 'subscription',
+    category: 'business',
+    name: 'Enterprise Business Plan',
+    slug: 'enterprise-monthly',
     description: 'For established businesses with full features',
     variants: JSON.stringify([
       {
-        name: 'Monthly',
-        price: 89,
+        name: 'Enterprise Monthly',
+        price: 99,
         currency: 'USD',
         durationValue: 1,
         durationUnit: 'month',
-        features: ['Up to 60 products/services', '12 business images', '1 video']
+        limits: { skuLimit: 60 },
+        features: ['Up to 60 products/services']
       },
       {
-        name: 'Yearly',
-        price: 890,
+        name: 'Enterprise Annual',
+        price: 990,
         currency: 'USD',
         durationValue: 12,
         durationUnit: 'months',
-        features: ['Up to 60 products/services', '12 business images', '1 video', 'Save $178']
+        limits: { skuLimit: 60 },
+        features: ['Up to 60 products/services', 'Save 20%']
       }
     ]),
     isActive: 1,
@@ -102,65 +181,200 @@ export const servicePackages = [
   },
 
   // ========================
-  // LISTING RENEWALS
+  // FEATURED PROMOTIONS
   // ========================
   {
-    id: 'sp-listing-7days',
-    type: 'listing_renewal',
-    name: '7-Day Listing Renewal',
-    slug: 'listing-7days',
-    description: 'Extend your listing visibility for 7 days',
+    id: 'sp-featured-listing',
+    type: 'featured',
+    category: 'listing',
+    name: 'Featured Listing Promotion',
+    slug: 'featured-listing',
+    description: 'Boost your listing visibility with featured placement',
     variants: JSON.stringify([
       {
-        name: '7 Days',
-        price: 8,
+        name: '7 Days Featured',
+        price: 10,
         currency: 'USD',
         durationValue: 7,
         durationUnit: 'days',
-        features: ['7-day listing visibility', 'Up to 6 images', '1 video']
+        limits: {},
+        features: ['Featured in category listing', 'Priority placement', 'Badge highlight']
+      },
+      {
+        name: '30 Days Featured',
+        price: 30,
+        currency: 'USD',
+        durationValue: 30,
+        durationUnit: 'days',
+        limits: {},
+        features: ['Featured in category listing', 'Priority placement', 'Badge highlight']
       }
     ]),
     isActive: 1,
     sortOrder: 100
   },
   {
-    id: 'sp-listing-30days',
-    type: 'listing_renewal',
-    name: '30-Day Listing Renewal',
-    slug: 'listing-30days',
-    description: 'Monthly listing with better visibility',
+    id: 'sp-homepage-featured',
+    type: 'featured',
+    category: 'business',
+    name: 'Homepage Featured',
+    slug: 'homepage-featured',
+    description: 'Appear on the homepage featured section',
     variants: JSON.stringify([
       {
-        name: '30 Days',
-        price: 20,
+        name: '7 Days Homepage',
+        price: 25,
+        currency: 'USD',
+        durationValue: 7,
+        durationUnit: 'days',
+        limits: {},
+        features: ['Homepage featured section', 'Large banner display', 'Priority over regular featured']
+      },
+      {
+        name: '14 Days Homepage',
+        price: 45,
+        currency: 'USD',
+        durationValue: 14,
+        durationUnit: 'days',
+        limits: {},
+        features: ['Homepage featured section', 'Large banner display', 'Priority over regular featured']
+      }
+    ]),
+    isActive: 1,
+    sortOrder: 101
+  },
+
+  // ========================
+  // ADDONS
+  // ========================
+  {
+    id: 'sp-addon-extra-images',
+    type: 'addon',
+    category: 'business',
+    name: 'Extra Images Addon',
+    slug: 'extra-images',
+    description: 'Purchase additional image slots for your business',
+    variants: JSON.stringify([
+      {
+        name: '+4 Images',
+        price: 5,
+        currency: 'USD',
+        durationValue: 1,
+        durationUnit: 'month',
+        limits: {
+          extraImages: 4
+        },
+        features: ['Add 4 images to your business gallery', 'Valid for 1 month']
+      }
+    ]),
+    isActive: 1,
+    sortOrder: 200
+  },
+  {
+    id: 'sp-addon-extra-videos',
+    type: 'addon',
+    category: 'business',
+    name: 'Extra Videos Addon',
+    slug: 'extra-videos',
+    description: 'Purchase additional video slots for your business',
+    variants: JSON.stringify([
+      {
+        name: '+1 Video',
+        price: 10,
+        currency: 'USD',
+        durationValue: 1,
+        durationUnit: 'month',
+        limits: {
+          extraVideos: 1
+        },
+        features: ['Add 1 video to your business gallery', 'Valid for 1 month']
+      }
+    ]),
+    isActive: 1,
+    sortOrder: 201
+  },
+
+  // ========================
+  // AD BANNERS (Position: homepage | businesses | products-services | listings)
+  // ========================
+  {
+    id: 'sp-banner-homepage',
+    type: 'featured',
+    category: 'other',
+    name: 'Homepage Banner Ad',
+    slug: 'banner-homepage',
+    description: 'Premium banner ad on the homepage',
+    variants: JSON.stringify([
+      {
+        name: '7 Days Homepage',
+        price: 50,
+        currency: 'USD',
+        durationValue: 7,
+        durationUnit: 'days',
+        limits: {},
+        features: ['Homepage banner position', 'High visibility placement', 'Click tracking']
+      },
+      {
+        name: '30 Days Homepage',
+        price: 150,
         currency: 'USD',
         durationValue: 30,
         durationUnit: 'days',
-        features: ['30-day listing visibility', 'Up to 6 images', '1 video']
+        limits: {},
+        features: ['Homepage banner position', 'High visibility placement', 'Click tracking', 'Save 25%']
       }
     ]),
     isActive: 1,
-    sortOrder: 110
+    sortOrder: 300
   },
   {
-    id: 'sp-listing-365days',
-    type: 'listing_renewal',
-    name: '365-Day Listing Renewal',
-    slug: 'listing-365days',
-    description: 'Full year listing with maximum exposure',
+    id: 'sp-banner-category',
+    type: 'featured',
+    category: 'other',
+    name: 'Category Page Banner Ad',
+    slug: 'banner-category',
+    description: 'Banner ad on business/listings category pages',
     variants: JSON.stringify([
       {
-        name: '365 Days',
-        price: 200,
+        name: '7 Days Category',
+        price: 30,
         currency: 'USD',
-        durationValue: 365,
+        durationValue: 7,
         durationUnit: 'days',
-        features: ['365-day listing visibility', 'Up to 6 images', '1 video', 'Best value']
+        limits: {},
+        features: ['Business or Listings category pages', 'Moderate visibility', 'Click tracking']
+      },
+      {
+        name: '30 Days Category',
+        price: 80,
+        currency: 'USD',
+        durationValue: 30,
+        durationUnit: 'days',
+        limits: {},
+        features: ['Business or Listings category pages', 'Moderate visibility', 'Click tracking', 'Save 20%']
       }
     ]),
     isActive: 1,
-    sortOrder: 120
-  },
+    sortOrder: 301
+  }
 ];
+
+// SQL generator for seeding
+export const insertServicePackagesSQL = servicePackages.map(pkg => `
+  INSERT OR REPLACE INTO service_packages (id, name, slug, type, category, description, variants, is_active, sort_order, created_at, updated_at)
+  VALUES (
+    '${pkg.id}',
+    '${pkg.name.replace(/'/g, "''")}',
+    '${pkg.slug}',
+    '${pkg.type}',
+    '${pkg.category}',
+    '${pkg.description.replace(/'/g, "''")}',
+    '${pkg.variants.replace(/'/g, "''")}',
+    ${pkg.isActive ? 1 : 0},
+    ${pkg.sortOrder},
+    ${Date.now()},
+    ${Date.now()}
+  );
+`).join('\n');
 
 export default servicePackages;

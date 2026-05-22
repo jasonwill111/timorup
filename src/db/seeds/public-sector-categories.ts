@@ -1,101 +1,285 @@
 /**
  * Public Sector Categories Seed Data
- * TimorUp (2026-05-21)
- *
- * 15 parent categories with subcategories
- * Government, Ministries, and Public Services in Timor-Leste
+ * TimorUp - Government, Ministries, and Public Services
  */
 
 export const publicSectorCategories = [
-  // 1. National Government
-  { id: "national-government", name: "National Government", slug: "national-government", description: "National ministries and government agencies", icon: "Landmark", parentId: null, sortOrder: 1, isActive: 1 },
-  { id: "prime-ministers-office", name: "Prime Minister's Office", slug: "prime-ministers-office", description: "Office of the Prime Minister", icon: "Building", parentId: "national-government", sortOrder: 1 },
-  { id: "ministries", name: "Ministries", slug: "ministries", description: "Government ministries", icon: "Building2", parentId: "national-government", sortOrder: 2 },
-  { id: "parliament", name: "Parliament", slug: "parliament", description: "National Parliament", icon: "Scale", parentId: "national-government", sortOrder: 3 },
-  { id: "courts", name: "Courts", slug: "courts", description: "Judicial system", icon: "Gavel", parentId: "national-government", sortOrder: 4 },
+  // TOP-LEVEL CATEGORIES
+  {
+    id: 'psc-1',
+    name: 'National Government',
+    slug: 'national-government',
+    description: 'National ministries and government agencies',
+    icon: '🏛�?,
+    parentId: null,
+    sortOrder: 1,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'ministryName', type: 'text', label: 'Ministry Name', required: true },
+      { name: 'ministerName', type: 'text', label: 'Minister' },
+      { name: 'headquarters', type: 'text', label: 'Headquarters Location' },
+      { name: 'regionalOffices', type: 'number', label: 'Number of Regional Offices' },
+      { name: 'servicesOffered', type: 'text', label: 'Key Services' }
+    ])
+  },
+  {
+    id: 'psc-2',
+    name: 'Municipal & District',
+    slug: 'municipal-district',
+    description: 'Local government offices',
+    icon: '🏢',
+    parentId: null,
+    sortOrder: 2,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'adminLevel', type: 'select', label: 'Admin Level', required: true, options: ['Municipality', 'Administrative Post', 'Suco/Suburb', 'Aldeia'] },
+      { name: 'population', type: 'number', label: 'Population Served' },
+      { name: 'chiefName', type: 'text', label: 'Chief Administrator' },
+      { name: 'servicesOffered', type: 'text', label: 'Services Available' }
+    ])
+  },
+  {
+    id: 'psc-3',
+    name: 'Justice & Law',
+    slug: 'justice-law',
+    description: 'Courts, police, and legal services',
+    icon: '⚖️',
+    parentId: null,
+    sortOrder: 3,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'justiceType', type: 'select', label: 'Type', required: true, options: ['Court', 'Prosecutor Office', 'Public Defender', 'Police Station', 'Prison', 'Legal Aid', 'Alternative Dispute Resolution'] },
+      { name: 'jurisdiction', type: 'text', label: 'Jurisdiction Area' },
+      { name: 'operatingHours', type: 'text', label: 'Operating Hours' },
+      { name: 'appointmentRequired', type: 'boolean', label: 'Appointment Required' }
+    ])
+  },
+  {
+    id: 'psc-4',
+    name: 'Education',
+    slug: 'education-public',
+    description: 'Public schools and educational institutions',
+    icon: '🏫',
+    parentId: null,
+    sortOrder: 4,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'schoolType', type: 'select', label: 'Type', required: true, options: ['Primary School', 'Secondary School', 'Technical School', 'University', 'Vocational Training Center', 'Teacher Training'] },
+      { name: 'level', type: 'text', label: 'Education Level' },
+      { name: 'studentCount', type: 'number', label: 'Number of Students' },
+      { name: 'feesRequired', type: 'boolean', label: 'Fees Required' },
+      { name: 'boardingAvailable', type: 'boolean', label: 'Boarding Available' }
+    ])
+  },
+  {
+    id: 'psc-5',
+    name: 'Healthcare',
+    slug: 'healthcare-public',
+    description: 'Public hospitals and health centers',
+    icon: '🏥',
+    parentId: null,
+    sortOrder: 5,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'healthType', type: 'select', label: 'Type', required: true, options: ['National Hospital', 'Referral Hospital', 'Municipal Health Center', 'Community Health Center', 'Health Post', 'Maternal & Child Health', 'Laboratory', 'Pharmacy'] },
+      { name: 'bedsAvailable', type: 'number', label: 'Number of Beds' },
+      { name: 'emergencyService', type: 'boolean', label: '24/7 Emergency' },
+      { name: 'freeService', type: 'boolean', label: 'Free Services' },
+      { name: 'specialistsAvailable', type: 'text', label: 'Medical Specialists' }
+    ])
+  },
+  {
+    id: 'psc-6',
+    name: 'Agriculture & Rural',
+    slug: 'agriculture-rural',
+    description: 'Agricultural extension and rural development',
+    icon: '🌾',
+    parentId: null,
+    sortOrder: 6,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'agriServiceType', type: 'select', label: 'Type', required: true, options: ['Agriculture Extension', 'Livestock', 'Fisheries', 'Forestry', 'Cooperatives', 'Rural Development', 'Irrigation', 'Agricultural Research'] },
+      { name: 'serviceArea', type: 'text', label: 'Service Area' },
+      { name: 'farmersReached', type: 'number', label: 'Farmers Reached' },
+      { name: 'trainingPrograms', type: 'boolean', label: 'Training Programs' }
+    ])
+  },
+  {
+    id: 'psc-7',
+    name: 'Infrastructure & Utilities',
+    slug: 'infrastructure-utilities',
+    description: 'Public works, transport, and utilities',
+    icon: '🔧',
+    parentId: null,
+    sortOrder: 7,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'infraType', type: 'select', label: 'Type', required: true, options: ['Roads & Bridges', 'Water Supply', 'Electricity', 'Telecommunications', 'Port Authority', 'Airport', 'Public Transport', 'Waste Management'] },
+      { name: 'serviceArea', type: 'text', label: 'Service Area' },
+      { name: 'emergencyContact', type: 'text', label: 'Emergency Contact' },
+      { name: 'reportFaults', type: 'boolean', label: 'Online Fault Reporting' }
+    ])
+  },
+  {
+    id: 'psc-8',
+    name: 'Social Services',
+    slug: 'social-services',
+    description: 'Social welfare and protection services',
+    icon: '🤝',
+    parentId: null,
+    sortOrder: 8,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'socialType', type: 'select', label: 'Type', required: true, options: ['Social Security', 'Pensions', 'Disability Benefits', 'Child Protection', 'Elderly Care', 'Food Assistance', 'Housing Support', 'Veteran Services', 'Refugee Services'] },
+      { name: 'eligibilityCriteria', type: 'text', label: 'Eligibility Criteria' },
+      { name: 'applicationProcess', type: 'text', label: 'Application Process' },
+      { name: 'beneficiaries', type: 'number', label: 'Number of Beneficiaries' }
+    ])
+  },
+  {
+    id: 'psc-9',
+    name: 'Tax & Finance',
+    slug: 'tax-finance',
+    description: 'Tax offices and financial services',
+    icon: '💰',
+    parentId: null,
+    sortOrder: 9,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'financeType', type: 'select', label: 'Type', required: true, options: ['Tax Office', 'Customs', 'Treasury', 'National Bank', 'Revenue Authority', 'Customs Authority'] },
+      { name: 'servicesOffered', type: 'text', label: 'Services' },
+      { name: 'operatingHours', type: 'text', label: 'Operating Hours' },
+      { name: 'onlineFiling', type: 'boolean', label: 'Online Filing Available' }
+    ])
+  },
+  {
+    id: 'psc-10',
+    name: 'Immigration & Consular',
+    slug: 'immigration-consular',
+    description: 'Passports, visas, and consular services',
+    icon: '🛂',
+    parentId: null,
+    sortOrder: 10,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'serviceType', type: 'select', label: 'Type', required: true, options: ['Passport Office', 'Visa Services', 'Emigration', 'Consular Affairs', 'Foreign Embassy', 'Immigration Control'] },
+      { name: 'processingTime', type: 'text', label: 'Processing Time' },
+      { name: 'appointmentRequired', type: 'boolean', label: 'Appointment Required' },
+      { name: 'onlineBooking', type: 'boolean', label: 'Online Booking' }
+    ])
+  },
+  {
+    id: 'psc-11',
+    name: 'Environment & Land',
+    slug: 'environment-land',
+    description: 'Environmental protection and land administration',
+    icon: '🌳',
+    parentId: null,
+    sortOrder: 11,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'envType', type: 'select', label: 'Type', required: true, options: ['Environmental Agency', 'Land Registry', 'Cadastral Office', 'Spatial Planning', 'Geology & Mines', 'Water Resources', 'Meteorology'] },
+      { name: 'serviceArea', type: 'text', label: 'Service Area' },
+      { name: 'permitsIssued', type: 'text', label: 'Key Permits' },
+      { name: 'onlinePortal', type: 'boolean', label: 'Online Portal' }
+    ])
+  },
+  {
+    id: 'psc-12',
+    name: 'Employment & Labor',
+    slug: 'employment-labor',
+    description: 'Employment services and labor offices',
+    icon: '👷',
+    parentId: null,
+    sortOrder: 12,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'laborType', type: 'select', label: 'Type', required: true, options: ['Labor Office', 'Employment Agency', 'Vocational Training', 'Social Security Institute', 'Workers Union', 'Occupational Safety'] },
+      { name: 'jobSeekersRegistered', type: 'number', label: 'Job Seekers Registered' },
+      { name: 'trainingPrograms', type: 'boolean', label: 'Training Programs' },
+      { name: 'onlineJobPortal', type: 'boolean', label: 'Online Job Portal' }
+    ])
+  },
 
-  // 2. Municipal & District
-  { id: "municipal-district", name: "Municipal & District", slug: "municipal-district", description: "Local government offices", icon: "MapPin", parentId: null, sortOrder: 2, isActive: 1 },
-  { id: "district-offices", name: "District Offices", slug: "district-offices", description: "Administrative districts", icon: "Map", parentId: "municipal-district", sortOrder: 1 },
-  { id: "municipal-services", name: "Municipal Services", slug: "municipal-services", description: "City/town services", icon: "Building", parentId: "municipal-district", sortOrder: 2 },
-  { id: "sucos", name: "Suco Offices", slug: "suco-offices", description: "Village administrative offices", icon: "Home", parentId: "municipal-district", sortOrder: 3 },
-
-  // 3. Healthcare Services
-  { id: "healthcare-services", name: "Healthcare Services", slug: "healthcare-services", description: "Public health services", icon: "Heart", parentId: null, sortOrder: 3, isActive: 1 },
-  { id: "national-hospitals", name: "National Hospitals", slug: "national-hospitals", description: "National referral hospitals", icon: "Building2", parentId: "healthcare-services", sortOrder: 1 },
-  { id: "community-health", name: "Community Health Centers", slug: "community-health-centers", description: "Health posts and clinics", icon: "Stethoscope", parentId: "healthcare-services", sortOrder: 2 },
-  { id: "clinics", name: "Clinics", slug: "clinics", description: "Local clinics", icon: "Plus", parentId: "healthcare-services", sortOrder: 3 },
-
-  // 4. Education Services
-  { id: "education-services", name: "Education Services", slug: "education-services", description: "Public education institutions", icon: "GraduationCap", parentId: null, sortOrder: 4, isActive: 1 },
-  { id: "ministry-of-education", name: "Ministry of Education", slug: "ministry-of-education", description: "Education ministry", icon: "Building", parentId: "education-services", sortOrder: 1 },
-  { id: "schools", name: "Schools", slug: "schools", description: "Public schools", icon: "BookOpen", parentId: "education-services", sortOrder: 2 },
-  { id: "training-centers", name: "Training Centers", slug: "training-centers", description: "Vocational training", icon: "Award", parentId: "education-services", sortOrder: 3 },
-
-  // 5. Public Security
-  { id: "public-security", name: "Public Security", slug: "public-security", description: "Law enforcement and emergency services", icon: "Shield", parentId: null, sortOrder: 5, isActive: 1 },
-  { id: "police", name: "Police (PNTL)", slug: "police", description: "National Police Timor-Leste", icon: "Shield", parentId: "public-security", sortOrder: 1 },
-  { id: "fire-department", name: "Fire Department", slug: "fire-department", description: "Fire and rescue services", icon: "Flame", parentId: "public-security", sortOrder: 2 },
-  { id: "civil-protection", name: "Civil Protection", slug: "civil-protection", description: "Civil defense and protection", icon: "AlertTriangle", parentId: "public-security", sortOrder: 3 },
-
-  // 6. Defense & Security
-  { id: "defense-security", name: "Defense & Security", slug: "defense-security", description: "Military and defense services", icon: "Crosshair", parentId: null, sortOrder: 6, isActive: 1 },
-  { id: "ffdlt", name: "F-FDTL (Armed Forces)", slug: "ffdlt", description: "Timor-Leste Defense Force", icon: "Shield", parentId: "defense-security", sortOrder: 1 },
-  { id: "maritime-authority", name: "Maritime Authority", slug: "maritime-authority", description: "Coast guard and maritime", icon: "Anchor", parentId: "defense-security", sortOrder: 2 },
-
-  // 7. Infrastructure
-  { id: "infrastructure", name: "Infrastructure", slug: "infrastructure", description: "Public infrastructure services", icon: "HardHat", parentId: null, sortOrder: 7, isActive: 1 },
-  { id: "roads", name: "Roads & Bridges", slug: "roads-bridges", description: "Road construction and maintenance", icon: "Route", parentId: "infrastructure", sortOrder: 1 },
-  { id: "utilities", name: "Utilities", slug: "utilities", description: "Electricity, water, telecom", icon: "Zap", parentId: "infrastructure", sortOrder: 2 },
-  { id: "public-works", name: "Public Works", slug: "public-works", description: "Construction projects", icon: "Hammer", parentId: "infrastructure", sortOrder: 3 },
-
-  // 8. Social Services
-  { id: "social-services", name: "Social Services", slug: "social-services", description: "Welfare and social programs", icon: "Users", parentId: null, sortOrder: 8, isActive: 1 },
-  { id: "welfare", name: "Welfare", slug: "welfare", description: "Social welfare programs", icon: "Heart", parentId: "social-services", sortOrder: 1 },
-  { id: "social-security", name: "Social Security", slug: "social-security", description: "Social security services", icon: "Shield", parentId: "social-services", sortOrder: 2 },
-  { id: "labor", name: "Labor & Employment", slug: "labor-employment", description: "Employment services", icon: "Briefcase", parentId: "social-services", sortOrder: 3 },
-
-  // 9. Agriculture & Rural
-  { id: "agriculture-rural", name: "Agriculture & Rural", slug: "agriculture-rural", description: "Agricultural and rural development", icon: "Wheat", parentId: null, sortOrder: 9, isActive: 1 },
-  { id: "agri-extension", name: "Agricultural Extension", slug: "agricultural-extension", description: "Farmer support services", icon: "Sprout", parentId: "agriculture-rural", sortOrder: 1 },
-  { id: "rural-development", name: "Rural Development", slug: "rural-development", description: "Rural development programs", icon: "Map", parentId: "agriculture-rural", sortOrder: 2 },
-  { id: "livestock", name: "Livestock & Fisheries", slug: "livestock-fisheries", description: "Animal and fish farming", icon: "Fish", parentId: "agriculture-rural", sortOrder: 3 },
-
-  // 10. Immigration & Consular
-  { id: "immigration-consular", name: "Immigration & Consular", slug: "immigration-consular", description: "Passport and visa services", icon: "Globe", parentId: null, sortOrder: 10, isActive: 1 },
-  { id: "passport-office", name: "Passport Office", slug: "passport-office", description: "Passport issuance", icon: "CreditCard", parentId: "immigration-consular", sortOrder: 1 },
-  { id: "visa-services", name: "Visa Services", slug: "visa-services", description: "Immigration and visas", icon: "FileText", parentId: "immigration-consular", sortOrder: 2 },
-  { id: "embassies", name: "Embassies & Consulates", slug: "embassies-consulates", description: "Foreign embassies in Timor-Leste", icon: "Building", parentId: "immigration-consular", sortOrder: 3 },
-
-  // 11. Tax & Finance
-  { id: "tax-finance", name: "Tax & Finance", slug: "tax-finance", description: "Financial and tax services", icon: "Landmark", parentId: null, sortOrder: 11, isActive: 1 },
-  { id: "tax-authority", name: "Tax Authority", slug: "tax-authority", description: "Tax collection and compliance", icon: "Calculator", parentId: "tax-finance", sortOrder: 1 },
-  { id: "treasury", name: "Treasury", slug: "treasury", description: "Government treasury", icon: "Coins", parentId: "tax-finance", sortOrder: 2 },
-  { id: "customs", name: "Customs", slug: "customs", description: "Customs and border control", icon: "Shield", parentId: "tax-finance", sortOrder: 3 },
-
-  // 12. Environment & Land
-  { id: "environment-land", name: "Environment & Land", slug: "environment-land", description: "Environmental and land management", icon: "TreePine", parentId: null, sortOrder: 12, isActive: 1 },
-  { id: "environmental-agency", name: "Environmental Agency", slug: "environmental-agency", description: "Environmental protection", icon: "Leaf", parentId: "environment-land", sortOrder: 1 },
-  { id: "land-registry", name: "Land Registry", slug: "land-registry", description: "Land titling and registration", icon: "Map", parentId: "environment-land", sortOrder: 2 },
-  { id: "land-management", name: "Land Management", slug: "land-management", description: "Land use planning", icon: "Grid3x3", parentId: "environment-land", sortOrder: 3 },
-
-  // 13. Tourism
-  { id: "tourism", name: "Tourism", slug: "tourism", description: "Tourism promotion and services", icon: "MapPin", parentId: null, sortOrder: 13, isActive: 1 },
-  { id: "tourism-authority", name: "Tourism Authority", slug: "tourism-authority", description: "National tourism board", icon: "Compass", parentId: "tourism", sortOrder: 1 },
-  { id: "national-parks", name: "National Parks", slug: "national-parks", description: "Protected areas and parks", icon: "Mountain", parentId: "tourism", sortOrder: 2 },
-  { id: "museums", name: "Museums & Heritage", slug: "museums-heritage", description: "Cultural heritage sites", icon: "Landmark", parentId: "tourism", sortOrder: 3 },
-
-  // 14. Culture & Heritage
-  { id: "culture-heritage", name: "Culture & Heritage", slug: "culture-heritage", description: "Cultural preservation and arts", icon: "Palette", parentId: null, sortOrder: 14, isActive: 1 },
-  { id: "cultural-heritage", name: "Cultural Heritage", slug: "cultural-heritage", description: "Heritage preservation", icon: "Landmark", parentId: "culture-heritage", sortOrder: 1 },
-  { id: "arts-culture", name: "Arts & Culture", slug: "arts-culture", description: "Arts promotion", icon: "Palette", parentId: "culture-heritage", sortOrder: 2 },
-  { id: "museums-2", name: "Museums", slug: "museums", description: "National museums", icon: "Building", parentId: "culture-heritage", sortOrder: 3 },
-
-  // 15. Religious & Youth
-  { id: "religious-youth", name: "Religious & Youth", slug: "religious-youth", description: "Religious affairs and youth services", icon: "Users", parentId: null, sortOrder: 15, isActive: 1 },
-  { id: "religious-affairs", name: "Religious Affairs", slug: "religious-affairs", description: "Religious affairs office", icon: "Cross", parentId: "religious-youth", sortOrder: 1 },
-  { id: "sports-commission", name: "Sports Commission", slug: "sports-commission", description: "National sports authority", icon: "Trophy", parentId: "religious-youth", sortOrder: 2 },
-  { id: "youth-center", name: "Youth Center", slug: "youth-center", description: "Youth development center", icon: "Rocket", parentId: "religious-youth", sortOrder: 3 },
+  // SUB-CATEGORIES
+  {
+    id: 'psc-5-1',
+    name: 'National Hospitals',
+    slug: 'national-hospitals',
+    description: 'National referral hospitals',
+    icon: '🏥',
+    parentId: 'psc-5',
+    sortOrder: 51,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'bedsAvailable', type: 'number', label: 'Number of Beds', required: true },
+      { name: 'specialties', type: 'text', label: 'Medical Specialties' },
+      { name: 'teachingHospital', type: 'boolean', label: 'Teaching Hospital' },
+      { name: 'ambulanceService', type: 'boolean', label: 'Ambulance Service' }
+    ])
+  },
+  {
+    id: 'psc-5-2',
+    name: 'Community Health Centers',
+    slug: 'community-health-centers',
+    description: 'Local health centers and posts',
+    icon: '🏃',
+    parentId: 'psc-5',
+    sortOrder: 52,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'servicesOffered', type: 'text', label: 'Services', required: true },
+      { name: 'staffCount', type: 'number', label: 'Staff Count' },
+      { name: 'openingHours', type: 'text', label: 'Opening Hours' }
+    ])
+  },
+  {
+    id: 'psc-1-1',
+    name: 'Ministry of Health',
+    slug: 'ministry-health',
+    description: 'Ministry of Health services and programs',
+    icon: '🩺',
+    parentId: 'psc-1',
+    sortOrder: 11,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'healthPrograms', type: 'text', label: 'Health Programs' },
+      { name: 'nationalHospitals', type: 'number', label: 'National Hospitals' },
+      { name: 'healthCenters', type: 'number', label: 'Health Centers' },
+      { name: 'emergencyHotline', type: 'text', label: 'Emergency Hotline' }
+    ])
+  },
+  {
+    id: 'psc-1-2',
+    name: 'Ministry of Education',
+    slug: 'ministry-education',
+    description: 'Ministry of Education services',
+    icon: '📖',
+    parentId: 'psc-1',
+    sortOrder: 12,
+    isActive: 1,
+    formFields: JSON.stringify([
+      { name: 'educationPrograms', type: 'text', label: 'Education Programs' },
+      { name: 'schoolsNationally', type: 'number', label: 'Total Schools' },
+      { name: 'studentsNationally', type: 'number', label: 'Total Students' },
+      { name: 'scholarships', type: 'text', label: 'Scholarship Programs' }
+    ])
+  }
 ];
+
+export const insertPublicSectorCategoriesSQL = publicSectorCategories.map(cat => `
+  INSERT INTO public_sector_categories (id, name, slug, description, icon, parent_id, sort_order, is_active, form_fields)
+  VALUES (
+    '${cat.id}',
+    '${cat.name.replace(/'/g, "''")}',
+    '${cat.slug}',
+    '${cat.description?.replace(/'/g, "''") || ''}',
+    '${cat.icon}',
+    ${cat.parentId ? `'${cat.parentId}'` : 'NULL'},
+    ${cat.sortOrder},
+    ${cat.isActive ? 1 : 0},
+    '${cat.formFields.replace(/'/g, "''")}'
+  );
+`).join('\n');
 
 export default publicSectorCategories;
