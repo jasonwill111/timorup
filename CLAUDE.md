@@ -462,6 +462,25 @@ This project is indexed by GitNexus as **timorup** (3480 symbols, 5210 relations
 <!-- gitnexus:end -->
 
 
+## Server Islands (Cloudflare Workers)
+
+**Server Islands 运行在隔离的 V8 上下文中**，必须使用正确的 DB 访问模式：
+
+```astro
+// ✅ 正确 - 直接从 env 获取 DB
+const { getDb } = await import('../lib/db');
+const db = await getDb();
+
+// ❌ 错误 - 依赖全局状态 (Isolated Context 中不可见)
+const { initDb } = await import('../lib/db');
+initDb(env.DB);
+const db = getDbInstance();  // 可能返回 null!
+```
+
+**规则**: Server Islands 必须使用 `await getDb()` 而不是 `initDb()` + `getDbInstance()` 组合。
+
+**timorbuy 教训**: timorbuy 原来用 initDb() 模式，在 Islands 中失败。timorup 正确使用 getDb()。
+
 ## Server Actions (Astro 6)
 
 ### Structure
