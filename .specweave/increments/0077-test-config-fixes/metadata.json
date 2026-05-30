@@ -1,0 +1,29 @@
+{
+  "id": "0077-test-config-fixes",
+  "status": "in-progress",
+  "type": "bug",
+  "priority": "P1",
+  "created": "2026-05-25T13:05:38.409Z",
+  "lastActivity": "2026-05-26T21:50:00.000Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "startedAt": "2026-05-26T19:00:00.000Z",
+  "completedTasks": [
+    "T-001", "T-002", "T-003", "T-004", "T-005", "T-009"
+  ],
+  "pendingTasks": [
+    "T-006", "T-007", "T-008", "T-010"
+  ],
+  "blockedBy": [
+    "Astro Cloudflare dev mode compatibility issue",
+    "Windows dist/client permission lock"
+  ],
+  "notes": "Phase 1 (Vitest) and Phase 4 (CSP) complete. Phase 2 (E2E) partial - baseURL configured but dev server verification blocked. Phase 3 (API) pending."
+}

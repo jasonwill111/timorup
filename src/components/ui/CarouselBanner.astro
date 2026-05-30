@@ -1,0 +1,214 @@
+---
+// Reusable Carousel Banner Component
+// Used on: Homepage, Businesses, Listings, Products-Services pages
+interface Props {
+  position: 'homepage' | 'businesses' | 'listings' | 'products-services';
+  class?: string;
+}
+
+const { position, class: className = '' } = Astro.props;
+
+// Height - consistent across all pages (mobile-first, explicit values)
+const heights = {
+  base: 'h-[224px]',     // 224px for mobile
+  sm: 'sm:h-[288px]',     // 288px for small
+  md: 'md:h-[320px]',    // 320px for medium
+  lg: 'lg:h-[384px]',    // 384px for large
+  xl: 'xl:h-[500px]',    // 500px for extra large
+};
+const heightClasses = Object.values(heights).join(' ');
+
+// Mock slides for demo (replace with actual data from ad_banners table)
+const slides = [
+  { id: 1, title: 'Discover Timor-Leste', subtitle: 'Your All-in-One Information Platform', bgColor: 'from-amber-500 via-orange-500 to-amber-600' },
+  { id: 2, title: 'Find Local Businesses', subtitle: 'Restaurants, shops, services and more', bgColor: 'from-emerald-500 via-teal-500 to-emerald-600' },
+  { id: 3, title: 'Buy & Sell Locally', subtitle: 'Classified ads for jobs, vehicles, property', bgColor: 'from-blue-500 via-indigo-500 to-blue-600' },
+];
+---
+
+<div
+  class={`carousel-banner w-full rounded-xl shadow-2xl ${className}`}
+  data-position={position}
+  style="position: relative; overflow: hidden;"
+>
+  <!-- Track wrapper -->
+  <div
+    class={`carousel-track-wrapper ${heightClasses}`}
+    style="position: relative; overflow: hidden; width: 100%;"
+  >
+    <div
+      class="carousel-track"
+      id={`carousel-track-${position}`}
+      style="display: flex; width: 100%;"
+    >
+      {slides.map((slide, index) => (
+        <div
+          class={`carousel-slide ${heightClasses} bg-gradient-to-r ${slide.bgColor} flex items-center justify-center`}
+          data-slide-index={index}
+          style="flex-shrink: 0; width: 100%; height: 100%;"
+        >
+          <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-10 left-[10%] w-40 h-40 sm:w-60 sm:h-60 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-[15%] w-48 h-48 sm:w-72 sm:h-72 bg-white rounded-full blur-3xl"></div>
+          </div>
+          <div class="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 border-t-4 border-r-4 border-white/20 rounded-bl-full"></div>
+          <div class="absolute bottom-0 left-0 w-24 h-24 sm:w-36 sm:h-36 border-b-4 border-l-4 border-white/10 rounded-tr-full"></div>
+          <div class="relative z-10 text-center text-white px-6 max-w-3xl">
+            <h3 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 drop-shadow-lg" style="font-family: var(--font-heading)">{slide.title}</h3>
+            <p class="text-sm sm:text-base md:text-lg lg:text-xl opacity-90">{slide.subtitle}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button
+      class="carousel-prev w-11 h-11 bg-white/95 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-opacity disabled:opacity-30"
+      aria-label="Previous slide"
+      style="position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); z-index: 20;"
+    >
+      <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <button
+      class="carousel-next w-11 h-11 bg-white/95 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-opacity disabled:opacity-30"
+      aria-label="Next slide"
+      style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); z-index: 20;"
+    >
+      <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+
+    <!-- Indicators -->
+    <div class="flex gap-1.5" style="position: absolute; bottom: 0.75rem; left: 50%; transform: translateX(-50%); z-index: 20;">
+      {slides.map((_, index) => (
+        <button
+          class="carousel-dot rounded-full transition-all duration-300"
+          data-dot-index={index}
+          aria-label={`Go to slide ${index + 1}`}
+          style={`min-width: 8px; min-height: 8px; ${index === 0 ? 'width: 16px; background-color: white;' : 'width: 8px; background-color: rgba(255,255,255,0.5);'}`}
+        />
+      ))}
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+// Astro 6: is:inline ensures script executes immediately in HTML,
+// bypassing module bundling for SSR pages where DB causes delays.
+
+// Single carousel initialization function
+function initCarousel(carousel) {
+  const track = carousel.querySelector('.carousel-track');
+  const slides = carousel.querySelectorAll('.carousel-slide');
+  const dots = carousel.querySelectorAll('.carousel-dot');
+  const prevBtn = carousel.querySelector('.carousel-prev');
+  const nextBtn = carousel.querySelector('.carousel-next');
+
+  if (!track || slides.length === 0) return false;
+
+  const totalSlides = slides.length;
+  let currentIndex = 0;
+
+  // Force overflow hidden on all parent containers
+  carousel.style.overflow = 'hidden';
+  const wrapper = carousel.querySelector('.carousel-track-wrapper');
+  if (wrapper) {
+    wrapper.style.overflow = 'hidden';
+    wrapper.style.position = 'relative';
+  }
+
+  // Set slide widths to match viewport width
+  const setSlideWidths = () => {
+    const rect = carousel.getBoundingClientRect();
+    const slideWidth = rect.width > 0 ? rect.width : window.innerWidth;
+    const slideHeight = wrapper ? wrapper.offsetHeight : rect.height;
+
+    slides.forEach(slide => {
+      slide.style.flexShrink = '0';
+      slide.style.width = slideWidth + 'px';
+      slide.style.height = slideHeight + 'px';
+    });
+
+    track.style.width = (slideWidth * totalSlides) + 'px';
+    track.style.height = slideHeight + 'px';
+    track.style.transform = 'translateX(-' + (100 * currentIndex) + '%)';
+  };
+
+  setSlideWidths();
+
+  const updateDots = () => {
+    dots.forEach((dot, i) => {
+      dot.style.backgroundColor = i === currentIndex ? 'white' : 'rgba(255,255,255,0.5)';
+      dot.style.width = i === currentIndex ? '16px' : '8px';
+    });
+  };
+  updateDots();
+
+  const goToSlide = (index) => {
+    currentIndex = ((index % totalSlides) + totalSlides) % totalSlides;
+    track.style.transform = 'translateX(-' + (100 * currentIndex) + '%)';
+    updateDots();
+  };
+
+  prevBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    goToSlide(currentIndex - 1);
+  });
+
+  nextBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    goToSlide(currentIndex + 1);
+  });
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => goToSlide(i));
+  });
+
+  let startX = 0;
+  let isDragging = false;
+
+  track.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+
+  track.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goToSlide(currentIndex + 1) : goToSlide(currentIndex - 1);
+    }
+    isDragging = false;
+  }, { passive: true });
+
+  window.addEventListener('resize', setSlideWidths);
+
+  return true;
+}
+
+function initAllCarousels() {
+  const carousels = document.querySelectorAll('.carousel-banner');
+  carousels.forEach(carousel => {
+    if (!carousel.dataset.carouselReady) {
+      const success = initCarousel(carousel);
+      if (success) {
+        carousel.dataset.carouselReady = 'true';
+      }
+    }
+  });
+}
+
+initAllCarousels();
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAllCarousels);
+}
+
+document.addEventListener('astro:page-load', initAllCarousels);
+
+setTimeout(initAllCarousels, 1000);
+setTimeout(initAllCarousels, 2000);
+</script>

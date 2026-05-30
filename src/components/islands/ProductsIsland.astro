@@ -1,0 +1,212 @@
+---
+// Server Island: Products list with client-side filtering
+// Uses is:defer for streaming, renders immediately with fallback
+import { getDb } from '@/lib/db';
+import { products, businesses } from '@/db/schema';
+import { desc, eq } from 'drizzle-orm';
+
+const searchParams = Astro.url.searchParams;
+
+// Fetch all businesses for filter
+let allBusinesses: { id: string; title: string; slug: string }[] = [];
+let allProducts = [];
+
+const db = await getDb();
+if (db) {
+  try {
+    allBusinesses = await db
+      .select({
+        id: businesses.id,
+        title: businesses.title,
+        slug: businesses.slug,
+      })
+      .from(businesses)
+      .where(eq(businesses.status, 'live'))
+      .limit(100)
+      .all();
+  } catch (e) {
+    console.error('Failed to fetch businesses:', e);
+  }
+
+  try {
+    allProducts = await db
+      .select({
+        id: products.id,
+        title: products.title,
+        slug: products.slug,
+        description: products.description,
+        price: products.price,
+        priceUnit: products.priceUnit,
+        priceFields: products.priceFields,
+        productType: products.productType,
+        businessId: products.businessId,
+        status: products.status,
+      })
+      .from(products)
+      .orderBy(desc(products.createdAt))
+      .limit(200)
+      .all();
+  } catch (e) {
+    console.error('Failed to fetch products:', e);
+  }
+}
+
+// Serialize for client
+const safeBusinesses = allBusinesses.map(b => ({
+  id: String(b.id || ''),
+  title: String(b.title || ''),
+  slug: String(b.slug || ''),
+}));
+
+const safeProducts = allProducts.map(p => ({
+  id: String(p.id || ''),
+  title: String(p.title || ''),
+  price: p.price != null ? String(p.price) : null,
+  priceFields: p.priceFields != null ? String(p.priceFields) : null,
+  productType: p.productType != null ? String(p.productType) : null,
+  businessId: String(p.businessId || ''),
+}));
+
+const businessesJson = JSON.stringify(safeBusinesses);
+const productsJson = JSON.stringify(safeProducts);
+const searchValue = searchParams.get('search') || '';
+---
+
+<!-- Header -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 sm:mb-6">
+  <div>
+    <h1 class="text-2xl sm:text-3xl font-bold">Products & Services</h1>
+    <p class="text-xs sm:text-sm text-muted-foreground">Browse all products and services</p>
+  </div>
+  <a href="/listings" class="text-xs sm:text-sm text-primary hover:underline">← Directory</a>
+</div>
+
+<!-- Filters -->
+<form id="filter-form" class="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
+  <div class="relative flex-1 min-w-[200px]">
+    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input
+      id="search"
+      name="search"
+      type="search"
+      placeholder="Search..."
+      value={searchValue}
+      class="w-full h-10 pl-10 pr-4 rounded-lg border border-input bg-background text-sm"
+    />
+  </div>
+
+  <select id="business-filter" name="business"
+    class="h-10 px-3 rounded-lg border border-input bg-background text-sm cursor-pointer">
+    <option value="">All Businesses</option>
+    {safeBusinesses.map(b => (
+      <option value={b.id}>{b.title}</option>
+    ))}
+  </select>
+
+  <select id="sort-filter" name="sort"
+    class="h-10 px-3 rounded-lg border border-input bg-background text-sm cursor-pointer">
+    <option value="recent">Recent</option>
+    <option value="name">Name A-Z</option>
+    <option value="price-low">Price ↑</option>
+    <option value="price-high">Price ↓</option>
+  </select>
+</form>
+
+<!-- Results -->
+<div id="results-container" class="mb-3 sm:mb-4 text-sm text-muted-foreground">
+  {safeProducts.length} products found
+</div>
+
+<!-- Products Grid -->
+<div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+  <!-- Content rendered by client script -->
+</div>
+
+<script define:vars={{ businessesJson, productsJson }}>
+  const businesses = JSON.parse(businessesJson);
+  let products = JSON.parse(productsJson);
+
+  const form = document.getElementById('filter-form');
+  const resultsContainer = document.getElementById('results-container');
+  const grid = document.getElementById('products-grid');
+
+  function formatPrice(product) {
+    if (product.priceFields) {
+      try {
+        const fields = JSON.parse(product.priceFields);
+        if (fields.length > 0 && fields[0].value) {
+          const unit = fields[0].unit ? `/${fields[0].unit.replace('/', '')}` : '';
+          return `$${fields[0].value}${unit}`;
+        }
+      } catch {}
+    }
+    if (product.price) {
+      return `$${Number(product.price).toLocaleString()}`;
+    }
+    return 'Price on request';
+  }
+
+  function renderProducts(filtered) {
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-16">
+          <svg class="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <h3 class="text-lg font-medium mb-2">No products found</h3>
+          <p class="text-muted-foreground">Try adjusting your search or filters</p>
+        </div>
+      `;
+      resultsContainer.textContent = '0 products found';
+      return;
+    }
+
+    resultsContainer.textContent = `${filtered.length} products found`;
+    grid.innerHTML = filtered.map(p => {
+      const business = businesses.find(b => b.id === p.businessId);
+      return `
+        <a href="/products-services?business=${p.businessId}#${p.id}" class="group block bg-card rounded-lg border shadow-sm hover:shadow-lg hover:border-primary/60 overflow-hidden transition-all duration-200 hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 relative flex items-center justify-center">
+            <svg class="w-12 h-12 text-primary/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+          </div>
+          <div class="p-3 space-y-1">
+            <h3 class="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">${p.title}</h3>
+            <p class="text-xs text-muted-foreground truncate">${business?.title || 'Unknown'}</p>
+            <p class="text-sm font-bold text-primary mt-2">${formatPrice(p)}</p>
+          </div>
+        </a>
+      `;
+    }).join('');
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('search')?.value?.toLowerCase() || '';
+    const business = document.getElementById('business-filter')?.value || '';
+    const sort = document.getElementById('sort-filter')?.value || 'recent';
+
+    let filtered = products.filter(p => {
+      const matchSearch = !search || p.title.toLowerCase().includes(search);
+      const matchBusiness = !business || p.businessId === business;
+      return matchSearch && matchBusiness;
+    });
+
+    if (sort === 'name') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sort === 'price-low') {
+      filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sort === 'price-high') {
+      filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+
+    renderProducts(filtered);
+  }
+
+  // Event listeners
+  form?.addEventListener('input', applyFilters);
+  form?.addEventListener('change', applyFilters);
+
+  // Initial render
+  renderProducts(products);
+</script>

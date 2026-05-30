@@ -1,0 +1,182 @@
+---
+// Server Island: Listings list with client-side filtering
+// Uses is:defer for streaming, renders immediately with fallback
+import { getDb } from '@/lib/db';
+import { listings } from '@/db/schema';
+import { desc } from 'drizzle-orm';
+
+const searchParams = Astro.url.searchParams;
+const search = searchParams.get('q') || '';
+const type = searchParams.get('type') || '';
+const page = parseInt(searchParams.get('page') || '1', 10);
+const LIMIT = 12;
+const offset = (page - 1) * LIMIT;
+
+let allListings = [];
+const db = await getDb();
+if (db) {
+  try {
+    allListings = await db.select({
+      id: listings.id,
+      title: listings.title,
+      slug: listings.slug,
+      description: listings.description,
+      price: listings.price,
+      listingType: listings.listingType,
+      location: listings.location,
+      imageIds: listings.imageIds,
+      likes: listings.likes,
+      views: listings.views,
+      status: listings.status,
+    })
+    .from(listings)
+    .orderBy(desc(listings.createdAt))
+    .all();
+
+    // Client-side filtering
+    allListings = allListings.filter(l => {
+      const statusOk = l.status === 'active' || l.status === 'published';
+      const searchMatch = !search ||
+        l.title.toLowerCase().includes(search.toLowerCase()) ||
+        (l.description && l.description.toLowerCase().includes(search.toLowerCase()));
+      const typeMatch = !type || l.listingType === type;
+      return statusOk && searchMatch && typeMatch;
+    });
+  } catch (e) {
+    console.error('Query error:', e);
+  }
+}
+
+const total = allListings.length;
+const totalPages = Math.ceil(total / LIMIT);
+const entities = allListings.slice(offset, offset + LIMIT);
+
+const typeColors: Record<string, { bg: string; text: string }> = {
+  product: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
+  vehicle: { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-700 dark:text-red-300' },
+  property: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
+  job: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
+  service: { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
+  wanted: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300' },
+};
+---
+
+<!-- Header with count -->
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl sm:text-3xl font-bold">Classified Ads</h1>
+  <span class="text-sm text-muted-foreground">{total} total</span>
+</div>
+
+<!-- Search & Filter -->
+<form method="GET" action="/listings" class="bg-card rounded-2xl border border-border/50 p-4 mb-6 shadow-sm">
+  <div class="flex flex-col sm:flex-row gap-3">
+    <div class="relative flex-1">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input name="q" type="search" placeholder="Search listings..." value={search}
+        class="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+    </div>
+    <div class="flex gap-2">
+      <select name="type" onchange="this.form.submit()"
+        class="h-11 px-4 rounded-xl border border-border bg-background text-sm cursor-pointer hover:border-primary/50 transition-colors">
+        <option value="">All Types</option>
+        <option value="product" selected={type === 'product'}>Product</option>
+        <option value="vehicle" selected={type === 'vehicle'}>Vehicle</option>
+        <option value="property" selected={type === 'property'}>Property</option>
+        <option value="job" selected={type === 'job'}>Job</option>
+        <option value="service" selected={type === 'service'}>Service</option>
+        <option value="wanted" selected={type === 'wanted'}>Wanted</option>
+      </select>
+    </div>
+  </div>
+</form>
+
+<!-- Listings Grid -->
+{entities.length > 0 ? (
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {entities.map(l => {
+      const colors = typeColors[l.listingType || 'product'] || typeColors.product;
+      return (
+        <a href={`/listing/${l.slug}`} class="group block bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/60 overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02]">
+          <div class="aspect-[4/3] bg-gradient-to-br from-primary/10 to-primary/5 relative overflow-hidden">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <svg class="w-16 h-16 text-primary/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            </div>
+            {l.listingType && (
+              <span class={`absolute top-3 left-3 text-xs px-3 py-1.5 rounded-full font-semibold ${colors.bg} ${colors.text}`}>
+                {l.listingType.charAt(0).toUpperCase() + l.listingType.slice(1)}
+              </span>
+            )}
+          </div>
+          <div class="p-4 space-y-3">
+            <h3 class="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">{l.title}</h3>
+            {l.location ? (
+              <p class="text-sm text-muted-foreground flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                <span class="truncate">{l.location?.split(',')[0] || l.location}</span>
+              </p>
+            ) : null}
+            <div class="flex items-center justify-between pt-2 border-t border-border/50">
+              {l.price ? (
+                <span class="text-sm font-bold text-primary">{l.price}</span>
+              ) : null}
+              <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                  <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.682l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                  {l.likes}
+                </span>
+                <span class="flex items-center gap-1 text-xs text-muted-foreground">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  {l.views > 999 ? `${(l.views/1000).toFixed(1)}k` : l.views}
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      );
+    })}
+  </div>
+) : (
+  <div class="text-center py-16">
+    <svg class="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+    </svg>
+    <h3 class="text-lg font-medium mb-2">No listings found</h3>
+    <p class="text-muted-foreground">Try adjusting your search or filters</p>
+  </div>
+)}
+
+<!-- Pagination -->
+{totalPages > 1 && (
+  <nav class="flex justify-center gap-2 mt-8" aria-label="Pagination">
+    {page > 1 && (
+      <a href={buildUrl({ page: String(page - 1) })} class="px-4 py-2 rounded-lg border hover:bg-muted transition-colors">
+        Previous
+      </a>
+    )}
+    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+      const p = i + 1;
+      return (
+        <a href={buildUrl({ page: String(p) })} class={`px-4 py-2 rounded-lg border ${p === page ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>
+          {p}
+        </a>
+      );
+    })}
+    {page < totalPages && (
+      <a href={buildUrl({ page: String(page + 1) })} class="px-4 py-2 rounded-lg border hover:bg-muted transition-colors">
+        Next
+      </a>
+    )}
+  </nav>
+)}
+
+<script is:inline>
+  function buildUrl(params) {
+    const p = new URLSearchParams(window.location.search);
+    Object.entries(params).forEach(([k, v]) => {
+      if (v) p.set(k, v);
+    });
+    return `/listings?${p.toString()}`;
+  }
+</script>

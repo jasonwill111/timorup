@@ -1,0 +1,19 @@
+{
+  "id": "0075-security-hardening",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-24T06:33:24.007Z",
+  "lastActivity": "2026-05-25T10:07:21.276Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-25T10:05:13.613Z",
+  "approvedAt": "2026-05-25T10:07:21.277Z"
+}

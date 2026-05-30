@@ -1,0 +1,19 @@
+{
+  "id": "0076-design-refinement",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P2",
+  "created": "2026-05-25T09:36:45.621Z",
+  "lastActivity": "2026-05-25T10:34:13.407Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-25T10:34:13.320Z",
+  "approvedAt": "2026-05-25T10:34:13.407Z"
+}
