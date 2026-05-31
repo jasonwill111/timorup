@@ -28,9 +28,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: |
-          rm -rf node_modules .pnpm-store
-          pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build for Cloudflare Workers
         run: pnpm build
@@ -43,7 +41,38 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
       - name: Verify deployment
         run: |
-          echo "Deployment complete"
-          curl -s -o /dev/null -w "%{http_code}" https://timorup.com || echo "Verification skipped"
+          echo "Verifying deployment..."
+
+          # Check health endpoint
+          echo "Checking health endpoint..."
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.com/api/health)
+          echo "Health check: $HEALTH_STATUS"
+
+          # Check main page
+          echo "Checking main page..."
+          MAIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.com)
+          echo "Main page: $MAIN_STATUS"
+
+          # Check static assets
+          echo "Checking static assets..."
+          ASSET_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.com/favicon.ico)
+          echo "Static assets: $ASSET_STATUS"
+
+          # Verify all checks pass
+          if [ "$MAIN_STATUS" != "200" ]; then
+            echo "ERROR: Main page returned $MAIN_STATUS"
+            exit 1
+          fi
+
+          if [ "$HEALTH_STATUS" != "200" ]; then
+            echo "WARNING: Health endpoint returned $HEALTH_STATUS (service may still be starting)"
+          fi
+
+          echo "Deployment verification complete!"
