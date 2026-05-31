@@ -21,7 +21,7 @@ if (db) {
         slug: businesses.slug,
       })
       .from(businesses)
-      .where(eq(businesses.status, 'live'))
+      .where(eq(businesses.status, 'active'))
       .limit(100)
       .all();
   } catch (e) {
@@ -35,12 +35,10 @@ if (db) {
         title: products.title,
         slug: products.slug,
         description: products.description,
-        price: products.price,
-        priceUnit: products.priceUnit,
         priceFields: products.priceFields,
         productType: products.productType,
         businessId: products.businessId,
-        status: products.status,
+        active: products.active,
       })
       .from(products)
       .orderBy(desc(products.createdAt))
@@ -58,14 +56,15 @@ const safeBusinesses = allBusinesses.map(b => ({
   slug: String(b.slug || ''),
 }));
 
-const safeProducts = allProducts.map(p => ({
-  id: String(p.id || ''),
-  title: String(p.title || ''),
-  price: p.price != null ? String(p.price) : null,
-  priceFields: p.priceFields != null ? String(p.priceFields) : null,
-  productType: p.productType != null ? String(p.productType) : null,
-  businessId: String(p.businessId || ''),
-}));
+const safeProducts = allProducts
+  .filter(p => p.active === 1 || p.active === true)  // Only active products
+  .map(p => ({
+    id: String(p.id || ''),
+    title: String(p.title || ''),
+    priceFields: p.priceFields != null ? String(p.priceFields) : null,
+    productType: p.productType != null ? String(p.productType) : null,
+    businessId: String(p.businessId || ''),
+  }));
 
 const businessesJson = JSON.stringify(safeBusinesses);
 const productsJson = JSON.stringify(safeProducts);
@@ -140,9 +139,6 @@ const searchValue = searchParams.get('search') || '';
         }
       } catch {}
     }
-    if (product.price) {
-      return `$${Number(product.price).toLocaleString()}`;
-    }
     return 'Price on request';
   }
 
@@ -181,6 +177,18 @@ const searchValue = searchParams.get('search') || '';
     }).join('');
   }
 
+  function getPrice(product) {
+    if (product.priceFields) {
+      try {
+        const fields = JSON.parse(product.priceFields);
+        if (fields.length > 0 && fields[0].value) {
+          return Number(fields[0].value);
+        }
+      } catch {}
+    }
+    return 0;
+  }
+
   function applyFilters() {
     const search = document.getElementById('search')?.value?.toLowerCase() || '';
     const business = document.getElementById('business-filter')?.value || '';
@@ -195,9 +203,9 @@ const searchValue = searchParams.get('search') || '';
     if (sort === 'name') {
       filtered.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sort === 'price-low') {
-      filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+      filtered.sort((a, b) => getPrice(a) - getPrice(b));
     } else if (sort === 'price-high') {
-      filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+      filtered.sort((a, b) => getPrice(b) - getPrice(a));
     }
 
     renderProducts(filtered);
