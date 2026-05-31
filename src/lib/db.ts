@@ -14,6 +14,7 @@ interface CfEnv {
 
 // Global singleton - initialized once per Worker cold start
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let _rawDb: D1Database | null = null;
 
 /**
  * Get Drizzle DB instance
@@ -36,6 +37,7 @@ export async function getDb(): Promise<ReturnType<typeof drizzle<typeof schema>>
     if (cfEnv?.DB) {
       const freshDb = drizzle(cfEnv.DB as D1Database, { schema });
       _db = freshDb; // Update cache
+      _rawDb = cfEnv.DB as D1Database; // Store raw D1 for direct queries
       console.log('[getDb] Fresh DB initialized from cloudflare:workers env.DB');
       return freshDb;
     } else {
@@ -50,10 +52,31 @@ export async function getDb(): Promise<ReturnType<typeof drizzle<typeof schema>>
 }
 
 /**
+ * Get raw D1Database instance for direct queries
+ * Use this when Drizzle ORM has compatibility issues with D1
+ */
+export async function getRawDb(): Promise<D1Database | null> {
+  if (_rawDb) return _rawDb;
+
+  try {
+    const { env: workersEnv } = await import('cloudflare:workers');
+    const cfEnv = workersEnv as { DB?: D1Database };
+    if (cfEnv?.DB) {
+      _rawDb = cfEnv.DB as D1Database;
+      return _rawDb;
+    }
+  } catch {
+    // cloudflare:workers not available
+  }
+  return _rawDb;
+}
+
+/**
  * Initialize DB with a D1Database instance (for middleware)
  */
 export function initDb(d1Db: D1Database): ReturnType<typeof drizzle<typeof schema>> {
   _db = drizzle(d1Db, { schema });
+  _rawDb = d1Db;
   return _db;
 }
 
