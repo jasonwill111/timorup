@@ -5,7 +5,6 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare({
-    // Astro sessions disabled - better-auth handles its own sessions
     kvNamespaces: [],
     imageService: 'passthrough',
   }),
@@ -16,15 +15,13 @@ export default defineConfig({
     defaultBundler: 'astro',
   },
 
-  // compressHTML: 'jsx', // ⚠️暂禁用，CI环境schema验证问题
+  compressHTML: true,
 
   server: {
     allowedHosts: ['timorup.com', 'www.timorup.com', 'localhost', '127.0.0.1'],
   },
 
-  integrations: [
-    // sitemap() removed - using custom src/pages/sitemap.xml.ts for dynamic sitemap
-  ],
+  integrations: [],
 
   vite: {
     plugins: [
@@ -32,7 +29,6 @@ export default defineConfig({
     ],
     ssr: {
       external: ['cloudflare:workers'],
-      noExternal: ['better-auth'],
     },
     resolve: {
       alias: {
@@ -40,20 +36,9 @@ export default defineConfig({
       },
     },
     optimizeDeps: {
-      exclude: ['@astrojs/cloudflare', 'better-auth', '@better-auth/drizzle-adapter', 'better-auth-cloudflare'],
+      exclude: ['better-auth'],
+      noDiscovery: true,
     },
-    // Disable all caching in development for real-time updates
-    ...(process.env.NODE_ENV === 'development' ? {
-      build: {
-        sourcemap: true,
-        minify: false,
-      },
-    } : {
-      build: {
-        minify: 'terser',
-        cssMinify: true,
-      },
-    }),
+    noExternal: [],
   },
-
 });
