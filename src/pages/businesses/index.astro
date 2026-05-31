@@ -16,6 +16,6 @@ Astro.response.headers.set('X-Accel-Buffering', 'plain');
   <!-- Banner - renders immediately, no DB dependency -->
   <CarouselBanner position="businesses" class="mb-6" />
 
-  <!-- Business List Island - loads async from D1 -->
-  <BusinessListIsland is:defer />
+  <!-- Business List - inline render (no is:defer) -->
+  <BusinessListIsland />
 </Layout>
