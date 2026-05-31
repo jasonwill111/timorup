@@ -62,10 +62,13 @@ Shared utilities.
 
 ## Analysis Summary
 
-- **Source Files**: 250+
-- **Server Actions**: 45+
-- **Components**: 40+
-- **Documentation Coverage**: 60%
+- **Source Files**: 300+
+- **Astro Files**: 121
+- **TypeScript Files**: 221
+- **Server Actions**: 47
+- **REST APIs**: 31
+- **Components**: 61
+- **Documentation Coverage**: 65%
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*

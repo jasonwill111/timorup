@@ -111,4 +111,4 @@ const db = await getDb(); // Direct import, not initDb()
 - **Total Exports**: 34
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*

@@ -88,4 +88,4 @@ pnpm exec playwright test e2e/auth.spec.ts
 | Page redirect | Check auth state before navigation |
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*

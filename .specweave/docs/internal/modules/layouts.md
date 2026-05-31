@@ -73,4 +73,4 @@ const theme = Astro.cookies.get('theme')?.value || 'light';
 - **Test Files**: 0
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*

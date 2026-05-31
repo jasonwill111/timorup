@@ -116,4 +116,4 @@ export const auth = withCloudflare({
 - **Type Safety**: Full (Zod validation)
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*

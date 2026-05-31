@@ -80,7 +80,7 @@ Uses Tailwind's transition utilities by default. Pure CSS only for complex keyfr
 3. **JS for Triggers**: IntersectionObserver, scroll events
 4. **Reduced Motion**: All animations respect `prefers-reduced-motion`
 
-### Motion.js Removed (2026-05-30)
+### Motion.js Removed (2026-05-31)
 
 | Removed | Status |
 |---------|--------|
@@ -189,10 +189,10 @@ Each slide is positioned using inline `left` style:
 
 ## Analysis Summary
 
-- **Files Analyzed**: 43
-- **Source Files**: 43
+- **Files Analyzed**: 61
+- **Source Files**: 61
 - **Test Files**: 0
-- **Documentation Coverage**: 65%
+- **Documentation Coverage**: 75%
 
 ---
-*Analysis updated on 2026-05-30*
+*Analysis updated on 2026-05-31*

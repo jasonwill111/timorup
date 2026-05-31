@@ -80,4 +80,4 @@ interface PriceField {
 - `src/pages/business/[slug]/products.astro` - Product display
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*

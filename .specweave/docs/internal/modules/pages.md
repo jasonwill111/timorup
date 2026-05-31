@@ -72,7 +72,7 @@ REST APIs are used for:
 | `/api/businesses` | Business data | Admin banners |
 | `/api/health` | Health check | Monitoring |
 
-### Deprecated APIs (Deleted 2026-05-30)
+### Deprecated APIs (Deleted 2026-05-31)
 
 | Endpoint | Status |
 |----------|--------|
@@ -133,4 +133,4 @@ export async function requireAdmin(cookies) {
 - **Total Exports**: 127
 
 ---
-*Updated 2026-05-30*
+*Updated 2026-05-31*
