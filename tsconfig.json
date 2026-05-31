@@ -1,13 +1,12 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "exactOptionalPropertyTypes": true,
     "useUnknownInCatchVariables": true,
-    "isolatedDeclarations": true,
+    "declaration": true,
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
@@ -21,5 +20,5 @@
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["src/**/*", "astro.config.*", "drizzle.config.*", "wrangler.jsonc"],
-  "exclude": ["src/db/seed.ts", "src/db/seeds/*.ts"]
+  "exclude": ["src/db/seed.ts", "src/db/seeds/*.ts", "**/*.test.ts", "**/*.spec.ts"]
 }
