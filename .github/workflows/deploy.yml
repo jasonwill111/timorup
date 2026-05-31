@@ -52,27 +52,22 @@ jobs:
 
           # Check Workers URL first (primary)
           echo "Checking Workers URL..."
-          WORKERS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.jasonwill.workers.dev --max-time 15)
+          WORKERS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.jasonwill.workers.dev --max-time 15 || echo "000")
           echo "Workers URL: $WORKERS_STATUS"
-
-          # Check custom domain (may take longer to propagate)
-          echo "Checking custom domain..."
-          MAIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.com --max-time 15)
-          echo "Custom domain: $MAIN_STATUS"
 
           # Check health endpoint
           echo "Checking health endpoint..."
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.jasonwill.workers.dev/api/health --max-time 15)
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://timorup.jasonwill.workers.dev/api/health --max-time 15 || echo "000")
           echo "Health check: $HEALTH_STATUS"
 
-          # Verify at least Workers URL passes
+          # Verify Workers URL passes
           if [ "$WORKERS_STATUS" != "200" ]; then
             echo "ERROR: Workers URL returned $WORKERS_STATUS"
             exit 1
           fi
 
           if [ "$HEALTH_STATUS" != "200" ]; then
-            echo "WARNING: Health endpoint returned $HEALTH_STATUS (service may still be starting)"
+            echo "WARNING: Health endpoint returned $HEALTH_STATUS"
           fi
 
           echo "Deployment verification complete!"
