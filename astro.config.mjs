@@ -36,8 +36,11 @@ export default defineConfig({
       },
     },
     optimizeDeps: {
-      exclude: ['better-auth'],
+      exclude: ['better-auth', '@better-auth/kysely-adapter'],
       noDiscovery: true,
+    },
+    ssr: {
+      external: ['cloudflare:workers', 'better-auth', '@better-auth/kysely-adapter'],
     },
     noExternal: [],
   },
