@@ -1,26 +1,20 @@
 // Business Server Action - Update
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
+import { getAuthenticatedUserFromCookies } from '@/lib/db/queries/auth';
 import { getDb } from '@/lib/db';
 import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { initAuth } from '@/lib/auth';
+import { updateBusiness } from '@/lib/db/queries/businesses';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 async function purgeCache(path: string): Promise<void> {
-  // Use Cloudflare Cache API to purge CDN cache
-  // This ensures updated content is served immediately after DB update
   try {
     const cacheKey = `https://TimorUp.com${path}`;
     await (caches as unknown as { default: Cache }).default.delete(cacheKey);
-    // Also purge list pages that might include this business
     await (caches as unknown as { default: Cache }).default.delete('https://TimorUp.com/businesses');
   } catch (e) {
-    // Log but don't fail the update if cache purge fails
     if (import.meta.env.DEV) {
       console.warn('[Cache] Purge failed:', e instanceof Error ? e.message : String(e));
     }
@@ -33,7 +27,6 @@ export const update = defineAction({
     slug: z.string().min(1, 'Slug is required'),
     title: z.string().optional(),
     categoryId: z.string().optional(),
-    
     contactName: z.string().optional(),
     contactNumber: z.string().optional(),
     countryCode: z.string().optional(),
@@ -53,30 +46,24 @@ export const update = defineAction({
     newSlug: z.string().optional(),
   }),
   handler: async (input, { cookies }) => {
-    const db = await getDb();
-if (!db) throw new Error("Database not available");
-
     try {
-      // Authenticate
-      const authApi = (await initAuth()).api;
-      const cookieValue = cookies.get('better-auth.session_token')?.value || '';
-
-      const session = await authApi.getSession({
-        headers: { cookie: cookieValue ? `better-auth.session_token=${cookieValue}` : '' },
-      });
-
-      if (!session?.user) {
-        return { success: false, error: { code: 'UNAUTHORIZED', message: 'You must be logged in to update a business' } };
+      // Authenticate via query layer
+      const authResult = await getAuthenticatedUserFromCookies(cookies);
+      if ('error' in authResult) {
+        return { success: false, error: { code: authResult.error, message: 'Authentication required' } };
       }
 
-      const userId = session.user.id;
+      const userId = authResult.userId;
 
-      // Check ownership
+      // Fetch existing business (still need inline for ownership check)
+      const db = await getDb();
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
+
       const existing = await db.select()
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
         .limit(1)
-        .get() ?? undefined;
+        .get() ?? null;
 
       if (!existing) {
         return { success: false, error: { message: 'Business not found' } };
@@ -86,42 +73,39 @@ if (!db) throw new Error("Database not available");
         return { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to edit this business' } };
       }
 
-      // Build update values
-      const updateValues: Record<string, unknown> = {};
-      if (input.title !== undefined) updateValues.title = input.title;
-      if (input.newSlug !== undefined) updateValues.slug = input.newSlug;
-      if (input.categoryId !== undefined) updateValues.categoryId = input.categoryId || null;
-      if (input.contactName !== undefined) updateValues.contactName = input.contactName || null;
-      if (input.contactNumber !== undefined) updateValues.contactNumber = input.contactNumber || null;
-      if (input.countryCode !== undefined) updateValues.countryCode = input.countryCode || '+670';
-      if (input.email !== undefined) updateValues.email = input.email || null;
-      if (input.address !== undefined) updateValues.address = input.address || null;
-      if (input.aboutUs !== undefined) updateValues.aboutUs = input.aboutUs || null;
-      if (input.tags !== undefined) updateValues.tags = JSON.stringify(input.tags);
-      if (input.openingHours !== undefined) updateValues.openingHours = JSON.stringify(input.openingHours);
-      if (input.latitude !== undefined) updateValues.locationLat = input.latitude || null;
-      if (input.longitude !== undefined) updateValues.locationLng = input.longitude || null;
-      if (input.yearOfEstablishment !== undefined) updateValues.yearOfEstablishment = input.yearOfEstablishment || null;
-      if (input.registrationUrl !== undefined) updateValues.registrationUrl = input.registrationUrl || null;
-      if (input.bannerImageId !== undefined) updateValues.bannerImageId = input.bannerImageId || null;
-      if (input.profileImageId !== undefined) updateValues.profileImageId = input.profileImageId || null;
-      if (input.socialLinks !== undefined) updateValues.socialLinks = JSON.stringify(input.socialLinks);
+      // Build update data for query layer
+      const updateData: Record<string, unknown> = {};
+      if (input.title !== undefined) updateData.title = input.title;
+      if (input.newSlug !== undefined) updateData.slug = input.newSlug;
+      if (input.categoryId !== undefined) updateData.categoryId = input.categoryId || null;
+      if (input.contactName !== undefined) updateData.contactName = input.contactName || null;
+      if (input.contactNumber !== undefined) updateData.contactNumber = input.contactNumber || null;
+      if (input.countryCode !== undefined) updateData.countryCode = input.countryCode || '+670';
+      if (input.email !== undefined) updateData.email = input.email || null;
+      if (input.address !== undefined) updateData.address = input.address || null;
+      if (input.aboutUs !== undefined) updateData.aboutUs = input.aboutUs || null;
+      if (input.tags !== undefined) updateData.tags = JSON.stringify(input.tags);
+      if (input.openingHours !== undefined) updateData.openingHours = JSON.stringify(input.openingHours);
+      if (input.latitude !== undefined) updateData.locationLat = input.latitude || null;
+      if (input.longitude !== undefined) updateData.locationLng = input.longitude || null;
+      if (input.yearOfEstablishment !== undefined) updateData.yearOfEstablishment = input.yearOfEstablishment || null;
+      if (input.registrationUrl !== undefined) updateData.registrationUrl = input.registrationUrl || null;
+      if (input.bannerImageId !== undefined) updateData.bannerImageId = input.bannerImageId || null;
+      if (input.profileImageId !== undefined) updateData.profileImageId = input.profileImageId || null;
+      if (input.socialLinks !== undefined) updateData.socialLinks = JSON.stringify(input.socialLinks);
 
-      if (Object.keys(updateValues).length > 0) {
-        updateValues.updatedAt = Math.floor(Date.now() / 1000);
-        await db.update(businesses)
-          .set(updateValues)
-          .where(eq(businesses.slug, input.slug))
-          .run();
-
+      if (Object.keys(updateData).length > 0) {
+        // Use query layer
+        await updateBusiness(existing.id, updateData);
         await purgeCache(`/api/businesses/${input.slug}`);
       }
 
+      // Fetch updated record
       const updated = await db.select()
         .from(businesses)
         .where(eq(businesses.slug, input.slug))
         .limit(1)
-        .get() ?? undefined;
+        .get() ?? null;
 
       return { success: true, data: updated };
     } catch (error) {

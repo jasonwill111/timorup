@@ -1,0 +1,17 @@
+{
+  "id": "0090-db-optimization",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-29T04:33:06.112Z",
+  "lastActivity": "2026-05-29T04:33:06.116Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

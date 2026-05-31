@@ -5,11 +5,8 @@ import { getDb } from '@/lib/db';
 import { media } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 export const updateMedia = defineAction({
   input: z.object({
@@ -23,7 +20,7 @@ export const updateMedia = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
     const auth = await initAuth();
     const sessionResult = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
     const user = (sessionResult as { user?: { id: string } } | null)?.user;

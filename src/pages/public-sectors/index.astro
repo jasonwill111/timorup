@@ -212,11 +212,11 @@ const buildUrl = (params: Record<string, string>) => {
 </Layout>
 
 <script>
-  import { sectionReveal, animateFilters, animatePagination, addHoverLift, addCardGlow, initParallax, pageTransitionIn } from '@/lib/motion-utils';
+  import { initCSSAnimations } from '@/lib/css-animations';
 
   document.addEventListener('DOMContentLoaded', () => {
     // Page transition
-    pageTransitionIn('[data-page-content]');
+    document.querySelector('[data-page-content]')?.classList.add('page-enter');
 
     // Show real content, hide skeleton
     const entitiesGrid = document.getElementById('entities-grid');
@@ -226,22 +226,13 @@ const buildUrl = (params: Record<string, string>) => {
       skeletonGrid.classList.add('hidden');
     }
 
-    // Filter animation
-    animateFilters('select[name="parent"], select[name="child"]');
+    // Card animations via CSS
+    const cardLinks = document.querySelectorAll('.grid a');
+    cardLinks.forEach(card => {
+      card.classList.add('reveal-on-scroll', 'card-hover', 'card-glow');
+    });
 
-    // Pagination animation
-    animatePagination('nav[aria-label="Pagination"]');
-
-    // Card animations
-    sectionReveal('.grid a');
-    addHoverLift('.grid a');
-    addCardGlow('.grid a');
-
-    // Hero parallax
-    const parallaxHero = document.querySelector('[data-parallax]');
-    if (parallaxHero) {
-      const parallaxImages = document.querySelectorAll('[data-parallax]');
-      initParallax(parallaxImages);
-    }
+    // Initialize CSS animations
+    initCSSAnimations();
   });
 </script>

@@ -1,48 +1,33 @@
 // Auth Server Action - Sign Up
 import { defineAction } from 'astro:actions';
-import { z } from 'zod';
-import { initAuth } from '@/lib/auth';
-
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000;
-const MAX_REQUESTS = 10;
-
-function checkRateLimit(identifier: string): boolean {
-  if (process.env.NODE_ENV === 'test' || process.env.TEST_MODE === 'true') {
-    return true;
-  }
-  const now = Date.now();
-  const record = rateLimitStore.get(identifier);
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(identifier, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-  if (record.count >= MAX_REQUESTS) return false;
-  record.count++;
-  return true;
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
+import * as z from 'zod';
+import { getAuth } from '@/lib/auth';
+import { emailSchema, requiredString } from '@/lib/schemas/common';
+import { passwordSchema } from '@/lib/schemas/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { getErrorMessage, createErrorResponse } from '@/lib/errors';
+import { ErrorCode } from '@/lib/errors';
 
 export const signUp = defineAction({
-  accept: 'form',
+  accept: 'json',
   input: z.object({
-    email: z.email({ error: 'Invalid email address' }),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    name: z.string().min(1, 'Name is required'),
+    email: emailSchema,
+    password: passwordSchema,
+    name: requiredString('Name is required'),
   }),
-  handler: async (input, { request }) => {
-    const clientIP = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
-
-    if (!checkRateLimit(`signup:${clientIP}`)) {
-      return { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' } };
+  handler: async (input) => {
+    // Simple in-memory rate limiting (no KV overhead)
+    const rateLimit = checkRateLimit('auth-sign-up');
+    if (!rateLimit.allowed) {
+      return createErrorResponse(
+        ErrorCode.AUTH_RATE_LIMITED,
+        'Too many sign-up attempts. Please try again later.',
+        { resetIn: rateLimit.resetIn }
+      );
     }
 
     try {
-      const auth = await initAuth();
+      const auth = await getAuth();
       const authApi = auth.api;
 
       const user = await authApi.signUpEmail({
@@ -57,9 +42,12 @@ export const signUp = defineAction({
     } catch (error) {
       const message = getErrorMessage(error);
       if (message.includes('already exists') || message.includes('already registered')) {
-        return { success: false, error: { code: 'USER_EXISTS', message: 'An account with this email already exists' } };
+        return createErrorResponse(ErrorCode.AUTH_USER_EXISTS, 'An account with this email already exists');
       }
-      return { success: false, error: { code: 'SIGN_UP_ERROR', message } };
+      if (message.includes('password') || message.includes('Password')) {
+        return createErrorResponse(ErrorCode.VALIDATION_PASSWORD_TOO_WEAK, message);
+      }
+      return createErrorResponse(ErrorCode.SERVER_ERROR, message);
     }
   },
 });

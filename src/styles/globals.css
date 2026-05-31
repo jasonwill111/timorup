@@ -1,36 +1,63 @@
 @import "tailwindcss";
 
-/* Local Fonts - loaded from /fonts/ directory */
+/* Plus Jakarta Sans (body font) */
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+  src: url('/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2');
 }
-
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+  src: url('/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2');
 }
 
+/* Sora (heading font) */
 @font-face {
-  font-family: 'Oswald';
+  font-family: 'Sora';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/Oswald-Regular.woff2') format('woff2');
+  src: url('/fonts/sora-latin-400-normal.woff2') format('woff2');
 }
-
 @font-face {
-  font-family: 'Oswald';
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/sora-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/sora-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/Oswald-Bold.woff2') format('woff2');
+  src: url('/fonts/sora-latin-700-normal.woff2') format('woff2');
 }
 
 /* Custom Theme Colors - YELLOW THEME */
@@ -68,28 +95,28 @@
   --color-brand-950: #4d3715;
 
   /* Font families */
-  --font-inter: 'Inter', sans-serif;
-  --font-oswald: 'Oswald', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Sora', sans-serif;
 }
 
-/* Dark mode - improved contrast for readability */
+/* Dark mode - Deep blue-black for better readability */
 .dark {
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-card: #18181b;
-  --color-card-foreground: #fafafa;
+  --color-background: #0c1222;       /* Deep blue-black, easier on eyes than pure black */
+  --color-foreground: #f1f5f9;       /* Slate 100, softer than pure white */
+  --color-card: #0f172a;             /* Slate 900, slight blue tint */
+  --color-card-foreground: #f1f5f9;
   --color-primary: #FFD150;
-  --color-primary-foreground: #18181b;
-  --color-secondary: #27272a;
-  --color-secondary-foreground: #fafafa;
-  --color-muted: #27272a;
-  --color-muted-foreground: #71717a; /* 4.5:1 contrast - zinc-500 for WCAG AA dark mode */
-  --color-accent: #27272a;
-  --color-accent-foreground: #fafafa;
-  --color-destructive: #991b1b;
-  --color-destructive-foreground: #fafafa;
-  --color-border: #3f3f46;
-  --color-input: #3f3f46;
+  --color-primary-foreground: #0f172a;
+  --color-secondary: #1e293b;       /* Slate 800 */
+  --color-secondary-foreground: #f1f5f9;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;  /* Slate 400, good contrast on dark bg */
+  --color-accent: #1e293b;
+  --color-accent-foreground: #f1f5f9;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #334155;           /* Slate 700 */
+  --color-input: #334155;
   --color-ring: #FFD150;
 }
 
@@ -101,7 +128,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-inter);
+    font-family: var(--font-sans);
     font-size: 16px; /* Mobile: minimum 16px for inputs */
     -webkit-text-size-adjust: 100%; /* Prevent iOS zoom on input focus */
   }

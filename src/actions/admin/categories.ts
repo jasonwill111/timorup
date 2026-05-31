@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { businessCategories as categories } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 // Input validation schemas
 const CreateCategorySchema = z.object({
@@ -32,7 +33,7 @@ export const adminCategories = {
     }).optional(),
     handler: async () => {
       const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const result = await db.select()
         .from(categories)
@@ -47,10 +48,10 @@ export const adminCategories = {
     input: CreateCategorySchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const id = `cat-${Date.now()}`;
       const slug = input.slug || input.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -73,10 +74,10 @@ if (!db) throw new Error("Database not available");
     input: UpdateCategorySchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const updateData: Record<string, unknown> = {
         updatedAt: Math.floor(Date.now() / 1000),
@@ -94,7 +95,7 @@ if (!db) throw new Error("Database not available");
         .returning()
         .get();
 
-      if (!updated) throw new Error('Category not found');
+      if (!updated) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Category not found');
 
       return { success: true, data: updated };
     },
@@ -105,10 +106,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Check if category has children
       const children = await db.select()
@@ -117,7 +118,7 @@ if (!db) throw new Error("Database not available");
         .all();
 
       if (children.length > 0) {
-        throw new Error('Cannot delete category with children. Remove children first.');
+        return createErrorResponse(ErrorCode.VALIDATION_INVALID_INPUT, 'Cannot delete category with children. Remove children first.');
       }
 
       await db.delete(categories).where(eq(categories.id, input.id)).run();

@@ -1,33 +1,32 @@
 # Operations Documentation
 
-## Monitoring
-
-| Resource | Endpoint | Threshold |
-|----------|----------|-----------|
-| Workers | Cloudflare Dashboard | Error rate > 1% |
-| D1 | Cloudflare D1 | Query latency > 500ms |
-| R2 | Cloudflare R2 | Upload failures |
-
 ## Health Checks
 
 ```bash
 # Check workers health
-curl -I https://TimorLink.jasonwill.workers.dev
+curl https://timorup.jasonwill.workers.dev/api/health
 
 # Check API
-curl https://TimorLink.jasonwill.workers.dev/api/products
+curl https://timorup.jasonwill.workers.dev/api/businesses
 ```
 
 ## Scheduled Tasks
 
-### Weekly Cleanup (Sunday 3:00 AM UTC)
+### Daily Cleanup (Sunday 3:00 AM UTC)
 
 | Task | Cron | Purpose |
 |------|------|---------|
-| `_cleanup.ts` | `0 3 * * 0` | Delete expired businesses (60+ days), removes R2 folders + D1 records |
-| `_cleanup-orphan-media.ts` | `0 3 * * 0` | Delete orphan R2 files (files without D1 metadata) |
+| `_cleanup.ts` | `0 3 * * 0` | Delete expired listings (7+ days), removes R2 folders + D1 records |
+| `_mark-expired.ts` | Daily | Mark subscriptions as expired |
+| `_cleanup-orphan-media.ts` | Daily | Delete orphan R2 files |
 
-### Cost Optimization
+### Cleanup Rate Limit
+
+| Endpoint | Limit | Window |
+|----------|-------|---------|
+| `/api/scheduled/cleanup-rate-limit` | 1 request | Per day |
+
+## Cost Optimization
 
 | Resource | Monthly Cost (est.) |
 |----------|---------------------|
@@ -37,7 +36,7 @@ curl https://TimorLink.jasonwill.workers.dev/api/products
 | KV (sessions) | ~$0 |
 | **Total** | **~$6/month** |
 
-### File Upload Limits
+## File Upload Limits
 
 | Type | Max Size | Format |
 |------|----------|--------|
@@ -45,16 +44,6 @@ curl https://TimorLink.jasonwill.workers.dev/api/products
 | Video | 8 MB | Original format |
 
 ## Common Issues
-
-### Local D1 not syncing
-
-```bash
-# Push schema to local D1
-npx drizzle-kit push
-
-# Or sync with production
-npx wrangler d1 execute TimorLink-db --remote --command "SELECT 1"
-```
 
 ### Wrangler port conflict
 
@@ -66,12 +55,37 @@ pkill -f wrangler
 npx wrangler dev --port 8789
 ```
 
-## Rollback
+### Local D1 not syncing
 
-If deployment fails:
-1. Check CI logs for error
-2. Revert to previous commit if needed
-3. Push fixed version
+```bash
+# Push schema to local D1
+pnpm db:push
+
+# Or sync with production
+npx wrangler d1 execute TimorUp-db --remote --file=src/db/seed.sql
+```
+
+### Auth failing (503 errors)
+
+**Cause**: better-auth exceeds 10ms CPU limit on Free Plan
+
+**Solution**: Use light-auth actions instead:
+```typescript
+const result = await actions.auth.lightSignIn({ email, password });
+```
+
+## Deployment
+
+| Environment | Command |
+|-------------|---------|
+| Preview | `wrangler deploy --dry-run` |
+| Production | `git push` (CI/CD) |
+
+### CI/CD Pipeline
+
+1. Build: `pnpm build`
+2. Test: `pnpm test` + `pnpm test:e2e`
+3. Deploy: Cloudflare Workers
 
 ---
-*Updated 2026-05-01*
+*Updated 2026-05-30*

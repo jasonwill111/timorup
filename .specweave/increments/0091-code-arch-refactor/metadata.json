@@ -1,0 +1,17 @@
+{
+  "id": "0091-code-arch-refactor",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-29T04:33:38.981Z",
+  "lastActivity": "2026-05-29T04:33:39.006Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

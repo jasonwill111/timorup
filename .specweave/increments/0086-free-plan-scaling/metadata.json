@@ -1,0 +1,18 @@
+{
+  "id": "0086-free-plan-scaling",
+  "status": "completed",
+  "completed": "2026-05-29",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-29T01:14:32.343Z",
+  "lastActivity": "2026-05-29T01:14:32.346Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

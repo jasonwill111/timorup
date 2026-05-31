@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { orders, businesses } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const listSchema = z.object({
   status: z.string().optional(),
@@ -36,10 +37,10 @@ export const subscriptions = {
     input: listSchema.optional(),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const page = input?.page || 1;
       const limit = input?.limit || 20;
       const offset = (page - 1) * limit;
@@ -78,13 +79,13 @@ if (!db) throw new Error("Database not available");
     input: updateStatusSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
       if (user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'editor') {
-        throw new Error('Insufficient permissions');
+        return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Insufficient permissions');
       }
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Get current order
       const order = await db.select()
@@ -93,7 +94,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!order) throw new Error('Order not found');
+      if (!order) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Order not found');
 
       // Calculate expiresAt if setting to paid
       let newExpiresAt = order.expiresAt;
@@ -160,10 +161,10 @@ if (!db) throw new Error("Database not available");
     input: updateSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Get current order
       const order = await db.select()
@@ -172,7 +173,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!order) throw new Error('Order not found');
+      if (!order) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Order not found');
 
       // Calculate expiresAt if setting to paid
       let newExpiresAt = input.expiresAt ? input.expiresAt : order.expiresAt;
@@ -252,10 +253,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       await db.delete(orders).where(eq(orders.id, input.id)).run();
 
       return { success: true };
@@ -267,10 +268,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const order = await db.select()
         .from(orders)
         .where(eq(orders.id, input.id))

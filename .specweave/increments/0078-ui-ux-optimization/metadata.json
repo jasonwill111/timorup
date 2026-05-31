@@ -1,11 +1,11 @@
 {
   "id": "0078-ui-ux-optimization",
-  "status": "active",
+  "status": "completed",
   "started_at": "2026-05-27T00:25:00Z",
   "type": "feature",
   "priority": "P1",
   "created": "2026-05-25T13:39:48.755Z",
-  "lastActivity": "2026-05-25T13:39:48.757Z",
+  "lastActivity": "2026-05-27T12:42:33.474Z",
   "testMode": "TDD",
   "coverageTarget": 80,
   "feature_id": null,
@@ -14,5 +14,7 @@
   "planning": {
     "parallel": false
   },
-  "project": "TimorUp"
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-27T12:42:33.422Z",
+  "approvedAt": "2026-05-27T12:42:33.474Z"
 }

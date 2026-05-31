@@ -91,7 +91,7 @@ if (!db) throw new Error("Database not available");
   const { uid } = parseResult.data;
 
   try {
-    // Get user's businesses
+    // Get user's businesses with category JOIN
     const businessList = await db.select({
       id: businesses.id,
       title: businesses.title,
@@ -103,21 +103,18 @@ if (!db) throw new Error("Database not available");
       views: businesses.views,
       planSlug: businesses.planSlug,
       limits: businesses.limits,
+      categoryName: businessCategories.name,
     })
     .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.categoryId, businessCategories.id))
     .where(eq(businesses.ownerId, uid))
     .orderBy(desc(businesses.createdAt))
     .all();
 
-    // Get category names
-    const categoryMap = new Map();
-    const cats = await db.select().from(businessCategories).all() as unknown[];
-    cats.forEach((cat: { id: string; name: string }) => categoryMap.set(cat.id, cat.name));
-
-    // Add category names
-    const businessesWithCategory = businessList.map((biz: { categoryId: string | null }) => ({
+    // Map to add default category name for null
+    const businessesWithCategory = businessList.map((biz: { categoryId: string | null; categoryName: string | null }) => ({
       ...biz,
-      categoryName: biz.categoryId ? (categoryMap.get(biz.categoryId) || 'Uncategorized') : 'Uncategorized',
+      categoryName: biz.categoryName || 'Uncategorized',
     }));
 
     return new Response(JSON.stringify({

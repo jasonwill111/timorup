@@ -4,7 +4,7 @@ feature: FS-073
 title: "BusinessCard Full Star Rating Display"
 status: completed
 priority: P1
-created: 2026-05-20
+created: 2026-05-27
 tldr: "**As a** site visitor."
 project: timorup
 ---

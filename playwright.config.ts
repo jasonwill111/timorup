@@ -9,7 +9,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['json', { outputFile: 'e2e/results.json' }], ['html']],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:8787',
+    baseURL: process.env.BASE_URL || 'http://localhost:4322',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

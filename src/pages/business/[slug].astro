@@ -73,7 +73,7 @@ const isPending = business.status === 'pending_payment';
 // Check grace period using plan fields
 const planStatus = business.planStatus || 'none';
 const gracePeriodEndDate = business.gracePeriodEndDate
-  ? new Date(business.gracePeriodEndDate * 1000)
+  ? new Date(business.gracePeriodEndDate as unknown as number * 1000)
   : null;
 
 const now = new Date();
@@ -283,7 +283,7 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
     <!-- Banner -->
     <div class="relative h-48 md:h-64 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30">
       {business.bannerImageId && (
-        <img src={`/api/media/${business.bannerImageId}`} class="w-full h-full object-cover" alt="" loading="eager" decoding="auto" />
+        <img src={`/api/media/${business.bannerImageId}`} class="w-full h-full object-cover" aria-hidden="true" alt="" loading="eager" decoding="auto" />
       )}
       <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
     </div>
@@ -558,6 +558,9 @@ const pageDesc = business.aboutUs?.substring(0, 160) || `${business.title} - ${c
   </div>
 
 </Layout>
+
+// Set Cache-Control header for CDN caching
+Astro.response.headers.set('Cache-Control', cacheControl);
 
 <script>
   // Save

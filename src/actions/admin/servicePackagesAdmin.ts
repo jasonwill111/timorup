@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { servicePackages, businesses } from '@/db/schema';
 import { eq, asc, count } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 // Variant schema for pricing tiers
 const VariantSchema = z.object({
@@ -26,15 +27,15 @@ const VariantSchema = z.object({
 });
 
 // Package type enum
-const PackageTypeEnum = z.enum(['subscription', 'listing_renewal', 'featured', 'addon']);
-const PackageCategoryEnum = z.enum(['business', 'listing', 'other']);
+const PackageTypeEnum = z.enum(['subscription', 'listing_renewal', 'ad_banner']);
+const PackageRelationEnum = z.enum(['business', 'listing', 'business_product', 'homepage']);
 
 // Create schema
 const CreatePackageSchema = z.object({
   name: z.string().min(1).max(100),
   slug: z.string().min(1).max(100).optional(),
-  type: PackageTypeEnum,
-  category: PackageCategoryEnum.optional(),
+  serviceType: PackageTypeEnum,
+  serviceRelationTo: PackageRelationEnum.optional(),
   description: z.string().max(500).optional(),
   variants: z.array(VariantSchema).min(1),
   isActive: z.boolean().default(true),
@@ -46,8 +47,8 @@ const UpdatePackageSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(100).optional(),
   slug: z.string().min(1).max(100).optional(),
-  type: PackageTypeEnum.optional(),
-  category: PackageCategoryEnum.optional(),
+  serviceType: PackageTypeEnum.optional(),
+  serviceRelationTo: PackageRelationEnum.optional(),
   description: z.string().max(500).optional(),
   variants: z.array(VariantSchema).optional(),
   isActive: z.boolean().optional(),
@@ -59,10 +60,10 @@ export const servicePackagesAdmin = {
   getAll: defineAction({
     handler: async () => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const allPackages = await db.select()
         .from(servicePackages)
         .orderBy(asc(servicePackages.sortOrder))
@@ -83,11 +84,11 @@ if (!db) throw new Error("Database not available");
     input: CreatePackageSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
-      if (user.role !== 'super_admin') throw new Error('Only super_admin can create packages');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+      if (user.role !== 'super_admin') return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Only super_admin can create packages');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Check for duplicate slug
       const existing = await db.select()
@@ -96,7 +97,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (existing) throw new Error('Package with this slug already exists');
+      if (existing) return createErrorResponse(ErrorCode.BUSINESS_SLUG_EXISTS, 'Package with this slug already exists');
 
       const id = `sp-${Date.now()}`;
       const slug = input.slug || input.name.toLowerCase().replace(/\s+/g, '-');
@@ -105,8 +106,8 @@ if (!db) throw new Error("Database not available");
         id,
         name: input.name,
         slug,
-        type: input.type,
-        category: input.category || null,
+        serviceType: input.serviceType,
+        serviceRelationTo: input.serviceRelationTo || null,
         description: input.description || null,
         variants: JSON.stringify(input.variants),
         isActive: input.isActive ? 1 : 0,
@@ -119,7 +120,7 @@ if (!db) throw new Error("Database not available");
           id,
           name: input.name,
           slug,
-          type: input.type,
+          serviceType: input.serviceType,
           variants: input.variants,
         },
       };
@@ -131,13 +132,13 @@ if (!db) throw new Error("Database not available");
     input: UpdatePackageSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
       if (user.role !== 'admin' && user.role !== 'super_admin') {
-        throw new Error('Insufficient permissions');
+        return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Insufficient permissions');
       }
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const { id, ...data } = input;
 
       // Check package exists
@@ -147,7 +148,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!existing) throw new Error('Package not found');
+      if (!existing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Package not found');
 
       // Build update object
       const updateData: Record<string, unknown> = {
@@ -156,8 +157,8 @@ if (!db) throw new Error("Database not available");
 
       if (data.name !== undefined) updateData.name = data.name;
       if (data.slug !== undefined) updateData.slug = data.slug;
-      if (data.type !== undefined) updateData.type = data.type;
-      if (data.category !== undefined) updateData.category = data.category;
+      if (data.serviceType !== undefined) updateData.serviceType = data.serviceType;
+      if (data.serviceRelationTo !== undefined) updateData.serviceRelationTo = data.serviceRelationTo;
       if (data.description !== undefined) updateData.description = data.description;
       if (data.variants !== undefined) updateData.variants = JSON.stringify(data.variants);
       if (data.isActive !== undefined) updateData.isActive = data.isActive ? 1 : 0;
@@ -190,11 +191,11 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
-      if (user.role !== 'super_admin') throw new Error('Only super_admin can delete packages');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+      if (user.role !== 'super_admin') return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Only super_admin can delete packages');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Check package exists
       const existing = await db.select()
@@ -203,7 +204,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!existing) throw new Error('Package not found');
+      if (!existing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Package not found');
 
       // Check if any businesses are using this package
       const businessesUsing = await db.select({ count: count() })
@@ -212,7 +213,7 @@ if (!db) throw new Error("Database not available");
         .get();
 
       if (businessesUsing && businessesUsing.count > 0) {
-        throw new Error(`Cannot delete package. ${businessesUsing.count} business(es) currently using this package.`);
+        return createErrorResponse(ErrorCode.VALIDATION_INVALID_INPUT, `Cannot delete package. ${businessesUsing.count} business(es) currently using this package.`);
       }
 
       await db.delete(servicePackages).where(eq(servicePackages.id, input.id)).run();
@@ -224,12 +225,12 @@ if (!db) throw new Error("Database not available");
   // Get active packages by type (public view)
   getActiveByType: defineAction({
     input: z.object({
-      type: PackageTypeEnum.optional(),
-      category: PackageCategoryEnum.optional(),
+      serviceType: PackageTypeEnum.optional(),
+      serviceRelationTo: PackageRelationEnum.optional(),
     }).optional(),
     handler: async (input) => {
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       let query = db.select()
         .from(servicePackages)
@@ -240,11 +241,11 @@ if (!db) throw new Error("Database not available");
       const allActive = await query.all();
 
       let filtered = allActive;
-      if (input?.type) {
-        filtered = filtered.filter(p => p.type === input.type);
+      if (input?.serviceType) {
+        filtered = filtered.filter(p => p.serviceType === input.serviceType);
       }
-      if (input?.category) {
-        filtered = filtered.filter(p => p.category === input.category);
+      if (input?.serviceRelationTo) {
+        filtered = filtered.filter(p => p.serviceRelationTo === input.serviceRelationTo);
       }
 
       return {

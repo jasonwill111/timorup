@@ -1,15 +1,21 @@
 // Auth API - Session (Get current user)
-// Reads session directly from KV and queries DB for role
+// Reads session from database (compatible with light-auth)
 export const prerender = false;
 
-import { initAuthInstance } from '@/lib/auth';
 import { drizzle } from 'drizzle-orm/d1';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, sessions } from '@/db/schema';
+import { eq, and, gt } from 'drizzle-orm';
 
 export async function GET({ request }: { request: Request }) {
   try {
     const { env } = await import('cloudflare:workers');
+
+    if (!env.DB) {
+      return new Response(JSON.stringify({ user: null, session: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     // Get token from cookie
     const cookieHeader = request.headers.get('cookie');
@@ -23,72 +29,71 @@ export async function GET({ request }: { request: Request }) {
     }
 
     const token = match[1];
+    const now = Math.floor(Date.now() / 1000);
 
-    // Read session directly from KV
-    if (env.SESSION) {
-      const stored = await env.SESSION.get(token);
+    // Query session from database
+    const db = drizzle(env.DB as D1Database);
 
-      if (stored) {
-        try {
-          const data = JSON.parse(stored);
-          const session = data.session;
-          const kvUser = data.user;
+    const session = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.token, token))
+      .limit(1)
+      .get();
 
-          // Check if session is expired
-          if (session && new Date(session.expiresAt) > new Date()) {
-            // Initialize auth
-            initAuthInstance(env as Record<string, unknown>);
-
-            // Get role from database
-            let role = 'user';
-            if (env.DB) {
-              try {
-                const db = drizzle(env.DB as D1Database, {
-                  schema: { users }
-                });
-                const dbUser = await db.select({ role: users.role })
-                  .from(users)
-                  .where(eq(users.id, session.userId))
-                  .limit(1)
-                  .get();
-                if (dbUser) {
-                  role = dbUser.role || 'user';
-                }
-              } catch (e) {
-                console.error('[Session] DB error:', e);
-              }
-            }
-
-            return new Response(JSON.stringify({
-              user: {
-                id: session.userId,
-                email: kvUser?.email || '',
-                name: kvUser?.name || '',
-                emailVerified: kvUser?.emailVerified ?? false,
-                image: kvUser?.image ?? null,
-                role: role,
-              },
-              session: {
-                id: session.id,
-                expiresAt: new Date(session.expiresAt).toISOString(),
-                token: session.token,
-                userId: session.userId,
-              }
-            }), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            });
-          }
-        } catch (e) {
-          console.error('[Session] Parse error:', e);
-        }
-      }
+    if (!session) {
+      return new Response(JSON.stringify({ user: null, session: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    return new Response(JSON.stringify({ user: null, session: null }), {
+    // Check if session is expired
+    if (session.expiresAt < now) {
+      return new Response(JSON.stringify({ user: null, session: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Get user info
+    const user = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.id, session.userId))
+      .limit(1)
+      .get();
+
+    if (!user) {
+      return new Response(JSON.stringify({ user: null, session: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name || '',
+        role: user.role || 'user',
+      },
+      session: {
+        id: session.id,
+        expiresAt: new Date(session.expiresAt * 1000).toISOString(),
+        token: session.token,
+        userId: session.userId,
+      }
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
+
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('[Session] Error:', errorMessage);

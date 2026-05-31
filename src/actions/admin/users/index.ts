@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq, or, like } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const listSchema = z.object({
   search: z.string().optional(),
@@ -27,10 +28,10 @@ export const adminUsers = {
     input: listSchema.optional(),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       let query = db.select({
         id: users.id,
@@ -68,10 +69,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const userRecord = await db.select({
         id: users.id,
@@ -100,10 +101,10 @@ if (!db) throw new Error("Database not available");
     input: updateSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const existing = await db.select()
         .from(users)
@@ -111,7 +112,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!existing) throw new Error('User not found');
+      if (!existing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'User not found');
 
       const updateData: Record<string, unknown> = { updatedAt: Math.floor(Date.now() / 1000) };
       if (input.name !== undefined) updateData.name = input.name;
@@ -132,15 +133,15 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+
+      const db = await getDb();
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Prevent self-deletion
       if (input.id === user.id) {
-        throw new Error('Cannot delete your own account');
+        return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Cannot delete your own account');
       }
-
-      const db = await getDb();
-if (!db) throw new Error("Database not available");
 
       const existing = await db.select()
         .from(users)
@@ -148,7 +149,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!existing) throw new Error('User not found');
+      if (!existing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'User not found');
 
       await db.delete(users).where(eq(users.id, input.id)).run();
 

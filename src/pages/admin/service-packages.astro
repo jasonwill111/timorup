@@ -96,13 +96,20 @@ import { actions } from 'astro:actions';
           </div>
           <div id="package-type-field">
             <label class="block text-sm font-medium mb-1">Type</label>
-            <select id="package-type" name="packageType" class="w-full h-9 px-3 rounded-md border bg-background text-sm">
-              <option value="subscription">Subscription</option>
+            <select id="package-type" name="serviceType" class="w-full h-9 px-3 rounded-md border bg-background text-sm">
+              <option value="subscription">Subscription (Business Plan)</option>
               <option value="listing_renewal">Listing Renewal</option>
-              <option value="featured">Featured</option>
-              <option value="addon">Addon</option>
+              <option value="ad_banner">Ad Banner</option>
             </select>
           </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Relation To</label>
+            <select id="package-relation" name="serviceRelationTo" class="w-full h-9 px-3 rounded-md border bg-background text-sm">
+              <option value="business">Business</option>
+              <option value="listing">Listing</option>
+              <option value="business_product">Product/Service</option>
+              <option value="homepage">Homepage</option>
+            </select>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -283,7 +290,7 @@ import { actions } from 'astro:actions';
         </td>
         <td class="p-3 hidden md:table-cell">
           <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
-            ${pkg.type}
+            ${pkg.serviceType}
           </span>
         </td>
         <td class="p-3 font-semibold">$${price}</td>
@@ -304,8 +311,8 @@ import { actions } from 'astro:actions';
 
   function updateStats() {
     const total = plans.length;
-    const subscriptions = plans.filter(p => p.type === 'subscription').length;
-    const listings = plans.filter(p => p.type === 'listing_renewal').length;
+    const subscriptions = plans.filter(p => p.serviceType === 'subscription').length;
+    const listings = plans.filter(p => p.serviceType === 'listing_renewal').length;
     const active = plans.filter(p => p.isActive).length;
 
     const statTotal = document.getElementById('stat-total');
@@ -480,10 +487,12 @@ import { actions } from 'astro:actions';
         });
       } else {
         // Create new package
-        const packageType = (formData.get('packageType') as string) || 'subscription';
+        const serviceType = (formData.get('serviceType') as string) || 'subscription';
+        const serviceRelationTo = (formData.get('serviceRelationTo') as string) || null;
         result = await actions.admin.servicePackagesAdmin.create({
           name: formData.get('name') as string,
-          type: packageType as 'subscription' | 'listing_renewal' | 'featured' | 'addon',
+          serviceType: serviceType as 'subscription' | 'listing_renewal' | 'ad_banner',
+          serviceRelationTo: serviceRelationTo as 'business' | 'listing' | 'business_product' | 'homepage' | null,
           description: formData.get('description') as string || '',
           variants: [variant],
           isActive: formData.get('active') === 'on',

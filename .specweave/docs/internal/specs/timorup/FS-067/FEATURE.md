@@ -2,10 +2,10 @@
 id: FS-067
 title: "D1 Database Schema Fix"
 type: feature
-status: ready_for_review
+status: completed
 priority: P1
-created: 2026-05-19
-lastUpdated: 2026-05-20
+created: 2026-05-19T00:00:00.000Z
+lastUpdated: 2026-05-27
 tldr: "Fix critical data integrity issues discovered during schema audit:."
 complexity: high
 stakeholder_relevant: true
@@ -16,7 +16,7 @@ stakeholder_relevant: true
 ## TL;DR
 
 **What**: Fix critical data integrity issues discovered during schema audit:.
-**Status**: ready_for_review | **Priority**: P1
+**Status**: completed | **Priority**: P1
 **User Stories**: 4
 
 ![D1 Database Schema Fix illustration](assets\feature-fs-067.jpg)
@@ -32,7 +32,7 @@ Fix critical data integrity issues discovered during schema audit:
 
 | Increment | Status | Completion Date |
 |-----------|--------|----------------|
-| [0067-d1-schema-fix](../../../../../increments/0067-d1-schema-fix/spec.md) | ⏳ ready_for_review | 2026-05-19 |
+| [0067-d1-schema-fix](../../../../../increments/0067-d1-schema-fix/spec.md) | ✅ completed | 2026-05-19T00:00:00.000Z |
 
 ## User Stories
 

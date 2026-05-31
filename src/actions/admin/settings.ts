@@ -5,16 +5,17 @@ import { getDb } from '@/lib/db';
 import { siteSettings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 export const settings = {
   // Get all settings
   getAll: defineAction({
     handler: async () => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const settingsResult = await db.select().from(siteSettings).all() as { key: string; value: string }[];
 
       const settings: Record<string, unknown> = {};
@@ -38,10 +39,10 @@ if (!db) throw new Error("Database not available");
     }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const existing = await db.select()
         .from(siteSettings)
@@ -77,10 +78,10 @@ if (!db) throw new Error("Database not available");
     }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       for (const [key, valueObj] of Object.entries(input.settings)) {
         let value: string;

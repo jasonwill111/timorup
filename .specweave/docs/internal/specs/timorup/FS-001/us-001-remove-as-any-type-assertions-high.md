@@ -2,11 +2,11 @@
 id: US-001
 feature: FS-001
 title: "Remove `as any` Type Assertions (HIGH)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-05-13
+created: 2026-05-27
 tldr: "**As a** developer."
-project: TimorLink
+project: timorlink
 ---
 
 # US-001: Remove `as any` Type Assertions (HIGH)
@@ -21,10 +21,10 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [ ] **AC-US1-01**: `src/pages/api/businesses/index.ts` â€?Remove 3 `as any` casts, use `SQL[]` condition array
-- [ ] **AC-US1-02**: `src/pages/api/non-profits/index.ts` â€?Remove 3 `as any` casts, use `SQL[]` condition array
-- [ ] **AC-US1-03**: `src/pages/api/public-sectors/index.ts` â€?Remove 3 `as any` casts, use `SQL[]` condition array
-- [ ] **AC-US1-04**: `src/pages/api/admin/ai-generate.ts` â€?Remove 2 `as any` casts, use proper type parameters
+- [x] **AC-US1-01**: `src/pages/api/businesses/index.ts` ï¿½?Remove 3 `as any` casts, use `SQL[]` condition array
+- [x] **AC-US1-02**: `src/pages/api/non-profits/index.ts` ï¿½?Remove 3 `as any` casts, use `SQL[]` condition array
+- [x] **AC-US1-03**: `src/pages/api/public-sectors/index.ts` ï¿½?Remove 3 `as any` casts, use `SQL[]` condition array
+- [x] **AC-US1-04**: `src/pages/api/admin/ai-generate.ts` ï¿½?Remove 2 `as any` casts, use proper type parameters
 
 ---
 
@@ -38,4 +38,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

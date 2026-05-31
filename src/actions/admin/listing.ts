@@ -6,6 +6,7 @@ import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
 import { buildUpdateData } from '@/lib/admin-update';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const updateSchema = z.object({
   id: z.string(),
@@ -58,14 +59,14 @@ export const listing = {
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const listing = await db.select()
         .from(businesses)
         .where(eq(businesses.id, input.id))
         .limit(1)
         .get();
 
-      if (!listing) throw new Error('Listing not found');
+      if (!listing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Listing not found');
 
       return { success: true, data: listing };
     },
@@ -76,10 +77,10 @@ if (!db) throw new Error("Database not available");
     input: updateSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const { id, ...data } = input;
 
       const existing = await db.select()
@@ -88,7 +89,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!existing) throw new Error('Listing not found');
+      if (!existing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Listing not found');
 
       // Build update data with field transforms
       const updateData = buildUpdateData(data, LISTING_FIELD_CONFIG);
@@ -107,10 +108,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       await db.delete(businesses).where(eq(businesses.id, input.id)).run();
 
       return { success: true };

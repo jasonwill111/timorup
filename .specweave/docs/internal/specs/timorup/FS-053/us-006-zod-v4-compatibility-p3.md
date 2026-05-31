@@ -21,7 +21,8 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US6-01**: Email validation uses `z.email()` instead of `z.string().email()` âœ?
+- [x] **AC-US6-01**: Email validation uses `z.email()` instead of `z.string().email()` ï¿½?
+
 ---
 
 ## Implementation
@@ -34,4 +35,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

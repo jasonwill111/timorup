@@ -5,11 +5,8 @@ import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 const UpdateBannerSchema = z.object({
   id: z.string(),
@@ -35,7 +32,7 @@ export const updateBanner = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
     try {
       const updated = await db.update(adBanners)
         .set({
@@ -78,7 +75,7 @@ export const deleteBanner = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
     try {
       await db.delete(adBanners).where(eq(adBanners.id, id)).run();
       return { success: true };

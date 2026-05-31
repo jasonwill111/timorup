@@ -22,22 +22,33 @@ const {
 
 const isDisabled = disabled || loading;
 
+// Size object pattern (ricoui style) - consistent padding/sizing
+const sizes = {
+  default: 'h-11 px-4 py-2.5 rounded-md text-sm font-medium',
+  sm: 'h-10 px-3 py-2 rounded-md text-sm',
+  md: 'h-11 px-5 py-2.5 rounded-md text-sm font-medium',
+  lg: 'h-12 px-6 py-3 rounded-lg text-base font-semibold',
+  xl: 'h-14 px-8 py-4 rounded-xl text-lg font-semibold',
+  icon: 'h-11 w-11',
+};
+
+// Hover shadow presets for enhanced interactions
+const hoverShadows = {
+  default: 'hover:shadow-lg hover:shadow-primary/20',
+  destructive: 'hover:shadow-lg hover:shadow-destructive/20',
+  outline: 'hover:shadow-md hover:shadow-foreground/10',
+  secondary: 'hover:shadow-md hover:shadow-foreground/10',
+  ghost: '',
+  link: '',
+};
+
 const variants = {
   default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
   destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
-  outline: 'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
-  secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
-  ghost: 'hover:bg-accent hover:text-accent-foreground',
+  outline: 'border border-primary text-primary hover:bg-primary/5',
+  secondary: 'border border-primary text-primary hover:bg-primary/5',
+  ghost: 'text-muted-foreground hover:text-primary hover:bg-muted',
   link: 'text-primary underline-offset-4 hover:underline',
-};
-
-const sizes = {
-  default: 'h-11 px-4 py-2.5 rounded-md text-sm font-medium', // h-11 = 44px touch target
-  sm: 'h-10 px-3 rounded-md text-sm', // h-10 = 40px
-  md: 'h-11 px-5 py-2.5 rounded-md text-sm font-medium', // h-11 = 44px
-  lg: 'h-12 px-8 py-3 rounded-md text-base font-semibold', // h-12 = 48px
-  xl: 'h-14 px-10 py-4 rounded-lg text-lg font-semibold', // h-14 = 56px
-  icon: 'h-11 w-11', // h-11 = 44px touch target
 };
 ---
 
@@ -46,9 +57,12 @@ const sizes = {
   disabled={isDisabled}
   data-slot={slot}
   class:list={[
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 rounded-md',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'disabled:opacity-50 disabled:cursor-not-allowed pointer-events-none',
     variants[variant],
     sizes[size],
+    hoverShadows[variant],
     className
   ]}
   {...props}

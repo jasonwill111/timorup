@@ -127,7 +127,7 @@
 ### T-008: Add prefers-reduced-motion Check
 **User Story**: US-004 | **Satisfies ACs**: AC-US4-05 | **Status**: [x] completed
 
-**File**: `src/lib/motion-utils.ts`
+**File**: `src/lib/css-animations.ts` (formerly `motion-utils.ts`)
 
 **Implementation Details**:
 1. Check `window.matchMedia('(prefers-reduced-motion: reduce)')` before animations

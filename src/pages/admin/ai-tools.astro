@@ -418,6 +418,7 @@ import { actions } from 'astro:actions';
 
 <script>
   import { actions } from 'astro:actions';
+  import DOMPurify from 'dompurify';
 
   // AI Generator interfaces
   interface PriceField {
@@ -460,6 +461,21 @@ import { actions } from 'astro:actions';
     heroSubtitle: string;
     features: string[];
     ctaText: string;
+  }
+
+  // Action result type helper
+  type ActionResult<T = unknown> = { success: boolean; data?: T; error?: { message?: string } } | { data?: { success: boolean; error?: { message?: string } } };
+
+  function unwrapActionResult<T>(result: ActionResult<T>): T {
+    if (result && typeof result === 'object') {
+      if ('data' in result && result.data) {
+        return result.data as T;
+      }
+      if ('success' in result) {
+        return result as unknown as T;
+      }
+    }
+    return result as unknown as T;
   }
 
   // Tab switching
@@ -516,7 +532,7 @@ import { actions } from 'astro:actions';
       });
 
       // Astro Actions wraps result in data property
-      const actionResult = (result as any).data || result;
+      const actionResult = unwrapActionResult<{ success: boolean; error?: { message?: string }; object?: GeneratedListing }>(result);
       if (!actionResult.success) {
         throw new Error(actionResult.error?.message || 'Generation failed');
       }
@@ -644,7 +660,7 @@ import { actions } from 'astro:actions';
       });
 
       // Astro Actions wraps result in data property
-      const actionResult = (result as any).data || result;
+      const actionResult = unwrapActionResult<{ success: boolean; error?: { message?: string }; object?: GeneratedSku }>(result);
       if (!actionResult.success) {
         throw new Error(actionResult.error?.message || 'Generation failed');
       }
@@ -711,7 +727,7 @@ import { actions } from 'astro:actions';
       // Debug logs removed for production
 
       // Astro Actions wraps result in data property
-      const actionResult = (result as any).data || result;
+      const actionResult = unwrapActionResult<{ success: boolean; error?: { message?: string }; object?: GeneratedBlog }>(result);
       if (!actionResult.success) {
         const errMsg = actionResult.error?.message || 'Generation failed';
         console.error('[Blog] Action failed:', errMsg);
@@ -734,7 +750,7 @@ import { actions } from 'astro:actions';
 
       document.getElementById('preview-blog-title')!.textContent = generatedBlog.title;
       document.getElementById('preview-blog-excerpt')!.textContent = (generatedBlog.excerpt || generatedBlog.content || '').substring(0, 200);
-      document.getElementById('preview-blog-content')!.innerHTML = (generatedBlog.content || '').replace(/\n/g, '<br>');
+      document.getElementById('preview-blog-content')!.innerHTML = DOMPurify.sanitize((generatedBlog.content || '').replace(/\n/g, '<br>'), { ALLOWED_TAGS: ['br'] });
 
       document.getElementById('blog-preview')?.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'px-2 py-1 text-xs rounded-full bg-green-100'; }
@@ -761,7 +777,7 @@ import { actions } from 'astro:actions';
           <!DOCTYPE html>
           <html>
           <head>
-            <title>Blog Preview - ${generatedBlog.title || 'Draft'}</title>
+            <title>Blog Preview - ${DOMPurify.escape(generatedBlog.title || 'Draft')}</title>
             <style>
               body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
               h1 { margin-bottom: 10px; }
@@ -771,11 +787,11 @@ import { actions } from 'astro:actions';
             </style>
           </head>
           <body>
-            <h1>${generatedBlog.title || 'Untitled'}</h1>
-            <div class="meta">${generatedBlog.excerpt || ''}</div>
-            <div class="content">${(generatedBlog.content || '').replace(/\n/g, '<br>')}</div>
+            <h1>${DOMPurify.escape(generatedBlog.title || 'Untitled')}</h1>
+            <div class="meta">${DOMPurify.escape(generatedBlog.excerpt || '')}</div>
+            <div class="content">${DOMPurify.sanitize((generatedBlog.content || '').replace(/\n/g, '<br>'), { ALLOWED_TAGS: ['br'] })}</div>
             <h2 style="margin-top:50px">Raw JSON</h2>
-            <pre>${JSON.stringify(generatedBlog, null, 2)}</pre>
+            <pre>${DOMPurify.escape(JSON.stringify(generatedBlog, null, 2))}</pre>
           </body>
           </html>
         `);
@@ -815,7 +831,7 @@ import { actions } from 'astro:actions';
       });
 
       // Astro Actions wraps result in data property
-      const actionResult = (result as any).data || result;
+      const actionResult = unwrapActionResult<{ success: boolean; error?: { message?: string }; object?: GeneratedLanding }>(result);
       if (!actionResult.success) {
         throw new Error(actionResult.error?.message || 'Generation failed');
       }
@@ -836,7 +852,8 @@ import { actions } from 'astro:actions';
       document.getElementById('preview-landing-hero-subtitle')!.textContent = generatedLanding.hero?.subtitle || description;
 
       const featuresEl = document.getElementById('preview-landing-features')!;
-      featuresEl.innerHTML = (generatedLanding.features || []).map((f: GeneratedSku) => `<li><strong>${f.title}</strong>: ${f.description}</li>`).join('') || '<li>No features generated</li>';
+      const escapeHtml = (str: string) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      featuresEl.innerHTML = (generatedLanding.features || []).map((f: GeneratedSku) => `<li><strong>${escapeHtml(f.title || '')}</strong>: ${escapeHtml(f.description || '')}</li>`).join('') || '<li>No features generated</li>';
 
       document.getElementById('preview-landing-desc')!.textContent = generatedLanding.landingDescription;
 

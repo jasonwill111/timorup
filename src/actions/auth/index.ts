@@ -5,3 +5,4 @@ export { verifyEmail } from './verifyEmail';
 export { forgotPassword } from './forgotPassword';
 export { resetPassword } from './resetPassword';
 export { getSession } from './session';
+export { lightSignIn, lightSignUp } from './light-auth';

@@ -1,10 +1,11 @@
 ---
 interface Props {
-  images: { id: string; url: string }[];
+  images: { id: string; url: string; alt?: string }[];
   title: string;
 }
 
 const { images, title } = Astro.props;
+const galleryId = `gallery-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
 {images.length > 0 && (
@@ -29,37 +30,57 @@ const { images, title } = Astro.props;
     </div>
 
     <!-- Gallery Modal -->
-    <div id="gallery-modal" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" data-gallery-modal>
+    <div
+      id={galleryId}
+      class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center"
+      data-gallery-modal
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${title} photo gallery`}
+      tabindex="-1"
+    >
       <button
-        id="gallery-close"
-        class="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-lg transition-colors"
+        id={`${galleryId}-close`}
+        class="absolute top-4 right-4 w-11 h-11 text-white hover:bg-white/20 rounded-lg transition-colors flex items-center justify-center"
         aria-label="Close gallery"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
-      <button id="gallery-prev" class="absolute left-4 text-white p-2 hover:bg-white/20 rounded-lg transition-colors" aria-label="Previous">
+      <button
+        id={`${galleryId}-prev`}
+        class="absolute left-4 w-11 h-11 text-white hover:bg-white/20 rounded-lg transition-colors flex items-center justify-center"
+        aria-label="Previous photo"
+      >
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
       </button>
-      <button id="gallery-next" class="absolute right-4 text-white p-2 hover:bg-white/20 rounded-lg transition-colors" aria-label="Next">
+      <button
+        id={`${galleryId}-next`}
+        class="absolute right-4 w-11 h-11 text-white hover:bg-white/20 rounded-lg transition-colors flex items-center justify-center"
+        aria-label="Next photo"
+      >
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
       </button>
-      <img id="gallery-image" src="" alt="" class="max-w-full max-h-[85vh] object-contain" />
-      <div id="gallery-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm"></div>
+      <img id={`${galleryId}-image`} src="" aria-hidden="true" alt="" class="max-w-full max-h-[85vh] object-contain" />
+      <div id={`${galleryId}-counter`} class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm" aria-live="polite"></div>
     </div>
   </section>
 )}
 
-<script define:vars={{ images }}>
-  const modal = document.getElementById('gallery-modal');
-  const image = document.getElementById('gallery-image');
-  const counter = document.getElementById('gallery-counter');
+<script define:vars={{ images, galleryId }}>
+  const modal = document.getElementById(galleryId);
+  const image = document.getElementById(`${galleryId}-image`);
+  const counter = document.getElementById(`${galleryId}-counter`);
+  const closeBtn = document.getElementById(`${galleryId}-close`);
+  const prevBtn = document.getElementById(`${galleryId}-prev`);
+  const nextBtn = document.getElementById(`${galleryId}-next`);
   let currentIndex = 0;
+  let lastFocusedElement = null;
 
   function showImage(index) {
     currentIndex = index;
@@ -70,44 +91,69 @@ const { images, title } = Astro.props;
     }
   }
 
+  // Focus trap implementation
+  function trapFocus(e) {
+    if (!modal?.classList.contains('flex')) return;
+    const focusable = modal.querySelectorAll('button:not([disabled])');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openGallery(index) {
+    lastFocusedElement = document.activeElement;
+    showImage(index);
+    modal?.classList.remove('hidden');
+    modal?.classList.add('flex');
+    modal?.focus();
+  }
+
+  function closeGallery() {
+    modal?.classList.add('hidden');
+    modal?.classList.remove('flex');
+    lastFocusedElement?.focus();
+  }
+
   document.querySelectorAll('[data-gallery-item]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const index = parseInt(btn.getAttribute('data-index') || '0');
-      showImage(index);
-      modal?.classList.remove('hidden');
-      modal?.classList.add('flex');
+      openGallery(index);
     });
   });
 
-  document.getElementById('gallery-close')?.addEventListener('click', () => {
-    modal?.classList.add('hidden');
-    modal?.classList.remove('flex');
-  });
+  closeBtn?.addEventListener('click', closeGallery);
 
-  document.getElementById('gallery-prev')?.addEventListener('click', () => {
+  prevBtn?.addEventListener('click', () => {
     showImage((currentIndex - 1 + images.length) % images.length);
   });
 
-  document.getElementById('gallery-next')?.addEventListener('click', () => {
+  nextBtn?.addEventListener('click', () => {
     showImage((currentIndex + 1) % images.length);
   });
 
   modal?.addEventListener('click', (e) => {
     if (e.target === modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      closeGallery();
     }
   });
 
   document.addEventListener('keydown', (e) => {
     if (!modal?.classList.contains('flex')) return;
     if (e.key === 'Escape') {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      closeGallery();
     } else if (e.key === 'ArrowLeft') {
       showImage((currentIndex - 1 + images.length) % images.length);
     } else if (e.key === 'ArrowRight') {
       showImage((currentIndex + 1) % images.length);
+    } else if (e.key === 'Tab') {
+      trapFocus(e);
     }
   });
 </script>

@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const VALID_ROLES = ['user', 'editor', 'admin', 'super_admin'] as const;
 type Role = typeof VALID_ROLES[number];
@@ -16,16 +17,16 @@ export const setUserRole = defineAction({
   }),
   handler: async (input) => {
     const currentUser = await getAdminUser();
-    if (!currentUser) throw new Error('Unauthorized');
-    if (currentUser.role !== 'super_admin') throw new Error('Only super_admin can change roles');
+    if (!currentUser) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    if (currentUser.role !== 'super_admin') return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Only super_admin can change roles');
 
     // Prevent self-demotion
     if (input.userId === currentUser.id) {
-      throw new Error('Cannot change your own role');
+      return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Cannot change your own role');
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+    if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
     // Get target user
     const targetUser = await db.select()
@@ -34,7 +35,7 @@ if (!db) throw new Error("Database not available");
       .limit(1)
       .get();
 
-    if (!targetUser) throw new Error('User not found');
+    if (!targetUser) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'User not found');
 
     // Update role
     await db.update(users)

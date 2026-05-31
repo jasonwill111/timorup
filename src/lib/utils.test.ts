@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 // Simple unit tests for utils
-import { cn, formatCurrency, formatDate, slugify } from '../lib/utils';
+import { cn, formatCurrency, formatDate, slugify, generateUniqueSlug } from '../lib/utils';
 
 describe('Utils', () => {
   it('should merge class names', () => {
@@ -102,5 +102,34 @@ describe('slugify', () => {
 
   it('handles Timor-Leste characters', () => {
     expect(slugify('Díli Timor-Leste')).toBe('dili-timor-leste');
+  });
+});
+
+describe('generateUniqueSlug', () => {
+  // nanoid(6) produces 6 chars: A-Za-z0-9_-
+  const NANOID_SUFFIX = /-[a-zA-Z0-9_-]{6}$/;
+
+  it('generates slug with nanoid suffix', () => {
+    const result = generateUniqueSlug('Hello World');
+    expect(result).toMatch(NANOID_SUFFIX);
+    expect(result).toMatch(/^hello-world-/);
+  });
+
+  it('produces different results for same input', () => {
+    const result1 = generateUniqueSlug('Test');
+    const result2 = generateUniqueSlug('Test');
+    expect(result1).not.toBe(result2);
+  });
+
+  it('handles special characters', () => {
+    const result = generateUniqueSlug('Café & Bar!');
+    expect(result).toMatch(NANOID_SUFFIX);
+    expect(result).toMatch(/^cafe-bar-/);
+  });
+
+  it('handles empty spaces', () => {
+    const result = generateUniqueSlug('  Hello  ');
+    expect(result).toMatch(NANOID_SUFFIX);
+    expect(result).toMatch(/^hello-/);
   });
 });

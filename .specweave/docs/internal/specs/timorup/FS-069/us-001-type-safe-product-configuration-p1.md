@@ -4,7 +4,7 @@ feature: FS-069
 title: "Type-Safe Product Configuration (P1)"
 status: completed
 priority: P1
-created: 2026-05-20
+created: 2026-05-27
 tldr: "**As a** developer."
 project: timorup
 ---

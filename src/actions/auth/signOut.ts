@@ -17,10 +17,11 @@ export const signOut = defineAction({
         });
       }
 
-      // Clear cookie
+      // Clear cookie with secure flags
       cookies.set('better-auth.session_token', '', {
         httpOnly: true,
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'strict',
         maxAge: 0,
         path: '/',
       });

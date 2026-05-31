@@ -3,72 +3,70 @@
 ## Base URL
 
 ```
-Production: https://TimorUp.jasonwill.workers.dev
+Production: https://timorup.jasonwill.workers.dev
 Local:      http://localhost:8787
 ```
 
 ## Authentication
 
-Most endpoints require authentication via better-auth session cookie.
+Most endpoints use Server Actions. Auth is via session cookie.
 
-### Auth Endpoints
+### Server Actions (Primary)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/sign-in` | Credential login |
-| POST | `/api/auth/sign-out` | Logout |
-| GET | `/api/auth/session` | Get current session |
+```typescript
+import { actions } from 'astro:actions';
 
-### Request Example
+// Sign in
+const result = await actions.auth.lightSignIn({ email, password });
 
-```bash
-curl -X POST http://localhost:8787/api/auth/sign-in \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@TimorUp.test","password":"TestPassword123!"}'
+// Create business
+const result = await actions.business.create(formData);
+
+// Admin operations
+const result = await actions.admin.listings.getAll();
 ```
 
-### Response
+### REST APIs (Limited)
 
-```json
-{
-  "success": true,
-  "user": { "id": "...", "email": "...", "name": "..." }
-}
-```
+REST APIs are used for public data caching only.
 
-### Error Response
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auth/session` | GET | Session check |
+| `/api/categories` | GET | Category data |
+| `/api/businesses` | GET | Business data (cached) |
+| `/api/health` | GET | Health check |
 
-```json
-{
-  "error": { "code": "SIGN_IN_ERROR", "message": "Invalid email or password" }
-}
-```
+## Server Actions
 
-## Key Endpoints
+### Auth Actions
 
-### Products
+| Action | Purpose |
+|--------|---------|
+| `actions.auth.lightSignIn` | User sign-in (Free Plan) |
+| `actions.auth.lightSignUp` | User sign-up |
+| `actions.auth.signOut` | User sign-out |
+| `actions.admin.auth.login` | Admin login |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/products?businessPageId=xxx` | List products |
-| POST | `/api/products` | Create product (admin) |
-| PUT | `/api/products?id=xxx` | Update product |
+### Admin Actions
 
-### Businesses
+| Action | Purpose |
+|--------|---------|
+| `actions.admin.listings.getAll` | List all listings |
+| `actions.admin.listings.create` | Create listing |
+| `actions.admin.listings.update` | Update listing |
+| `actions.admin.categories.*` | Category management |
+| `actions.admin.businesses.*` | Business management |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/businesses` | List all businesses |
-| POST | `/api/businesses` | Create business |
-| PUT | `/api/businesses?id=xxx` | Update business |
+### Business Actions
 
-### Media
+| Action | Purpose |
+|--------|---------|
+| `actions.business.create` | Create business |
+| `actions.business.update` | Update business |
+| `actions.business.like` | Like business |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/media` | Upload to R2 |
-
-## Response Format
+## REST API Response Format
 
 ```json
 {
@@ -81,9 +79,24 @@ Error:
 ```json
 {
   "success": false,
-  "error": { "message": "..." }
+  "error": { "code": "ERROR_CODE", "message": "..." }
+}
+```
+
+## Health Check
+
+```bash
+curl https://timorup.jasonwill.workers.dev/api/health
+```
+
+Response:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-05-30T...",
+  "environment": "production"
 }
 ```
 
 ---
-*Updated 2026-04-30*
+*Updated 2026-05-30*

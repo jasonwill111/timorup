@@ -2,11 +2,11 @@
 id: US-003
 feature: FS-001
 title: "Improve Test Coverage (MEDIUM)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-05-13
+created: 2026-05-27
 tldr: "**As a** QA engineer."
-project: TimorLink
+project: timorlink
 ---
 
 # US-003: Improve Test Coverage (MEDIUM)
@@ -21,9 +21,9 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [ ] **AC-US3-01**: Add tests for `sanitizeSearchTerm()` function
-- [ ] **AC-US3-02**: Add tests for `escapeHtml()` and `escapeHtmlServer()`
-- [ ] **AC-US3-03**: Add tests for `getPlanLimits()` subscription logic
+- [x] **AC-US3-01**: Add tests for `sanitizeSearchTerm()` function
+- [x] **AC-US3-02**: Add tests for `escapeHtml()` and `escapeHtmlServer()`
+- [x] **AC-US3-03**: Add tests for `getPlanLimits()` subscription logic
 
 ---
 
@@ -37,4 +37,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

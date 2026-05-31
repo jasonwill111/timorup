@@ -4,7 +4,7 @@ feature: FS-068
 title: "Add formFields to Categories Management (P1)"
 status: completed
 priority: P1
-created: 2026-05-19
+created: 2026-05-19T00:00:00.000Z
 tldr: "**As a** admin."
 project: timorup
 ---

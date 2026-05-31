@@ -1,73 +1,61 @@
-// Admin API Auth Helper
-// Uses KV directly for session instead of better-auth's getSession
-import { initAuthInstance } from '@/lib/auth';
-import { drizzle } from 'drizzle-orm/d1';
+// Admin Auth - unified via D1 sessions
+import { getAuthenticatedUserFromCookies, type AuthResult, type AuthError } from '@/lib/db/queries/auth';
+import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+
+const ADMIN_ROLES = ['admin', 'super_admin', 'editor'] as const;
+type AdminRole = typeof ADMIN_ROLES[number];
+
+// Re-export for use in other modules
+export { ADMIN_ROLES };
+export type { AdminRole };
 
 export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
-  role: 'user' | 'editor' | 'admin' | 'super_admin';
+  role: AdminRole;
 }
 
-export async function getAdminUser(request?: Request): Promise<AuthUser | null> {
-  try {
-    if (!request) return null;
+/**
+ * Require admin role - uses D1 sessions (same as getAuthenticatedUserFromCookies)
+ */
+export async function requireAdmin(
+  cookies: Record<string, string> | { get(name: string): { value: string | undefined } | undefined }
+): Promise<AuthResult | AuthError> {
+  const result = await getAuthenticatedUserFromCookies(cookies);
 
-    const { env } = await import('cloudflare:workers');
+  if ('error' in result) {
+    return result;
+  }
 
-    // Get token from cookie
-    const cookieHeader = request.headers.get('cookie');
-    const match = cookieHeader?.match(/better-auth\.session_token=([^;]+)/);
+  // Check admin role
+  if (!result.user || !ADMIN_ROLES.includes(result.user.role as AdminRole)) {
+    return { error: 'FORBIDDEN', requiredRole: 'admin' };
+  }
 
-    if (!match) return null;
+  return result;
+}
 
-    const token = match[1];
+/**
+ * Get admin user - returns null on any failure (backward compatible)
+ */
+export async function getAdminUser(cookies?: Record<string, string>): Promise<AuthUser | null> {
+  if (!cookies) return null;
 
-    // Read session directly from KV
-    if (!env.SESSION) return null;
+  const result = await requireAdmin(cookies);
 
-    const stored = await env.SESSION.get(token);
-    if (!stored) return null;
-
-    const data = JSON.parse(stored);
-    const session = data.session;
-    const kvUser = data.user;
-
-    if (!session || new Date(session.expiresAt) <= new Date()) return null;
-
-    // Initialize auth instance
-    initAuthInstance(env as Record<string, unknown>);
-
-    // Get role from database
-    if (!env.DB) return null;
-
-    const db = drizzle(env.DB as D1Database, { schema: { users } });
-    const dbUser = await db.select({ id: users.id, email: users.email, name: users.name, role: users.role })
-      .from(users)
-      .where(eq(users.id, session.userId))
-      .limit(1)
-      .get();
-
-    if (!dbUser) return null;
-
-    const role = (dbUser.role || 'user') as AuthUser['role'];
-    if (!['admin', 'super_admin', 'editor'].includes(role)) {
-      return null;
-    }
-
-    return {
-      id: dbUser.id,
-      email: dbUser.email || '',
-      name: dbUser.name,
-      role,
-    };
-  } catch (e) {
-    console.error('[AdminAuth] Error:', e);
+  if ('error' in result || !result.user) {
     return null;
   }
+
+  return {
+    id: result.userId,
+    email: result.user.email,
+    name: result.user.name || null,
+    role: result.user.role as AdminRole,
+  };
 }
 
 export function unauthorizedResponse() {

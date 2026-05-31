@@ -1,0 +1,17 @@
+{
+  "id": "0093-security-best-practices",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-29T04:33:48.108Z",
+  "lastActivity": "2026-05-29T04:33:48.110Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

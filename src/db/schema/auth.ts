@@ -1,59 +1,51 @@
-// Database schema for Better Auth
-import { sqliteTable, text, integer, customType, index } from 'drizzle-orm/sqlite-core';
+// Database schema for Better Auth - matching better-auth's expected column names (camelCase)
+// Reference: https://www.better-auth.com/docs/database-adapters/drizzle
 
-// Custom timestamp type that handles Date -> Unix timestamp conversion for D1
-const timestamp = () => customType<{ data: number; notNull: false; hasDefault: true }>({
-  dataType: () => 'integer',
-  toDriver: (value: unknown) => {
-    if (value === null || value === undefined) return null;
-    if (value instanceof Date) return Math.floor(value.getTime() / 1000);
-    return typeof value === 'number' ? value : null;
-  },
-  fromDriver: (value: unknown): number => value as number,
-});
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 
-// Sessions table - D1 compatible with custom timestamp handling
-export const sessions = sqliteTable('sessions', {
+// Sessions table - matches better-auth's expected schema
+export const sessions = sqliteTable('session', {
   id: text('id').primaryKey(),
-  expiresAt: integer('expires_at').notNull(),
+  expiresAt: integer('expiresAt').notNull(),
   token: text('token').notNull().unique(),
-  createdAt: timestamp()(),
-  updatedAt: timestamp()(),
-  ipAddress: text('ip_address'),
-  userAgent: text('user_agent'),
-  userId: text('user_id').notNull(),
-}, (sessions) => ({
-  userIdx: index('sessions_user_idx').on(sessions.userId),
+  createdAt: integer('createdAt').default(Math.floor(Date.now() / 1000)),
+  updatedAt: integer('updatedAt').default(Math.floor(Date.now() / 1000)),
+  ipAddress: text('ipAddress'),
+  userAgent: text('userAgent'),
+  userId: text('userId').notNull(),
+}, (t) => ({
+  userIdx: index('sessions_user_idx').on(t.userId),
+  tokenIdx: index('sessions_token_idx').on(t.token),
 }));
 
-// Accounts table (OAuth)
-export const accounts = sqliteTable('accounts', {
+// Accounts table (OAuth + password) - matches better-auth's expected schema
+export const accounts = sqliteTable('account', {
   id: text('id').primaryKey(),
-  accountId: text('account_id').notNull(),
-  providerId: text('provider_id').notNull(),
-  userId: text('user_id').notNull(),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  idToken: text('id_token'),
-  accessTokenExpiresAt: integer('access_token_expires_at'),
-  refreshTokenExpiresAt: integer('refresh_token_expires_at'),
+  userId: text('userId').notNull(),
+  accountId: text('accountId').notNull(),
+  providerId: text('providerId').notNull(),
+  accessToken: text('accessToken'),
+  refreshToken: text('refreshToken'),
+  idToken: text('idToken'),
+  accessTokenExpiresAt: integer('accessTokenExpiresAt'),
+  refreshTokenExpiresAt: integer('refreshTokenExpiresAt'),
   scope: text('scope'),
   password: text('password'),
-  createdAt: timestamp()(),
-  updatedAt: timestamp()(),
-}, (accounts) => ({
-  userIdx: index('accounts_user_idx').on(accounts.userId),
+  createdAt: integer('createdAt').default(Math.floor(Date.now() / 1000)),
+  updatedAt: integer('updatedAt').default(Math.floor(Date.now() / 1000)),
+}, (t) => ({
+  userIdx: index('accounts_user_idx').on(t.userId),
 }));
 
-// Verifications table
-export const verifications = sqliteTable('verifications', {
+// Verifications table - matches better-auth's expected schema
+export const verifications = sqliteTable('verification', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
-  expiresAt: integer('expires_at').notNull(),
-  createdAt: timestamp()(),
-}, (verifications) => ({
-  expiresIdx: index('verifications_expires_idx').on(verifications.expiresAt),
+  expiresAt: integer('expiresAt').notNull(),
+  createdAt: integer('createdAt').default(Math.floor(Date.now() / 1000)),
+}, (t) => ({
+  expiresIdx: index('verifications_expires_idx').on(t.expiresAt),
 }));
 
 // Export types

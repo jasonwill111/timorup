@@ -1,0 +1,19 @@
+{
+  "id": "0084-production-readiness",
+  "status": "completed",
+  "type": "feature",
+  "priority": "P1",
+  "created": "2026-05-27T07:45:39.261Z",
+  "lastActivity": "2026-05-27T12:33:00.014Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "readyForReviewAt": "2026-05-27T12:32:59.944Z",
+  "approvedAt": "2026-05-27T12:33:00.014Z"
+}

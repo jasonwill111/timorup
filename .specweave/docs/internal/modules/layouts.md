@@ -4,39 +4,73 @@
 
 ## Purpose
 
-Provides layouts functionality for the application.
+Astro page layouts with theme, header, and footer.
 
-## Overview
+## Layout Files
 
-The layouts module contains 2 files with approximately 0 lines of code.
+| File | Purpose |
+|------|---------|
+| `Layout.astro` | Main layout (theme, header, footer) |
+| `AdminLayout.astro` | Admin dashboard layout |
 
-## Dependencies
+## Layout Structure
 
-No dependencies detected.
+```
+src/layouts/
+├── Layout.astro         # Main site layout
+│   ├── Theme script (localStorage)
+│   ├── CSS animations
+│   ├── Header component
+│   └── Footer component
+└── AdminLayout.astro    # Admin dashboard
+    ├── Sidebar navigation
+    └── Content area
+```
 
-## Dependents
+## Theme System
 
-No dependencies detected.
+```astro
+---
+// Layout.astro
+const theme = Astro.cookies.get('theme')?.value || 'light';
+---
+<html data-theme={theme}>
+```
 
-## Integration Points
+### CSS Variables
 
-No external integration points detected.
+```css
+:root {
+  --color-background: #FDFBF7;
+  --color-foreground: #141413;
+  --color-primary: #FFD150;
+  --color-card: #ffffff;
+}
+[data-theme="dark"] {
+  --color-background: #0F1A2E;
+  --color-foreground: #E8E6DC;
+  --color-card: #152236;
+}
+```
 
-## Patterns Used
+## Header
 
-No specific patterns detected.
+- Logo + navigation
+- Theme toggle (light/dark)
+- Search bar
+- Mobile menu
+
+## Footer
+
+- Site links
+- Social media
+- Copyright
 
 ## Analysis Summary
 
-- **Files Analyzed**: 0
-- **Source Files**: 0
+- **Files Analyzed**: 2
+- **Source Files**: 2
 - **Test Files**: 0
-- **Total Exports**: 0
-
-## Documentation Status
-
-**Has README**: No
-**Has Tests**: No
 
 ---
-*Analysis generated on 2026-05-06*
+*Updated 2026-05-30*

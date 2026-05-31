@@ -2,11 +2,11 @@
 id: US-002
 feature: FS-001
 title: "Verify better-auth Session Cookie Config (MEDIUM)"
-status: not_started
+status: completed
 priority: P1
-created: 2026-05-13
+created: 2026-05-27
 tldr: "**As a** security engineer."
-project: TimorLink
+project: timorlink
 ---
 
 # US-002: Verify better-auth Session Cookie Config (MEDIUM)
@@ -21,9 +21,9 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [ ] **AC-US2-01**: `src/lib/auth.ts` â€?Add explicit `session.cookie` config with `httpOnly: true`, `secure: true`, `sameSite: 'lax'`
-- [ ] **AC-US2-02**: Session cookie maxAge set to 7 days (604800 seconds)
-- [ ] **AC-US2-03**: AUTH_SECRET validation at startup (minimum 32 characters)
+- [x] **AC-US2-01**: `src/lib/auth.ts` ï¿½?Add explicit `session.cookie` config with `httpOnly: true`, `secure: true`, `sameSite: 'lax'`
+- [x] **AC-US2-02**: Session cookie maxAge set to 7 days (604800 seconds)
+- [x] **AC-US2-03**: AUTH_SECRET validation at startup (minimum 32 characters)
 
 ---
 
@@ -37,4 +37,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

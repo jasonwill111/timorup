@@ -1,52 +1,42 @@
 // Products Create Server Action
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
+import { requireAdmin } from '@/lib/admin-auth';
 import { getDb } from '@/lib/db';
-import { products, businesses } from '@/db/schema';
-import { eq } from 'drizzle-orm';
-import { canCreateSku, canEditBusiness } from '@/lib/subscription';
-import { getAdminUser } from '@/lib/admin-auth';
+import { products } from '@/db/schema';
+import { canCreateSku } from '@/lib/subscription';
+import { verifyBusinessExists } from '@/lib/db/queries/businesses';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 const CreateProductSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional().nullable(),
   businessId: z.string().min(1),
-  categoryId: z.string().min(1),  // FK to product_categories.id
+  categoryId: z.string().min(1),
   productType: z.enum([
     'product', 'service', 'virtual', 'ticket', 'rental',
     'food', 'accommodation', 'automotive', 'healthcare',
     'education', 'beauty', 'event', 'subscription'
   ]).default('product'),
-  specifications: z.record(z.string(), z.unknown()).optional().nullable(),  // { pricing: { basePrice, currency, unit, unitOptions, ... } }
+  specifications: z.record(z.string(), z.unknown()).optional().nullable(),
   images: z.array(z.string()).optional().nullable(),
   featured: z.boolean().optional().default(false),
 });
 
 export const createProduct = defineAction({
   input: CreateProductSchema,
-  handler: async (input, { request }) => {
-    const user = await getAdminUser(request);
-    if (!user) {
-      return { success: false, error: { code: 'UNAUTHORIZED', message: 'Admin access required' } };
+  handler: async (input, { cookies }) => {
+    // Use requireAdmin for unified auth
+    const authResult = await requireAdmin(cookies);
+    if ('error' in authResult) {
+      return { success: false, error: { code: authResult.error, message: 'Admin access required' } };
     }
 
-    const db = await getDb();
-    if (!db) throw new Error("Database not available");
-
     try {
-      // Check business exists
-      const business = await db.select({ id: businesses.id })
-        .from(businesses)
-        .where(eq(businesses.id, input.businessId))
-        .limit(1)
-        .get() ?? undefined;
-
-      if (!business) {
+      // Verify business via query layer
+      const businessExists = await verifyBusinessExists(input.businessId);
+      if (!businessExists) {
         return { success: false, error: { message: 'Business not found' } };
       }
 
@@ -68,6 +58,9 @@ export const createProduct = defineAction({
         return JSON.stringify(val);
       };
 
+      const db = await getDb();
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
+
       await db.insert(products).values({
         id,
         slug: `prod-${id}`,
@@ -77,7 +70,7 @@ export const createProduct = defineAction({
         businessPageId: input.businessId,
         categoryId: input.categoryId,
         productType: finalProductType,
-        serviceType: finalProductType,  // Keep for compatibility
+        serviceType: finalProductType,
         specifications: safeStringify(input.specifications),
         images: input.images ? JSON.stringify(input.images) : '[]',
         featured: input.featured ? 1 : 0,

@@ -4,7 +4,7 @@ feature: FS-072
 title: "Input Error State"
 status: completed
 priority: P1
-created: 2026-05-20
+created: 2026-05-27
 tldr: "**As a** user **I want** to see clear error feedback on invalid form inputs **So that** I can quickly identify and correct mistakes."
 project: timorup
 ---

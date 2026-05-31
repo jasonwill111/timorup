@@ -1,35 +1,31 @@
+import { getErrorMessage } from '@/lib/errors';
 // Business Server Action - Create
 import { defineAction } from 'astro:actions';
-import { z } from 'zod';
-import { getDb } from '@/lib/db';
-import { businesses } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import * as z from 'zod';
 import { getAuthenticatedUserFromCookies } from '@/lib/db/queries/auth';
+import { getBusinessByOwner, slugExists, createBusiness } from '@/lib/db/queries/businesses';
+import { emailSchema, requiredString } from '@/lib/schemas/common';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 export const create = defineAction({
   accept: 'form',
   input: z.object({
-    title: z.string().min(1, 'Title is required'),
-    categoryId: z.string().min(1, 'Category is required'),
-    contactName: z.string().min(1, 'Contact name is required'),
-    contactNumber: z.string().min(1, 'Phone number is required'),
-    email: z.email({ error: 'Valid email required' }),
+    title: requiredString('Title is required'),
+    categoryId: requiredString('Category is required'),
+    contactName: requiredString('Contact name is required'),
+    contactNumber: requiredString('Phone number is required'),
+    email: emailSchema,
     slug: z.string().optional(),
     address: z.string().optional(),
     aboutUs: z.string().optional(),
-    tags: z.string().optional(), // JSON string
-    openingHours: z.string().optional(), // JSON string
+    tags: z.string().optional(),
+    openingHours: z.string().optional(),
     locationLat: z.number().optional(),
     locationLng: z.number().optional(),
     registrationUrl: z.string().url().optional().or(z.string().optional()),
-    
+
     yearOfEstablishment: z.number().optional(),
-    socialLinks: z.string().optional(), // JSON string
+    socialLinks: z.string().optional(),
     countryCode: z.string().optional(),
     publishNow: z.boolean().optional(),
   }),
@@ -40,17 +36,10 @@ export const create = defineAction({
     }
 
     const userId = authResult.userId;
-    const db = await getDb();
-if (!db) throw new Error("Database not available");
 
     try {
-      // Check one-listing-per-user limit
-      const existingListing = await db.select()
-        .from(businesses)
-        .where(eq(businesses.ownerId, userId))
-        .limit(1)
-        .get() ?? undefined;
-
+      // Check one-listing-per-user limit via query layer
+      const existingListing = await getBusinessByOwner(userId);
       if (existingListing) {
         return {
           success: false,
@@ -61,20 +50,14 @@ if (!db) throw new Error("Database not available");
         };
       }
 
-      // Generate slug
+      // Generate slug and check uniqueness via query layer
       const businessSlug = input.slug || input.title.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '')
         .replace(/-+/g, '-');
 
-      // Check slug uniqueness
-      const existingSlug = await db.select()
-        .from(businesses)
-        .where(eq(businesses.slug, businessSlug))
-        .limit(1)
-        .get() ?? undefined;
-
-      if (existingSlug) {
+      const slugInUse = await slugExists(businessSlug);
+      if (slugInUse) {
         return {
           success: false,
           error: { message: 'A page with this name already exists. Please choose a different name.' }
@@ -111,13 +94,8 @@ if (!db) throw new Error("Database not available");
         }
       }
 
-      const id = `biz-${Date.now()}`;
-
-      // Set initial status - pending_payment (requires subscription)
-      const pageStatus = 'pending_payment';
-
-      await db.insert(businesses).values({
-        id,
+      // Create via query layer
+      const result = await createBusiness({
         title: input.title,
         slug: businessSlug,
         ownerId: userId,
@@ -134,14 +112,12 @@ if (!db) throw new Error("Database not available");
         locationLng: input.locationLng || null,
         registrationUrl: input.registrationUrl || null,
         yearOfEstablishment: input.yearOfEstablishment || null,
-        bannerImageId: null,
-        profileImageId: null,
         socialLinks: parsedSocialLinks ? JSON.stringify(parsedSocialLinks) : null,
-        status: pageStatus,
+        status: 'pending_payment',  // requires subscription
         subscriptionStatus: 'none',
-      }).run();
+      });
 
-      return { success: true, data: { id, title: input.title, slug: businessSlug } };
+      return { success: true, data: result };
     } catch (error) {
       console.error('Create page error:', error);
       return { success: false, error: { message: getErrorMessage(error) || 'Failed to create page' } };

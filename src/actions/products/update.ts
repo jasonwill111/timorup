@@ -6,15 +6,12 @@ import { products } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { canEditBusiness } from '@/lib/subscription';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const VALID_PRODUCT_TYPES = [
   'product', 'service', 'virtual', 'ticket', 'rental', 'subscription'
 ];
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 const UpdateProductSchema = z.object({
   id: z.string(),
@@ -51,7 +48,7 @@ export const updateProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
 
     try {
       // Check grace period if updating business association
@@ -116,7 +113,7 @@ export const deleteProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
     try {
       await db.delete(products).where(eq(products.id, input.id)).run();
       return { success: true };

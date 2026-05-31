@@ -201,7 +201,8 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
 
     setLoading(true);
 
-    const { data, error } = await actions.auth.signUp({
+    // Use lightAuth.signUp for Free Plan compatibility
+    const { data, error } = await actions.auth.lightSignUp({
       email: email,
       password: password,
       name: name,

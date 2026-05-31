@@ -1,0 +1,19 @@
+{
+  "id": "0080-expiry-enforcer",
+  "status": "completed",
+  "completed_at": "2026-05-27T09:15:00Z",
+  "started_at": "2026-05-27T09:30:00Z",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-27T01:11:08.274Z",
+  "lastActivity": "2026-05-27T01:11:08.275Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

@@ -68,6 +68,7 @@ import '../../styles/globals.css';
 
           <button
             type="submit"
+            id="submit-btn"
             class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity"
           >
             Sign In
@@ -116,12 +117,13 @@ import '../../styles/globals.css';
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    errorMsg!.classList.add('hidden');
 
     const formData = new FormData(form);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    const { data, error } = await actions.auth.signIn({ email, password });
+    const { data, error } = await actions.auth.lightSignIn({ email, password });
 
     if (error || !data?.success) {
       const errorMessage = error?.message || data?.error?.message || 'Invalid email or password';
@@ -130,11 +132,16 @@ import '../../styles/globals.css';
       return;
     }
 
-    // Check admin role
-    if (!['admin', 'super_admin', 'editor'].includes(data.user?.role)) {
-      errorMsg!.textContent = 'Access denied. Admin role required.';
+    // Check if user is admin
+    if (data.user?.role !== 'admin') {
+      errorMsg!.textContent = 'Access denied. Admin privileges required.';
       errorMsg!.classList.remove('hidden');
       return;
+    }
+
+    // Set session cookie
+    if (data.token) {
+      document.cookie = `better-auth.session_token=${data.token}; path=/; SameSite=Lax`;
     }
 
     window.location.href = '/admin';

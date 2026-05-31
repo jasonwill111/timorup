@@ -2,6 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const AVAILABLE_TOOLS = [
   {
@@ -35,7 +36,7 @@ export const aiTools = {
   list: defineAction({
     handler: async () => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       return { success: true, data: AVAILABLE_TOOLS };
     },
@@ -49,11 +50,11 @@ export const aiTools = {
     }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       // Validate tool exists
       const tool = AVAILABLE_TOOLS.find(t => t.id === input.toolId);
-      if (!tool) throw new Error('Invalid tool ID');
+      if (!tool) return createErrorResponse(ErrorCode.VALIDATION_INVALID_INPUT, 'Invalid tool ID');
 
       // Placeholder - actual AI integration would go here
       return {

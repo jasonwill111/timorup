@@ -165,11 +165,26 @@ if (!db) throw new Error("Database not available");
     const allCategories = await db.select().from(businessCategories).all() as unknown[];
     allCategories.forEach((cat) => categoryMap.set(cat.id, cat.name));
 
-    const responseData = paginated.map((biz) => ({
-      ...biz,
-      tags: biz.tags ? (typeof biz.tags === 'string' ? JSON.parse(biz.tags) : biz.tags) : [],
-      categoryName: categoryMap.get(biz.categoryId) || 'Business',
-    }));
+    const responseData = paginated.map((biz) => {
+      let parsedTags: string[] = [];
+      if (biz.tags) {
+        if (typeof biz.tags === 'string') {
+          try {
+            parsedTags = JSON.parse(biz.tags);
+          } catch {
+            // Fallback: split comma-separated string
+            parsedTags = biz.tags.split(',').map(t => t.trim()).filter(Boolean);
+          }
+        } else if (Array.isArray(biz.tags)) {
+          parsedTags = biz.tags as string[];
+        }
+      }
+      return {
+        ...biz,
+        tags: parsedTags,
+        categoryName: categoryMap.get(biz.categoryId) || 'Business',
+      };
+    });
 
     const response = new Response(JSON.stringify({
       success: true,

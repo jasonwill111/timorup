@@ -1,0 +1,19 @@
+{
+  "id": "0083-analytics-tracking",
+  "status": "completed",
+  "completed_at": "2026-05-27T09:47:00Z",
+  "started_at": "2026-05-27T09:35:00Z",
+  "priority": "P2",
+  "created": "2026-05-27T01:42:59.903Z",
+  "lastActivity": "2026-05-27T01:42:59.904Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp",
+  "type": "feature"
+}

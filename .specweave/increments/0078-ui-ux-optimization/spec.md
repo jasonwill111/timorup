@@ -1,11 +1,11 @@
 ---
 increment: 0078-ui-ux-optimization
-title: "UI/UX Optimization"
+title: UI/UX Optimization
 type: feature
 priority: P1
 status: completed
-completed_at: 2026-05-27T01:00:00Z
-created: 2026-05-25
+completed_at: 2026-05-27T01:00:00.000Z
+created: 2026-05-25T00:00:00.000Z
 structure: user-stories
 ---
 

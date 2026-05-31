@@ -6,6 +6,8 @@ import { blogPosts } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 const createBlogSchema = z.object({
   title: z.string().min(1),
@@ -31,10 +33,10 @@ export const blogs = {
   list: defineAction({
     handler: async () => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const posts = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt)).all();
 
       return { success: true, data: posts };
@@ -46,18 +48,19 @@ if (!db) throw new Error("Database not available");
     input: createBlogSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const slug = input.slug || input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + nanoid(6);
+      const sanitizedContent = sanitizeHtml(input.content);
 
       const newPost = {
         id: nanoid(),
         title: input.title,
         slug,
         excerpt: input.excerpt || null,
-        content: input.content,
+        content: sanitizedContent,
         status: input.status,
         tags: input.tags ? JSON.stringify(input.tags) : null,
         coverImageId: input.coverImageId || null,
@@ -80,17 +83,17 @@ if (!db) throw new Error("Database not available");
     input: updateBlogSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const { id, ...data } = input;
 
       const updateData: Record<string, unknown> = {};
       if (data.title !== undefined) updateData.title = data.title;
       if (data.slug !== undefined) updateData.slug = data.slug;
       if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
-      if (data.content !== undefined) updateData.content = data.content;
+      if (data.content !== undefined) updateData.content = sanitizeHtml(data.content);
       if (data.status !== undefined) {
         updateData.status = data.status;
         if (data.status === 'published') {
@@ -119,10 +122,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       await db.delete(blogPosts).where(eq(blogPosts.id, input.id)).run();
 
       return { success: true, message: 'Blog post deleted' };

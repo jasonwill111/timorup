@@ -4,7 +4,7 @@ feature: FS-072
 title: "AuthCard Real-Time Validation"
 status: completed
 priority: P1
-created: 2026-05-20
+created: 2026-05-27
 tldr: "**As a** user **I want** immediate feedback when I enter invalid data in auth forms **So that** I can fix errors before submitting."
 project: timorup
 ---

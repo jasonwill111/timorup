@@ -4,11 +4,8 @@ import { z } from 'zod';
 import { getDb } from '@/lib/db';
 import { businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 export const like = defineAction({
   accept: 'form',
@@ -18,7 +15,7 @@ export const like = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
 
     try {
       const business = await db.select()

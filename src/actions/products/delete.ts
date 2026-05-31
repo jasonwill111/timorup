@@ -5,11 +5,8 @@ import { getDb } from '@/lib/db';
 import { products } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 export const deleteProduct = defineAction({
   input: z.object({
@@ -22,7 +19,7 @@ export const deleteProduct = defineAction({
     }
 
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
     try {
       await db.delete(products).where(eq(products.id, input.id)).run();
       return { success: true };

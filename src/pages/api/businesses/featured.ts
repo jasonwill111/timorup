@@ -47,7 +47,7 @@ if (!db) throw new Error("Database not available");
   }));
 
   // Cache in production: stale-while-revalidate for 60 seconds (featured changes less often)
-  const cacheHeaders = process.env.NODE_ENV === 'production'
+  const cacheHeaders = import.meta.env.PROD
     ? { 'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=600' }
     : { 'Cache-Control': 'no-store' };
 

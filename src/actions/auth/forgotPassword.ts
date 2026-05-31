@@ -8,7 +8,7 @@ const RATE_LIMIT_WINDOW = 60 * 1000;
 const MAX_REQUESTS = 5;
 
 function checkRateLimit(identifier: string): boolean {
-  if (process.env.NODE_ENV === 'test' || process.env.TEST_MODE === 'true') {
+  if (import.meta.env.DEV || import.meta.env.TEST) {
     return true;
   }
   const now = Date.now();

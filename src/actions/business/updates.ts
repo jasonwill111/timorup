@@ -5,11 +5,9 @@ import { getDb } from '@/lib/db';
 import { businesses, latestUpdates } from '@/db/schema';
 import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
+import { sanitizeHtml } from '@/lib/sanitize';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 export const createUpdate = defineAction({
   accept: 'form',
@@ -20,7 +18,7 @@ export const createUpdate = defineAction({
   }),
   handler: async (input, { cookies }) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
 
     try {
       // Authenticate
@@ -72,16 +70,17 @@ if (!db) throw new Error("Database not available");
       }
 
       const id = `upd-${Math.floor(Date.now() / 1000)}-${Math.random().toString(36).substr(2, 9)}`;
+      const sanitizedContent = sanitizeHtml(input.content);
 
       await db.insert(latestUpdates).values({
         id,
         type: 'businesses',
         typeId: business.id,
-        content: input.content,
+        content: sanitizedContent,
         imageIds: input.images ? JSON.stringify(input.images) : null,
       }).run();
 
-      return { success: true, data: { id, content: input.content } };
+      return { success: true, data: { id, content: sanitizedContent } };
     } catch (error) {
       return { success: false, error: { message: getErrorMessage(error) } };
     }
@@ -95,7 +94,7 @@ export const listUpdates = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
 
     try {
       const business = await db.select()
@@ -136,7 +135,7 @@ export const deleteUpdate = defineAction({
   }),
   handler: async (input, { cookies }) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
 
     try {
       const authApi = (await initAuth()).api;

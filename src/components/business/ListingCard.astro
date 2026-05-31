@@ -53,7 +53,7 @@ const typeLabel = listingTypeLabels[listingType] || listingType;
 ---
 
 <a href={href} class:list={["block group cursor-pointer", className]} data-card>
-  <div class="relative bg-card rounded-lg border shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 overflow-hidden">
+  <div class="relative bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden cursor-pointer">
     <!-- Thumbnail -->
     <div class:list={["aspect-square relative overflow-hidden bg-gradient-to-br", gradientClass]}>
       {thumbnail ? (
@@ -87,7 +87,7 @@ const typeLabel = listingTypeLabels[listingType] || listingType;
       <div class="flex items-center justify-between mt-0.5">
         {location && (
           <span class="flex items-center gap-0.5 text-[10px] sm:text-xs text-muted-foreground truncate">
-            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-2 h-2 sm:w-2.5 sm:h-2.5 flex-shrink-0 text-muted-foreground/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
             </svg>
             <span class="truncate">{location}</span>

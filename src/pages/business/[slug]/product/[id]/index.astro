@@ -154,7 +154,7 @@ const productTypeLabels: Record<string, string> = {
                     class={`thumbnail-btn w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${index === 0 ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'}`}
                     data-index={index}
                   >
-                    <img src={`/api/media/${img.mediaId}`} alt="" class="w-full h-full object-cover" />
+                    <img src={`/api/media/${img.mediaId}`} aria-hidden="true" alt="" class="w-full h-full object-cover" />
                   </button>
                 ))}
                 <button id="scroll-right" class="flex-shrink-0 w-10 h-20 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
@@ -189,7 +189,7 @@ const productTypeLabels: Record<string, string> = {
               <a href={`/business/${slug}`} class="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-80 transition-opacity">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden border-2 border-background shadow-sm flex-shrink-0">
                   {business.profileImageId ? (
-                    <img src={`/api/media/${business.profileImageId}`} alt="" class="w-full h-full object-cover" />
+                    <img src={`/api/media/${business.profileImageId}`} aria-hidden="true" alt="" class="w-full h-full object-cover" />
                   ) : (
                     <span class="text-sm font-bold text-white">{business.title.charAt(0)}</span>
                   )}

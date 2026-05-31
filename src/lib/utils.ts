@@ -4,6 +4,7 @@
 
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { nanoid } from 'nanoid'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -70,6 +71,15 @@ export function slugify(text: string): string {
     .trim()
     .replace(/\s+/g, '-')             // Replace spaces with hyphens
     .replace(/-+/g, '-');             // Collapse multiple hyphens
+}
+
+/**
+ * Generate a unique slug by appending nanoid suffix
+ * Use for creating slugs that won't collide with existing ones
+ */
+export function generateUniqueSlug(title: string): string {
+  const base = slugify(title).replace(/-+/g, '-').replace(/^-|-$/g, '');
+  return `${base}-${nanoid(6)}`;
 }
 
 /**

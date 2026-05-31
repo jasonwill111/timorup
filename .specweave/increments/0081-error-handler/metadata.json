@@ -1,0 +1,19 @@
+{
+  "id": "0081-error-handler",
+  "status": "completed",
+  "completed_at": "2026-05-27T09:23:00Z",
+  "started_at": "2026-05-27T09:20:00Z",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-27T01:17:53.634Z",
+  "lastActivity": "2026-05-27T01:17:53.634Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

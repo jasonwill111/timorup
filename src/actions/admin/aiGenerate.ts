@@ -2,7 +2,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
 import { getAdminUser } from '@/lib/admin-auth';
-import { agents } from '@/mastra/agents';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const AI_TIMEOUT = 120000; // 2 minutes
 
@@ -68,11 +68,23 @@ export const aiGenerate = defineAction({
   handler: async (input, context) => {
     const request = context?.request;
     if (!request) {
-      throw new Error('Request context not available');
+      return createErrorResponse(ErrorCode.SERVER_ERROR, 'Request context not available');
     }
 
     const user = await getAdminUser(request);
-    if (!user) throw new Error('Unauthorized');
+    if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+
+    // Lazy load agents to avoid Cloudflare Workers Node.js module issues
+    // NOTE: Mastra uses Node.js modules (node:os) which don't work in Workers
+    // Return an error for now - AI generation requires a different approach in Workers
+    let agents: typeof import('@/mastra/agents').agents | null = null;
+    try {
+      const mod = await import('@/mastra/agents');
+      agents = mod.agents;
+    } catch (e) {
+      console.error('[AI Generate] Failed to load Mastra agents:', e);
+      return { success: false, error: { code: 'AI_UNAVAILABLE', message: 'AI generation is temporarily unavailable in this environment' } };
+    }
 
     const data = input.data as Record<string, unknown>;
     const userMessage = buildUserMessage(input.type, data);

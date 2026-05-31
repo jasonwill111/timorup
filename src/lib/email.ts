@@ -70,7 +70,7 @@ export class SendGridProvider implements EmailProvider {
 // Null provider for development (logs to console)
 export class NullEmailProvider implements EmailProvider {
   async send(options: EmailOptions): Promise<void> {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('📧 [DEV] Email:', {
         to: options.to,
         subject: options.subject,
@@ -81,22 +81,22 @@ export class NullEmailProvider implements EmailProvider {
 
 // Factory function to get email provider based on config
 export function getEmailProvider(): EmailProvider {
-  const provider = process.env.EMAIL_PROVIDER || 'null';
-  
+  const provider = import.meta.env.EMAIL_PROVIDER || 'null';
+
   switch (provider) {
     case 'smtp':
       return new SMTPProvider({
-        host: process.env.SMTP_HOST || 'smtp.example.com',
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || '',
-        from: process.env.EMAIL_FROM || 'noreply@TimorUp.com',
+        host: import.meta.env.SMTP_HOST || 'smtp.example.com',
+        port: parseInt(import.meta.env.SMTP_PORT || '587'),
+        user: import.meta.env.SMTP_USER || '',
+        pass: import.meta.env.SMTP_PASS || '',
+        from: import.meta.env.EMAIL_FROM || 'noreply@TimorUp.com',
       });
-    
+
     case 'sendgrid':
       return new SendGridProvider({
-        apiKey: process.env.SENDGRID_API_KEY || '',
-        from: process.env.EMAIL_FROM || 'noreply@TimorUp.com',
+        apiKey: import.meta.env.SENDGRID_API_KEY || '',
+        from: import.meta.env.EMAIL_FROM || 'noreply@TimorUp.com',
       });
     
     default:

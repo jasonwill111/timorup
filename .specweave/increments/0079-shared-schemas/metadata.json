@@ -1,0 +1,18 @@
+{
+  "id": "0079-shared-schemas",
+  "status": "completed",
+  "started_at": "2026-05-27T08:42:00Z",
+  "type": "refactor",
+  "priority": "P2",
+  "created": "2026-05-27T08:40:00Z",
+  "lastActivity": "2026-05-27T08:40:00Z",
+  "testMode": "TDG",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

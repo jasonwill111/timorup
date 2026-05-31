@@ -5,16 +5,27 @@ import { initAuth } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
+import { ADMIN_ROLES } from '@/lib/admin-auth';
 
 export const login = defineAction({
-  accept: 'form',
+  accept: 'json',
   input: z.object({
     email: z.email({ error: 'Valid email required' }),
     password: z.string().min(1, 'Password required'),
   }),
   handler: async (input) => {
     try {
-      const auth = await initAuth();
+      let env: Record<string, unknown>;
+      try {
+        const { env: workersEnv } = await import('cloudflare:workers');
+        env = workersEnv as Record<string, unknown>;
+      } catch {
+        env = globalThis as Record<string, unknown>;
+      }
+
+      const { initAuth } = await import('@/lib/auth');
+      const auth = await initAuth(env);
       const result = await auth.api.signInEmail({
         body: { email: input.email, password: input.password }
       });
@@ -25,7 +36,7 @@ export const login = defineAction({
 
       // Query DB for role (better-auth doesn't return custom fields)
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const dbUser = await db.select({ role: users.role })
         .from(users)
         .where(eq(users.id, result.user.id))
@@ -34,7 +45,7 @@ if (!db) throw new Error("Database not available");
 
       const userRole = dbUser?.role || 'user';
 
-      if (!['admin', 'super_admin', 'editor'].includes(userRole)) {
+      if (!ADMIN_ROLES.includes(userRole)) {
         return { success: false, error: { message: 'Access denied. Admin role required.' } };
       }
 
@@ -56,6 +67,14 @@ if (!db) throw new Error("Database not available");
       };
     } catch (error) {
       console.error('Admin sign in error:', error);
+      // Return detailed error for debugging
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('no such table')) {
+        return { success: false, error: { message: 'Database schema error - missing tables' } };
+      }
+      if (errorMessage.includes('D1') || errorMessage.includes('database')) {
+        return { success: false, error: { message: 'Database connection error' } };
+      }
       return { success: false, error: { message: 'Failed to sign in as admin' } };
     }
   },

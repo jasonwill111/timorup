@@ -2,7 +2,7 @@
 
 ## TimorUp
 
-A business listing platform for East Timor, supporting Business, Government, and Non-Profit organizations.
+A business directory platform for Timor-Leste, supporting Business, Government, Non-Profit organizations, and Classified Listings.
 
 ## Quick Start
 
@@ -10,9 +10,9 @@ A business listing platform for East Timor, supporting Business, Government, and
 # Install dependencies
 pnpm install
 
-# Local development (requires wrangler for D1/R2)
+# Local development
 pnpm build
-npx wrangler dev --config wrangler.jsonc --local dist/server/entry.mjs
+npx wrangler dev --local --port 8787
 
 # Production build
 pnpm build
@@ -22,35 +22,48 @@ git push  # CI/CD handles deployment
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────�?�?                 Cloudflare Workers                  �?�? ┌─────────────�? ┌─────────────�? ┌─────────────�? �?�? �?  Admin    �? �?  Auth     �? �?  Business  �? �?�? �?  Panel    �? �?  API      �? �?  Pages     �? �?�? └─────────────�? └─────────────�? └─────────────�? �?└─────────────────────────────────────────────────────�?           �?               �?               �?      ┌────┴────�?     ┌────┴────�?     ┌────┴────�?      �?  D1    �?     �?  KV    �?     �?  R2    �?      �?(SQLite)�?     �?Session)�?     �?Media)  �?      └─────────�?     └─────────�?     └─────────�?```
+Cloudflare Workers (Edge)
+├── Astro SSR Pages
+│   ├── Public pages (cached)
+│   ├── Admin dashboard
+│   └── Server Actions
+├── D1 Database
+│   ├── Auth tables (better-auth)
+│   └── Business tables (Drizzle)
+├── KV Storage
+│   └── Session cache
+└── R2 Storage
+    └── Media files
+```
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Framework | Astro 6.2.1 (Server Islands) |
+| Framework | Astro 6.4.2 (Server Islands) |
 | Runtime | Cloudflare Workers |
 | Database | D1 (SQLite at edge) |
-| Auth | better-auth 1.6.9 |
+| Auth | light-auth (Free) / better-auth (Paid) |
 | ORM | Drizzle 0.45.2 |
 | Styling | TailwindCSS v4 |
 | Editor | TipTap 3.x |
+| Icons | Lucide |
 
 ## Key Features
 
-- Multi-entity support (Business/Gov/NGO)
-- Industry-specific SKU specifications
-- Admin panel with full CRUD
-- OAuth authentication (Google, Facebook)
-- R2 media storage with Cloudflare Images
-- Server Islands for minimal server costs
-- Weekly auto-cleanup for expired data
+- **Multi-entity support**: Business, Government, Non-Profit, Listings
+- **Subscription system**: Free tier + paid plans with SKU limits
+- **AI content generation**: MiniMax-powered listing/blog creation
+- **Admin dashboard**: Full CRUD for all entities
+- **Server Islands**: Minimal server costs
 
 ## Deployment
 
-- **Production URL**: https://TimorUp.jasonwill.workers.dev
-- **Database**: TimorUp-db (D1)
-- **Storage**: TimorUp-media (R2)
+| Environment | URL |
+|------------|-----|
+| Production | https://timorup.jasonwill.workers.dev |
+| Database | TimorUp-db (D1) |
+| Storage | TimorUp-media (R2) |
 
 ---
-*Generated 2026-04-30*
+*Updated 2026-05-30*

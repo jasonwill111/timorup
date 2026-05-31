@@ -2,7 +2,6 @@
 import '../styles/globals.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import MotionAnimations from '../components/ui/MotionAnimations.astro';
 
 interface Props {
   title: string;
@@ -92,9 +91,9 @@ const websiteSchema = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- Preload critical fonts for LCP improvement -->
-    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/Oswald-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/sora-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Preconnect to external resources (reduce DNS/connection time) -->
     <link rel="preconnect" href="https://TimorUp-media.r2.cloudflarestorage.com" crossorigin />
@@ -179,13 +178,12 @@ const websiteSchema = {
     <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
     {structuredData && <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />}
   </head>
-  <body class="min-h-screen bg-background font-inter antialiased flex flex-col">
+  <body class="min-h-screen bg-background font-sans antialiased flex flex-col">
       <Header currentPath={currentPath} />
       <main class="flex-1">
         <slot />
       </main>
       <Footer />
-      <MotionAnimations />
   </body>
 </html>
 

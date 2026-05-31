@@ -47,14 +47,14 @@ const { id, placeholder = 'Start typing...', initialContent = '', class: classNa
     const { default: Link } = tiptapLink;
     const { default: Placeholder } = tiptapPlaceholder;
 
-    const placeholder = element.dataset.placeholder || 'Start typing...';
+    const placeholderText = element.dataset.placeholder || 'Start typing...';
 
     const editor = new Editor({
       element,
       extensions: [
         StarterKit.configure({ heading: { levels: [2, 3] } }),
         Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
-        Placeholder.configure({ placeholder, emptyEditorClass: 'is-editor-empty' }),
+        Placeholder.configure({ placeholder: placeholderText, emptyEditorClass: 'is-editor-empty' }),
       ],
       content: textarea?.value || '',
       onUpdate: ({ editor }) => {
@@ -76,7 +76,7 @@ const { id, placeholder = 'Start typing...', initialContent = '', class: classNa
   }
 
   // Global function for manual initialization
-  (window as any).initTipTapEditor = async function(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
+  async function initTipTapEditor(element: HTMLElement, options: { placeholder?: string; content?: string } = {}) {
     const textareaId = `${element.id}-content`;
 
     // Create hidden textarea if not exists
@@ -110,17 +110,20 @@ const { id, placeholder = 'Start typing...', initialContent = '', class: classNa
         Placeholder.configure({ placeholder: options.placeholder || 'Start typing...', emptyEditorClass: 'is-editor-empty' }),
       ],
       content: options.content || '',
-      onUpdate: ({ editor }) => { textarea.value = editor.getHTML(); },
+      onUpdate: ({ editor }) => { if (textarea) textarea.value = editor.getHTML(); },
       editorProps: {
         attributes: { class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] px-3 py-2' },
       },
     });
 
     // Initial sync
-    textarea.value = editor.getHTML();
+    if (textarea) textarea.value = editor.getHTML();
 
     return editor;
-  };
+  }
+
+  // Expose to window
+  window.initTipTapEditor = initTipTapEditor;
 </script>
 
 <style>

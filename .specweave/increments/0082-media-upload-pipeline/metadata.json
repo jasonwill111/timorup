@@ -1,0 +1,19 @@
+{
+  "id": "0082-media-upload-pipeline",
+  "status": "completed",
+  "completed_at": "2026-05-27T09:33:00Z",
+  "started_at": "2026-05-27T09:25:00Z",
+  "type": "refactor",
+  "priority": "P1",
+  "created": "2026-05-27T01:26:18.755Z",
+  "lastActivity": "2026-05-27T01:26:18.756Z",
+  "testMode": "TDD",
+  "coverageTarget": 80,
+  "feature_id": null,
+  "epic_id": null,
+  "externalLinks": {},
+  "planning": {
+    "parallel": false
+  },
+  "project": "TimorUp"
+}

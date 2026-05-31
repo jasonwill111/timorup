@@ -174,7 +174,6 @@ const urlParams = new URL(Astro.request.url).searchParams;
 
 <script>
   import { actions } from 'astro:actions';
-  import { dropdownIn, dropdownOut, slideInLeft } from '@/lib/motion-utils';
 
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
@@ -187,24 +186,29 @@ const urlParams = new URL(Astro.request.url).searchParams;
       mobileMenu.classList.remove('hidden');
       const mobileNav = mobileMenu.querySelector('nav');
       if (mobileNav) {
-        slideInLeft(mobileNav);
+        mobileNav.classList.add('animate-in');
       }
     } else {
       mobileMenu.classList.add('hidden');
     }
   });
 
-  // Dropdown menu animations
+  // Dropdown menu animations via CSS classes
   const dropdownGroups = document.querySelectorAll('.group');
   dropdownGroups.forEach(group => {
     const dropdown = group.querySelector('div:last-child');
     if (dropdown) {
       group.addEventListener('mouseenter', () => {
         dropdown.classList.remove('hidden');
-        dropdownIn(dropdown);
+        dropdown.classList.add('dropdown-enter');
       });
       group.addEventListener('mouseleave', () => {
-        dropdownOut(dropdown, () => dropdown.classList.add('hidden'));
+        dropdown.classList.remove('dropdown-enter');
+        dropdown.classList.add('dropdown-exit');
+        setTimeout(() => {
+          dropdown.classList.add('hidden');
+          dropdown.classList.remove('dropdown-exit');
+        }, 150);
       });
     }
   });

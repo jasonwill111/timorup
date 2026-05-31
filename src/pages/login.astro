@@ -230,11 +230,15 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
 
     setLoading(true);
 
-    const formData = new FormData(form);
-    const { data, error } = await actions.auth.signIn({
+    // Get rememberMe value from checkbox
+    const rememberMeCheckbox = document.getElementById('remember-me') as HTMLInputElement;
+    const rememberMe = rememberMeCheckbox?.checked || false;
+
+    // Use lightAuth.signIn for Free Plan compatibility
+    const { data, error } = await actions.auth.lightSignIn({
       email: email,
       password: password,
-      rememberMe: formData.get('rememberMe') === 'on',
+      rememberMe: rememberMe,
     });
 
     setLoading(false);
@@ -245,7 +249,12 @@ import PasswordInput from '../components/forms/PasswordInput.astro';
       return;
     }
 
-    window.location.assign('/account');
+    // Set session cookie (match the name used by auth verification)
+    if (data?.token) {
+      const cookieExpiry = rememberMe ? 7 * 24 * 60 * 60 : undefined;
+      document.cookie = `better-auth.session_token=${data.token}; path=/; max-age=${cookieExpiry || ''}; SameSite=Lax`;
+      window.location.assign('/account');
+    }
   });
 </script>
 

@@ -103,7 +103,7 @@ const pageDesc = org.aboutUs?.substring(0, 160) || `${org.title} - Non-Profit in
     <!-- Banner -->
     <div class="relative h-48 md:h-64 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
       {org.bannerImageId && (
-        <img src={`/api/media/${org.bannerImageId}`} class="w-full h-full object-cover" alt="" loading="eager" decoding="auto" />
+        <img src={`/api/media/${org.bannerImageId}`} class="w-full h-full object-cover" aria-hidden="true" alt="" loading="eager" decoding="auto" />
       )}
       <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
     </div>

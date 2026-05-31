@@ -46,7 +46,7 @@ Reduce client bundle size and improve initial page load performance.
 ## Acceptance Criteria
 
 - [x] AC-01: Wrangler minify enabled, verified via `wrangler deploy --dry-run`
-- [x] AC-02: Motion library loads on-demand, not on every page (motion already lazy)
+- [x] AC-02: Motion library REMOVED (2026-05-30), replaced with CSS animations
 - [x] AC-03: Client JS reduced by 30%+ (369KB â†?<260KB) - TiPTap now lazy loaded
-- [ ] AC-04: No regression in functionality
+- [x] AC-04: No regression in functionality
 

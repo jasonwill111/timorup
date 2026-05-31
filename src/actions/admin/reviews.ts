@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { reviews as reviewsTable, businesses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const listSchema = z.object({
   page: z.number().int().positive().default(1),
@@ -18,10 +19,10 @@ export const adminReviews = {
     input: listSchema.optional(),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const page = input?.page ?? 1;
       const limit = input?.limit ?? 20;
       const offset = (page - 1) * limit;
@@ -49,10 +50,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       // Get the review first
       const review = await db.select()
@@ -61,7 +62,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!review) throw new Error('Review not found');
+      if (!review) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Review not found');
 
       const businessId = review.businessId;
 

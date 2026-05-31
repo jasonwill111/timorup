@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { businesses } from '@/db/schema';
 import { eq, like, or, desc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const listSchema = z.object({
   search: z.string().optional(),
@@ -19,10 +20,10 @@ export const adminBusinesses = {
     input: listSchema.optional(),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       let query = db.select({
         id: businesses.id,
@@ -71,10 +72,10 @@ if (!db) throw new Error("Database not available");
     }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const now = Math.floor(Date.now() / 1000);
 
@@ -105,10 +106,10 @@ if (!db) throw new Error("Database not available");
     }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const existing = await db.select()
         .from(businesses)
@@ -116,7 +117,7 @@ if (!db) throw new Error("Database not available");
         .limit(1)
         .get();
 
-      if (!existing) throw new Error('Business not found');
+      if (!existing) return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Business not found');
 
       await db.update(businesses)
         .set({ status: input.status, updatedAt: Math.floor(Date.now() / 1000) })

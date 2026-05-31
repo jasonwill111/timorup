@@ -5,7 +5,7 @@ type: feature
 status: planned
 priority: P1
 created: 2026-05-20
-lastUpdated: 2026-05-20
+lastUpdated: 2026-05-27
 tldr: "Fix AI tools to use Mastra agents with correct JSON output for all 4 generators."
 complexity: high
 stakeholder_relevant: true

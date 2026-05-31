@@ -1,14 +1,11 @@
+import { getErrorMessage } from '@/lib/errors';
 // Reviews Create Server Action
 import { defineAction } from 'astro:actions';
 import { z } from 'zod';
-import { getDb } from '@/lib/db';
-import { reviews, businesses } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { createReview as createReviewQuery, getReviewStats } from '@/lib/db/queries/reviews';
+import { verifyBusinessExists, updateBusinessRating } from '@/lib/db/queries/businesses';
+import { sanitizeText } from '@/lib/sanitize';
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
 
 const CreateReviewSchema = z.object({
   businessId: z.string().min(1),
@@ -20,41 +17,28 @@ const CreateReviewSchema = z.object({
 export const createReview = defineAction({
   input: CreateReviewSchema,
   handler: async (input) => {
-    const db = await getDb();
-if (!db) throw new Error("Database not available");
     try {
-      // Check business exists
-      const business = await db.select()
-        .from(businesses)
-        .where(eq(businesses.id, input.businessId))
-        .limit(1);
-
-      if (business.length === 0) {
+      // Verify business via query layer
+      const businessExists = await verifyBusinessExists(input.businessId);
+      if (!businessExists) {
         return { success: false, error: { message: 'Business not found' } };
       }
 
-      const id = `review-${Date.now()}`;
-      const newReview = await db.insert(reviews).values({
-        id,
+      // Sanitize comment to prevent XSS
+      const sanitizedComment = sanitizeText(input.content || '');
+
+      // Create review via query layer
+      const result = await createReviewQuery({
         businessId: input.businessId,
         userId: input.userId,
         rating: input.rating,
-        content: input.content || '',
-      }).returning();
+        comment: sanitizedComment,
+      });
 
-      // Update business rating average
-      const avgResult = await db.select({ avg: sql`AVG(${reviews.rating})`, count: sql`COUNT(*)` })
-        .from(reviews)
-        .where(eq(reviews.businessId, input.businessId));
+      // Update business rating via query layer
+      await updateBusinessRating(input.businessId);
 
-      await db.update(businesses)
-        .set({
-          ratingAverage: Number(avgResult[0]?.avg) || input.rating,
-          ratingCount: Number(avgResult[0]?.count) || 1
-        })
-        .where(eq(businesses.id, input.businessId));
-
-      return { success: true, data: newReview[0] };
+      return { success: true, data: { id: result.id } };
     } catch (error) {
       return { success: false, error: { message: getErrorMessage(error) } };
     }

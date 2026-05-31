@@ -4,57 +4,84 @@
 
 ## Purpose
 
-Drizzle ORM schema definitions for D1/SQLite database.
+Drizzle ORM schema definitions for Cloudflare D1 (SQLite) database.
+
+## Schema Structure
+
+```
+src/db/
+├── schema/
+│   ├── index.ts          # All table definitions
+│   ├── auth.ts          # Auth tables (users, sessions, accounts)
+│   ├── businesses.ts     # Business entities
+│   ├── listings.ts      # Listing ads
+│   ├── media.ts         # Media attachments
+│   ├── products.ts      # Products/SKUs
+│   └── subscriptions.ts  # Subscription plans
+├── seed.ts             # Test data seeding
+└── migrations/         # Drizzle migrations
+```
 
 ## Key Tables
 
 | Table | Purpose |
 |-------|---------|
-| `users` | User accounts with role |
-| `sessions` | better-auth sessions |
+| `user` | User accounts (better-auth) |
+| `session` | Session tokens |
+| `account` | Auth providers |
 | `businesses` | Business listings |
-| `categories` | Two-level hierarchy |
-| `media` | Images/videos (R2) |
+| `business_categories` | Business categories |
+| `listings` | Classified ads |
+| `listing_categories` | Listing categories |
+| `non_profits` | Non-profit organizations |
+| `public_sectors` | Government/NGO |
 | `products` | SKUs with pricing |
-| `reviews` | User reviews |
+| `subscriptions` | Subscription plans |
+| `media` | Images/videos |
 
 ## Schema Pattern
 
 ```typescript
-// src/db/schema/index.ts
+// src/db/schema/businesses.ts
 import { text, integer } from 'drizzle-orm/sqlite-core';
-
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  name: text('name'),
-  role: text('role').default('user'),  // 'user' | 'admin' | 'super_admin' | 'editor'
-  // ... better-auth fields
-});
 
 export const businesses = sqliteTable('businesses', {
   id: text('id').primaryKey(),
-  name: text('name').notNull(),
+  title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
-  userId: text('user_id').references(() => users.id),
-  // ...
+  ownerId: text('owner_id').references(() => users.id),
+  categoryId: text('category_id').references(() => businessCategories.id),
+  // Timestamps
+  createdAt: integer('created_at'),
+  updatedAt: integer('updated_at'),
 });
 ```
 
-## Drizzle Config
+## Auth Tables (better-auth compatible)
 
 ```typescript
-// drizzle.config.json
-{
-  "dialect": "sqlite",
-  "schema": "./src/db/schema/index.ts",
-  "dbCredentials": {
-    "url": "https://{account}.user.devcloud.cloudflarestored.com"
-  }
-}
+// camelCase columns for better-auth
+export const users = sqliteTable('user', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  name: text('name').notNull(),
+  role: text('role').default('user'),
+  emailVerified: integer('emailVerified', { mode: 'boolean' }),
+  createdAt: integer('createdAt'),
+  updatedAt: integer('updatedAt'),
+});
+
+export const sessions = sqliteTable('session', {
+  id: text('id').primaryKey(),
+  userId: text('userId').notNull().references(() => users.id),
+  token: text('token').notNull().unique(),
+  expiresAt: integer('expiresAt').notNull(),
+  createdAt: integer('createdAt'),
+  updatedAt: integer('updatedAt'),
+});
 ```
 
-## DB Access
+## DB Access Pattern
 
 ```typescript
 // src/lib/db.ts
@@ -67,14 +94,21 @@ export async function getDb() {
 }
 ```
 
-**Note**: `casing: 'snake_case'` converts Drizzle camelCase to DB snake_case.
+## Server Islands Pattern
+
+```typescript
+// For Server Islands (isolated V8 context)
+import { getDb } from '@/lib/db';
+
+const db = await getDb(); // Direct import, not initDb()
+```
 
 ## Analysis Summary
 
-- **Files Analyzed**: 4
-- **Source Files**: 4
+- **Files Analyzed**: 14
+- **Source Files**: 14
 - **Test Files**: 0
 - **Total Exports**: 34
 
 ---
-*Analysis updated on 2026-05-06*
+*Updated 2026-05-30*

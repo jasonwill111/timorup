@@ -420,7 +420,7 @@ See **AGENTS.md** for Cursor, Copilot, Windsurf, Aider instructions.
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **timorup** (3480 symbols, 5210 relationships, 93 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **timorup** (4464 symbols, 6664 relationships, 151 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -578,3 +578,110 @@ const result = await actions.auth.signIn({ email, password });
 - **Width**: `w-48` (compact)
 - **Nav items**: `px-2 py-2 gap-2 min-h-9`
 - **Links**: Dashboard, Listings, Businesses, Non-Profits, Gov & NGOs, Users, SKUs, Categories, Heroes, Blogs, Media, Plans, Settings
+
+---
+
+## Shared Lib Modules (2026-05-27)
+
+### Error Handling (`src/lib/errors/`)
+统一错误处理和错误码系统。
+
+```typescript
+import { ErrorCode, createErrorResponse, getErrorMessage } from '@/lib/errors';
+
+// Error codes
+ErrorCode.AUTH_REQUIRED      // 401
+ErrorCode.BUSINESS_NOT_FOUND  // 404
+ErrorCode.MEDIA_UPLOAD_ERROR // 500
+// ... 25+ standardized codes
+
+// Create error response
+return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Please login');
+```
+
+### Expiry Module (`src/lib/expiry/`)
+订阅过期和权限检查模块。
+
+```typescript
+import { ExpiryEnforcer } from '@/lib/expiry';
+
+const enforcer = new ExpiryEnforcer();
+enforcer.isInGracePeriod(subscription);      // 是否在60天宽限期内
+enforcer.canCreateSku(subscription, count, limit);  // SKU创建权限
+enforcer.canEditBusiness(subscription);     // 业务编辑权限
+```
+
+### Analytics Module (`src/lib/analytics/`)
+用户行为追踪模块。
+
+```typescript
+import { trackPageView, trackBusinessView, EventType } from '@/lib/analytics';
+
+trackPageView('/business/timor-cafe');
+trackBusinessView('biz-123', 'Timor Cafe');
+```
+
+### Zod Schemas (`src/lib/schemas/`)
+共享 Zod 验证 schemas。
+
+```typescript
+import { emailSchema, requiredString, phoneSchema } from '@/lib/schemas/common';
+
+// In actions
+input: z.object({
+  email: emailSchema,
+  name: requiredString('Name is required'),
+})
+```
+
+### Media Validator (`src/lib/media/`)
+媒体验证和上传工具。
+
+```typescript
+import { validateMediaFile, buildR2Key } from '@/lib/media';
+
+const result = validateMediaFile(file, 'businesses');
+if (!result.valid) {
+  return createErrorResponse(result.error.code, result.error.message);
+}
+```
+
+### Query Layer (`src/lib/db/queries/`)
+数据库查询封装，提供统一的数据访问接口。
+
+```typescript
+import { getBusinessByOwner, slugExists, createBusiness } from '@/lib/db/queries/businesses';
+import { getAuthenticatedUserFromCookies } from '@/lib/db/queries/auth';
+```
+
+### Admin Auth (`src/lib/admin-auth.ts`)
+统一的管理员认证。
+
+```typescript
+import { requireAdmin } from '@/lib/admin-auth';
+
+const authResult = await requireAdmin(cookies);
+if ('error' in authResult) {
+  return { error: authResult.error };
+}
+```
+
+### Security Features
+
+**Middleware Security** (`src/middleware.ts`):
+- Security headers: X-Content-Type-Options, X-Frame-Options, CSP
+- CSRF protection for mutation requests (POST/PUT/DELETE/PATCH)
+
+**XSS Prevention** (`src/lib/sanitize.ts`):
+```typescript
+import { sanitizeHtml, sanitizeText } from '@/lib/sanitize';
+// DOMPurify with allowed tags: b, i, em, strong, a, p, br, ul, ol, li, h1-h6, blockquote, code, pre, span
+```
+
+**Error Codes** (`src/lib/errors/errorCodes.ts`):
+- 30+ standardized error codes with HTTP status mappings
+- Consistent error responses via `createErrorResponse()`
+
+**Rate Limiting** (`src/lib/rate-limit.ts`):
+- KV-based rate limiting for auth actions
+- Configurable limits per action type

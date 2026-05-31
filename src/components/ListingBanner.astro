@@ -15,7 +15,7 @@ const gradientClass = type === 'nonprofit'
     <img
       src={`/api/media/${bannerImageId}`}
       class="w-full h-full object-cover"
-      alt=""
+      alt={`${type === 'nonprofit' ? 'Organization' : 'Business'} banner`}
       loading="eager"
       decoding="auto"
     />

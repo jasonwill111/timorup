@@ -2,7 +2,7 @@
 id: US-002
 feature: FS-054
 title: "BreadcrumbList JSON-LD (P1)"
-status: in_progress
+status: completed
 priority: P1
 created: 2026-05-14
 tldr: "**As a** search engine."
@@ -21,7 +21,7 @@ project: TimorLink
 
 ## Acceptance Criteria
 
-- [x] **AC-US2-01**: Business detail pages include BreadcrumbList JSON-LD ‚ú?- [x] **AC-US2-02**: Non-profit detail pages include BreadcrumbList JSON-LD ‚ú?- [x] **AC-US2-03**: Public sector detail pages include BreadcrumbList JSON-LD ‚ú?- [x] **AC-US2-04**: Product/SKU detail pages include BreadcrumbList JSON-LD ‚ú?- [ ] **AC-US2-05**: Blog article pages include BreadcrumbList JSON-LD ‚ö†Ô∏è (blog pages don't exist)
+- [x] **AC-US2-01**: Business detail pages include BreadcrumbList JSON-LD ÔøΩ?- [x] **AC-US2-02**: Non-profit detail pages include BreadcrumbList JSON-LD ÔøΩ?- [x] **AC-US2-03**: Public sector detail pages include BreadcrumbList JSON-LD ÔøΩ?- [x] **AC-US2-04**: Product/SKU detail pages include BreadcrumbList JSON-LD ÔøΩ?- [ ] **AC-US2-05**: Blog article pages include BreadcrumbList JSON-LD ‚ö†Ô∏è (blog pages don't exist)
 
 ---
 
@@ -35,4 +35,3 @@ project: TimorLink
 ## Tasks
 
 _No tasks defined for this user story_
-

@@ -7,6 +7,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **0095-code-review-security-fixes**: Critical security improvements:
+  - XSS vulnerability fixed in ai-tools.astro (DOMPurify sanitization)
+  - CSRF protection added to middleware.ts (origin validation)
+  - Window interface declared in global.d.ts
+- **0094-test-coverage**: Enhanced test coverage infrastructure
+- **0093-security-best-practices**: Security best practices documented
+- **0092-frontend-ux-improvements**: Focus trap, reduced motion support
+- **0091-code-arch-refactor**: Unified error handling, removed dead code
+- **0090-db-optimization**: N+1 query fix, database performance
+- **0089-typescript-safety**: Type guards, any removal
+- **0088-xss-sanitization-a11y**: DOMPurify XSS prevention, aria-hidden
+- **0087-auth-security-hardening**: Rate limiting, cookie config
+
+### Changed
 - **0058-code-quality-cleanup-p0**: P0 code quality fixes:
   - Type-safe env wrapper (`src/lib/env.ts`) - replaces `as any` pattern
   - Empty catch blocks fixed (10 locations) with proper error logging

@@ -5,9 +5,9 @@ type: feature
 status: completed
 priority: P1
 created: 2026-05-15
-lastUpdated: 2026-05-15
-tldr: "修复首页 Server Islands 未启用、Middleware 重复问题，优化 TTFB 和 CDN 缓存."
-complexity: medium
+lastUpdated: 2026-05-27
+tldr: "修复首页 Server Islands 未启用、Middleware 重复问题，优�?TTFB �?CDN 缓存."
+complexity: high
 stakeholder_relevant: true
 ---
 
@@ -15,15 +15,15 @@ stakeholder_relevant: true
 
 ## TL;DR
 
-**What**: 修复首页 Server Islands 未启用、Middleware 重复问题，优化 TTFB 和 CDN 缓存.
+**What**: 修复首页 Server Islands 未启用、Middleware 重复问题，优�?TTFB �?CDN 缓存.
 **Status**: completed | **Priority**: P1
-**User Stories**: 3
+**User Stories**: 4
 
-![Astro Server Islands 性能优化 illustration](assets/feature-fs-057.jpg)
+![Astro Server Islands 性能优化 illustration](assets\feature-fs-057.jpg)
 
 ## Overview
 
-修复首页 Server Islands 未启用、Middleware 重复问题，优化 TTFB 和 CDN 缓存
+修复首页 Server Islands 未启用、Middleware 重复问题，优�?TTFB �?CDN 缓存
 
 ## Implementation History
 
@@ -36,3 +36,4 @@ stakeholder_relevant: true
 - [US-001: Server Islands 启用](./us-001-server-islands.md)
 - [US-002: Middleware 合并](./us-002-middleware.md)
 - [US-003: 回退机制](./us-003-.md)
+- [US-004: Public Blog Pages](./us-004-public-blog-pages.md)

@@ -6,45 +6,17 @@ import { media, businesses } from '@/db/schema';
 import { eq, and, sql, count } from 'drizzle-orm';
 import { initAuth } from '@/lib/auth';
 import { getPlanLimits } from '@/lib/subscription';
-import { getMediaLimits, isAllowedImageType, isAllowedVideoType } from '@/lib/media-limits';
+import { getMediaLimits } from '@/lib/media-limits';
 import { getR2PublicUrl, isR2Available, getR2Bucket } from '@/lib/media';
+import { validateMediaFile, buildR2Key } from '@/lib/media/validator';
+import { getErrorMessage, createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const DEFAULT_LIMITS = { maxImages: 5, maxVideos: 1, maxBusinessImages: 16, maxBusinessVideos: 2 };
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
-
-// Build R2 key from type and typeId
-// type = R2 path prefix (e.g., 'businesses/biz-123/profile')
-// typeId = entity ID
-function buildR2Key(params: {
-  type: string;      // R2 path prefix
-  typeId: string;    // entity ID
-  filename: string;
-  timestamp: number;
-  id: string;
-}): string {
-  const { type, filename, timestamp, id } = params;
-  const ext = filename.split('.').pop() || 'webp';
-  const safeFilename = `${timestamp}-${id}.${ext}`;
-
-  // type already contains the full path prefix
-  return `${type}/${safeFilename}`;
-}
-
-// Parse type prefix to extract media category (profile, banner, gallery, etc.)
-function getMediaTypeFromPrefix(prefix: string): string {
-  // prefix format: 'businesses/{id}/profile' -> 'image' or 'video'
-  // Actually, we store the full prefix as 'type' and use it directly
-  return prefix;
-}
 
 export const uploadMedia = defineAction({
   accept: 'form',
   input: z.object({
-    file: z.any(),
+    file: z.instanceof(File, { error: 'Invalid file' }),
     type: z.string(),           // R2 path prefix (e.g., 'businesses/biz-123/profile')
     typeId: z.string(),        // entity ID
     hash: z.string().optional(),
@@ -53,38 +25,28 @@ export const uploadMedia = defineAction({
   }),
   handler: async (input) => {
     const db = await getDb();
-if (!db) throw new Error("Database not available");
+    if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, "Database not available");
     const auth = await initAuth();
     const session = await auth.api.getSession({ headers: { cookie: '' } }).catch(() => null);
     const user = session?.user ?? null;
 
     if (!user) {
-      return { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } };
+      return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
     }
 
     try {
       const file = input.file as File;
       if (!file) {
-        return { success: false, error: { code: 'NO_FILE', message: 'No file provided' } };
+        return createErrorResponse(ErrorCode.MEDIA_NO_FILE, 'No file provided');
       }
 
-      // Use centralized limits based on entity type
-      const entityType = input.type.split('/')[0] || 'default';
-      const limits = getMediaLimits(entityType);
-
-      const isImage = isAllowedImageType(file.type);
-      const isVideo = isAllowedVideoType(file.type);
-
-      if (!isImage && !isVideo) {
-        const allowedTypes = [...limits.allowedImageTypes, ...limits.allowedVideoTypes].join(', ');
-        return { success: false, error: { code: 'INVALID_TYPE', message: `File type not allowed. Allowed: ${allowedTypes}` } };
+      // Use centralized validation
+      const validation = validateMediaFile(file, entityType);
+      if (!validation.valid) {
+        return createErrorResponse(validation.error!.code, validation.error!.message);
       }
 
-      const maxSize = isImage ? limits.maxImageSize : limits.maxVideoSize;
-      if (file.size > maxSize) {
-        const maxMB = (maxSize / 1024 / 1024).toFixed(1);
-        return { success: false, error: { code: 'FILE_TOO_LARGE', message: `File must be less than ${maxMB}MB` } };
-      }
+      const { isImage, isVideo } = validation;
 
       const id = crypto.randomUUID();
       const timestamp = Date.now();
@@ -122,11 +84,11 @@ if (!db) throw new Error("Database not available");
           .limit(1);
 
         if (!business) {
-          return { success: false, error: { code: 'NOT_FOUND', message: 'Business not found' } };
+          return createErrorResponse(ErrorCode.BUSINESS_NOT_FOUND, 'Business not found');
         }
 
         if (business.ownerId !== user.id && (user as { role?: string }).role !== 'admin' && (user as { role?: string }).role !== 'super_admin') {
-          return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied to this business' } };
+          return createErrorResponse(ErrorCode.BUSINESS_FORBIDDEN, 'Access denied to this business');
         }
 
         const limits = await getPlanLimits(business?.planType || null) || DEFAULT_LIMITS;
@@ -138,11 +100,11 @@ if (!db) throw new Error("Database not available");
           .get() ?? undefined;
 
         if (isImage && limits.maxBusinessImages > 0 && (imageCountResult?.count || 0) >= limits.maxBusinessImages) {
-          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessImages} images allowed` } };
+          return createErrorResponse(ErrorCode.MEDIA_LIMIT_REACHED, `Maximum ${limits.maxBusinessImages} images allowed`);
         }
 
         if (isVideo && limits.maxBusinessVideos > 0 && (imageCountResult?.count || 0) >= limits.maxBusinessVideos) {
-          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxBusinessVideos} videos allowed` } };
+          return createErrorResponse(ErrorCode.MEDIA_LIMIT_REACHED, `Maximum ${limits.maxBusinessVideos} videos allowed`);
         }
       } else {
         // Non-business entities use default limits (0 = unlimited)
@@ -152,11 +114,11 @@ if (!db) throw new Error("Database not available");
           .get() ?? undefined;
 
         if (isImage && limits.maxImages > 0 && (entityMediaCount?.count || 0) >= limits.maxImages) {
-          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxImages} images allowed` } };
+          return createErrorResponse(ErrorCode.MEDIA_LIMIT_REACHED, `Maximum ${limits.maxImages} images allowed`);
         }
 
         if (isVideo && limits.maxVideos > 0 && (entityMediaCount?.count || 0) >= limits.maxVideos) {
-          return { success: false, error: { code: 'LIMIT_REACHED', message: `Maximum ${limits.maxVideos} videos allowed` } };
+          return createErrorResponse(ErrorCode.MEDIA_LIMIT_REACHED, `Maximum ${limits.maxVideos} videos allowed`);
         }
       }
 
@@ -208,7 +170,7 @@ if (!db) throw new Error("Database not available");
       }).returning();
 
       if (!created) {
-        return { success: false, error: { code: 'INSERT_ERROR', message: 'Failed to create media record' } };
+        return createErrorResponse(ErrorCode.MEDIA_UPLOAD_ERROR, 'Failed to create media record');
       }
 
       return {
@@ -227,7 +189,7 @@ if (!db) throw new Error("Database not available");
         isDuplicate: false,
       };
     } catch (error) {
-      return { success: false, error: { code: 'UPLOAD_ERROR', message: getErrorMessage(error) } };
+      return createErrorResponse(ErrorCode.MEDIA_UPLOAD_ERROR, getErrorMessage(error));
     }
   },
 });

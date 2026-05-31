@@ -2,10 +2,11 @@
   "increment": "0075",
   "name": "server-islands-db-pattern",
   "title": "Server Islands DB Pattern Unification",
-  "status": "open",
+  "status": "completed",
   "priority": "medium",
   "created": "2026-05-22T10:30:00+08:00",
-  "updated": "2026-05-22T10:30:00+08:00",
+  "updated": "2026-05-29T20:53:00+08:00",
+  "completed": "2026-05-29T20:53:00+08:00",
   "tags": ["server-islands", "best-practices", "cloudflare", "astro"],
   "owner": "jasonwill",
   "parent": null

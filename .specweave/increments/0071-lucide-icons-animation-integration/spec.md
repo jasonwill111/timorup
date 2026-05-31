@@ -1,6 +1,6 @@
 ---
 increment: 0071-lucide-icons-animation-integration
-title: Lucide Icons & Motion Animation Integration
+title: Lucide Icons & CSS Animation Integration
 type: feature
 priority: P1
 status: completed
@@ -10,11 +10,13 @@ test_mode: TDD
 coverage_target: 80
 ---
 
-# Feature: Lucide Icons & Motion Animation Integration
+# Feature: Lucide Icons & CSS Animation Integration
 
 ## Overview
 
-统一项目中所有图标为 Lucide，并增强 MotionAnimations 组件的集成使用。消除内联 SVG 混用，统一图标管理，同时提升 UI 动效体验。
+统一项目中所有图标为 Lucide，并增强 CSS 动画集成。消除内联 SVG 混用，统一图标管理，同时使用 Tailwind-first 的 CSS 动画方案。
+
+**2026-05-30 更新**: Motion.js 已移除，改用纯 CSS 动画方案。
 
 ## User Stories
 
@@ -34,19 +36,19 @@ coverage_target: 80
 
 ---
 
-### US-002: MotionAnimations Integration in Core Layouts
+### US-002: CSS Animation Integration in Core Layouts
 **Project**: timorup
 **As a** user
 **I want** smooth animations on navigation and page elements
 **So that** the interface feels polished and responsive
 
 **Acceptance Criteria**:
-- [x] **AC-US2-01**: Header navigation dropdowns animate with `dropdownIn`/`dropdownOut` on hover
-- [x] **AC-US2-02**: Header mobile menu slides down with `slideInLeft` effect
-- [x] **AC-US2-03**: Footer social links have hover scale animation
-- [x] **AC-US2-04**: Homepage hero section uses `textReveal` for main title
-- [x] **AC-US2-05**: Homepage entity cards entrance with staggered `fadeInUp` on load
-- [x] **AC-US2-06**: Page transition uses `pageTransitionIn` on main content areas
+- [x] **AC-US2-01**: Header navigation dropdowns animate with CSS classes `dropdown-enter`/`dropdown-exit`
+- [x] **AC-US2-02**: Header mobile menu animates in
+- [x] **AC-US2-03**: Footer social links have hover animation via CSS
+- [x] **AC-US2-04**: Homepage cards entrance with CSS stagger animation via `stagger-children`
+- [x] **AC-US2-05**: Page transition uses CSS class `page-enter`
+- [x] **AC-US2-06**: Scroll reveal uses `reveal-on-scroll` class + IntersectionObserver
 
 ---
 
@@ -57,11 +59,11 @@ coverage_target: 80
 **So that** browsing feels engaging and content reveals progressively
 
 **Acceptance Criteria**:
-- [x] **AC-US3-01**: List page (businesses, listings, non-profits, public-sectors) cards use `sectionReveal` on scroll
-- [x] **AC-US3-02**: Filter/tabs section uses `animateFilters` for staggered tag appearance
-- [x] **AC-US3-03**: Pagination nav uses `animatePagination` for button stagger
-- [x] **AC-US3-04**: Entity cards use `addHoverLift` and `addCardGlow` for interactive feedback
-- [x] **AC-US3-05**: Hero section on list pages uses `initParallax` for scroll parallax effect
+- [x] **AC-US3-01**: List page cards use CSS class `reveal-on-scroll` for scroll reveal
+- [x] **AC-US3-02**: Filter/tabs use CSS stagger animation
+- [x] **AC-US3-03**: Pagination nav uses CSS animation
+- [x] **AC-US3-04**: Entity cards use `.card-hover` and `.card-glow` for interactive feedback
+- [x] **AC-US3-05**: Parallax effect via CSS class `data-parallax` + JS handler
 
 ---
 
@@ -72,13 +74,14 @@ coverage_target: 80
 - SSR-compatible Astro component
 - Accepts any Lucide icon name from lucide-astro
 
-### FR-002: Animation Orchestration
-- MotionAnimations.astro loaded in Layout.astro (already in `src/components/ui/`)
-- Header/Footer animations triggered after DOMContentLoaded
-- Scroll animations use IntersectionObserver via `inView`
+### FR-002: CSS Animation Architecture
+- **Priority**: Tailwind CSS utilities → Pure CSS for complex cases
+- `CSSAnimations.astro` provides CSS classes and keyframes
+- `css-animations.ts` provides JS utilities for triggers
 
 ### FR-003: Performance
-- Use `will-change: transform, opacity` on animated elements
+- Use CSS transitions (Tailwind `transition-*`) for simple animations
+- Use `will-change: transform, opacity` sparingly
 - Lazy-load animations below fold
 - Respect `prefers-reduced-motion` media query
 
@@ -87,7 +90,7 @@ coverage_target: 80
 ## Out of Scope
 
 - Creating new icons (only using existing Lucide library)
-- Complex animation sequences (beyond existing MotionAnimations functions)
+- Complex animation sequences (CSS sufficient for most cases)
 - Admin dashboard animations
 - Mobile-specific scroll animations (keep simple for low-end devices)
 
@@ -96,12 +99,37 @@ coverage_target: 80
 ## Dependencies
 
 - `@lucide/astro` (already installed)
-- `motion` library (already installed via MotionAnimations.astro)
-- `MotionAnimations.astro` (already exists in `src/components/ui/`)
+- `motion` library - **REMOVED** (2026-05-30)
 
 ---
 
 ## Technical Notes
+
+### Files Modified (2026-05-30)
+| File | Change |
+|------|--------|
+| `src/components/ui/CSSAnimations.astro` | Pure CSS animations (replaces MotionAnimations.astro) |
+| `src/lib/css-animations.ts` | JS utilities for CSS animation triggers |
+| `src/lib/motion-utils.ts` | **DELETED** |
+| `src/components/ui/MotionAnimations.astro` | **DELETED** |
+
+### Animation System
+```
+┌─────────────────────────────────────────────────┐
+│  Tailwind CSS (priority)                        │
+│  transition-*, hover:*, animate-*              │
+└─────────────────────────────────────────────────┘
+                       ↓ (only when Tailwind insufficient)
+┌─────────────────────────────────────────────────┐
+│  CSSAnimations.astro (CSS classes + keyframes) │
+│  .reveal-on-scroll, .stagger-children, etc.   │
+└─────────────────────────────────────────────────┘
+                       ↓ (only for triggers)
+┌─────────────────────────────────────────────────┐
+│  css-animations.ts (JS utilities)              │
+│  initScrollReveal(), initLazyLoad(), etc.      │
+└─────────────────────────────────────────────────┘
+```
 
 ### Files to Modify
 | File | Change |
@@ -112,8 +140,8 @@ coverage_target: 80
 | `src/components/Header.astro` | Lucide icons for dropdown chevrons |
 | `src/components/Footer.astro` | Lucide icons for social media |
 | `src/pages/index.astro` | Lucide icons for entity cards |
-| `src/layouts/Layout.astro` | Ensure MotionAnimations loaded |
-| `src/pages/businesses/index.astro` | Scroll animations |
-| `src/pages/listings/index.astro` | Scroll animations |
-| `src/pages/non-profits/index.astro` | Scroll animations |
-| `src/pages/public-sectors/index.astro` | Scroll animations |
+| `src/layouts/Layout.astro` | CSSAnimations loaded |
+| `src/pages/businesses/index.astro` | CSS scroll animations |
+| `src/pages/listings/index.astro` | CSS scroll animations |
+| `src/pages/non-profits/index.astro` | CSS scroll animations |
+| `src/pages/public-sectors/index.astro` | CSS scroll animations |

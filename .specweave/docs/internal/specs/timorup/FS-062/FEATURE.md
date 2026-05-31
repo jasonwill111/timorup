@@ -5,7 +5,7 @@ type: feature
 status: completed
 priority: P1
 created: 2026-05-18
-lastUpdated: 2026-05-18
+lastUpdated: 2026-05-27
 tldr: "Fix stringly-typed TABLE_MAP in admin categories API with inconsistent entity type naming."
 complexity: medium
 stakeholder_relevant: true

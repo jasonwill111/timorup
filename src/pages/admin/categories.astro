@@ -452,7 +452,7 @@ import Button from '@components/ui/Button.astro';
   });
 
   // Edit category
-  (window as any).editCategory = function(id: string) {
+  window.editCategory = function(id: string) {
     const cat = categories.find((c: Category) => c.id === id);
     if (!cat) return;
 
@@ -567,7 +567,7 @@ import Button from '@components/ui/Button.astro';
   });
 
   // Delete category
-  (window as any).deleteCategory = function(id: string) {
+  window.deleteCategory = function(id: string) {
     deleteTargetId = id;
     const cat = categories.find((c: Category) => c.id === id);
     const modal = document.getElementById('delete-category-dialog');

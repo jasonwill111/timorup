@@ -1,11 +1,13 @@
 ---
 interface Props {
   class?: string;
+  hover?: boolean;
   'data-slot'?: string;
 }
 
 const {
   class: className = '',
+  hover = false,
   'data-slot': slot = 'card',
   ...props
 } = Astro.props;
@@ -13,7 +15,8 @@ const {
 
 <div
   class:list={[
-    'rounded-xl border bg-card text-card-foreground shadow',
+    'rounded-2xl border bg-card text-card-foreground shadow',
+    hover && 'transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-0.5',
     className
   ]}
   data-slot={slot}

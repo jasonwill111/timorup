@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 import { adBanners } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getAdminUser } from '@/lib/admin-auth';
+import { createErrorResponse, ErrorCode } from '@/lib/errors';
 
 const CreateHeroSchema = z.object({
   title: z.string().min(1),
@@ -33,10 +34,10 @@ export const heroes = {
   list: defineAction({
     handler: async () => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const heroList = await db.select().from(adBanners).orderBy(desc(adBanners.createdAt)).all();
 
       return { success: true, data: heroList };
@@ -48,10 +49,10 @@ if (!db) throw new Error("Database not available");
     input: CreateHeroSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       const id = `hero-${Date.now()}`;
 
       await db.insert(adBanners).values({
@@ -75,10 +76,10 @@ if (!db) throw new Error("Database not available");
     input: UpdateHeroSchema,
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
 
       const updateData: Record<string, unknown> = {};
       if (input.title !== undefined) updateData.title = input.title;
@@ -104,10 +105,10 @@ if (!db) throw new Error("Database not available");
     input: z.object({ id: z.string() }),
     handler: async (input) => {
       const user = await getAdminUser();
-      if (!user) throw new Error('Unauthorized');
+      if (!user) return createErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
 
       const db = await getDb();
-if (!db) throw new Error("Database not available");
+      if (!db) return createErrorResponse(ErrorCode.SERVER_DB_ERROR, 'Database not available');
       await db.delete(adBanners).where(eq(adBanners.id, input.id)).run();
 
       return { success: true, message: 'Hero deleted' };

@@ -1,10 +1,10 @@
 ---
 increment: 0068-admin-ui-fix
-title: "Admin UI Fix"
+title: Admin UI Fix
 type: bug
 priority: P1
-status: planned
-created: 2026-05-19
+status: completed
+created: 2026-05-19T00:00:00.000Z
 structure: user-stories
 test_mode: TDD
 coverage_target: 80
