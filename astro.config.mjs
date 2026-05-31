@@ -28,7 +28,7 @@ export default defineConfig({
       tailwindcss(),
     ],
     ssr: {
-      external: ['cloudflare:workers'],
+      external: ['cloudflare:workers', 'better-auth', '@better-auth/kysely-adapter'],
     },
     resolve: {
       alias: {
@@ -39,9 +39,5 @@ export default defineConfig({
       exclude: ['better-auth', '@better-auth/kysely-adapter'],
       noDiscovery: true,
     },
-    ssr: {
-      external: ['cloudflare:workers', 'better-auth', '@better-auth/kysely-adapter'],
-    },
-    noExternal: [],
   },
 });
