@@ -20,5 +20,6 @@
     },
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["src/**/*", "astro.config.*", "drizzle.config.*", "wrangler.jsonc"]
+  "include": ["src/**/*", "astro.config.*", "drizzle.config.*", "wrangler.jsonc"],
+  "exclude": ["src/db/seed.ts", "src/db/seeds/*.ts"]
 }
