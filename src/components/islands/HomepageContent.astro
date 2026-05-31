@@ -54,7 +54,7 @@ let featuredNonProfits: BusinessListing[] = [];
 try {
   if (!db) throw new Error('Database not initialized');
 
-  // Featured Businesses (live or published, limit 12)
+  // Featured Businesses (active/live/published, limit 12)
   const businessesResult = await db.select({
     id: businesses.id,
     title: businesses.title,
@@ -68,6 +68,7 @@ try {
   .from(businesses)
   .where(
     or(
+      eq(businesses.status, 'active'),
       eq(businesses.status, 'live'),
       eq(businesses.status, 'published')
     )
@@ -115,7 +116,7 @@ try {
     };
   });
 
-  // Featured Public Sectors (limit 12)
+  // Featured Public Sectors (active/live/published, limit 12)
   const publicSectorsResult = await db.select({
     id: publicSectors.id,
     title: publicSectors.title,
@@ -129,6 +130,7 @@ try {
   .from(publicSectors)
   .where(
     or(
+      eq(publicSectors.status, 'active'),
       eq(publicSectors.status, 'live'),
       eq(publicSectors.status, 'published')
     )
@@ -156,7 +158,7 @@ try {
     };
   });
 
-  // Featured Non-Profits (limit 12)
+  // Featured Non-Profits (active/live/published, limit 12)
   const nonProfitsResult = await db.select({
     id: nonProfits.id,
     title: nonProfits.title,
@@ -170,6 +172,7 @@ try {
   .from(nonProfits)
   .where(
     or(
+      eq(nonProfits.status, 'active'),
       eq(nonProfits.status, 'live'),
       eq(nonProfits.status, 'published')
     )

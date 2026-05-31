@@ -24,15 +24,17 @@ console.log('[BusinessListNew] db initialized:', !!db);
 
 if (db) {
   try {
+    // Check businessCategories table
+    console.log('[BusinessListNew] Fetching categories...');
     const allCats = await db.select({
       id: businessCategories.id,
       name: businessCategories.name,
       parentId: businessCategories.parentId,
     }).from(businessCategories).all();
+    console.log('[BusinessListNew] Categories count:', allCats.length);
 
     parentCats = allCats.filter(c => !c.parentId);
     getChildren = (pid: string) => allCats.filter(c => c.parentId === pid);
-    console.log('[BusinessListNew] Categories count:', allCats.length);
   } catch (e) {
     console.error('Categories error:', e);
   }
@@ -42,9 +44,15 @@ if (db) {
 let allEntities = [];
 if (db) {
   try {
+    console.log('[BusinessListNew] Fetching businesses...');
     const raw = await db.select().from(businesses).all();
-    console.log('[BusinessListNew] Businesses count:', raw.length);
-    allEntities = raw;
+    console.log('[BusinessListNew] Raw businesses count:', raw.length);
+
+    // Filter for active/live/published status
+    allEntities = raw.filter(e =>
+      e.status === 'active' || e.status === 'live' || e.status === 'published'
+    );
+    console.log('[BusinessListNew] Filtered businesses count:', allEntities.length);
   } catch (e) {
     console.error('Query error:', e);
   }
