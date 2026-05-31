@@ -38,6 +38,7 @@ export async function GET({ request }: { request: Request }) {
       description: products.description,
       categoryId: products.categoryId,
       productType: products.productType,
+      priceFields: products.priceFields,
       specifications: products.specifications,
       images: products.images,
       featured: products.featured,
@@ -58,6 +59,7 @@ export async function GET({ request }: { request: Request }) {
       ...p,
       specifications: parseJsonField(p.specifications),
       images: parseJsonField(p.images),
+      priceFields: parseJsonField(p.priceFields),
     }));
 
     return new Response(JSON.stringify({
