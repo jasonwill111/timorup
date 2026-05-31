@@ -57,7 +57,7 @@ if (db) {
 
     // Client-side filtering
     allEntities = allEntities.filter(e => {
-      const statusOk = e.status === 'live' || e.status === 'published';
+      const statusOk = e.status === 'active' || e.status === 'live' || e.status === 'published';
       const searchMatch = !search ||
         e.title.toLowerCase().includes(search.toLowerCase());
       return statusOk && searchMatch;
