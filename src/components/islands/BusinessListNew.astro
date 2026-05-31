@@ -37,35 +37,18 @@ if (db) {
 let allEntities = [];
 if (db) {
   try {
-    allEntities = await db.select({
-      id: businesses.id,
-      title: businesses.title,
-      slug: businesses.slug,
-      categoryId: businesses.categoryId,
-      address: businesses.address,
-      profileImageId: businesses.profileImageId,
-      likes: businesses.likes,
-      views: businesses.views,
-      ratingAverage: businesses.ratingAverage,
-      ratingCount: businesses.ratingCount,
-      status: businesses.status,
-      featured: businesses.featured,
-    })
-    .from(businesses)
-    .orderBy(desc(businesses.createdAt))
-    .all();
-
-    // Client-side filtering
-    allEntities = allEntities.filter(e => {
-      const statusOk = e.status === 'active' || e.status === 'live' || e.status === 'published';
-      const searchMatch = !search ||
-        e.title.toLowerCase().includes(search.toLowerCase());
-      return statusOk && searchMatch;
-    });
+    // Simple query without orderBy
+    const query = db.select().from(businesses);
+    const raw = await query.all();
+    console.log('[BusinessListNew] Raw businesses count:', raw.length);
+    console.log('[BusinessListNew] First business:', JSON.stringify(raw[0]));
+    allEntities = raw;
   } catch (e) {
     console.error('Query error:', e);
   }
 }
+
+console.log('[BusinessListNew] allEntities length:', allEntities.length);
 
 const total = allEntities.length;
 const totalPages = Math.ceil(total / LIMIT);
