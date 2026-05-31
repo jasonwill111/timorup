@@ -5,8 +5,8 @@ import { getDb } from '@/lib/db';
 import { products } from '@/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 
-const parseJsonField = (val: string | null): unknown => {
-  if (!val) return null;
+const parseJsonField = (val: unknown): unknown => {
+  if (!val || typeof val !== 'string') return val;
   try { return JSON.parse(val); } catch { return val; }
 };
 
