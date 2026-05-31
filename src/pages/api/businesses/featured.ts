@@ -31,7 +31,7 @@ if (!db) throw new Error("Database not available");
       planType: businesses.planType,
     })
     .from(businesses)
-    .where(eq(businesses.status, 'live'))
+    .where(eq(businesses.status, 'active'))
     .orderBy(sql`(likes * 3 + saves * 1 + views * 0.01) DESC`)
     .limit(8);
 

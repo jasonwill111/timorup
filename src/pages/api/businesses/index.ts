@@ -96,10 +96,11 @@ if (!db) throw new Error("Database not available");
       }
     }
 
-    // Build conditions - include both 'live' and 'published' status
+    // Build conditions - include 'active', 'live', and 'published' status
     // Also exclude expired subscriptions
     const conditions: SQL[] = [
       or(
+        eq(businesses.status, 'active'),
         eq(businesses.status, 'live'),
         eq(businesses.status, 'published')
       )!,
