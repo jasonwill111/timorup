@@ -5,78 +5,84 @@ import { getDb } from '@/lib/db';
 import { products } from '@/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 
-const parseJsonField = (val: unknown): unknown => {
-  if (!val || typeof val !== 'string') return val;
-  try { return JSON.parse(val); } catch { return val; }
+const safeParse = (val: unknown): unknown => {
+  if (!val || typeof val !== 'string') return null;
+  try {
+    return JSON.parse(val);
+  } catch {
+    return val;
+  }
 };
 
 export async function GET({ request }: { request: Request }) {
   try {
     const db = await getDb();
-    if (!db) throw new Error("Database not available");
+    if (!db) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: 'Database not available' }
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
 
     const url = new URL(request.url);
     const businessId = url.searchParams.get('businessId');
-    const activeOnly = url.searchParams.get('active') !== 'false';
-    const includeInactive = url.searchParams.get('isAdmin') === 'true';
+    const isAdmin = url.searchParams.get('isAdmin') === 'true';
 
-    // Build where conditions
-    const conditions = [];
-    if (businessId) {
-      conditions.push(eq(products.businessId, businessId));
+    console.log('[Products API] businessId:', businessId, 'isAdmin:', isAdmin);
+
+    // Simple query - just get all products first
+    let allProducts;
+    try {
+      allProducts = await db.select().from(products).limit(5).all();
+      console.log('[Products API] Query result count:', allProducts?.length);
+    } catch (queryError) {
+      console.error('[Products API] Query error:', queryError);
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: `Query error: ${String(queryError)}` }
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
-    if (activeOnly && !includeInactive) {
-      conditions.push(eq(products.active, 1));
+
+    if (!allProducts || allProducts.length === 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        data: [],
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    // Parse first product to check structure
+    const first = allProducts[0];
+    console.log('[Products API] First product keys:', Object.keys(first));
 
-    const allProducts = await db.select({
-      id: products.id,
-      title: products.title,
-      slug: products.slug,
-      description: products.description,
-      categoryId: products.categoryId,
-      productType: products.productType,
-      priceFields: products.priceFields,
-      specifications: products.specifications,
-      images: products.images,
-      featured: products.featured,
-      active: products.active,
-      businessId: products.businessId,
-      sortOrder: products.sortOrder,
-      createdAt: products.createdAt,
-      updatedAt: products.updatedAt,
-    })
-      .from(products)
-      .where(whereClause)
-      .orderBy(desc(products.createdAt))
-      .limit(100)
-      .all();
-
-    // Parse JSON fields
-    const parsedProducts = allProducts.map(p => ({
-      ...p,
-      specifications: parseJsonField(p.specifications),
-      images: parseJsonField(p.images),
-      priceFields: parseJsonField(p.priceFields),
+    // Map results
+    const parsedProducts = allProducts.map((p: Record<string, unknown>) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      description: p.description,
+      categoryId: p.category_id,
+      productType: p.product_type,
+      priceFields: safeParse(p.price_fields),
+      specifications: safeParse(p.specifications),
+      images: safeParse(p.images),
+      featured: p.featured,
+      active: p.active,
+      businessId: p.business_id,
+      sortOrder: p.sort_order,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
     }));
 
     return new Response(JSON.stringify({
       success: true,
       data: parsedProducts,
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
   } catch (error) {
     console.error('[Products API] Error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: { message: String(error) }
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
