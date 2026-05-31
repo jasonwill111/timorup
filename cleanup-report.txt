@@ -1,0 +1,236 @@
+================================================================================
+                    TIMORUP PROJECT CLEANUP REPORT
+                    Generated: 2026-05-31
+================================================================================
+
+### CATEGORY: Root Directory - Orphan/Log Files
+**Files to DELETE:**
+- build.log
+- dev.log
+- nul (empty file, likely from Windows redirection)
+- wrangler.log
+- wrangler2.log
+- wrangler3.log
+- wrangler_test.log
+
+**Issues FOUND:**
+1. 7 log/debug files in root directory left over from development
+2. 'nul' file is a Windows artifact from redirecting output to NUL device
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Root Directory - Large Data/Backup Files
+**Files to DELETE:**
+- d1-backup.sql (164KB - old backup, superseded by full-dump.sql)
+- full-dump.sql (226KB - large database dump, consider archiving)
+- schema_dump.sql (62KB - old schema, superseded by current schema)
+- data_businesses.sql (23KB - seed data, old format)
+- data_categories.sql (2KB - seed data, old format)
+
+**Files to REVIEW:**
+- create-admin.sql (134 bytes - small, but check if still needed)
+
+**Issues FOUND:**
+1. Multiple old SQL dump files from different migration phases
+2. These are potentially superseded by current drizzle schema
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Root Directory - Duplicate Scripts
+**Files to DELETE:**
+- scripts/create-admin.ts (duplicate of .js version)
+- scripts/create-admin.js (duplicate of .ts version)
+
+**Issues FOUND:**
+1. create-admin.js and create-admin.ts are nearly identical (diff shows minor differences)
+2. The .ts version has better-auth imports but the .js version has working instructions
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Root Directory - Test/Debug HTML Files
+**Files to DELETE:**
+- test_businesses.html (248KB - leftover from manual testing)
+- test_homepage.html (255KB - leftover from manual testing)
+- playwright-report/index.html (525KB - test report artifact)
+
+**Files to REVIEW:**
+- clean-start.ps1 (3.7KB) - PowerShell script, verify if still needed
+
+**Issues FOUND:**
+1. Two large HTML test output files in root directory
+2. Playwright report in root instead of test-results folder
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Font Assets - Duplicates
+**Files to DELETE:**
+- src/fonts/ (entire directory - duplicates public/fonts)
+  - NunitoSans-Bold.woff2
+  - NunitoSans-Regular.woff2
+  - NunitoSans-SemiBold.woff2
+  - PlusJakartaSans-Bold.woff2
+  - PlusJakartaSans-ExtraBold.woff2
+  - PlusJakartaSans-Regular.woff2
+  - PlusJakartaSans-SemiBold.woff2
+
+**Issues FOUND:**
+1. src/fonts/ has 7 font files (380KB total)
+2. public/fonts/ has 72 font files (including PlusJakartaSans variants)
+3. CSS references /fonts/ which maps to public/fonts, making src/fonts/ redundant
+4. NunitoSans fonts in src/fonts/ are NEVER used in CSS (CSS only uses PlusJakartaSans and Sora)
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Unused Packages in package.json
+**Packages to REMOVE (unused):**
+- @fontsource/plus-jakarta-sans (v5.2.8) - fonts loaded via /fonts/ in CSS, not npm
+- node-fetch (v3.3.2) - NOT used anywhere in src/ code
+- kysely (v0.28.8) - NOT used anywhere in src/ code
+
+**Issues FOUND:**
+1. @fontsource/plus-jakarta-sans: installed but NOT imported in any .ts/.tsx files
+2. node-fetch: installed but NOT used - codebase uses native fetch (Cloudflare Workers)
+3. kysely: installed but NOT used - codebase uses drizzle-orm
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: E2E Tests - Redundant/Similar Files
+**Files to DELETE:**
+- e2e/us-001.spec.ts (47 lines - duplicate content with us-0070-001.spec.ts)
+- e2e/us-002.spec.ts (47 lines - similar user story tests)
+- e2e/us-003.spec.ts (56 lines - similar structure)
+- e2e/us-004.spec.ts (47 lines - similar structure)
+- e2e/us-005.spec.ts (65 lines - similar structure)
+- e2e/us-006.spec.ts (47 lines - similar structure)
+- e2e/us-007.spec.ts (56 lines - duplicate of us-0070-001/002/003/004)
+- e2e/us-0070-001.spec.ts (113 lines - versioned, more complete)
+- e2e/us-0070-002.spec.ts (88 lines)
+- e2e/us-0070-003.spec.ts (68 lines)
+- e2e/us-0070-004.spec.ts (57 lines)
+- e2e/complete-test-checklist.md (may be redundant)
+
+**Files to REVIEW:**
+- e2e/tdd-e2e.spec.ts (489 lines - comprehensive, may supersede smaller specs)
+- e2e/schema-alignment.spec.ts (415 lines - comprehensive)
+- e2e/auth-flow.spec.ts (258 lines - comprehensive)
+
+**Issues FOUND:**
+1. Multiple user story specs (us-001 through us-007) are small skeleton files (47-65 lines)
+2. Versioned variants (us-0070-001, etc.) appear to be more complete versions
+3. Consider consolidating into fewer, more comprehensive test files
+4. Results files: e2e/results.json, e2e/results-full.json, e2e/reports/ - test artifacts
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Test Results/Reports - Cleanup
+**Files to DELETE:**
+- e2e/results.json
+- e2e/results-full.json
+- e2e/reports/e2e-report-0049.json
+- test-results/ (entire directory - test artifacts)
+- playwright-report/ (entire directory - HTML report artifact)
+
+**Issues FOUND:**
+1. Multiple test result JSON files in e2e/ folder
+2. test-results/ contains 16 subdirectories with test run artifacts
+3. playwright-report/ is a single large HTML file, not a directory of reports
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Scripts Directory - Obsolete Migration Scripts
+**Files to DELETE:**
+- batch-fix-common.mjs
+- batch-fix-types.mjs
+- batch-fix-types2.mjs
+- fix-all.mjs
+- fix-all-dates.mjs
+- fix-boolean-defaults.mjs
+- fix-date-to-timestamp.mjs
+- fix-duplicate-db-check.mjs
+- fix-isActive.mjs
+- fix-node-modules.cjs
+- fix-tests.mjs
+- fix-timestamps.cjs
+
+**Files to REVIEW:**
+- migrate_data.sql
+- migrate_entities.sql
+- migrate_split_categories.sql
+- migrate_unified_schema.sql
+- migrate-entity-tables.sql
+- migrate-to-new-tables.sql
+- remote_backup.sql (164KB - large backup file)
+
+**Issues FOUND:**
+1. 12 batch-fix*.mjs scripts - all appear to be one-off migration/fix scripts
+2. These were likely run once and are now obsolete
+3. Large remote_backup.sql (164KB) in scripts folder
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Design System Directory
+**Files to REVIEW:**
+- design-system/timorup/ (entire directory)
+
+**Issues FOUND:**
+1. Directory exists but may be a reference implementation, not integrated
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: Screenshot Assets
+**Files to DELETE (potentially):**
+- public/ui-screenshots/ (entire directory - 24 images, 4.7MB)
+
+**Issues FOUND:**
+1. 24 PNG screenshots totaling ~4.7MB in public/
+2. Some may be reference images for design, verify necessity
+
+--------------------------------------------------------------------------------
+
+### CATEGORY: SQL Files (Root Level)
+**Files to DELETE:**
+- d1-schema.sql (32 bytes - very small, likely obsolete)
+- temp-auth-schema.sql (1.7KB - temp file)
+- temp-auth-singular.sql (1.4KB - temp file)
+
+**Issues FOUND:**
+1. temp-auth-*.sql files look like one-off experimental scripts
+2. d1-schema.sql is tiny, likely a quick reference
+
+================================================================================
+                           SUMMARY OF FINDINGS
+================================================================================
+
+TOTAL FILES TO DELETE: ~50-60 files
+TOTAL SPACE TO RECLAIM: ~1.2MB+ in log/artifact files + ~380KB fonts + 4.7MB screenshots
+
+IMMEDIATE ACTIONS (Safe to Delete):
+- All .log files in root (build.log, dev.log, wrangler*.log, wrangler_test.log)
+- nul file
+- src/fonts/ directory (redundant with public/fonts)
+- test_businesses.html, test_homepage.html
+- playwright-report/
+- e2e/results*.json
+- e2e/reports/e2e-report-0049.json
+- test-results/
+- scripts/batch-fix*.mjs (12 files)
+- scripts/fix*.mjs (6 files)
+- d1-schema.sql, temp-auth-*.sql
+- create-admin.js AND create-admin.ts (duplicate pair)
+
+REVIEW BEFORE DELETE:
+- Large SQL dumps (d1-backup.sql, full-dump.sql, schema_dump.sql)
+- Data seed files (data_*.sql)
+- Migration SQL files (migrate_*.sql)
+- E2E spec files (many small files, consolidate if possible)
+- public/ui-screenshots/ (reference images, verify)
+- design-system/ (verify if used)
+
+UNUSED PACKAGES TO REMOVE:
+- @fontsource/plus-jakarta-sans
+- node-fetch
+- kysely
+
+================================================================================
+                         END OF CLEANUP REPORT
+================================================================================
