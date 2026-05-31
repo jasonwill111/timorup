@@ -7,6 +7,8 @@ export default defineConfig({
   adapter: cloudflare({
     kvNamespaces: [],
     imageService: 'passthrough',
+    platformProxy: { enabled: false },
+    remoteBindings: false,
   }),
   site: 'https://timorup.com',
 
