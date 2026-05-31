@@ -17,7 +17,11 @@ const offset = (page - 1) * LIMIT;
 let parentCats: { id: string; name: string }[] = [];
 let getChildren = (_pid: string) => [];
 
+console.log('[BusinessListNew] Starting...');
+
 const db = await getDb();
+console.log('[BusinessListNew] db initialized:', !!db);
+
 if (db) {
   try {
     const allCats = await db.select({
@@ -28,6 +32,7 @@ if (db) {
 
     parentCats = allCats.filter(c => !c.parentId);
     getChildren = (pid: string) => allCats.filter(c => c.parentId === pid);
+    console.log('[BusinessListNew] Categories count:', allCats.length);
   } catch (e) {
     console.error('Categories error:', e);
   }
@@ -37,18 +42,15 @@ if (db) {
 let allEntities = [];
 if (db) {
   try {
-    // Simple query without orderBy
-    const query = db.select().from(businesses);
-    const raw = await query.all();
-    console.log('[BusinessListNew] Raw businesses count:', raw.length);
-    console.log('[BusinessListNew] First business:', JSON.stringify(raw[0]));
+    const raw = await db.select().from(businesses).all();
+    console.log('[BusinessListNew] Businesses count:', raw.length);
     allEntities = raw;
   } catch (e) {
     console.error('Query error:', e);
   }
 }
 
-console.log('[BusinessListNew] allEntities length:', allEntities.length);
+console.log('[BusinessListNew] Final allEntities:', allEntities.length);
 
 const total = allEntities.length;
 const totalPages = Math.ceil(total / LIMIT);
